@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import Header from "@/components/layout/Header";
 import Card from "@/components/ui/Card";
 import Chip from "@/components/ui/Chip";
@@ -10,7 +11,14 @@ export const metadata = {
   title: "이번 주 회고 | 사자록",
 };
 
-export default function RetrospectivePage() {
+async function StartActionsPreview({ searchParams }) {
+  const { preview } = await searchParams;
+  const status = preview === "writing" ? "writing" : "idle";
+
+  return <StartActions key={status} status={status} />;
+}
+
+export default function RetrospectivePage({ searchParams }) {
   return (
     <>
       <Header userName="김사자" userPart="기획·디자인" />
@@ -65,7 +73,15 @@ export default function RetrospectivePage() {
                 <p>쌓이면 나만의 큰 자산이 돼요!</p>
               </div>
             </div>
-            <StartActions />
+            <Suspense
+              fallback={
+                <p role="status" className="mt-5 border-t border-line pt-4 text-body-sm text-ink-muted">
+                  회고 상태를 불러오는 중이에요.
+                </p>
+              }
+            >
+              <StartActionsPreview searchParams={searchParams} />
+            </Suspense>
           </Card>
 
           <Card as="aside" size="md" aria-labelledby="deadline-title">
