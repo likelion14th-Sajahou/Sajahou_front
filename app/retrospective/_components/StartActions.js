@@ -15,12 +15,13 @@ export default function StartActions({ status = "idle" }) {
           이번 주는 휴회했어요
         </TextLink>
         {isWriting ? (
-          <div className="ml-auto flex gap-2">
-            <Button variant="secondary" href="/retrospective">
+          <div className="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto">
+            <Button variant="secondary" href="/retrospective" className="min-w-0 max-sm:px-3">
               처음부터
             </Button>
             <Button
               variant="accent"
+              className="min-w-0 max-sm:px-3"
               onClick={() => setNotice("이어 쓸 자료 입력 화면은 준비 중입니다. 03 화면 구현 후 연결할 예정입니다.")}
             >
               이어 쓰기 →
