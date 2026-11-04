@@ -4,11 +4,14 @@ import RetrospectiveSteps from "./RetrospectiveSteps";
 import StartActions from "./StartActions";
 import PausedRetrospective from "./PausedRetrospective";
 
-export default async function RetrospectiveContent({ searchParams }) {
+export default async function RetrospectiveContent({ searchParams, retrospective }) {
   const { preview } = await searchParams;
-  if (preview === "paused") return <PausedRetrospective />;
+  const { week, deadlines } = retrospective;
+  const status = preview === "writing" || preview === "paused"
+    ? preview
+    : retrospective.status;
+  if (status === "paused") return <PausedRetrospective week={week} />;
 
-  const status = preview === "writing" ? "writing" : "idle";
   return (
     <>
       <RetrospectiveSteps />
@@ -44,14 +47,12 @@ export default async function RetrospectiveContent({ searchParams }) {
             <ShapeCharacter shape="circle" color="blue" size={16} face="none" cropped />
           </div>
           <dl className="mt-4 flex flex-col gap-2 text-body-sm">
-            <div className="flex justify-between gap-4">
-              <dt>세션 회고</dt>
-              <dd>11/1(일) 23:59</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt>과제 회고</dt>
-              <dd>11/3(화) 23:59</dd>
-            </div>
+            {deadlines.map(({ id, label, dueLabel }) => (
+              <div key={id} className="flex justify-between gap-4">
+                <dt>{label}</dt>
+                <dd>{dueLabel}</dd>
+              </div>
+            ))}
           </dl>
         </Card>
       </div>
