@@ -11,7 +11,7 @@ export default function StartActions({ status = "idle" }) {
   return (
     <div className="mt-5 border-t border-line pt-4">
       <div className="flex flex-wrap items-center justify-between gap-3.5">
-        <TextLink onClick={() => setNotice("휴회 상태 화면은 다음 작업에서 연결할 예정입니다.")}>
+        <TextLink href="/retrospective?preview=paused">
           이번 주는 휴회했어요
         </TextLink>
         {isWriting ? (
