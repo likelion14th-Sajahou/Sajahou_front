@@ -1,4 +1,4 @@
-import Image from "next/image";
+import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import Button from "@/components/ui/Button";
 
 export default function PausedRetrospective() {
@@ -8,11 +8,11 @@ export default function PausedRetrospective() {
       className="mx-auto mt-6 flex w-full max-w-[620px] flex-col items-center gap-3.5 rounded-[24px] bg-white px-6 py-8 text-center sm:rounded-[32px] sm:px-8 sm:py-10"
     >
       <div className="relative size-[90px]" aria-hidden="true">
-        <Image
-          src="/images/retrospective/paused-character.svg"
-          alt=""
-          width={79.2}
-          height={39.6}
+        <ShapeCharacter
+          shape="semicircle"
+          color="green"
+          size={90}
+          cropped
           className="absolute top-[34%] left-[6%]"
         />
       </div>

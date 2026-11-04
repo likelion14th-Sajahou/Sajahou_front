@@ -49,12 +49,15 @@ export default function ShapeCharacter({
   size = 70,
   face = "smile",
   sticker = false,
+  cropped = false,
   label,
   className = "",
 }) {
   const { plain, sticker: stickerGeometry } = SHAPES[shape];
   const isSticker = sticker && Boolean(stickerGeometry);
-  const { d, faceY } = isSticker ? stickerGeometry : plain;
+  const { d, faceY, bounds } = isSticker ? stickerGeometry : plain;
+  // 내보낸 SVG처럼 도형 바깥 여백을 제외하되, size 기준 배율은 유지한다.
+  const viewBounds = cropped && bounds ? bounds : [0, 0, 100, 100];
   const hasPlainPentagonStroke = shape === "pentagon" && !isSticker;
 
   let strokeProps = {};
@@ -76,9 +79,10 @@ export default function ShapeCharacter({
 
   return (
     <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
+      width={Number((size * viewBounds[2] / 100).toFixed(4))}
+      height={Number((size * viewBounds[3] / 100).toFixed(4))}
+      viewBox={viewBounds.join(" ")}
+      preserveAspectRatio={cropped ? "none" : undefined}
       className={`shrink-0 ${COLOR_CLASSES[color]} ${className}`}
       role={label ? "img" : undefined}
       aria-label={label}

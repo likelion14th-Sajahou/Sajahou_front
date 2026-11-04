@@ -1,4 +1,4 @@
-import Image from "next/image";
+import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import Card from "@/components/ui/Card";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import StartActions from "./StartActions";
@@ -20,11 +20,11 @@ export default async function RetrospectiveContent({ searchParams }) {
           </h2>
           <div className="mt-4 flex items-end gap-3.5 pt-1.5 pb-1 sm:min-h-[120px]">
             <div className="relative size-16 shrink-0" aria-hidden="true">
-              <Image
-                src="/images/retrospective/30a4f.svg"
-                alt=""
-                width={56.32}
-                height={52.48}
+              <ShapeCharacter
+                shape="triangle"
+                color="coral"
+                size={64}
+                cropped
                 className="absolute top-[8%] left-[6%]"
               />
             </div>
@@ -41,7 +41,7 @@ export default async function RetrospectiveContent({ searchParams }) {
             <h2 id="deadline-title" className="text-[18px] tracking-[-0.01em]">
               마감일
             </h2>
-            <Image src="/images/retrospective/d3b6d.svg" alt="" width={14.72} height={14.72} />
+            <ShapeCharacter shape="circle" color="blue" size={16} face="none" cropped />
           </div>
           <dl className="mt-4 flex flex-col gap-2 text-body-sm">
             <div className="flex justify-between gap-4">
