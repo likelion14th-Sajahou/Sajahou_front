@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import HeroDecoration from "./HeroDecoration";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
-import { HERO_DOTS, HERO_IMAGES } from "./heroDecorations";
+import { HERO_DOTS, HERO_DECORATIONS } from "./heroDecorations";
 
 const HERO_CONTENT = {
   default: { title: "이번 주 이야기를\n남겨 볼까요", cta: "회고 쓰기" },
@@ -12,9 +13,9 @@ const HERO_CONTENT = {
 function HeroDecorations() {
   return (
     <div aria-hidden="true">
-      {HERO_IMAGES.map(({ src, left, top, frame, image, rotate, blur }) => (
+      {HERO_DECORATIONS.map(({ kind, left, top, frame, image, rotate, blur }) => (
         <div
-          key={src}
+          key={kind}
           className="absolute"
           style={{
             left,
@@ -25,9 +26,8 @@ function HeroDecorations() {
             filter: blur ? "blur(3px)" : undefined,
           }}
         >
-          <Image
-            src={src}
-            alt=""
+          <HeroDecoration
+            kind={kind}
             width={image[2]}
             height={image[3]}
             className="absolute max-w-none"

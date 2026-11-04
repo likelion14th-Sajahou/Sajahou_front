@@ -1,17 +1,17 @@
-import Image from "next/image";
+import ShapeCharacter from "@/components/ui/ShapeCharacter";
 
 const STEPS = [
-  { label: "시작", asset: "643bd", width: 51.52, height: 51.52 },
-  { label: "자료", asset: "2562d", width: 36.96, height: 36.96 },
-  { label: "AI 질문", asset: "c8b0a", width: 40.744, height: 41.36 },
-  { label: "검토", asset: "340a6", width: 38.72, height: 36.08 },
-  { label: "저장", asset: "d197a", width: 38.72, height: 19.36 },
+  { label: "시작", shape: "circle", size: 56, color: "blue", face: "smile" },
+  { label: "자료", shape: "square", size: 44, color: "muted", face: "none" },
+  { label: "AI 질문", shape: "sunFine", size: 44, color: "muted", face: "none" },
+  { label: "검토", shape: "triangle", size: 44, color: "muted", face: "none" },
+  { label: "저장", shape: "semicircle", size: 44, color: "muted", face: "none" },
 ];
 
 export default function RetrospectiveSteps() {
   return (
     <ol aria-label="회고 단계" className="mt-6 grid grid-cols-5 pt-1 sm:pt-9">
-      {STEPS.map(({ label, asset, width, height }, index) => (
+      {STEPS.map(({ label, shape, size, color, face }, index) => (
         <li
           key={label}
           aria-current={index === 0 ? "step" : undefined}
@@ -21,11 +21,12 @@ export default function RetrospectiveSteps() {
             <span aria-hidden="true" className="absolute top-[21px] right-1/2 w-full border-t-[3px] border-dashed border-[#cfcabf] sm:top-[27px]" />
           )}
           <div className="relative z-10 flex size-11 items-center justify-center sm:size-14">
-            <Image
-              src={`/images/retrospective/${asset}.svg`}
-              alt=""
-              width={width}
-              height={height}
+            <ShapeCharacter
+              shape={shape}
+              size={size}
+              color={color}
+              face={face}
+              cropped
               className={`relative max-w-none shrink-0 ${index === 0 ? "max-sm:translate-x-1.5 max-sm:translate-y-1.5" : "opacity-90"}`}
             />
             {index === 0 ? (
