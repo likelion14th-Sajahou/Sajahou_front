@@ -7,6 +7,7 @@ import { HERO_LAYOUTS } from "./heroDecorations";
 const HERO_CONTENT = {
   default: { title: "이번 주 이야기를\n남겨 볼까요", cta: "회고 쓰기" },
   draft: { title: "이번 주 이야기를\n남겨 볼까요", cta: "이어 쓰기" },
+  done: { title: "이번 주 이야기를\n남겨 볼까요", cta: "다시 보기" },
   rest: { title: "이번 주는\n쉬어 가는 주예요", cta: "이번 주 보기" },
 };
 
