@@ -18,7 +18,7 @@ const STORY_FIELDS = [
 ];
 
 export default function ReviewContent({ initialDraft }) {
-  const { setCompletedDraft } = useRetrospectivePreview();
+  const { setCompletedDraft, getStepHref } = useRetrospectivePreview();
   const [draft, setDraft] = useState(initialDraft);
   const [notice, setNotice] = useState("");
 
@@ -109,10 +109,10 @@ export default function ReviewContent({ initialDraft }) {
           </div>
           <div className="pt-1">
             <div className="flex items-center gap-3.5 border-t border-line pt-4">
-              <TextLink href="/retrospective?step=questions&preview=questions-complete">← 질문으로</TextLink>
+              <TextLink href={`${getStepHref("questions")}&preview=questions-complete`}>← 질문으로</TextLink>
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 수정한 내용이 사라져요.")}>나중에 이어쓰기</Button>
-                <Button variant="accent" href="/retrospective?step=complete" onClick={() => setCompletedDraft(draft)}>저장하고 사자록에 추가</Button>
+                <Button variant="accent" href={getStepHref("complete")} onClick={() => setCompletedDraft(draft)}>저장하고 사자록에 추가</Button>
               </div>
             </div>
           </div>

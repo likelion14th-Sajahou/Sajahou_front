@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import Chip from "@/components/ui/Chip";
 
 const RetrospectivePreviewContext = createContext(null);
@@ -22,11 +23,32 @@ export default function RetrospectivePreview({ initialPart, children }) {
 }
 
 export function useRetrospectivePreview() {
-  return useContext(RetrospectivePreviewContext);
+  const context = useContext(RetrospectivePreviewContext);
+  const searchParams = useSearchParams();
+  const isAssignment = searchParams.get("type") === "assignment";
+
+  // 화면 이동 시 회고 종류를 유지한다. 실제 API 요청 경로와는 무관한 데모 URL이다.
+  function getStepHref(step) {
+    const params = new URLSearchParams();
+    if (step) params.set("step", step);
+    if (isAssignment) params.set("type", "assignment");
+    return `/retrospective${params.size ? `?${params}` : ""}`;
+  }
+
+  return {
+    ...context,
+    isAssignment,
+    getStepHref,
+    isStarted: Boolean(searchParams.get("step")),
+    isComplete: searchParams.get("step") === "complete",
+    assignmentPending: context.assignmentStatus === "later" || searchParams.get("preview") === "assignment-pending",
+  };
 }
 
 export function RetrospectiveHeading({ week }) {
-  const { part, setPart, assignmentStatus } = useRetrospectivePreview();
+  const { part, setPart, assignmentPending, isAssignment, isComplete, isStarted, completedDraft } = useRetrospectivePreview();
+  const sessionStatusLabel = isComplete || isAssignment || completedDraft ? "완료" : "작성 중";
+  const assignmentStatusLabel = !isAssignment || !isStarted ? "시작 전" : isComplete ? "완료" : "작성 중";
 
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3.5">
@@ -34,12 +56,12 @@ export function RetrospectiveHeading({ week }) {
         <Link href="/" className="text-body-sm text-ink-muted">← 홈</Link>
         <p className="text-label text-accent-strong">{part}</p>
         <h1 className="text-[38px] leading-[1.2] tracking-[-0.02em]">
-          {week}주차 세션 회고
+          {week}주차 {isAssignment ? "과제" : "세션"} 회고
         </h1>
-        {assignmentStatus === "later" && (
+        {(assignmentPending || isAssignment) && (
           <div aria-label="회고 작성 상태" className="flex max-w-full flex-wrap gap-1.5 pt-2">
-            <Chip selected disabled className="disabled:cursor-default">세션 회고 · 작성 중</Chip>
-            <Chip disabled className="disabled:cursor-default">과제 회고 · 시작 전</Chip>
+            <Chip selected={!isAssignment} disabled className="disabled:cursor-default">세션 회고 · {sessionStatusLabel}</Chip>
+            <Chip selected={isAssignment} disabled className="disabled:cursor-default">과제 회고 · {assignmentStatusLabel}</Chip>
           </div>
         )}
       </div>

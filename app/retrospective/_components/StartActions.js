@@ -1,16 +1,18 @@
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 
-export default function StartActions({ status = "idle" }) {
+export default function StartActions({ status = "idle", isAssignment = false }) {
   const isWriting = status === "writing";
 
   return (
     <div className="mt-5 border-t border-line pt-4">
       <div className="flex flex-wrap items-center justify-between gap-3.5">
-        <TextLink href="/retrospective?preview=paused">
+        {!isAssignment && <TextLink href="/retrospective?preview=paused">
           이번 주는 휴회했어요
-        </TextLink>
-        {isWriting ? (
+        </TextLink>}
+        {isAssignment ? (
+          <Button className="ml-auto" href="/retrospective?step=materials&type=assignment">시작하기 →</Button>
+        ) : isWriting ? (
           <div className="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto">
             <Button variant="secondary" href="/retrospective" className="min-w-0 max-sm:px-3">
               처음부터

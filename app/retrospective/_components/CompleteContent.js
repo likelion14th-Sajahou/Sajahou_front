@@ -8,8 +8,8 @@ import TextLink from "@/components/ui/TextLink";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 
-export default function CompleteContent({ week, initialDraft }) {
-  const { completedDraft, setCompletedDraft, setAssignmentStatus } = useRetrospectivePreview();
+export default function CompleteContent({ week, initialDraft, assignmentDueLabel }) {
+  const { completedDraft, setCompletedDraft, setAssignmentStatus, assignmentPending, isAssignment } = useRetrospectivePreview();
   const [notice, setNotice] = useState("");
 
   async function copyRetrospective() {
@@ -36,13 +36,24 @@ export default function CompleteContent({ week, initialDraft }) {
             <ShapeCharacter shape="triangle" color="coral" size={32} face="none" cropped className="absolute top-[32.56px] left-[1.92px]" />
             <ShapeCharacter shape="square" color="green" size={26} face="none" cropped className="absolute top-[86.08px] left-[156.08px]" />
           </div>
-          <p className="text-label text-accent-strong">{week}주차 세션 회고 완료</p>
+          <p className="text-label text-accent-strong">{week}주차 {isAssignment ? "과제" : "세션"} 회고 완료</p>
           <h2 id="retrospective-complete-title" className="text-[26px] leading-[1.6] tracking-[-0.02em]">사자록에 카드 1장을 저장했어요</h2>
           <p className="text-body text-ink-subtle">노션에 붙여넣기 했나요? 아직이면 지금 복사해 두세요.</p>
           <div className="flex justify-center gap-2 pt-1.5">
             <Button onClick={copyRetrospective}>회고록 복사</Button>
             <Button variant="secondary" onClick={() => setNotice("나의 사자록 화면은 준비 중이에요.")}>나의 사자록 보기</Button>
           </div>
+          {assignmentPending && !isAssignment && (
+            <div className="w-full pt-2">
+              <div className="flex items-center gap-3 rounded-2xl px-3.5 py-3 text-left">
+                <div className="min-w-0 flex-1">
+                  <p className="text-body">과제 회고가 남았어요</p>
+                  <p className="text-label leading-[1.5] text-ink-subtle">마감 {assignmentDueLabel} · 과제를 낸 뒤에 써요</p>
+                </div>
+                <Button size="sm" href="/retrospective?type=assignment">과제 회고 쓰기</Button>
+              </div>
+            </div>
+          )}
           <TextLink href="/retrospective" onClick={restartDemo}>데모 처음부터 다시 보기</TextLink>
         </Card>
         <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
