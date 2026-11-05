@@ -12,7 +12,7 @@ export default async function RetrospectiveContent({ searchParams, retrospective
     ? preview
     : retrospective.status;
   if (status === "paused") return <PausedRetrospective week={week} />;
-  if (step === "materials") return <MaterialsContent />;
+  if (step === "materials") return <MaterialsContent preview={preview} />;
 
   return (
     <>

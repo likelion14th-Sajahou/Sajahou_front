@@ -1,6 +1,6 @@
 import Card from "@/components/ui/Card";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
-import { MOCK_MATERIALS_BY_PART, MOCK_RETROSPECTIVE } from "@/lib/mock/retrospective";
+import { MOCK_MATERIALS_BY_PART, MOCK_MATERIALS_CHANGED_PREVIEW, MOCK_RETROSPECTIVE } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import MaterialsForm from "./MaterialsForm";
 
@@ -11,12 +11,19 @@ const UPLOAD_TIPS = [
   "화면 → 캡처 이미지",
 ];
 
-export default function MaterialsContent() {
+export default function MaterialsContent({ preview }) {
+  const changePreview = preview === "materials-changed" ? MOCK_MATERIALS_CHANGED_PREVIEW : null;
+
   return (
     <>
       <RetrospectiveSteps currentStep={1} />
       <div className="mt-7 grid grid-cols-1 items-start gap-5 min-[901px]:grid-cols-[minmax(0,1fr)_320px]">
-        <MaterialsForm initialMaterialsByPart={MOCK_MATERIALS_BY_PART} assignmentDueLabel={MOCK_RETROSPECTIVE.deadlines.find(({ id }) => id === "assignment").dueLabel} />
+        <MaterialsForm
+          key={changePreview ? "materials-changed" : "materials"}
+          initialMaterialsByPart={changePreview?.materialsByPart ?? MOCK_MATERIALS_BY_PART}
+          assignmentDueLabel={MOCK_RETROSPECTIVE.deadlines.find(({ id }) => id === "assignment").dueLabel}
+          changePreview={changePreview}
+        />
         <Card as="aside" size="md" aria-labelledby="upload-guide-title">
           <div className="flex items-center justify-between border-b border-ink pb-3">
             <h2 id="upload-guide-title" className="text-[18px] tracking-[-0.01em]">

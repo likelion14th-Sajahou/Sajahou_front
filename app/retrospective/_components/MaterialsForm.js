@@ -8,6 +8,7 @@ import Chip from "@/components/ui/Chip";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
+import MaterialsChangeNotice from "./MaterialsChangeNotice";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 
 const ACCEPTED_FILES = {
@@ -28,7 +29,7 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
   );
 }
 
-export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLabel }) {
+export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLabel, changePreview = null }) {
   const { part, assignmentStatus, setAssignmentStatus } = useRetrospectivePreview();
   const [drafts, setDrafts] = useState(initialMaterialsByPart);
   const materials = drafts[part];
@@ -36,6 +37,16 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
   const [notice, setNotice] = useState("");
+  const [isChangeNoticeOpen, setIsChangeNoticeOpen] = useState(Boolean(changePreview));
+
+  function requestQuestions() {
+    if (changePreview) {
+      setNotice("");
+      setIsChangeNoticeOpen(true);
+      return;
+    }
+    setNotice("AI 질문 받기는 준비 중이에요. 입력한 내용은 현재 화면에서만 유지돼요.");
+  }
 
   // 파트를 바꾸거나 입력 영역을 숨겨도 각 파트에서 작성한 내용은 유지한다.
   function setMaterials(update) {
@@ -172,12 +183,19 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
       </MaterialSection>
 
       <TextField label="고민 메모 · 선택" multiline name="memo" placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
+      <MaterialsChangeNotice
+        open={isChangeNoticeOpen}
+        answerCount={changePreview?.answerCount ?? 0}
+        onCancel={() => { setIsChangeNoticeOpen(false); setNotice(""); }}
+        onContinue={() => setNotice("이전 질문 이어 쓰기는 준비 중이에요.")}
+        onRegenerate={() => setNotice("질문 새로 만들기는 준비 중이에요. 기존 답변은 삭제하지 않았어요.")}
+      />
       <div className="pt-1">
         <div className="flex flex-wrap items-center justify-between gap-x-3.5 gap-y-2.5 border-t border-line pt-4">
           <TextLink href="/retrospective">← 이전</TextLink>
           <div className="ml-auto grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
             <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</Button>
-            <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => setNotice("AI 질문 받기는 준비 중이에요. 입력한 내용은 현재 화면에서만 유지돼요.")}>AI 질문 받기 →</Button>
+            <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={requestQuestions}>AI 질문 받기 →</Button>
           </div>
         </div>
         <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
