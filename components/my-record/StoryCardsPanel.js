@@ -25,7 +25,7 @@ function matchesSearch({ title, tags, evidence }, search) {
   return target.toLowerCase().includes(search);
 }
 
-export default function StoryCardsPanel({ cards, competencies, week, initialCardId }) {
+export default function StoryCardsPanel({ cards, competencies, week, initialCardId, onDeleteCard }) {
   const [type, setType] = useState(ALL);
   const [competency, setCompetency] = useState(ALL);
   const [search, setSearch] = useState("");
@@ -41,6 +41,11 @@ export default function StoryCardsPanel({ cards, competencies, week, initialCard
       url.searchParams.delete("card");
       window.history.replaceState(null, "", url);
     }
+  }
+
+  function deleteOpenCard() {
+    onDeleteCard(openCardId);
+    closeCard();
   }
 
   const normalizedSearch = search.trim().toLowerCase();
@@ -117,7 +122,14 @@ export default function StoryCardsPanel({ cards, competencies, week, initialCard
         size="lg"
         aria-labelledby="story-card-title"
       >
-        {openCard && <StoryCardDetail card={openCard} titleId="story-card-title" onClose={closeCard} />}
+        {openCard && (
+          <StoryCardDetail
+            card={openCard}
+            titleId="story-card-title"
+            onClose={closeCard}
+            onDelete={deleteOpenCard}
+          />
+        )}
       </Modal>
     </section>
   );

@@ -10,11 +10,11 @@ function getRecapLabel({ cardCount, isProjectRecap }) {
 }
 
 // 항상 그 주차 카드만 걸러서 보여 준다. 카드가 1장이면 그 카드 팝업도 함께 연다(card 값).
-function getCardLink({ week, cardCount }) {
+function getCardLink({ week, cardIds, cardCount }) {
   const href = `/my-record?tab=cards&week=${week}`;
 
   if (cardCount === 1) {
-    return { href: `${href}&card=card-${week}`, label: "카드 보기 →" };
+    return { href: `${href}&card=${cardIds[0]}`, label: "카드 보기 →" };
   }
 
   return { href, label: `카드 ${cardCount}장 보기 →` };

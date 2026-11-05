@@ -102,12 +102,13 @@ function SummaryDetails({ summary }) {
   );
 }
 
-export default function StoryCardDetail({ card, titleId, onClose }) {
+export default function StoryCardDetail({ card, titleId, onClose, onDelete }) {
   const { type, whenLabel, shape, color, title, tags, evidence } = card;
   const { label, tone } = STORY_CARD_TYPES[type];
   const { document, summary } = getStoryCardDetail(card);
   const documentText = type === "project" ? PORTFOLIO_TEXT : RECAP_TEXT;
   const [copyNotice, setCopyNotice] = useState("");
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   async function copyDocument() {
     try {
@@ -159,13 +160,30 @@ export default function StoryCardDetail({ card, titleId, onClose }) {
         <span className="shrink-0">근거</span>
         <span>{evidence}</span>
       </p>
-      <div className="flex w-full items-center justify-between gap-3.5 pt-1">
-        <TextLink variant="danger">삭제</TextLink>
-        <div className="flex gap-2">
-          <Button variant="secondary">수정</Button>
-          <Button onClick={onClose}>닫기</Button>
+      {isConfirmingDelete ? (
+        <div role="alert" className="flex w-full flex-col gap-2.5 rounded-2xl bg-[#fdecea] px-4 py-3.5">
+          <p className="text-body-sm">
+            이 카드를 지울까요?
+            <br />
+            그 주 스티커는 남고, 자소서 매칭에는 더 이상 쓰이지 않아요. 지운 카드는 되돌릴 수 없어요.
+          </p>
+          <div className="flex items-center justify-between gap-3.5 pt-1">
+            {/* 삭제 버튼이 사라져도 포커스를 잃지 않고, 안내가 화면에 보이도록 취소로 옮긴다. */}
+            <TextLink autoFocus onClick={() => setIsConfirmingDelete(false)}>
+              취소
+            </TextLink>
+            <Button variant="danger" onClick={onDelete}>지우기</Button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex w-full items-center justify-between gap-3.5 pt-1">
+          <TextLink variant="danger" onClick={() => setIsConfirmingDelete(true)}>삭제</TextLink>
+          <div className="flex gap-2">
+            <Button variant="secondary">수정</Button>
+            <Button onClick={onClose}>닫기</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
