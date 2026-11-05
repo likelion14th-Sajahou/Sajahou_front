@@ -24,7 +24,7 @@ function ProjectRow({ project }) {
         </span>
       </Link>
       <Link
-        href="/retrospective"
+        href={`/projects/${id}?record=new`}
         aria-label={`${name} 기록 추가`}
         className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-title text-white"
       >
