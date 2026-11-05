@@ -7,6 +7,8 @@ import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import { MATCHING_SAMPLE } from "@/lib/mock/matching";
 import MatchingAttachments from "./MatchingAttachments";
+import MatchingResults from "./MatchingResults";
+import { createMockMatchingResult } from "@/lib/mock/matchingResult";
 
 const EMPTY_FORM = { company: "", role: "", jd: "", preferences: "", companyInfo: "" };
 
@@ -16,6 +18,8 @@ export default function MatchingForm() {
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([]);
   const [notice, setNotice] = useState("");
+  const [result, setResult] = useState(null);
+  const resultHeadingRef = useRef(null);
   const formRef = useRef(null);
   const questionRefs = useRef(new Map());
 
@@ -28,6 +32,8 @@ export default function MatchingForm() {
     const { questions: sampleQuestions, ...sampleFields } = MATCHING_SAMPLE;
     setFields({ ...sampleFields });
     setQuestions(sampleQuestions.map((text) => ({ id: crypto.randomUUID(), text })));
+    setFiles([{ id: "sample-pdf", name: "모아핀테크_채용공고.pdf", kind: "PDF", sample: true }]);
+    setLinks([{ id: "sample-link", url: "https://www.saramin.co.kr/zf_user/jobs/view?rec_idx=482910", unreadable: true }]);
     setNotice("예시 공고와 문항을 넣었어요. 원하는 내용으로 수정할 수 있어요.");
   }
 
@@ -43,7 +49,13 @@ export default function MatchingForm() {
       formRef.current.elements.namedItem("jd")?.focus();
       return;
     }
-    setNotice("입력 내용을 확인했어요. 경험 매칭과 결과 보기는 준비 중이에요.");
+    setResult({ ...createMockMatchingResult(fields, questions), id: crypto.randomUUID() });
+    setNotice("예시 매칭 결과를 표시했어요.");
+    requestAnimationFrame(() => {
+      const heading = resultHeadingRef.current;
+      heading?.focus({ preventScroll: true });
+      heading?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+    });
   }
 
   function field(key, label, placeholder, rows) {
@@ -51,6 +63,7 @@ export default function MatchingForm() {
   }
 
   return (
+    <>
     <Card as="form" size="md" className="mt-6 flex flex-col gap-4" aria-labelledby="matching-form-title" onSubmit={submit} ref={formRef}>
       <div>
         <h2 id="matching-form-title" className="text-title tracking-[-0.4px]">지원할 곳 알려 주기</h2>
@@ -89,8 +102,20 @@ export default function MatchingForm() {
           <Button type="submit" variant="accent">내 사자록에서 찾기 →</Button>
         </div>
       </div>
-      <p role="status" className={notice ? "text-label text-ink-muted" : "sr-only"}>{notice}</p>
+      <p role="status" className="sr-only">{notice}</p>
       <p className="rounded-xl bg-tint-yellow px-3.5 py-2.5 text-label text-ink-muted">사자록에 기록된 내용으로만 초안을 써요. 기록에 없는 건 지어내지 않고 빈칸으로 남겨요.</p>
     </Card>
+    {result && (
+      <MatchingResults
+        key={result.id}
+        result={result}
+        headingRef={resultHeadingRef}
+        onEdit={(id, editedText) => setResult((previous) => ({
+          ...previous,
+          answers: previous.answers.map((answer) => answer.id === id ? { ...answer, editedText } : answer),
+        }))}
+      />
+    )}
+    </>
   );
 }
