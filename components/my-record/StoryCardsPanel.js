@@ -42,10 +42,11 @@ export default function StoryCardsPanel({
   function closeCard() {
     setOpenCardId(undefined);
 
-    // 주소로 연 팝업이 새로고침할 때 다시 열리지 않도록 card 값을 지운다.
+    // 주소로 연 팝업이 새로고침할 때 다시 열리지 않도록 card 값을 지우고, 지금 탭은 주소에 남긴다.
     const url = new URL(window.location.href);
     if (url.searchParams.has("card")) {
       url.searchParams.delete("card");
+      url.searchParams.set("tab", "cards");
       window.history.replaceState(null, "", url);
     }
   }
