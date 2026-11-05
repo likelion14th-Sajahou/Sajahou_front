@@ -8,7 +8,7 @@ import ProjectSidebar from "./ProjectSidebar";
 
 // 기록의 "카드 N에 쓰임"은 대표 카드 순서로 계산해서, 카드를 지우면 함께 바뀐다.
 // 프로젝트 API가 없어 변경은 화면 안에서만 반영된다.
-export default function ProjectView({ project, storyCards, competencies }) {
+export default function ProjectView({ project, storyCards, competencies, initialIsAdding }) {
   const [projectRecords, setProjectRecords] = useState(project.records);
   // 다른 페이지에 다녀와도 상태가 유지되므로(cacheComponents), 링크로 새로 들어오면 열려 있던 폼과 팝업을 닫는다.
   // 뒤로 가기로 돌아오면 bfcacheId가 그대로라 작성 중인 내용이 남는다. 기록과 카드 변경은 어느 경우든 유지한다.
@@ -87,6 +87,7 @@ export default function ProjectView({ project, storyCards, competencies }) {
           key={`records-${bfcacheId}`}
           project={project}
           records={records}
+          initialIsAdding={initialIsAdding}
           onSaveRecord={saveRecord}
           onDeleteRecord={deleteRecord}
         />
