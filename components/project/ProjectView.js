@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MOCK_TODAY } from "@/lib/mock/projects";
-import PortfolioRecordSelect from "./PortfolioRecordSelect";
+import ProjectPortfolio from "./ProjectPortfolio";
 import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
 import ProjectSidebar from "./ProjectSidebar";
@@ -97,7 +97,7 @@ export default function ProjectView({ project, storyCards, competencies, initial
       />
       {isMakingPortfolio ? (
         <div className="pt-6">
-          <PortfolioRecordSelect records={records} onCancel={() => setPortfolioBfcacheId(null)} />
+          <ProjectPortfolio records={records} onCancel={() => setPortfolioBfcacheId(null)} />
         </div>
       ) : (
         <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5 pt-6">

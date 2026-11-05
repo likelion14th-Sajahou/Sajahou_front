@@ -6,23 +6,14 @@ import StoryCardDetail from "@/components/my-record/StoryCardDetail";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Modal from "@/components/ui/Modal";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
+import SidebarTitle from "./SidebarTitle";
 
 const FINISH_STEPS = [
   "넣을 기록 고르기",
   "AI가 빈 곳을 찾아 질문·요청",
   "포트폴리오와 대표 카드 완성",
 ];
-
-function SidebarTitle({ children }) {
-  return (
-    <div className="flex items-center justify-between border-b border-ink pb-3">
-      <h2 className="text-[18px] tracking-[-0.18px] text-ink">{children}</h2>
-      <ShapeCharacter shape="sunFine" color="yellow" face="none" size={18} />
-    </div>
-  );
-}
 
 function FinishProjectCard({ onFinish }) {
   return (

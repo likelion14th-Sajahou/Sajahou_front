@@ -31,7 +31,7 @@ function RecordOption({ record, isSelected, onToggle }) {
   );
 }
 
-export default function PortfolioRecordSelect({ records, onCancel }) {
+export default function PortfolioRecordSelect({ records, onCancel, onNext }) {
   // 처음 마칠 때는 모든 기록을 고른 채로 시작한다(H-16).
   const [selectedIds, setSelectedIds] = useState(() => records.map(({ id }) => id));
 
@@ -65,7 +65,7 @@ export default function PortfolioRecordSelect({ records, onCancel }) {
       ))}
       <RecordFormFooter>
         <TextLink onClick={onCancel}>취소</TextLink>
-        <Button variant="accent" className="ml-auto" disabled={selectedIds.length === 0}>
+        <Button variant="accent" className="ml-auto" disabled={selectedIds.length === 0} onClick={onNext}>
           AI가 빈 곳 찾기 →
         </Button>
       </RecordFormFooter>
