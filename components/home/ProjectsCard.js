@@ -12,12 +12,12 @@ import SectionHeader from "./SectionHeader";
 const MODAL_TITLE_ID = "new-project-title";
 
 function ProjectRow({ project }) {
-  const { name, recordCount, lastRecordedAt, shape, color } = project;
+  const { id, name, recordCount, lastRecordedAt, shape, color } = project;
 
   return (
     <li className="flex items-center gap-3 rounded-2xl bg-canvas px-3 py-2.5">
       <ShapeCharacter shape={shape} color={color} size={34} />
-      <Link href="/my-record" className="flex min-w-0 flex-1 flex-col">
+      <Link href={`/projects/${id}`} className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-body text-ink">{name}</span>
         <span className="text-[12.5px] text-ink-subtle">
           기록 {recordCount} · {lastRecordedAt}
@@ -59,11 +59,15 @@ export default function ProjectsCard({ initialProjects }) {
   return (
     <Card as="section" className="flex flex-col items-start gap-3.5">
       <SectionHeader title="프로젝트" />
-      <ul className="flex w-full flex-col gap-2">
-        {projects.map((project) => (
-          <ProjectRow key={project.id} project={project} />
-        ))}
-      </ul>
+      {projects.length > 0 ? (
+        <ul className="flex w-full flex-col gap-2">
+          {projects.map((project) => (
+            <ProjectRow key={project.id} project={project} />
+          ))}
+        </ul>
+      ) : (
+        <p className="text-body-sm text-ink-subtle">진행 중인 프로젝트가 없어요</p>
+      )}
       <TextLink onClick={() => setIsModalOpen(true)}>+ 새 프로젝트</TextLink>
       <Modal
         open={isModalOpen}
