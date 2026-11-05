@@ -119,7 +119,7 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
             {attachments("practiceFiles", "+ 노션 ZIP · 캡처")}
           </>
         ) : (
-          <p className="text-body-sm text-ink-subtle">실습 질문은 건너뛰고 세션 내용만 물어볼게요.</p>
+          <p className="text-body-sm break-keep text-ink-subtle">실습 질문은 건너뛰고 세션 내용만 물어볼게요.</p>
         )}
       </MaterialSection>
 
@@ -151,11 +151,19 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
               {linkError && <p id="assignment-link-error" role="alert" className="text-label text-tint-red-ink">{linkError}</p>}
             </div>
             {part === "프론트엔드" && (
-              <TextField label="받은 코드리뷰 · 짝이 남긴 코멘트 3개" multiline name="codeReview" value={materials.codeReview} onChange={(event) => updateField("codeReview", event.target.value)} className="h-[98px]" />
+              <TextField
+                label="받은 코드리뷰 · 짝이 남긴 코멘트 3개"
+                multiline
+                rows={7}
+                name="codeReview"
+                value={materials.codeReview}
+                onChange={(event) => updateField("codeReview", event.target.value)}
+                className="min-h-[194px] max-[359px]:min-h-[266px] max-sm:resize-y min-[640px]:h-[98px] min-[640px]:min-h-0 min-[901px]:h-[146px] min-[1101px]:h-[98px]"
+              />
             )}
           </>
         ) : (
-          <p className="text-body-sm text-ink-subtle">
+          <p className="text-body-sm break-keep text-ink-subtle">
             {assignmentStatus === "later"
               ? `과제는 ${assignmentDueLabel}까지 따로 써요. 세션 회고만 먼저 끝내요.`
               : "이번 주 과제는 없어요."}

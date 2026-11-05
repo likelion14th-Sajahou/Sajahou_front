@@ -29,20 +29,20 @@ export function RetrospectiveHeading({ week }) {
 
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3.5">
-      <div className="flex flex-col items-start gap-1.5">
+      <div className="flex min-w-0 max-w-full flex-col items-start gap-1.5">
         <Link href="/" className="text-body-sm text-ink-muted">← 홈</Link>
         <p className="text-label text-accent-strong">{part}</p>
         <h1 className="text-[38px] leading-[1.2] tracking-[-0.02em]">
           {week}주차 세션 회고
         </h1>
         {assignmentStatus === "later" && (
-          <div aria-label="회고 작성 상태" className="flex gap-1.5 pt-2">
+          <div aria-label="회고 작성 상태" className="flex max-w-full flex-wrap gap-1.5 pt-2">
             <Chip selected disabled className="disabled:cursor-default">세션 회고 · 작성 중</Chip>
             <Chip disabled className="disabled:cursor-default">과제 회고 · 시작 전</Chip>
           </div>
         )}
       </div>
-      <div className="flex flex-col items-end gap-1.5">
+      <div className="flex min-w-0 max-w-full flex-col items-end gap-1.5">
         <p className="text-label text-ink-subtle">데모 · 파트 바꿔 보기</p>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="파트 미리보기">
           {PARTS.map((item) => (
