@@ -10,8 +10,10 @@ import TextLink from "@/components/ui/TextLink";
 import { MOCK_AI_QUESTIONS } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import AiQuestionsComplete from "./AiQuestionsComplete";
+import { useRetrospectivePreview } from "./RetrospectivePreview";
 
 export default function AiQuestionsContent({ initialComplete = false }) {
+  const { getStepHref } = useRetrospectivePreview();
   const [currentIndex, setCurrentIndex] = useState(initialComplete ? MOCK_AI_QUESTIONS.length - 1 : 0);
   const [isComplete, setIsComplete] = useState(initialComplete);
   const [responses, setResponses] = useState(() => Object.fromEntries(MOCK_AI_QUESTIONS.map((item, index) => [item.id, {
@@ -47,8 +49,8 @@ export default function AiQuestionsContent({ initialComplete = false }) {
             <AiQuestionsComplete
               questions={MOCK_AI_QUESTIONS}
               responses={responses}
+              reviewHref={getStepHref("review")}
               onReturn={() => { setIsComplete(false); setNotice(""); }}
-              onDraft={() => setNotice("초안 생성은 준비 중이에요. 답변은 현재 화면에서만 유지돼요.")}
             />
           ) : (
             <Card as="section" size="md" className="min-w-0 rounded-[28px]" aria-labelledby="ai-question-title">
@@ -101,7 +103,7 @@ export default function AiQuestionsContent({ initialComplete = false }) {
           </ol>
           <p className="mt-3 text-label leading-[1.5] text-ink-subtle">자소서에 쓸 가치가 큰 곳부터 최대 5개만 물어요. 마지막은 느낀 점이에요.</p>
           <div className="mt-1 flex items-center gap-3.5 border-t border-line pt-4">
-            <TextLink href="/retrospective?step=materials">← 자료 고치기</TextLink>
+            <TextLink href={getStepHref("materials")}>← 자료 고치기</TextLink>
             <TextLink onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</TextLink>
           </div>
         </Card>
