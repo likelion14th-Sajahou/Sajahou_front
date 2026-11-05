@@ -15,7 +15,7 @@ export default function MaterialsContent() {
   return (
     <>
       <RetrospectiveSteps currentStep={1} />
-      <div className="mt-7 grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5">
+      <div className="mt-7 grid grid-cols-1 items-start gap-5 min-[901px]:grid-cols-[minmax(0,1fr)_320px]">
         <MaterialsForm initialMaterials={MOCK_MATERIALS} />
         <Card as="aside" size="md" aria-labelledby="upload-guide-title">
           <div className="flex items-center justify-between border-b border-ink pb-3">

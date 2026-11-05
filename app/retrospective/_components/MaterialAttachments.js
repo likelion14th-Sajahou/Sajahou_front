@@ -20,11 +20,11 @@ export default function MaterialAttachments({
   const fileItems = files.map(({ id, name, kind }) => {
     const badge = FILE_BADGES[kind];
     return (
-      <li key={id} className="inline-flex min-w-0 items-center gap-2 rounded-xl border border-line py-1.5 pr-2 pl-2.5 text-label">
+      <li key={id} className="inline-flex min-w-0 max-w-full items-center gap-2 rounded-xl border border-line py-1.5 pr-2 pl-2.5 text-label">
         <Badge tone={badge.tone} size="sm" className="text-[11px] leading-[1.6]">
           {badge.label}
         </Badge>
-        <span className="truncate" title={name}>{name}</span>
+        <span className="min-w-0 truncate max-sm:overflow-visible max-sm:break-all max-sm:whitespace-normal" title={name}>{name}</span>
         <button type="button" aria-label={`${name} 빼기`} onClick={() => onRemove(id)} className="shrink-0 cursor-pointer px-1 py-0.5 text-[16px] leading-4 text-ink-subtle">
           ×
         </button>
@@ -53,12 +53,12 @@ export default function MaterialAttachments({
     <div className="flex min-w-0 flex-col gap-1.5">
       {uploadOnNewLine ? (
         <>
-          {files.length > 0 && <ul aria-label="첨부 자료" className="flex flex-wrap items-center gap-2">{fileItems}</ul>}
-          <div className="flex items-center gap-2">{upload}{children}</div>
+          {files.length > 0 && <ul aria-label="첨부 자료" className="flex min-w-0 max-w-full flex-wrap items-center gap-2">{fileItems}</ul>}
+          <div className="flex flex-wrap items-center gap-2">{upload}{children}</div>
         </>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
-          {files.length > 0 && <ul aria-label="첨부 자료" className="flex flex-wrap items-center gap-2">{fileItems}</ul>}
+          {files.length > 0 && <ul aria-label="첨부 자료" className="flex min-w-0 max-w-full flex-wrap items-center gap-2">{fileItems}</ul>}
           {upload}
         </div>
       )}

@@ -18,8 +18,8 @@ const ACCEPTED_FILES = {
 function MaterialSection({ title, titleId, controls, children }) {
   return (
     <section aria-labelledby={titleId} className="flex min-w-0 flex-col gap-3 rounded-[20px] border border-line px-5 py-[18px]">
-      <div className="flex items-center gap-3">
-        <h3 id={titleId} className="text-[16px]">{title}</h3>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <h3 id={titleId} className="shrink-0 text-[16px]">{title}</h3>
         {controls}
       </div>
       {children}
@@ -98,7 +98,7 @@ export default function MaterialsForm({ initialMaterials }) {
       </MaterialSection>
 
       <MaterialSection title="세션 중 실습이 있었나요?" titleId="practice-title" controls={
-        <div className="ml-auto flex gap-1.5" role="group" aria-labelledby="practice-title">
+        <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="practice-title">
           {["있었어요", "없었어요"].map((label, index) => (
             <Chip key={label} size="sm" selected={index === 0} disabled title="실습 여부 전환은 다음 작업에서 연결할 예정입니다." className="disabled:cursor-default">{label}</Chip>
           ))}
@@ -109,7 +109,7 @@ export default function MaterialsForm({ initialMaterials }) {
       </MaterialSection>
 
       <MaterialSection title="이번 주 과제는요?" titleId="assignment-title" controls={
-        <div className="ml-auto flex gap-1.5" role="group" aria-labelledby="assignment-title">
+        <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="assignment-title">
           {["과제 기록하기", "나중에 쓸게요", "과제 없음"].map((label, index) => (
             <Chip key={label} size="sm" selected={index === 0} disabled title="과제 상태 전환은 다음 작업에서 연결할 예정입니다." className="disabled:cursor-default">{label}</Chip>
           ))}
@@ -121,8 +121,8 @@ export default function MaterialsForm({ initialMaterials }) {
           {attachments("assignmentFiles", "+ 파일 업로드", {
             uploadOnNewLine: true,
             children: (
-              <div className="flex min-w-0 flex-1 gap-1.5">
-                <TextField size="sm" name="assignmentLink" aria-label="Git 링크" placeholder="피그마·GitHub 링크" value={link} aria-invalid={Boolean(linkError)} aria-describedby={linkError ? "assignment-link-error" : undefined} onChange={(event) => { setLink(event.target.value); setLinkError(""); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addLink(); } }} />
+              <div className="flex w-full min-w-0 gap-1.5 sm:w-auto sm:flex-1">
+                <TextField size="sm" className="min-w-0" name="assignmentLink" aria-label="Git 링크" placeholder="피그마·GitHub 링크" value={link} aria-invalid={Boolean(linkError)} aria-describedby={linkError ? "assignment-link-error" : undefined} onChange={(event) => { setLink(event.target.value); setLinkError(""); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addLink(); } }} />
                 <Button variant="secondary" size="sm" onClick={addLink}>추가</Button>
               </div>
             ),
@@ -133,11 +133,11 @@ export default function MaterialsForm({ initialMaterials }) {
 
       <TextField label="고민 메모 · 선택" multiline name="memo" placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
       <div className="pt-1">
-        <div className="flex items-center justify-between gap-3.5 border-t border-line pt-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-3.5 gap-y-2.5 border-t border-line pt-4">
           <TextLink href="/retrospective">← 이전</TextLink>
-          <div className="ml-auto flex gap-2">
-            <Button variant="secondary" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</Button>
-            <Button onClick={() => setNotice("AI 질문 받기는 준비 중이에요. 입력한 내용은 현재 화면에서만 유지돼요.")}>AI 질문 받기 →</Button>
+          <div className="ml-auto grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+            <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</Button>
+            <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => setNotice("AI 질문 받기는 준비 중이에요. 입력한 내용은 현재 화면에서만 유지돼요.")}>AI 질문 받기 →</Button>
           </div>
         </div>
         <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
