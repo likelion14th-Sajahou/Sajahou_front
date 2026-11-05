@@ -2,6 +2,7 @@ const TONE_CLASSES = {
   blue: "bg-tint-blue text-tint-blue-ink",
   purple: "bg-tint-purple text-tint-purple-ink",
   yellow: "bg-tint-yellow text-tint-yellow-ink",
+  amber: "bg-[#fff1d6] text-[#8a5a00]",
   red: "bg-tint-red text-tint-red-ink",
   green: "bg-tint-green text-tint-green-ink",
   neutral: "bg-canvas text-ink-muted",

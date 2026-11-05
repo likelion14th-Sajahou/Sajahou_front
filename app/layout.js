@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Gowun_Dodum } from "next/font/google";
 import Header from "@/components/layout/Header";
 import ScrollToTopOnNavigate from "@/components/layout/ScrollToTopOnNavigate";
@@ -21,7 +22,9 @@ export default function RootLayout({ children }) {
       className={`${gowunDodum.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ScrollToTopOnNavigate />
+        <Suspense fallback={null}>
+          <ScrollToTopOnNavigate />
+        </Suspense>
         <Header userName={MOCK_USER.name} userPart={MOCK_USER.part} />
         {children}
       </body>

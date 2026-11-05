@@ -34,7 +34,7 @@ export default function StoryCard({ card, isHighlighted = false, onOpen }) {
       </h3>
       <CompetencyTags tags={tags} />
       <p className="mt-auto flex w-full gap-1.5 border-t border-dashed border-line pt-2.5 text-label text-ink-muted">
-        <span>근거</span>
+        <span className="shrink-0">근거</span>
         <span>{evidence}</span>
       </p>
     </Card>
