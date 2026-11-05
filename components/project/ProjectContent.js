@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { COMPETENCIES } from "@/lib/mock/myRecord";
 import { MOCK_PROJECTS } from "@/lib/mock/projects";
+import { MOCK_STORY_CARDS } from "@/lib/mock/storyCards";
 import ProjectHeader from "./ProjectHeader";
-import ProjectRecords from "./ProjectRecords";
+import ProjectView from "./ProjectView";
 
 export default async function ProjectContent({ params }) {
   const { id } = await params;
@@ -21,12 +23,14 @@ export default async function ProjectContent({ params }) {
     );
   }
 
+  const storyCards = project.representativeCards.map(({ cardId }) =>
+    MOCK_STORY_CARDS.find(({ id: storyCardId }) => storyCardId === cardId),
+  );
+
   return (
     <>
       <ProjectHeader project={project} />
-      <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5 pt-6">
-        <ProjectRecords project={project} />
-      </div>
+      <ProjectView project={project} storyCards={storyCards} competencies={COMPETENCIES} />
     </>
   );
 }

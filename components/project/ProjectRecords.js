@@ -76,8 +76,8 @@ function RecordItem({ record, isLast }) {
   );
 }
 
-export default function ProjectRecords({ project }) {
-  const { id, status, records } = project;
+export default function ProjectRecords({ project, records }) {
+  const { id, status } = project;
 
   return (
     <section aria-label="기록" className="flex min-w-0 flex-col gap-4">
