@@ -9,13 +9,15 @@ function getRecapLabel({ cardCount, isProjectRecap }) {
   return cardCount > 0 ? `${recap} · 카드 ${cardCount}장` : recap;
 }
 
-// 카드 1장이면 그 카드 팝업, 2장 이상이면 그 주차 카드 목록으로 보낸다.
+// 항상 그 주차 카드만 걸러서 보여 준다. 카드가 1장이면 그 카드 팝업도 함께 연다(card 값).
 function getCardLink({ week, cardCount }) {
+  const href = `/my-record?tab=cards&week=${week}`;
+
   if (cardCount === 1) {
-    return { href: `/my-record?tab=cards&card=card-${week}`, label: "카드 보기 →" };
+    return { href: `${href}&card=card-${week}`, label: "카드 보기 →" };
   }
 
-  return { href: `/my-record?tab=cards&week=${week}`, label: `카드 ${cardCount}장 보기 →` };
+  return { href, label: `카드 ${cardCount}장 보기 →` };
 }
 
 function WeekName({ week }) {

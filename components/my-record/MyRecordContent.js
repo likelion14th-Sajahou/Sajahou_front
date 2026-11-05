@@ -1,11 +1,11 @@
 import FootprintsPanel from "./FootprintsPanel";
 import MyRecordTabs from "./MyRecordTabs";
-import StoryCardList from "./StoryCardList";
+import StoryCardsPanel from "./StoryCardsPanel";
 
 export default async function MyRecordContent({ searchParams, record }) {
   const { tab, week } = await searchParams;
   const activeTab = tab === "cards" ? "cards" : "footprints";
-  const { currentWeek, storyCards, footprintSections, footprintWeeks } = record;
+  const { currentWeek, competencies, storyCards, footprintSections, footprintWeeks } = record;
   const requestedWeek = footprintWeeks.find((item) => item.week === Number(week));
 
   return (
@@ -18,7 +18,13 @@ export default async function MyRecordContent({ searchParams, record }) {
           initialWeek={requestedWeek?.week ?? currentWeek}
         />
       )}
-      {activeTab === "cards" && <StoryCardList cards={storyCards} />}
+      {activeTab === "cards" && (
+        <StoryCardsPanel
+          cards={storyCards}
+          competencies={competencies}
+          week={requestedWeek?.week}
+        />
+      )}
     </>
   );
 }
