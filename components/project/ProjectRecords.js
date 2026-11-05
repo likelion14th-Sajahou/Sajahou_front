@@ -1,39 +1,19 @@
+"use client";
+
+import { useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
-
-const RECORD_FIELDS = [
-  { key: "did", label: "한 일" },
-  { key: "problem", label: "고민·해결" },
-  { key: "choice", label: "선택과 이유" },
-  { key: "result", label: "결과·반응" },
-  { key: "next", label: "다음" },
-];
-
-const ATTACHMENT_BADGES = {
-  pdf: { label: "PDF", tone: "red" },
-  notion: { label: "노션 MD", tone: "dark" },
-  image: { label: "이미지", tone: "green" },
-  link: { label: "링크", tone: "purple" },
-};
+import AttachmentChip from "./AttachmentChip";
+import ProjectRecordForm from "./ProjectRecordForm";
+import { RECORD_FIELDS } from "./recordFields";
 
 const ADD_RECORD_HINTS = {
   active: "회의록·시안·링크를 올리면 AI가 정리를 도와요",
   done: "완료한 프로젝트도 기록을 더하거나 고칠 수 있어요",
 };
 
-function Attachment({ attachment }) {
-  const { label, tone } = ATTACHMENT_BADGES[attachment.kind];
-
-  return (
-    <li className="flex items-center gap-2 rounded-xl border border-line bg-white py-1.5 pr-2 pl-2.5 text-label text-ink">
-      <Badge tone={tone} size="xs">{label}</Badge>
-      {attachment.name}
-    </li>
-  );
-}
-
-function RecordItem({ record, isLast }) {
+function RecordItem({ record, isLast, onEdit }) {
   const { date, weekday, cardNumbers, attachments } = record;
 
   return (
@@ -52,7 +32,7 @@ function RecordItem({ record, isLast }) {
             ))}
           </p>
           <div className="flex items-center gap-3">
-            <TextLink size="sm">수정</TextLink>
+            <TextLink size="sm" onClick={() => onEdit(record.id)}>수정</TextLink>
             <TextLink variant="danger" size="sm">삭제</TextLink>
           </div>
         </div>
@@ -67,7 +47,7 @@ function RecordItem({ record, isLast }) {
         {attachments.length > 0 && (
           <ul aria-label="첨부 자료" className="flex flex-wrap gap-2">
             {attachments.map((attachment) => (
-              <Attachment key={attachment.id} attachment={attachment} />
+              <AttachmentChip key={attachment.id} attachment={attachment} />
             ))}
           </ul>
         )}
@@ -76,19 +56,38 @@ function RecordItem({ record, isLast }) {
   );
 }
 
-export default function ProjectRecords({ project, records }) {
+export default function ProjectRecords({ project, records, onSaveRecord }) {
   const { id, status } = project;
+  const [editingRecordId, setEditingRecordId] = useState();
+  const editingRecord = records.find((record) => record.id === editingRecordId);
 
   return (
     <section aria-label="기록" className="flex min-w-0 flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <Button href={`/projects/${id}?record=new`} scroll={false}>+ 기록 추가</Button>
-        <p className="text-label leading-[19.5px] text-ink-subtle">{ADD_RECORD_HINTS[status]}</p>
-      </div>
+      {editingRecord ? (
+        <ProjectRecordForm
+          key={editingRecord.id}
+          record={editingRecord}
+          onCancel={() => setEditingRecordId(undefined)}
+          onSave={(changes) => {
+            onSaveRecord(editingRecord.id, changes);
+            setEditingRecordId(undefined);
+          }}
+        />
+      ) : (
+        <div className="flex items-center gap-2">
+          <Button href={`/projects/${id}?record=new`} scroll={false}>+ 기록 추가</Button>
+          <p className="text-label leading-[19.5px] text-ink-subtle">{ADD_RECORD_HINTS[status]}</p>
+        </div>
+      )}
       {records.length > 0 ? (
         <ol>
           {records.map((record, index) => (
-            <RecordItem key={record.id} record={record} isLast={index === records.length - 1} />
+            <RecordItem
+              key={record.id}
+              record={record}
+              isLast={index === records.length - 1}
+              onEdit={setEditingRecordId}
+            />
           ))}
         </ol>
       ) : (
