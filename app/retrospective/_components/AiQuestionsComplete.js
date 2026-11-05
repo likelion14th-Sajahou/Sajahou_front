@@ -3,7 +3,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import TextLink from "@/components/ui/TextLink";
 
-export default function AiQuestionsComplete({ questions, responses, onReturn, onDraft }) {
+export default function AiQuestionsComplete({ questions, responses, onReturn, reviewHref }) {
   return (
     <>
       <Card as="section" size="md" className="rounded-[28px]" aria-labelledby="questions-complete-title">
@@ -17,7 +17,7 @@ export default function AiQuestionsComplete({ questions, responses, onReturn, on
           </h2>
           <div className="flex items-center justify-between gap-3">
             <TextLink onClick={onReturn}>← 마지막 질문 다시</TextLink>
-            <Button variant="accent" onClick={onDraft}>초안 확인하기 →</Button>
+            <Button variant="accent" href={reviewHref}>초안 확인하기 →</Button>
           </div>
         </div>
       </Card>

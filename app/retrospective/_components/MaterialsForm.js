@@ -32,7 +32,8 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
 
 export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLabel, changePreview = null }) {
   const router = useRouter();
-  const { part, assignmentStatus, setAssignmentStatus } = useRetrospectivePreview();
+  const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref } = useRetrospectivePreview();
+  const assignmentStatus = isAssignment ? "record" : sessionAssignmentStatus;
   const [drafts, setDrafts] = useState(initialMaterialsByPart);
   const materials = drafts[part];
   const [hasPractice, setHasPractice] = useState(true);
@@ -47,7 +48,7 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
       setIsChangeNoticeOpen(true);
       return;
     }
-    router.push("/retrospective?step=questions");
+    router.push(getStepHref("questions"));
   }
 
   // 파트를 바꾸거나 입력 영역을 숨겨도 각 파트에서 작성한 내용은 유지한다.
@@ -136,7 +137,7 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
         )}
       </MaterialSection>
 
-      <MaterialSection title="이번 주 과제는요?" titleId="assignment-title" inactive={assignmentStatus !== "record"} controls={
+      <MaterialSection title="이번 주 과제는요?" titleId="assignment-title" inactive={assignmentStatus !== "record"} controls={!isAssignment && (
         <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="assignment-title">
           {[
             { value: "record", label: "과제 기록하기" },
@@ -146,7 +147,7 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
             <Chip key={value} size="sm" selected={assignmentStatus === value} onClick={() => setAssignmentStatus(value)}>{label}</Chip>
           ))}
         </div>
-      }>
+      )}>
         {assignmentStatus === "record" ? (
           <>
             <TextField label="과제 내용 · 코드나 에러 · 붙여넣기" multiline name="assignment" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} className="h-[130px] text-[13px] leading-[1.6]" />
@@ -194,7 +195,7 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
       />
       <div className="pt-1">
         <div className="flex flex-wrap items-center justify-between gap-x-3.5 gap-y-2.5 border-t border-line pt-4">
-          <TextLink href="/retrospective">← 이전</TextLink>
+          <TextLink href={getStepHref()}>← 이전</TextLink>
           <div className="ml-auto grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
             <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</Button>
             <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={requestQuestions}>AI 질문 받기 →</Button>
