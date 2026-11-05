@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
 import ProjectSidebar from "./ProjectSidebar";
 
@@ -16,7 +17,14 @@ export default function ProjectView({ project, storyCards, competencies }) {
     project.representativeCards.map(({ recordIds }, index) => ({
       ...storyCards[index],
       recordIds,
+      deletedRecordCount: 0,
     })),
+  );
+
+  const displayCards = cards.map((card) =>
+    card.deletedRecordCount > 0
+      ? { ...card, evidence: `${card.evidence} · 삭제된 기록 ${card.deletedRecordCount}개` }
+      : card,
   );
 
   const records = projectRecords.map((record) => ({
@@ -32,6 +40,22 @@ export default function ProjectView({ project, storyCards, competencies }) {
     );
   }
 
+  // 대표 카드에 쓴 기록을 지워도 카드 글은 남기고, 근거에 지운 개수만 표시한다(H-15).
+  function deleteRecord(recordId) {
+    setProjectRecords((current) => current.filter(({ id }) => id !== recordId));
+    setCards((current) =>
+      current.map((card) =>
+        card.recordIds.includes(recordId)
+          ? {
+              ...card,
+              recordIds: card.recordIds.filter((id) => id !== recordId),
+              deletedRecordCount: card.deletedRecordCount + 1,
+            }
+          : card,
+      ),
+    );
+  }
+
   function updateCard(cardId, changes) {
     setCards((current) =>
       current.map((card) => (card.id === cardId ? { ...card, ...changes } : card)),
@@ -43,21 +67,29 @@ export default function ProjectView({ project, storyCards, competencies }) {
   }
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5 pt-6">
-      <ProjectRecords
-        key={`records-${bfcacheId}`}
+    <>
+      <ProjectHeader
         project={project}
-        records={records}
-        onSaveRecord={saveRecord}
+        recordCount={records.length}
+        lastRecordedAt={records[0]?.date}
       />
-      <ProjectSidebar
-        key={`sidebar-${bfcacheId}`}
-        status={project.status}
-        cards={cards}
-        competencies={competencies}
-        onUpdateCard={updateCard}
-        onDeleteCard={deleteCard}
-      />
-    </div>
+      <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5 pt-6">
+        <ProjectRecords
+          key={`records-${bfcacheId}`}
+          project={project}
+          records={records}
+          onSaveRecord={saveRecord}
+          onDeleteRecord={deleteRecord}
+        />
+        <ProjectSidebar
+          key={`sidebar-${bfcacheId}`}
+          status={project.status}
+          cards={displayCards}
+          competencies={competencies}
+          onUpdateCard={updateCard}
+          onDeleteCard={deleteCard}
+        />
+      </div>
+    </>
   );
 }

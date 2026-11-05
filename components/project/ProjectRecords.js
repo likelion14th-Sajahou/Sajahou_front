@@ -13,8 +13,27 @@ const ADD_RECORD_HINTS = {
   done: "완료한 프로젝트도 기록을 더하거나 고칠 수 있어요",
 };
 
-function RecordItem({ record, isLast, onEdit }) {
+function DeleteConfirm({ isUsedInCard, onCancel, onConfirm }) {
+  return (
+    <div role="alert" className="flex flex-col gap-2.5 rounded-[14px] border border-[#f3c4be] bg-[#fff4f2] px-3.5 py-3">
+      <p className="text-body-sm text-ink">
+        이 기록을 지울까요?
+        <br />
+        {isUsedInCard && "대표 카드에 쓰인 기록이에요. 카드 글은 그대로 남고, 근거에 '삭제된 기록'으로 표시돼요. "}
+        지운 기록은 되돌릴 수 없어요.
+      </p>
+      <div className="flex items-center justify-end gap-3">
+        {/* 삭제 버튼을 눌러도 포커스를 잃지 않도록 안전한 쪽인 취소로 옮긴다. */}
+        <TextLink size="sm" autoFocus onClick={onCancel}>취소</TextLink>
+        <Button variant="danger" size="sm" onClick={onConfirm}>지우기</Button>
+      </div>
+    </div>
+  );
+}
+
+function RecordItem({ record, isLast, onEdit, onDelete }) {
   const { date, weekday, cardNumbers, attachments } = record;
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   return (
     <li className="relative pb-5 pl-7">
@@ -33,7 +52,7 @@ function RecordItem({ record, isLast, onEdit }) {
           </p>
           <div className="flex items-center gap-3">
             <TextLink size="sm" onClick={() => onEdit(record.id)}>수정</TextLink>
-            <TextLink variant="danger" size="sm">삭제</TextLink>
+            <TextLink variant="danger" size="sm" onClick={() => setIsConfirmingDelete(true)}>삭제</TextLink>
           </div>
         </div>
         <dl className="grid grid-cols-[62.8px_minmax(0,1fr)] gap-x-3 gap-y-1">
@@ -51,12 +70,19 @@ function RecordItem({ record, isLast, onEdit }) {
             ))}
           </ul>
         )}
+        {isConfirmingDelete && (
+          <DeleteConfirm
+            isUsedInCard={cardNumbers.length > 0}
+            onCancel={() => setIsConfirmingDelete(false)}
+            onConfirm={() => onDelete(record.id)}
+          />
+        )}
       </article>
     </li>
   );
 }
 
-export default function ProjectRecords({ project, records, onSaveRecord }) {
+export default function ProjectRecords({ project, records, onSaveRecord, onDeleteRecord }) {
   const { id, status } = project;
   const [editingRecordId, setEditingRecordId] = useState();
   const editingRecord = records.find((record) => record.id === editingRecordId);
@@ -87,6 +113,10 @@ export default function ProjectRecords({ project, records, onSaveRecord }) {
               record={record}
               isLast={index === records.length - 1}
               onEdit={setEditingRecordId}
+              onDelete={(recordId) => {
+                onDeleteRecord(recordId);
+                setEditingRecordId((current) => (current === recordId ? undefined : current));
+              }}
             />
           ))}
         </ol>

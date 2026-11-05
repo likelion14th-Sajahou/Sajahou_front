@@ -5,12 +5,12 @@ const STATUS_LABELS = {
   done: "완료",
 };
 
-export default function ProjectHeader({ project }) {
-  const { name, subtitle, status, role, recordCount, startedAt, lastRecordedAt } = project;
+export default function ProjectHeader({ project, recordCount, lastRecordedAt }) {
+  const { name, subtitle, status, role, startedAt } = project;
   const stats = [
     { label: "기록", value: recordCount },
     { label: "시작", value: startedAt },
-    { label: "마지막 기록", value: lastRecordedAt },
+    { label: "마지막 기록", value: lastRecordedAt ?? "-" },
   ];
 
   return (
