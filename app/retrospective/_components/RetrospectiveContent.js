@@ -14,7 +14,7 @@ export default async function RetrospectiveContent({ searchParams, retrospective
     : retrospective.status;
   if (status === "paused") return <PausedRetrospective week={week} />;
   if (step === "materials") return <MaterialsContent preview={preview} />;
-  if (step === "questions") return <AiQuestionsContent />;
+  if (step === "questions") return <AiQuestionsContent key={preview} initialComplete={preview === "questions-complete"} />;
 
   return (
     <>
