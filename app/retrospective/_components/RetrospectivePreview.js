@@ -47,7 +47,7 @@ export function useRetrospectivePreview() {
 
 export function RetrospectiveHeading({ week }) {
   const { part, setPart, assignmentPending, isAssignment, isComplete, isStarted, completedDraft } = useRetrospectivePreview();
-  const sessionStatusLabel = isComplete || isAssignment || completedDraft ? "완료" : "작성 중";
+  const sessionStatusLabel = (!isAssignment && isComplete) || completedDraft ? "완료" : "작성 중";
   const assignmentStatusLabel = !isAssignment || !isStarted ? "시작 전" : isComplete ? "완료" : "작성 중";
 
   return (

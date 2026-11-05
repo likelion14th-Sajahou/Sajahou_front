@@ -7,9 +7,11 @@ export default function StartActions({ status = "idle", isAssignment = false }) 
   return (
     <div className="mt-5 border-t border-line pt-4">
       <div className="flex flex-wrap items-center justify-between gap-3.5">
-        {!isAssignment && <TextLink href="/retrospective?preview=paused">
-          이번 주는 휴회했어요
-        </TextLink>}
+        {!isAssignment && (
+          <TextLink href="/retrospective?preview=paused">
+            이번 주는 휴회했어요
+          </TextLink>
+        )}
         {isAssignment ? (
           <Button className="ml-auto" href="/retrospective?step=materials&type=assignment">시작하기 →</Button>
         ) : isWriting ? (
