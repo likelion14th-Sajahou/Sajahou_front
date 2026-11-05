@@ -5,16 +5,25 @@ import RecentRetrospectives from "@/components/home/RecentRetrospectives";
 import StickerBoard from "@/components/home/StickerBoard";
 import { MOCK_HOME } from "@/lib/mock/home";
 import { MOCK_USER } from "@/lib/mock/user";
+import { selectBoardStickers } from "@/lib/selectBoardStickers";
 
 // 이번 주 회고를 완료했거나 휴회한 주에는 스티커 보드의 + 자리를 숨긴다.
 const STATUSES_WITHOUT_CURRENT_SLOT = ["done", "rest"];
 
 export default function HomePage() {
-  const { week, weekStatus, stickerCount, stickers, projects, recentRetrospectives } = MOCK_HOME;
-  const visibleStickers =
-    STATUSES_WITHOUT_CURRENT_SLOT.includes(weekStatus)
-      ? stickers.filter(({ kind }) => kind !== "current")
-      : stickers;
+  const {
+    week,
+    weekStatus,
+    stickerCount,
+    earnedStickers,
+    placeholderStickers,
+    projects,
+    recentRetrospectives,
+  } = MOCK_HOME;
+  const visiblePlaceholders = STATUSES_WITHOUT_CURRENT_SLOT.includes(weekStatus)
+    ? placeholderStickers.filter(({ kind }) => kind !== "current")
+    : placeholderStickers;
+  const visibleStickers = [...selectBoardStickers(earnedStickers), ...visiblePlaceholders];
 
   return (
     <>
