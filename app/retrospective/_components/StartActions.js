@@ -1,11 +1,7 @@
-"use client";
-
-import { useState } from "react";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 
 export default function StartActions({ status = "idle" }) {
-  const [notice, setNotice] = useState("");
   const isWriting = status === "writing";
 
   return (
@@ -22,20 +18,17 @@ export default function StartActions({ status = "idle" }) {
             <Button
               variant="accent"
               className="min-w-0 max-sm:px-3"
-              onClick={() => setNotice("이어 쓸 자료 입력 화면은 준비 중입니다. 03 화면 구현 후 연결할 예정입니다.")}
+              href="/retrospective?step=materials"
             >
               이어 쓰기 →
             </Button>
           </div>
         ) : (
-          <Button onClick={() => setNotice("자료 입력 화면은 준비 중입니다. 03 화면 구현 후 연결할 예정입니다.")}>
+          <Button href="/retrospective?step=materials">
             시작하기 →
           </Button>
         )}
       </div>
-      <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>
-        {notice}
-      </p>
     </div>
   );
 }

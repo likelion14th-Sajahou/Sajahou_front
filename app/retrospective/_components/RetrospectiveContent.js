@@ -3,14 +3,16 @@ import Card from "@/components/ui/Card";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import StartActions from "./StartActions";
 import PausedRetrospective from "./PausedRetrospective";
+import MaterialsContent from "./MaterialsContent";
 
 export default async function RetrospectiveContent({ searchParams, retrospective }) {
-  const { preview } = await searchParams;
+  const { preview, step } = await searchParams;
   const { week, deadlines } = retrospective;
   const status = preview === "writing" || preview === "paused"
     ? preview
     : retrospective.status;
   if (status === "paused") return <PausedRetrospective week={week} />;
+  if (step === "materials") return <MaterialsContent preview={preview} />;
 
   return (
     <>
