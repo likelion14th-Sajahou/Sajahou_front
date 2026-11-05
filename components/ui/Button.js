@@ -22,7 +22,7 @@ export default function Button({
   children,
   ...rest
 }) {
-  const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full border text-center ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`;
+  const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full border text-center disabled:cursor-default disabled:border-line disabled:bg-line disabled:text-[#6b6358] ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`;
 
   if (href) {
     return (

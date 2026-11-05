@@ -24,7 +24,7 @@ function SidebarTitle({ children }) {
   );
 }
 
-function FinishProjectCard() {
+function FinishProjectCard({ onFinish }) {
   return (
     <Card as="aside" size="md" aria-label="프로젝트 마치기">
       <SidebarTitle>프로젝트를 마치면</SidebarTitle>
@@ -37,7 +37,9 @@ function FinishProjectCard() {
         ))}
       </ul>
       <div className="pt-3.5">
-        <Button variant="accent" className="w-full">프로젝트 마치고 포트폴리오 만들기</Button>
+        <Button variant="accent" className="w-full" onClick={onFinish}>
+          프로젝트 마치고 포트폴리오 만들기
+        </Button>
       </div>
     </Card>
   );
@@ -114,6 +116,8 @@ function RepresentativeCards({
   );
 }
 
-export default function ProjectSidebar({ status, ...cardProps }) {
-  return status === "done" ? <RepresentativeCards {...cardProps} /> : <FinishProjectCard />;
+export default function ProjectSidebar({ status, onFinishProject, ...cardProps }) {
+  return status === "done"
+    ? <RepresentativeCards {...cardProps} />
+    : <FinishProjectCard onFinish={onFinishProject} />;
 }

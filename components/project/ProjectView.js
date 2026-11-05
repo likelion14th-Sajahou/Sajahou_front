@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MOCK_TODAY } from "@/lib/mock/projects";
+import PortfolioRecordSelect from "./PortfolioRecordSelect";
 import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
 import ProjectSidebar from "./ProjectSidebar";
@@ -15,6 +16,9 @@ export default function ProjectView({ project, storyCards, competencies, initial
   // 뒤로 가기로 돌아오면 bfcacheId가 그대로라 작성 중인 내용이 남는다. 기록과 카드 변경은 어느 경우든 유지한다.
   const { bfcacheId } = useRouter();
   const [hasRecordChanged, setHasRecordChanged] = useState(false);
+  // 흐름을 연 시점의 bfcacheId를 기억해, 링크로 새로 들어오면 자동으로 프로젝트 화면으로 돌아간다.
+  const [portfolioBfcacheId, setPortfolioBfcacheId] = useState(null);
+  const isMakingPortfolio = portfolioBfcacheId === bfcacheId;
   const [cards, setCards] = useState(() =>
     project.representativeCards.map(({ recordIds }, index) => ({
       ...storyCards[index],
@@ -91,27 +95,34 @@ export default function ProjectView({ project, storyCards, competencies, initial
         recordCount={records.length}
         lastRecordedAt={records[0]?.date}
       />
-      <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5 pt-6">
-        <ProjectRecords
-          key={`records-${bfcacheId}`}
-          project={project}
-          records={records}
-          initialIsAdding={initialIsAdding}
-          onAddRecord={addRecord}
-          onSaveRecord={saveRecord}
-          onDeleteRecord={deleteRecord}
-        />
-        <ProjectSidebar
-          key={`sidebar-${bfcacheId}`}
-          status={project.status}
-          cards={displayCards}
-          competencies={competencies}
-          showChangeNotice={hasRecordChanged}
-          onDismissChangeNotice={() => setHasRecordChanged(false)}
-          onUpdateCard={updateCard}
-          onDeleteCard={deleteCard}
-        />
-      </div>
+      {isMakingPortfolio ? (
+        <div className="pt-6">
+          <PortfolioRecordSelect records={records} onCancel={() => setPortfolioBfcacheId(null)} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5 pt-6">
+          <ProjectRecords
+            key={`records-${bfcacheId}`}
+            project={project}
+            records={records}
+            initialIsAdding={initialIsAdding}
+            onAddRecord={addRecord}
+            onSaveRecord={saveRecord}
+            onDeleteRecord={deleteRecord}
+          />
+          <ProjectSidebar
+            key={`sidebar-${bfcacheId}`}
+            status={project.status}
+            cards={displayCards}
+            competencies={competencies}
+            showChangeNotice={hasRecordChanged}
+            onDismissChangeNotice={() => setHasRecordChanged(false)}
+            onUpdateCard={updateCard}
+            onDeleteCard={deleteCard}
+            onFinishProject={() => setPortfolioBfcacheId(bfcacheId)}
+          />
+        </div>
+      )}
     </>
   );
 }
