@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
+import Modal from "@/components/ui/Modal";
+import StoryCardDetail from "./StoryCardDetail";
 import StoryCardList from "./StoryCardList";
 
 const ALL = "all";
@@ -23,10 +25,23 @@ function matchesSearch({ title, tags, evidence }, search) {
   return target.toLowerCase().includes(search);
 }
 
-export default function StoryCardsPanel({ cards, competencies, week }) {
+export default function StoryCardsPanel({ cards, competencies, week, initialCardId }) {
   const [type, setType] = useState(ALL);
   const [competency, setCompetency] = useState(ALL);
   const [search, setSearch] = useState("");
+  const [openCardId, setOpenCardId] = useState(initialCardId);
+  const openCard = cards.find(({ id }) => id === openCardId);
+
+  function closeCard() {
+    setOpenCardId(undefined);
+
+    // 주소로 연 팝업이 새로고침할 때 다시 열리지 않도록 card 값을 지운다.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("card")) {
+      url.searchParams.delete("card");
+      window.history.replaceState(null, "", url);
+    }
+  }
 
   const normalizedSearch = search.trim().toLowerCase();
   // 역량을 뺀 나머지 필터의 결과다. 드롭다운의 카드 수도 이 목록에서 세어 고른 뒤의 결과와 맞춘다.
@@ -89,12 +104,21 @@ export default function StoryCardsPanel({ cards, competencies, week }) {
       )}
 
       {visibleCards.length > 0 ? (
-        <StoryCardList cards={visibleCards} />
+        <StoryCardList cards={visibleCards} onOpenCard={setOpenCardId} />
       ) : (
         <p role="status" className="rounded-[20px] border border-dashed border-[#d7d3cb] p-6 text-center text-body text-ink-subtle">
           조건에 맞는 카드가 없어요.
         </p>
       )}
+
+      <Modal
+        open={Boolean(openCard)}
+        onClose={closeCard}
+        size="lg"
+        aria-labelledby="story-card-title"
+      >
+        {openCard && <StoryCardDetail card={openCard} titleId="story-card-title" onClose={closeCard} />}
+      </Modal>
     </section>
   );
 }
