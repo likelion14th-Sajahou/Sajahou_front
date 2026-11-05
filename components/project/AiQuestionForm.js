@@ -4,6 +4,7 @@ import { useState } from "react";
 import Button from "@/components/ui/Button";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
+import Toast from "@/components/ui/Toast";
 import AiPromptHeader from "./AiPromptHeader";
 
 // 질문이 바뀌면 입력을 비우도록, 쓰는 곳에서 질문별 key를 준다.
@@ -40,25 +41,15 @@ export default function AiQuestionForm({
         multiline
         placeholder={placeholder}
         value={answer}
-        onChange={(event) => {
-          setAnswer(event.target.value);
-          setNotice("");
-        }}
+        onChange={(event) => setAnswer(event.target.value)}
         className="h-[98px]"
       />
-      {notice && <p role="alert" className="text-label text-tint-red-ink">{notice}</p>}
       <div className="flex items-center gap-3">
-        <TextLink
-          onClick={() => {
-            setAnswer(exampleAnswer);
-            setNotice("");
-          }}
-        >
-          예시 답변 넣기
-        </TextLink>
+        <TextLink onClick={() => setAnswer(exampleAnswer)}>예시 답변 넣기</TextLink>
         <TextLink onClick={onSkip}>건너뛰기</TextLink>
         <Button className="ml-auto" onClick={submitAnswer}>답하고 다음 →</Button>
       </div>
+      <Toast message={notice} onDismiss={() => setNotice("")} />
     </div>
   );
 }
