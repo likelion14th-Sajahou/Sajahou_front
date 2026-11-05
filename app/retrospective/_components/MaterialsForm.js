@@ -8,6 +8,7 @@ import Chip from "@/components/ui/Chip";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
+import { useRetrospectivePreview } from "./RetrospectivePreview";
 
 const ACCEPTED_FILES = {
   sessionFiles: ".pdf",
@@ -15,9 +16,9 @@ const ACCEPTED_FILES = {
   assignmentFiles: ".zip,.pdf,.png,.jpg,.jpeg,.webp,.gif",
 };
 
-function MaterialSection({ title, titleId, controls, children }) {
+function MaterialSection({ title, titleId, controls, inactive = false, children }) {
   return (
-    <section aria-labelledby={titleId} className="flex min-w-0 flex-col gap-3 rounded-[20px] border border-line px-5 py-[18px]">
+    <section aria-labelledby={titleId} className={`flex min-w-0 flex-col gap-3 rounded-[20px] border border-line px-5 py-[18px] ${inactive ? "border-dashed bg-canvas" : ""}`}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h3 id={titleId} className="shrink-0 text-[16px]">{title}</h3>
         {controls}
@@ -27,11 +28,19 @@ function MaterialSection({ title, titleId, controls, children }) {
   );
 }
 
-export default function MaterialsForm({ initialMaterials }) {
-  const [materials, setMaterials] = useState(initialMaterials);
+export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLabel }) {
+  const { part, assignmentStatus, setAssignmentStatus } = useRetrospectivePreview();
+  const [drafts, setDrafts] = useState(initialMaterialsByPart);
+  const materials = drafts[part];
+  const [hasPractice, setHasPractice] = useState(true);
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
   const [notice, setNotice] = useState("");
+
+  // 파트를 바꾸거나 입력 영역을 숨겨도 각 파트에서 작성한 내용은 유지한다.
+  function setMaterials(update) {
+    setDrafts((previous) => ({ ...previous, [part]: update(previous[part]) }));
+  }
 
   function updateField(field, value) {
     setMaterials((previous) => ({ ...previous, [field]: value }));
@@ -97,38 +106,61 @@ export default function MaterialsForm({ initialMaterials }) {
         {attachments("sessionFiles", "+ 세션 PDF")}
       </MaterialSection>
 
-      <MaterialSection title="세션 중 실습이 있었나요?" titleId="practice-title" controls={
+      <MaterialSection title="세션 중 실습이 있었나요?" titleId="practice-title" inactive={!hasPractice} controls={
         <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="practice-title">
           {["있었어요", "없었어요"].map((label, index) => (
-            <Chip key={label} size="sm" selected={index === 0} disabled title="실습 여부 전환은 다음 작업에서 연결할 예정입니다." className="disabled:cursor-default">{label}</Chip>
+            <Chip key={label} size="sm" selected={hasPractice === (index === 0)} onClick={() => setHasPractice(index === 0)}>{label}</Chip>
           ))}
         </div>
       }>
-        <TextField label="실습 내용 · 무엇을 배웠는지 적어보세요" multiline name="practice" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} className="h-[98px]" />
-        {attachments("practiceFiles", "+ 노션 ZIP · 캡처")}
+        {hasPractice ? (
+          <>
+            <TextField label="실습 내용 · 무엇을 배웠는지 적어보세요" multiline name="practice" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} className="h-[98px]" />
+            {attachments("practiceFiles", "+ 노션 ZIP · 캡처")}
+          </>
+        ) : (
+          <p className="text-body-sm text-ink-subtle">실습 질문은 건너뛰고 세션 내용만 물어볼게요.</p>
+        )}
       </MaterialSection>
 
-      <MaterialSection title="이번 주 과제는요?" titleId="assignment-title" controls={
+      <MaterialSection title="이번 주 과제는요?" titleId="assignment-title" inactive={assignmentStatus !== "record"} controls={
         <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="assignment-title">
-          {["과제 기록하기", "나중에 쓸게요", "과제 없음"].map((label, index) => (
-            <Chip key={label} size="sm" selected={index === 0} disabled title="과제 상태 전환은 다음 작업에서 연결할 예정입니다." className="disabled:cursor-default">{label}</Chip>
+          {[
+            { value: "record", label: "과제 기록하기" },
+            { value: "later", label: "나중에 쓸게요" },
+            { value: "none", label: "과제 없음" },
+          ].map(({ value, label }) => (
+            <Chip key={value} size="sm" selected={assignmentStatus === value} onClick={() => setAssignmentStatus(value)}>{label}</Chip>
           ))}
         </div>
       }>
-        <TextField label="과제 내용 · 코드나 에러 · 붙여넣기" multiline name="assignment" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} className="h-[130px] text-[13px] leading-[1.6]" />
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <p className="text-label text-ink-muted">과제 노션이나 Git을 올려보세요</p>
-          {attachments("assignmentFiles", "+ 파일 업로드", {
-            uploadOnNewLine: true,
-            children: (
-              <div className="flex w-full min-w-0 gap-1.5 sm:w-auto sm:flex-1">
-                <TextField size="sm" className="min-w-0" name="assignmentLink" aria-label="Git 링크" placeholder="피그마·GitHub 링크" value={link} aria-invalid={Boolean(linkError)} aria-describedby={linkError ? "assignment-link-error" : undefined} onChange={(event) => { setLink(event.target.value); setLinkError(""); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addLink(); } }} />
-                <Button variant="secondary" size="sm" onClick={addLink}>추가</Button>
-              </div>
-            ),
-          })}
-          {linkError && <p id="assignment-link-error" role="alert" className="text-label text-tint-red-ink">{linkError}</p>}
-        </div>
+        {assignmentStatus === "record" ? (
+          <>
+            <TextField label="과제 내용 · 코드나 에러 · 붙여넣기" multiline name="assignment" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} className="h-[130px] text-[13px] leading-[1.6]" />
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <p className="text-label text-ink-muted">과제 노션이나 Git을 올려보세요</p>
+              {attachments("assignmentFiles", "+ 파일 업로드", {
+                uploadOnNewLine: true,
+                children: (
+                  <div className="flex w-full min-w-0 gap-1.5 sm:w-auto sm:flex-1">
+                    <TextField size="sm" className="min-w-0" name="assignmentLink" aria-label="Git 링크" placeholder={part === "프론트엔드" ? "GitHub 링크 · github.com/아이디/저장소" : "피그마·GitHub 링크"} value={link} aria-invalid={Boolean(linkError)} aria-describedby={linkError ? "assignment-link-error" : undefined} onChange={(event) => { setLink(event.target.value); setLinkError(""); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addLink(); } }} />
+                    <Button variant="secondary" size="sm" onClick={addLink}>추가</Button>
+                  </div>
+                ),
+              })}
+              {linkError && <p id="assignment-link-error" role="alert" className="text-label text-tint-red-ink">{linkError}</p>}
+            </div>
+            {part === "프론트엔드" && (
+              <TextField label="받은 코드리뷰 · 짝이 남긴 코멘트 3개" multiline name="codeReview" value={materials.codeReview} onChange={(event) => updateField("codeReview", event.target.value)} className="h-[98px]" />
+            )}
+          </>
+        ) : (
+          <p className="text-body-sm text-ink-subtle">
+            {assignmentStatus === "later"
+              ? `과제는 ${assignmentDueLabel}까지 따로 써요. 세션 회고만 먼저 끝내요.`
+              : "이번 주 과제는 없어요."}
+          </p>
+        )}
       </MaterialSection>
 
       <TextField label="고민 메모 · 선택" multiline name="memo" placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
