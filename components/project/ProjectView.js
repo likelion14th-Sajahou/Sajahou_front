@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { MOCK_TODAY } from "@/lib/mock/projects";
 import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
 import ProjectSidebar from "./ProjectSidebar";
@@ -34,6 +35,14 @@ export default function ProjectView({ project, storyCards, competencies, initial
       recordIds.includes(record.id) ? [index + 1] : [],
     ),
   }));
+
+  function addRecord(record) {
+    setHasRecordChanged(true);
+    setProjectRecords((current) => [
+      { id: crypto.randomUUID(), ...MOCK_TODAY, ...record },
+      ...current,
+    ]);
+  }
 
   function saveRecord(recordId, changes) {
     const record = projectRecords.find(({ id }) => id === recordId);
@@ -88,6 +97,7 @@ export default function ProjectView({ project, storyCards, competencies, initial
           project={project}
           records={records}
           initialIsAdding={initialIsAdding}
+          onAddRecord={addRecord}
           onSaveRecord={saveRecord}
           onDeleteRecord={deleteRecord}
         />

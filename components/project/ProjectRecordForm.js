@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import AttachmentChip from "./AttachmentChip";
+import RecordFieldsGrid from "./RecordFieldsGrid";
 import RecordFormTitle from "./RecordFormTitle";
 import { RECORD_FIELDS } from "./recordFields";
 
@@ -34,21 +34,13 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <RecordFormTitle id="record-form-title">기록 수정</RecordFormTitle>
         <p className="text-label leading-[19.5px] text-ink-subtle">고칠 칸을 바꾸고 저장하세요.</p>
-        <div className="grid grid-cols-2 gap-3">
-          {RECORD_FIELDS.map(({ key, formLabel }, index) => (
-            <div key={key} className={index === 0 ? "col-span-2" : ""}>
-              <TextField
-                label={formLabel}
-                name={key}
-                multiline
-                rows={2}
-                defaultValue={record[key]}
-                autoFocus={index === 0}
-                className="h-[76px]"
-              />
-            </div>
-          ))}
-        </div>
+        <RecordFieldsGrid
+          getFieldProps={({ key, formLabel }, index) => ({
+            label: formLabel,
+            defaultValue: record[key],
+            autoFocus: index === 0,
+          })}
+        />
         {attachments.length > 0 && (
           <div className="flex flex-col gap-1.5">
             <p className="text-label text-ink-muted">함께 저장되는 자료</p>

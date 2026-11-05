@@ -87,6 +87,7 @@ export default function ProjectRecords({
   project,
   records,
   initialIsAdding,
+  onAddRecord,
   onSaveRecord,
   onDeleteRecord,
 }) {
@@ -124,7 +125,13 @@ export default function ProjectRecords({
           }}
         />
       ) : isAdding ? (
-        <ProjectRecordAddForm onCancel={closeAddForm} />
+        <ProjectRecordAddForm
+          onCancel={closeAddForm}
+          onSave={(record) => {
+            onAddRecord(record);
+            closeAddForm();
+          }}
+        />
       ) : (
         <div className="flex items-center gap-2">
           <Button onClick={() => setIsAdding(true)}>+ 기록 추가</Button>
