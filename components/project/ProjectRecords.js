@@ -5,6 +5,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import AttachmentChip from "./AttachmentChip";
+import ProjectRecordAddForm from "./ProjectRecordAddForm";
 import ProjectRecordForm from "./ProjectRecordForm";
 import { RECORD_FIELDS } from "./recordFields";
 
@@ -82,9 +83,33 @@ function RecordItem({ record, isLast, onEdit, onDelete }) {
   );
 }
 
-export default function ProjectRecords({ project, records, onSaveRecord, onDeleteRecord }) {
-  const { id, status } = project;
+export default function ProjectRecords({
+  project,
+  records,
+  initialIsAdding,
+  onAddRecord,
+  onSaveRecord,
+  onDeleteRecord,
+}) {
+  const { status } = project;
   const [editingRecordId, setEditingRecordId] = useState();
+  const [isAdding, setIsAdding] = useState(initialIsAdding);
+
+  function closeAddForm() {
+    setIsAdding(false);
+
+    // 주소로 연 폼이 새로고침할 때 다시 열리지 않도록 record 값을 지운다.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("record")) {
+      url.searchParams.delete("record");
+      window.history.replaceState(null, "", url);
+    }
+  }
+
+  function startEditing(recordId) {
+    closeAddForm();
+    setEditingRecordId(recordId);
+  }
   const editingRecord = records.find((record) => record.id === editingRecordId);
 
   return (
@@ -99,9 +124,17 @@ export default function ProjectRecords({ project, records, onSaveRecord, onDelet
             setEditingRecordId(undefined);
           }}
         />
+      ) : isAdding ? (
+        <ProjectRecordAddForm
+          onCancel={closeAddForm}
+          onSave={(record) => {
+            onAddRecord(record);
+            closeAddForm();
+          }}
+        />
       ) : (
         <div className="flex items-center gap-2">
-          <Button href={`/projects/${id}?record=new`} scroll={false}>+ 기록 추가</Button>
+          <Button onClick={() => setIsAdding(true)}>+ 기록 추가</Button>
           <p className="text-label leading-[19.5px] text-ink-subtle">{ADD_RECORD_HINTS[status]}</p>
         </div>
       )}
@@ -112,7 +145,7 @@ export default function ProjectRecords({ project, records, onSaveRecord, onDelet
               key={record.id}
               record={record}
               isLast={index === records.length - 1}
-              onEdit={setEditingRecordId}
+              onEdit={startEditing}
               onDelete={(recordId) => {
                 onDeleteRecord(recordId);
                 setEditingRecordId((current) => (current === recordId ? undefined : current));

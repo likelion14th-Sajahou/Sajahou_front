@@ -5,7 +5,7 @@ export const metadata = {
   title: "프로젝트 | 사자록",
 };
 
-export default function ProjectPage({ params }) {
+export default function ProjectPage({ params, searchParams }) {
   return (
     <main className="mx-auto w-full max-w-[1120px] px-4 pt-6 pb-20">
       <Suspense
@@ -15,7 +15,7 @@ export default function ProjectPage({ params }) {
           </p>
         }
       >
-        <ProjectContent params={params} />
+        <ProjectContent params={params} searchParams={searchParams} />
       </Suspense>
     </main>
   );

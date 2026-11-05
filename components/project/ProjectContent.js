@@ -4,8 +4,9 @@ import { MOCK_PROJECTS } from "@/lib/mock/projects";
 import { MOCK_STORY_CARDS } from "@/lib/mock/storyCards";
 import ProjectView from "./ProjectView";
 
-export default async function ProjectContent({ params }) {
+export default async function ProjectContent({ params, searchParams }) {
   const { id } = await params;
+  const { record } = await searchParams;
   const project = MOCK_PROJECTS.find((item) => item.id === id);
 
   // 프로젝트 API가 없어 홈에서 새로 만든 프로젝트는 아직 이 목록에 없다.
@@ -26,5 +27,12 @@ export default async function ProjectContent({ params }) {
     MOCK_STORY_CARDS.find(({ id: storyCardId }) => storyCardId === cardId),
   );
 
-  return <ProjectView project={project} storyCards={storyCards} competencies={COMPETENCIES} />;
+  return (
+    <ProjectView
+      project={project}
+      storyCards={storyCards}
+      competencies={COMPETENCIES}
+      initialIsAdding={record === "new"}
+    />
+  );
 }
