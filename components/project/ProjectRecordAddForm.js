@@ -6,6 +6,7 @@ import Card from "@/components/ui/Card";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import { MOCK_RECORD_EXAMPLE } from "@/lib/mock/projects";
+import ProjectRecordQuestions from "./ProjectRecordQuestions";
 import RecordAttachmentsField from "./RecordAttachmentsField";
 import RecordFieldsGrid from "./RecordFieldsGrid";
 import RecordFormTitle from "./RecordFormTitle";
@@ -16,6 +17,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
   const [fields, setFields] = useState({});
   const [isWritingFields, setIsWritingFields] = useState(false);
   const [notice, setNotice] = useState("");
+  const [step, setStep] = useState("materials");
 
   function saveAsWritten() {
     const trimmedFields = Object.fromEntries(
@@ -41,7 +43,31 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
     // 첨부와 메모가 모두 비어 있으면 AI 정리로 넘어가지 않는다(H-12).
     if (attachments.length === 0 && !memo.trim()) {
       setNotice("자료를 첨부하거나 메모를 적어 주세요.");
+      return;
     }
+
+    setStep("questions");
+  }
+
+  if (step === "questions") {
+    return (
+      <Card as="section" size="md" aria-labelledby="record-add-title">
+        <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
+        <div className="pt-4">
+          <ProjectRecordQuestions attachments={attachments} onComplete={() => setStep("review")} />
+        </div>
+      </Card>
+    );
+  }
+
+  // 정리 결과 확인은 다음 작업에서 이어진다.
+  if (step === "review") {
+    return (
+      <Card as="section" size="md" aria-labelledby="record-add-title">
+        <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
+        <p role="status" className="pt-4 text-body-sm text-ink-subtle">정리 결과를 준비하고 있어요.</p>
+      </Card>
+    );
   }
 
   return (
