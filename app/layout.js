@@ -1,5 +1,6 @@
 import { Gowun_Dodum } from "next/font/google";
 import Header from "@/components/layout/Header";
+import ScrollToTopOnNavigate from "@/components/layout/ScrollToTopOnNavigate";
 import { MOCK_USER } from "@/lib/mock/user";
 import "./globals.css";
 
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
       className={`${gowunDodum.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <ScrollToTopOnNavigate />
         <Header userName={MOCK_USER.name} userPart={MOCK_USER.part} />
         {children}
       </body>
