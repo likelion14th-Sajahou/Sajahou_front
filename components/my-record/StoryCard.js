@@ -4,12 +4,18 @@ import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import CompetencyTags from "./CompetencyTags";
 import { STORY_CARD_TYPES } from "./storyCardTypes";
 
-export default function StoryCard({ card, onOpen }) {
+export default function StoryCard({ card, isHighlighted = false, onOpen }) {
   const { type, whenLabel, shape, color, title, tags, evidence } = card;
   const { label, tone } = STORY_CARD_TYPES[type];
 
   return (
-    <Card as="article" size="sm" className="relative flex h-full flex-col items-start gap-2.5 border border-transparent">
+    <Card
+      as="article"
+      size="sm"
+      className={`relative flex h-full flex-col items-start gap-2.5 border border-transparent ${
+        isHighlighted ? "shadow-[0_0_0_3px_var(--color-accent)]" : ""
+      }`}
+    >
       <div className="flex w-full items-center gap-2">
         <ShapeCharacter shape={shape} color={color} face="none" size={30} />
         <Badge tone={tone}>{label}</Badge>

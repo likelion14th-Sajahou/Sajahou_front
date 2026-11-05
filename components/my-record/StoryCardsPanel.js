@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
 import Modal from "@/components/ui/Modal";
@@ -16,6 +16,8 @@ const TYPE_FILTERS = [
   { id: "project", label: "프로젝트" },
 ];
 
+const HIGHLIGHT_DURATION_MS = 3000;
+
 const FIELD_CLASSES =
   "h-[38px] rounded-[14px] border border-transparent bg-canvas text-body-sm text-ink";
 
@@ -30,6 +32,7 @@ export default function StoryCardsPanel({
   competencies,
   week,
   initialCardId,
+  initialHighlightedCardId,
   onDeleteCard,
   onUpdateCard,
 }) {
@@ -37,7 +40,23 @@ export default function StoryCardsPanel({
   const [competency, setCompetency] = useState(ALL);
   const [search, setSearch] = useState("");
   const [openCardId, setOpenCardId] = useState(initialCardId);
+  const [highlightedCardId, setHighlightedCardId] = useState(initialHighlightedCardId);
   const openCard = cards.find(({ id }) => id === openCardId);
+
+  // 자소서 매칭에서 넘어온 카드로 스크롤하고, 잠깐 뒤 강조를 지운다(A-09).
+  useEffect(() => {
+    if (!highlightedCardId) {
+      return undefined;
+    }
+
+    document
+      .getElementById(`story-card-${highlightedCardId}`)
+      ?.scrollIntoView({ block: "center" });
+
+    const timer = setTimeout(() => setHighlightedCardId(undefined), HIGHLIGHT_DURATION_MS);
+
+    return () => clearTimeout(timer);
+  }, [highlightedCardId]);
 
   function closeCard() {
     setOpenCardId(undefined);
@@ -117,7 +136,11 @@ export default function StoryCardsPanel({
       )}
 
       {visibleCards.length > 0 ? (
-        <StoryCardList cards={visibleCards} onOpenCard={setOpenCardId} />
+        <StoryCardList
+          cards={visibleCards}
+          highlightedCardId={highlightedCardId}
+          onOpenCard={setOpenCardId}
+        />
       ) : (
         <p role="status" className="rounded-[20px] border border-dashed border-[#d7d3cb] p-6 text-center text-body text-ink-subtle">
           조건에 맞는 카드가 없어요.

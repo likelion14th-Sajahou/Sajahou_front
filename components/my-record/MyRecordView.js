@@ -8,7 +8,13 @@ import StoryCardsPanel from "./StoryCardsPanel";
 
 // 두 탭이 같은 카드 목록을 쓰도록 여기서 관리한다.
 // 카드 API가 없어 수정과 삭제는 화면 안에서만 반영되고, 새로고침하면 되돌아온다.
-export default function MyRecordView({ record, activeTab, week, initialCardId }) {
+export default function MyRecordView({
+  record,
+  activeTab,
+  week,
+  initialCardId,
+  initialHighlightedCardId,
+}) {
   const { currentWeek, competencies, storyCards, footprintSections, footprintWeeks } = record;
   const [cards, setCards] = useState(storyCards);
   // cacheComponents가 켜져 있으면 다른 페이지에 다녀와도 상태가 유지된다.
@@ -45,11 +51,12 @@ export default function MyRecordView({ record, activeTab, week, initialCardId })
       )}
       {activeTab === "cards" && (
         <StoryCardsPanel
-          key={initialCardId ? bfcacheId : "story-cards"}
+          key={initialCardId || initialHighlightedCardId ? bfcacheId : "story-cards"}
           cards={cards}
           competencies={competencies}
           week={week}
           initialCardId={initialCardId}
+          initialHighlightedCardId={initialHighlightedCardId}
           onDeleteCard={deleteCard}
           onUpdateCard={updateCard}
         />
