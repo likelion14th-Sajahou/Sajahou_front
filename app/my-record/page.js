@@ -21,7 +21,7 @@ export default function MyRecordPage({ searchParams }) {
       >
         <MyRecordContent
           searchParams={searchParams}
-          storyCardCount={MOCK_MY_RECORD.storyCardCount}
+          record={MOCK_MY_RECORD}
         />
       </Suspense>
     </main>
