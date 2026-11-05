@@ -33,11 +33,12 @@ export default function StoryCardsPanel({
   week,
   initialCardId,
   initialHighlightedCardId,
+  initialCompetency = ALL,
   onDeleteCard,
   onUpdateCard,
 }) {
   const [type, setType] = useState(ALL);
-  const [competency, setCompetency] = useState(ALL);
+  const [competency, setCompetency] = useState(initialCompetency);
   const [search, setSearch] = useState("");
   const [openCardId, setOpenCardId] = useState(initialCardId);
   const [highlightedCardId, setHighlightedCardId] = useState(initialHighlightedCardId);

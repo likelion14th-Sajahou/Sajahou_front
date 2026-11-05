@@ -14,6 +14,7 @@ export default function MyRecordView({
   week,
   initialCardId,
   initialHighlightedCardId,
+  initialCompetency,
 }) {
   const { currentWeek, competencies, storyCards, footprintSections, footprintWeeks } = record;
   const [cards, setCards] = useState(storyCards);
@@ -51,12 +52,13 @@ export default function MyRecordView({
       )}
       {activeTab === "cards" && (
         <StoryCardsPanel
-          key={initialCardId || initialHighlightedCardId ? bfcacheId : "story-cards"}
+          key={initialCardId || initialHighlightedCardId || initialCompetency ? bfcacheId : "story-cards"}
           cards={cards}
           competencies={competencies}
           week={week}
           initialCardId={initialCardId}
           initialHighlightedCardId={initialHighlightedCardId}
+          initialCompetency={initialCompetency}
           onDeleteCard={deleteCard}
           onUpdateCard={updateCard}
         />
