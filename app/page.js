@@ -17,9 +17,9 @@ export default function HomePage() {
     <>
       <HomeHero userName={MOCK_USER.name} week={week} weekStatus={weekStatus} />
       <main className="mx-auto w-full max-w-[1120px] px-4 pt-2 pb-20">
-        <div className="grid grid-cols-[1.75fr_1fr] gap-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.75fr_1fr]">
           <StickerBoard count={stickerCount} stickers={visibleStickers} />
-          <div className="flex flex-col gap-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:flex lg:flex-col">
             <ProjectsCard initialProjects={projects} />
             <MatchingPromoCard />
           </div>

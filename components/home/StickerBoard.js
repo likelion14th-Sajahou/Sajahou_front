@@ -12,23 +12,24 @@ const LABEL_CLASSES = {
   upcoming: "text-ink-muted",
 };
 
-const ITEM_CLASSES = "flex w-[92px] flex-col items-center gap-1";
+const ITEM_CLASSES = "flex w-[72px] flex-col items-center gap-1 md:w-[92px]";
+const ICON_SIZE_CLASSES = "size-[54px] md:size-[70px]";
 
 function StickerIcon({ sticker }) {
   const { kind, week, title, shape, color } = sticker;
 
   if (kind === "current") {
     return (
-      <span className="flex size-[70px] items-center justify-center">
-        <Image src="/images/home/sticker-add.svg" alt="" width={58.982} height={58.982} />
+      <span className={`flex items-center justify-center ${ICON_SIZE_CLASSES}`}>
+        <Image src="/images/home/sticker-add.svg" alt="" width={58.982} height={58.982} className="size-[84.26%]" />
       </span>
     );
   }
 
   if (kind === "upcoming") {
     return (
-      <span className="flex size-[70px] items-center justify-center">
-        <Image src="/images/home/sticker-upcoming.svg" alt={`${title} 예정`} width={62.892} height={62.892} />
+      <span className={`flex items-center justify-center ${ICON_SIZE_CLASSES}`}>
+        <Image src="/images/home/sticker-upcoming.svg" alt={`${title} 예정`} width={62.892} height={62.892} className="size-[89.85%]" />
       </span>
     );
   }
@@ -38,6 +39,7 @@ function StickerIcon({ sticker }) {
       shape={shape}
       color={color}
       sticker
+      className={ICON_SIZE_CLASSES}
       label={`${week}주차 ${title} 스티커`}
     />
   );
