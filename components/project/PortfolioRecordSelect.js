@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import TextLink from "@/components/ui/TextLink";
 import RecordFormFooter from "./RecordFormFooter";
 
 function RecordOption({ record, isSelected, onToggle }) {
-  const { date, weekday, did, problem, attachments } = record;
+  const { date, weekday, did, problem, attachments, cardNumbers } = record;
   const title = [`${date}(${weekday})`, did].filter(Boolean).join(" · ");
   const summary = [problem, attachments.length > 0 && `첨부 ${attachments.length}개`]
     .filter(Boolean)
@@ -24,16 +25,23 @@ function RecordOption({ record, isSelected, onToggle }) {
         className="mt-[3px] mr-[3px] ml-1 size-[18px] shrink-0 cursor-pointer accent-ink"
       />
       <span className="flex min-w-0 flex-col">
-        <span className="text-body leading-6 text-ink">{title}</span>
+        <span className="flex flex-wrap items-center gap-1 text-body text-ink">
+          <span className="leading-6">{title}</span>
+          {cardNumbers.map((number) => (
+            <Badge key={number} tone="amber">카드 {number}에 쓰임</Badge>
+          ))}
+        </span>
         {summary && <span className="text-label leading-[19.5px] text-ink-subtle">{summary}</span>}
       </span>
     </label>
   );
 }
 
-export default function PortfolioRecordSelect({ records, onCancel, onNext }) {
-  // 처음 마칠 때는 모든 기록을 고른 채로 시작한다(H-16).
-  const [selectedIds, setSelectedIds] = useState(() => records.map(({ id }) => id));
+export default function PortfolioRecordSelect({ isFirstCard, cardNumber, records, onCancel, onNext }) {
+  // 아직 카드에 안 쓴 기록을 고른 채로 시작한다. 처음 마칠 때는 모든 기록이 여기에 해당한다(H-16, H-22).
+  const [selectedIds, setSelectedIds] = useState(() =>
+    records.filter(({ cardNumbers }) => cardNumbers.length === 0).map(({ id }) => id),
+  );
 
   function toggleRecord(recordId) {
     setSelectedIds((current) =>
@@ -46,11 +54,14 @@ export default function PortfolioRecordSelect({ records, onCancel, onNext }) {
   return (
     <Card as="section" size="md" aria-labelledby="portfolio-select-title" className="flex flex-col gap-4">
       <div>
-        <p className="text-label leading-[20.8px] text-accent-strong">1 / 3 · 기록 고르기</p>
+        <p className="text-label leading-[20.8px] text-accent-strong">
+          1 / 3 · 기록 고르기{!isFirstCard && ` · 대표 카드 ${cardNumber}번째`}
+        </p>
         <h2 id="portfolio-select-title" className="text-title leading-8 tracking-[-0.4px] text-ink">
-          포트폴리오에 넣을 기록 고르기
+          {isFirstCard ? "포트폴리오에 넣을 기록 고르기" : "새 대표 카드에 쓸 기록 고르기"}
         </h2>
         <p className="text-label leading-[19.5px] text-ink-subtle">
+          {!isFirstCard && "이미 카드에 쓴 기록도 다시 고를 수 있어요. 같은 기록에서 다른 장면을 꺼내도 돼요. "}
           고른 기록만 근거로 써요. 기록에 없는 성과는 넣지 않아요.
         </p>
       </div>

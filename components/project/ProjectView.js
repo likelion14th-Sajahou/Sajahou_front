@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Toast from "@/components/ui/Toast";
 import { MOCK_TODAY } from "@/lib/mock/projects";
 import ProjectPortfolio from "./ProjectPortfolio";
 import ProjectHeader from "./ProjectHeader";
@@ -25,6 +26,7 @@ export default function ProjectView({ project, storyCards, competencies, initial
   // 흐름을 연 시점의 bfcacheId를 기억해, 링크로 새로 들어오면 자동으로 프로젝트 화면으로 돌아간다.
   const [portfolioBfcacheId, setPortfolioBfcacheId] = useState(null);
   const isMakingPortfolio = portfolioBfcacheId === bfcacheId;
+  const [toastMessage, setToastMessage] = useState("");
   const [cards, setCards] = useState(() =>
     project.representativeCards.map(({ recordIds }, index) => ({
       ...storyCards[index],
@@ -102,15 +104,22 @@ export default function ProjectView({ project, storyCards, competencies, initial
         id: crypto.randomUUID(),
         type: "project",
         whenLabel: `${project.name} · ${MOCK_TODAY.date.split("/")[0]}월`,
-        shape: project.shape,
-        color: project.color,
+        shape: "sunFine",
+        color: "yellow",
         deletedRecordCount: 0,
         ...card,
       },
     ]);
+    // 처음 마칠 때는 완료 표시가 저장을 알려 주므로, 더 만들 때만 안내한다(H-18).
+    if (status === "done") {
+      setToastMessage(`대표 카드를 하나 더 저장했어요 (${cards.length + 1}장)`);
+    }
+
     setStatus("done");
     setHasRecordChanged(false);
     setPortfolioBfcacheId(null);
+    // 검토 화면 아래쪽에서 저장하므로, 바뀐 프로젝트 화면을 처음부터 보여 준다.
+    window.scrollTo(0, 0);
   }
 
   return (
@@ -124,6 +133,7 @@ export default function ProjectView({ project, storyCards, competencies, initial
         <div className="pt-6">
           <ProjectPortfolio
             project={currentProject}
+            cardNumber={cards.length + 1}
             records={records}
             competencies={competencies}
             onCancel={() => setPortfolioBfcacheId(null)}
@@ -150,10 +160,11 @@ export default function ProjectView({ project, storyCards, competencies, initial
             onDismissChangeNotice={() => setHasRecordChanged(false)}
             onUpdateCard={updateCard}
             onDeleteCard={deleteCard}
-            onFinishProject={() => setPortfolioBfcacheId(bfcacheId)}
+            onMakePortfolio={() => setPortfolioBfcacheId(bfcacheId)}
           />
         </div>
       )}
+      <Toast message={toastMessage} onDismiss={() => setToastMessage("")} />
     </>
   );
 }

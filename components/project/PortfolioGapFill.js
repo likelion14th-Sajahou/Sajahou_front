@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
-import { MOCK_PORTFOLIO_GAPS } from "@/lib/mock/projects";
+import { MOCK_PORTFOLIO_EXAMPLES, MOCK_PORTFOLIO_GAPS } from "@/lib/mock/projects";
 import AiQuestionForm from "./AiQuestionForm";
 import PortfolioArtifactRequest from "./PortfolioArtifactRequest";
 import SidebarTitle from "./SidebarTitle";
@@ -40,8 +40,9 @@ function GapList({ gaps, getStatus }) {
   );
 }
 
-export default function PortfolioGapFill({ initialFilled, onComplete }) {
+export default function PortfolioGapFill({ projectId, initialFilled, onComplete }) {
   const gaps = MOCK_PORTFOLIO_GAPS;
+  const examples = MOCK_PORTFOLIO_EXAMPLES[projectId];
   const [index, setIndex] = useState(0);
   const [filled, setFilled] = useState(initialFilled);
   const gap = gaps[index];
@@ -80,7 +81,7 @@ export default function PortfolioGapFill({ initialFilled, onComplete }) {
               category={<GapCategory gap={gap} />}
               progress={progress}
               question={gap.question}
-              exampleAttachments={gap.exampleAttachments}
+              exampleAttachments={examples[gap.id]}
               initialAttachments={filled[gap.id]}
               onSubmit={(attachments) => goNext({ ...filled, [gap.id]: attachments })}
               onSkip={() => goNext({ ...filled, [gap.id]: undefined })}
@@ -93,7 +94,7 @@ export default function PortfolioGapFill({ initialFilled, onComplete }) {
               source={gap.gap}
               question={gap.question}
               placeholder="확인할 수 있는 것만 적어 주세요"
-              exampleAnswer={gap.exampleAnswer}
+              exampleAnswer={examples[gap.id]}
               initialAnswer={filled[gap.id]}
               onAnswer={(answer) => goNext({ ...filled, [gap.id]: answer })}
               onSkip={() => goNext({ ...filled, [gap.id]: undefined })}

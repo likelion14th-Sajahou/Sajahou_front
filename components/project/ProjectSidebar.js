@@ -54,6 +54,7 @@ function RepresentativeCards({
   onDismissChangeNotice,
   onUpdateCard,
   onDeleteCard,
+  onAddCard,
 }) {
   const [openCardId, setOpenCardId] = useState();
   const openCard = cards.find(({ id }) => id === openCardId);
@@ -74,7 +75,7 @@ function RepresentativeCards({
         ))}
       </ol>
       <div className="pt-3.5">
-        <Button variant="secondary" className="w-full">+ 대표 카드 더 만들기</Button>
+        <Button variant="secondary" className="w-full" onClick={onAddCard}>+ 대표 카드 더 만들기</Button>
         <p className="pt-1.5 text-label leading-[19.5px] text-ink-subtle">
           회의나 발표가 끝날 때마다 새 기록으로 카드를 만들어 두면, 자소서 문항마다 다른 경험을 꺼내 쓸 수 있어요.
         </p>
@@ -103,8 +104,8 @@ function RepresentativeCards({
   );
 }
 
-export default function ProjectSidebar({ status, onFinishProject, ...cardProps }) {
+export default function ProjectSidebar({ status, onMakePortfolio, ...cardProps }) {
   return status === "done"
-    ? <RepresentativeCards {...cardProps} />
-    : <FinishProjectCard onFinish={onFinishProject} />;
+    ? <RepresentativeCards {...cardProps} onAddCard={onMakePortfolio} />
+    : <FinishProjectCard onFinish={onMakePortfolio} />;
 }

@@ -34,11 +34,22 @@ function ReviewTitle({ id, action, children }) {
 }
 
 export default function PortfolioReview({ project, records, filled, competencies, onBack, onSave }) {
+  const isFirstCard = project.status === "active";
   const attachmentCount = getPortfolioAttachments(records, filled).length;
   const [markdown, setMarkdown] = useState(() => buildPortfolioMarkdown(project, records, filled));
-  const [title, setTitle] = useState(MOCK_PORTFOLIO_CARD.title);
+  const [title, setTitle] = useState(() => {
+    if (isFirstCard) {
+      return MOCK_PORTFOLIO_CARD.first.title;
+    }
+
+    const did = records.find((record) => record.did)?.did;
+
+    return did ? `${project.name} · ${did} 경험` : "";
+  });
   const [fields, setFields] = useState(() => buildCardDraft(project, records, filled));
-  const [tags, setTags] = useState(MOCK_PORTFOLIO_CARD.tags);
+  const [tags, setTags] = useState(
+    isFirstCard ? MOCK_PORTFOLIO_CARD.first.tags : MOCK_PORTFOLIO_CARD.more.tags,
+  );
   const [copyNotice, setCopyNotice] = useState("");
 
   async function copyMarkdown() {
@@ -55,10 +66,7 @@ export default function PortfolioReview({ project, records, filled, competencies
       title: title.trim(),
       tags: competencies.filter((tag) => tags.includes(tag)),
       document: markdown,
-      evidence: [
-        `프로젝트 기록 ${records.length}개`,
-        ...(attachmentCount > 0 ? [`산출물 ${attachmentCount}개`] : []),
-      ].join(" · "),
+      evidence: `프로젝트 기록 ${records.length}개 · 포트폴리오`,
       summary: {
         situation: fields.situation.trim(),
         action: fields.action.trim(),
@@ -129,7 +137,7 @@ export default function PortfolioReview({ project, records, filled, competencies
           <RecordFormFooter gapClassName="gap-2">
             <TextLink onClick={onBack}>← 빈 곳 다시 채우기</TextLink>
             <Button variant="accent" className="ml-auto" disabled={!title.trim()} onClick={saveCard}>
-              대표 카드 저장하고 프로젝트 완료로 표시
+              {isFirstCard ? "대표 카드 저장하고 프로젝트 완료로 표시" : "대표 카드 저장"}
             </Button>
           </RecordFormFooter>
         </Card>
