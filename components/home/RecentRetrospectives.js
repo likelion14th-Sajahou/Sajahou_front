@@ -16,7 +16,7 @@ export default function RecentRetrospectives({ items }) {
           </TextLink>
         }
       />
-      <ul className="grid grid-cols-3 gap-3">
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
         {items.map(({ id, title, type, shape, color }) => (
           <li key={id}>
             <Card as={Link} href="/my-record" size="xs" className="flex h-full items-center gap-3">

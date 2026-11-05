@@ -10,8 +10,8 @@ export default function MatchingPromoCard() {
       <span aria-hidden="true">
         <ShapeCharacter shape="sunFine" color="yellow" size={150} className="absolute -top-[30px] -right-[34px]" />
         <ShapeCharacter shape="triangle" color="coral" size={44} className="absolute top-[18px] left-6 -rotate-12" />
-        <ShapeCharacter shape="circle" color="blue" face="none" size={28} className="absolute top-[30px] left-[140px]" />
-        <ShapeCharacter shape="square" color="green" size={40} className="absolute top-6 left-[186px] rotate-10" />
+        <ShapeCharacter shape="circle" color="blue" face="none" size={28} className="absolute top-[30px] left-[36%]" />
+        <ShapeCharacter shape="square" color="green" size={40} className="absolute top-6 right-[42%] rotate-10" />
       </span>
       <span className="relative text-title leading-[27px]">
         지원할 공고가
