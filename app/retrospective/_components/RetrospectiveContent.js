@@ -4,6 +4,7 @@ import RetrospectiveSteps from "./RetrospectiveSteps";
 import StartActions from "./StartActions";
 import PausedRetrospective from "./PausedRetrospective";
 import MaterialsContent from "./MaterialsContent";
+import AiQuestionsContent from "./AiQuestionsContent";
 
 export default async function RetrospectiveContent({ searchParams, retrospective }) {
   const { preview, step } = await searchParams;
@@ -13,6 +14,7 @@ export default async function RetrospectiveContent({ searchParams, retrospective
     : retrospective.status;
   if (status === "paused") return <PausedRetrospective week={week} />;
   if (step === "materials") return <MaterialsContent preview={preview} />;
+  if (step === "questions") return <AiQuestionsContent />;
 
   return (
     <>
