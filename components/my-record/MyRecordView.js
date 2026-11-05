@@ -6,7 +6,7 @@ import MyRecordTabs from "./MyRecordTabs";
 import StoryCardsPanel from "./StoryCardsPanel";
 
 // 두 탭이 같은 카드 목록을 쓰도록 여기서 관리한다.
-// 카드 API가 없어 삭제는 화면 안에서만 반영되고, 새로고침하면 되돌아온다.
+// 카드 API가 없어 수정과 삭제는 화면 안에서만 반영되고, 새로고침하면 되돌아온다.
 export default function MyRecordView({ record, activeTab, week, initialCardId }) {
   const { currentWeek, competencies, storyCards, footprintSections, footprintWeeks } = record;
   const [cards, setCards] = useState(storyCards);
@@ -19,6 +19,12 @@ export default function MyRecordView({ record, activeTab, week, initialCardId })
 
   function deleteCard(cardId) {
     setCards((current) => current.filter(({ id }) => id !== cardId));
+  }
+
+  function updateCard(cardId, changes) {
+    setCards((current) =>
+      current.map((card) => (card.id === cardId ? { ...card, ...changes } : card)),
+    );
   }
 
   return (
@@ -38,6 +44,7 @@ export default function MyRecordView({ record, activeTab, week, initialCardId })
           week={week}
           initialCardId={initialCardId}
           onDeleteCard={deleteCard}
+          onUpdateCard={updateCard}
         />
       )}
     </>

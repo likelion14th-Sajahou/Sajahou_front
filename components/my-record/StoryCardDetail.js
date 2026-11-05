@@ -5,17 +5,9 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
-import { getStoryCardDetail } from "@/lib/mock/storyCards";
 import CompetencyTags from "./CompetencyTags";
-import { STORY_CARD_TYPES } from "./storyCardTypes";
-
-const SUMMARY_FIELDS = [
-  { key: "situation", label: "상황" },
-  { key: "action", label: "행동" },
-  { key: "reason", label: "이유" },
-  { key: "result", label: "결과" },
-  { key: "learned", label: "배운 점" },
-];
+import StoryCardEditForm from "./StoryCardEditForm";
+import { STORY_CARD_TYPES, SUMMARY_FIELDS } from "./storyCardTypes";
 
 const RECAP_TEXT = {
   title: "회고록 전문",
@@ -102,13 +94,13 @@ function SummaryDetails({ summary }) {
   );
 }
 
-export default function StoryCardDetail({ card, titleId, onClose, onDelete }) {
-  const { type, whenLabel, shape, color, title, tags, evidence } = card;
+export default function StoryCardDetail({ card, competencies, titleId, onClose, onDelete, onUpdate }) {
+  const { type, whenLabel, shape, color, title, tags, evidence, document, summary } = card;
   const { label, tone } = STORY_CARD_TYPES[type];
-  const { document, summary } = getStoryCardDetail(card);
   const documentText = type === "project" ? PORTFOLIO_TEXT : RECAP_TEXT;
   const [copyNotice, setCopyNotice] = useState("");
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   async function copyDocument() {
     try {
@@ -117,6 +109,12 @@ export default function StoryCardDetail({ card, titleId, onClose, onDelete }) {
     } catch {
       setCopyNotice(COPY_FAILED_MESSAGE);
     }
+  }
+
+  function handleSave(changes) {
+    onUpdate(changes);
+    setCopyNotice("");
+    setIsEditing(false);
   }
 
   return (
@@ -134,55 +132,71 @@ export default function StoryCardDetail({ card, titleId, onClose, onDelete }) {
           ×
         </button>
       </div>
-      <h2 id={titleId} className="break-keep text-heading leading-[30.8px] tracking-[-0.44px]">
-        {title}
-      </h2>
-      <CompetencyTags tags={tags} />
-      <section className="w-full rounded-2xl border border-line px-4 py-3.5">
-        <div className="flex items-center justify-between">
-          <h3 className="text-body font-normal">{documentText.title}</h3>
-          <Button size="sm" onClick={copyDocument}>노션에 복사</Button>
-        </div>
-        {copyNotice && (
-          <p role="status" className="pt-2 text-label text-ink-subtle">{copyNotice}</p>
-        )}
-        <div className="pt-2">
-          {document
-            .split("\n")
-            .filter((line) => line.trim())
-            .map((line, index) => (
-              <DocumentLine key={index} line={line} />
-            ))}
-        </div>
-      </section>
-      <SummaryDetails summary={summary} />
-      <p className="flex w-full gap-2.5 rounded-[14px] bg-canvas px-3.5 py-3 text-[13.5px] leading-[21.6px]">
-        <span className="shrink-0">근거</span>
-        <span>{evidence}</span>
-      </p>
-      {isConfirmingDelete ? (
-        <div role="alert" className="flex w-full flex-col gap-2.5 rounded-2xl bg-[#fdecea] px-4 py-3.5">
-          <p className="text-body-sm">
-            이 카드를 지울까요?
-            <br />
-            그 주 스티커는 남고, 자소서 매칭에는 더 이상 쓰이지 않아요. 지운 카드는 되돌릴 수 없어요.
-          </p>
-          <div className="flex items-center justify-between gap-3.5 pt-1">
-            {/* 삭제 버튼이 사라져도 포커스를 잃지 않고, 안내가 화면에 보이도록 취소로 옮긴다. */}
-            <TextLink autoFocus onClick={() => setIsConfirmingDelete(false)}>
-              취소
-            </TextLink>
-            <Button variant="danger" onClick={onDelete}>지우기</Button>
+      {isEditing ? (
+        <>
+          <h2 id={titleId} className="sr-only">{title} 수정</h2>
+          <div className="w-full">
+            <StoryCardEditForm
+              card={card}
+              competencies={competencies}
+              onCancel={() => setIsEditing(false)}
+              onSave={handleSave}
+            />
           </div>
-        </div>
+        </>
       ) : (
-        <div className="flex w-full items-center justify-between gap-3.5 pt-1">
-          <TextLink variant="danger" onClick={() => setIsConfirmingDelete(true)}>삭제</TextLink>
-          <div className="flex gap-2">
-            <Button variant="secondary">수정</Button>
-            <Button onClick={onClose}>닫기</Button>
-          </div>
-        </div>
+        <>
+          <h2 id={titleId} className="break-keep text-heading leading-[30.8px] tracking-[-0.44px]">
+            {title}
+          </h2>
+          <CompetencyTags tags={tags} />
+          <section className="w-full rounded-2xl border border-line px-4 py-3.5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-body font-normal">{documentText.title}</h3>
+              <Button size="sm" onClick={copyDocument}>노션에 복사</Button>
+            </div>
+            {copyNotice && (
+              <p role="status" className="pt-2 text-label text-ink-subtle">{copyNotice}</p>
+            )}
+            <div className="pt-2">
+              {document
+                .split("\n")
+                .filter((line) => line.trim())
+                .map((line, index) => (
+                  <DocumentLine key={index} line={line} />
+                ))}
+            </div>
+          </section>
+          <SummaryDetails summary={summary} />
+          <p className="flex w-full gap-2.5 rounded-[14px] bg-canvas px-3.5 py-3 text-[13.5px] leading-[21.6px]">
+            <span className="shrink-0">근거</span>
+            <span>{evidence}</span>
+          </p>
+          {isConfirmingDelete ? (
+            <div role="alert" className="flex w-full flex-col gap-2.5 rounded-2xl bg-[#fdecea] px-4 py-3.5">
+              <p className="text-body-sm">
+                이 카드를 지울까요?
+                <br />
+                그 주 스티커는 남고, 자소서 매칭에는 더 이상 쓰이지 않아요. 지운 카드는 되돌릴 수 없어요.
+              </p>
+              <div className="flex items-center justify-between gap-3.5 pt-1">
+                {/* 삭제 버튼이 사라져도 포커스를 잃지 않고, 안내가 화면에 보이도록 취소로 옮긴다. */}
+                <TextLink autoFocus onClick={() => setIsConfirmingDelete(false)}>
+                  취소
+                </TextLink>
+                <Button variant="danger" onClick={onDelete}>지우기</Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex w-full items-center justify-between gap-3.5 pt-1">
+              <TextLink variant="danger" onClick={() => setIsConfirmingDelete(true)}>삭제</TextLink>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => setIsEditing(true)}>수정</Button>
+                <Button onClick={onClose}>닫기</Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

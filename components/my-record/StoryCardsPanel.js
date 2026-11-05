@@ -25,7 +25,14 @@ function matchesSearch({ title, tags, evidence }, search) {
   return target.toLowerCase().includes(search);
 }
 
-export default function StoryCardsPanel({ cards, competencies, week, initialCardId, onDeleteCard }) {
+export default function StoryCardsPanel({
+  cards,
+  competencies,
+  week,
+  initialCardId,
+  onDeleteCard,
+  onUpdateCard,
+}) {
   const [type, setType] = useState(ALL);
   const [competency, setCompetency] = useState(ALL);
   const [search, setSearch] = useState("");
@@ -125,9 +132,11 @@ export default function StoryCardsPanel({ cards, competencies, week, initialCard
         {openCard && (
           <StoryCardDetail
             card={openCard}
+            competencies={competencies}
             titleId="story-card-title"
             onClose={closeCard}
             onDelete={deleteOpenCard}
+            onUpdate={(changes) => onUpdateCard(openCardId, changes)}
           />
         )}
       </Modal>
