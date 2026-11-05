@@ -7,8 +7,10 @@ import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import { MOCK_RECORD_EXAMPLE } from "@/lib/mock/projects";
 import ProjectRecordQuestions from "./ProjectRecordQuestions";
+import ProjectRecordReview from "./ProjectRecordReview";
 import RecordAttachmentsField from "./RecordAttachmentsField";
 import RecordFieldsGrid from "./RecordFieldsGrid";
+import RecordFormFooter from "./RecordFormFooter";
 import RecordFormTitle from "./RecordFormTitle";
 
 export default function ProjectRecordAddForm({ onCancel, onSave }) {
@@ -19,7 +21,17 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
   const [notice, setNotice] = useState("");
   const [step, setStep] = useState("materials");
 
-  function saveAsWritten() {
+  function getFieldValueProps(key) {
+    return {
+      value: fields[key] ?? "",
+      onChange: (event) => {
+        setFields((current) => ({ ...current, [key]: event.target.value }));
+        setNotice("");
+      },
+    };
+  }
+
+  function saveRecord() {
     const trimmedFields = Object.fromEntries(
       Object.entries(fields).map(([key, value]) => [key, value.trim()]),
     );
@@ -46,93 +58,95 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
       return;
     }
 
+    setNotice("");
     setStep("questions");
   }
 
-  if (step === "questions") {
-    return (
-      <Card as="section" size="md" aria-labelledby="record-add-title">
-        <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
-        <div className="pt-4">
-          <ProjectRecordQuestions attachments={attachments} onComplete={() => setStep("review")} />
-        </div>
-      </Card>
-    );
+  // 실제로는 AI가 자료와 답변을 정리한다. 목업에서는 답변을 해당 칸에 그대로 넣는다.
+  function showReview(answers) {
+    setFields((current) => ({ ...current, ...answers }));
+    setStep("review");
   }
 
-  // 정리 결과 확인은 다음 작업에서 이어진다.
-  if (step === "review") {
-    return (
-      <Card as="section" size="md" aria-labelledby="record-add-title">
-        <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
-        <p role="status" className="pt-4 text-body-sm text-ink-subtle">정리 결과를 준비하고 있어요.</p>
-      </Card>
-    );
+  function returnToMaterials() {
+    // 정리된 글이 보이지 않게 남아 있지 않도록, 내용이 있으면 5칸을 펼쳐 둔다.
+    setIsWritingFields((current) => current || Object.values(fields).some((value) => value.trim()));
+    setNotice("");
+    setStep("materials");
   }
 
   return (
     <Card as="section" size="md" aria-labelledby="record-add-title">
-      <div className="flex flex-col items-start gap-4">
-        <div className="w-full">
-          <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
-        </div>
-        <div className="w-full">
-          <RecordAttachmentsField
+      <div className="flex flex-col gap-4">
+        <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
+        {step === "questions" && (
+          <ProjectRecordQuestions attachments={attachments} onComplete={showReview} />
+        )}
+        {step === "review" && (
+          <ProjectRecordReview
             attachments={attachments}
-            onChange={(next) => {
-              setAttachments(next);
-              setNotice("");
-            }}
-          />
-        </div>
-        <TextField
-          label={
-            <>
-              짧은 메모 <span className="text-ink-subtle">· 대충 써도 돼요</span>
-            </>
-          }
-          multiline
-          rows={2}
-          placeholder="예) 11/3 기획 회의. 홈 화면 구성 논의. 나는 시안 2개 준비"
-          value={memo}
-          onChange={(event) => {
-            setMemo(event.target.value);
-            setNotice("");
-          }}
-        />
-        <TextLink onClick={() => setIsWritingFields((current) => !current)}>
-          {isWritingFields ? "직접 쓰기 접기" : "5칸 직접 채우기"}
-        </TextLink>
-        {isWritingFields && (
-          <RecordFieldsGrid
-            getFieldProps={({ key, formLabel, placeholder }) => ({
-              label: (
-                <>
-                  {formLabel} <span className="text-ink-subtle">· 선택</span>
-                </>
-              ),
-              placeholder,
-              value: fields[key] ?? "",
-              onChange: (event) => {
-                setFields((current) => ({ ...current, [key]: event.target.value }));
-                setNotice("");
-              },
-            })}
+            fields={fields}
+            getFieldValueProps={getFieldValueProps}
+            notice={notice}
+            onBack={returnToMaterials}
+            onSave={saveRecord}
           />
         )}
-        {notice && <p role="alert" className="text-label text-tint-red-ink">{notice}</p>}
-        <div className="w-full pt-1">
-          <div className="flex items-center gap-3.5 border-t border-line pt-4">
-            <TextLink onClick={onCancel}>취소</TextLink>
-            <TextLink onClick={fillExample}>예시 자료 넣기</TextLink>
-            <div className="ml-auto flex gap-2">
-              {isWritingFields && (
-                <Button variant="secondary" onClick={saveAsWritten}>이대로 저장</Button>
-              )}
-              <Button onClick={startAiSummary}>AI와 정리하기 →</Button>
+        {step === "materials" && (
+          <div className="flex flex-col items-start gap-4">
+            <div className="w-full">
+              <RecordAttachmentsField
+                attachments={attachments}
+                onChange={(next) => {
+                  setAttachments(next);
+                  setNotice("");
+                }}
+              />
             </div>
+            <TextField
+              label={
+                <>
+                  짧은 메모 <span className="text-ink-subtle">· 대충 써도 돼요</span>
+                </>
+              }
+              multiline
+              rows={2}
+              placeholder="예) 11/3 기획 회의. 홈 화면 구성 논의. 나는 시안 2개 준비"
+              value={memo}
+              onChange={(event) => {
+                setMemo(event.target.value);
+                setNotice("");
+              }}
+            />
+            <TextLink onClick={() => setIsWritingFields((current) => !current)}>
+              {isWritingFields ? "직접 쓰기 접기" : "5칸 직접 채우기"}
+            </TextLink>
+            {isWritingFields && (
+              <RecordFieldsGrid
+                getFieldProps={({ key, formLabel, placeholder }) => ({
+                  label: (
+                    <>
+                      {formLabel} <span className="text-ink-subtle">· 선택</span>
+                    </>
+                  ),
+                  placeholder,
+                  ...getFieldValueProps(key),
+                })}
+              />
+            )}
+            {notice && <p role="alert" className="text-label text-tint-red-ink">{notice}</p>}
+            <RecordFormFooter>
+              <TextLink onClick={onCancel}>취소</TextLink>
+              <TextLink onClick={fillExample}>예시 자료 넣기</TextLink>
+              <div className="ml-auto flex gap-2">
+                {isWritingFields && (
+                  <Button variant="secondary" onClick={saveRecord}>이대로 저장</Button>
+                )}
+                <Button onClick={startAiSummary}>AI와 정리하기 →</Button>
+              </div>
+            </RecordFormFooter>
           </div>
-        </div>
+        )}
       </div>
     </Card>
   );

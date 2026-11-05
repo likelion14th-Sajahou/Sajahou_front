@@ -53,7 +53,7 @@ export default function ProjectRecordQuestions({ attachments, onComplete }) {
       return;
     }
 
-    goNext({ ...answers, [question.id]: answer.trim() });
+    goNext({ ...answers, [question.fieldKey]: answer.trim() });
   }
 
   return (
