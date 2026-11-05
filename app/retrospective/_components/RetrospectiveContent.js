@@ -6,6 +6,7 @@ import PausedRetrospective from "./PausedRetrospective";
 import MaterialsContent from "./MaterialsContent";
 import AiQuestionsContent from "./AiQuestionsContent";
 import ReviewContent from "./ReviewContent";
+import CompleteContent from "./CompleteContent";
 import { MOCK_REVIEW_DRAFT } from "@/lib/mock/retrospective";
 
 export default async function RetrospectiveContent({ searchParams, retrospective }) {
@@ -18,6 +19,7 @@ export default async function RetrospectiveContent({ searchParams, retrospective
   if (step === "materials") return <MaterialsContent preview={preview} />;
   if (step === "questions") return <AiQuestionsContent key={preview} initialComplete={preview === "questions-complete"} />;
   if (step === "review") return <ReviewContent initialDraft={MOCK_REVIEW_DRAFT} />;
+  if (step === "complete") return <CompleteContent week={week} initialDraft={MOCK_REVIEW_DRAFT} />;
 
   return (
     <>

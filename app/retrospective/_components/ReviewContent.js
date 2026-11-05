@@ -8,6 +8,7 @@ import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import RetrospectiveSteps from "./RetrospectiveSteps";
+import { useRetrospectivePreview } from "./RetrospectivePreview";
 
 const STORY_FIELDS = [
   { name: "title", label: "제목" },
@@ -17,6 +18,7 @@ const STORY_FIELDS = [
 ];
 
 export default function ReviewContent({ initialDraft }) {
+  const { setCompletedDraft } = useRetrospectivePreview();
   const [draft, setDraft] = useState(initialDraft);
   const [notice, setNotice] = useState("");
 
@@ -110,7 +112,7 @@ export default function ReviewContent({ initialDraft }) {
               <TextLink href="/retrospective?step=questions&preview=questions-complete">← 질문으로</TextLink>
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 수정한 내용이 사라져요.")}>나중에 이어쓰기</Button>
-                <Button variant="accent" onClick={() => setNotice("사자록 저장은 준비 중이에요. 수정한 회고록은 복사해서 보관해 주세요.")}>저장하고 사자록에 추가</Button>
+                <Button variant="accent" href="/retrospective?step=complete" onClick={() => setCompletedDraft(draft)}>저장하고 사자록에 추가</Button>
               </div>
             </div>
           </div>

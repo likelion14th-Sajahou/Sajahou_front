@@ -12,9 +12,10 @@ const PARTS = ["기획·디자인", "프론트엔드", "백엔드"];
 export default function RetrospectivePreview({ initialPart, children }) {
   const [part, setPart] = useState(initialPart);
   const [assignmentStatus, setAssignmentStatus] = useState("record");
+  const [completedDraft, setCompletedDraft] = useState(null);
 
   return (
-    <RetrospectivePreviewContext value={{ part, setPart, assignmentStatus, setAssignmentStatus }}>
+    <RetrospectivePreviewContext value={{ part, setPart, assignmentStatus, setAssignmentStatus, completedDraft, setCompletedDraft }}>
       {children}
     </RetrospectivePreviewContext>
   );
