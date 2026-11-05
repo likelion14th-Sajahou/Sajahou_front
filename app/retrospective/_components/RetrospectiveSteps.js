@@ -24,7 +24,7 @@ export default function RetrospectiveSteps({ currentStep = 0 }) {
             <ShapeCharacter
               shape={shape}
               size={index === currentStep ? 56 : index < currentStep ? 46 : size === 56 ? 44 : size}
-              color={index <= currentStep ? (index === 0 ? "blue" : index === 2 ? "peach" : "yellow") : color}
+              color={index <= currentStep ? (index === 0 ? "blue" : index === 2 ? "peach" : index === 3 ? "coral" : "yellow") : color}
               face={index <= currentStep ? "smile" : face}
               cropped
               className={`relative max-w-none shrink-0 ${index === currentStep ? "max-sm:translate-x-1.5 max-sm:translate-y-1.5" : index > currentStep ? "opacity-90" : ""}`}

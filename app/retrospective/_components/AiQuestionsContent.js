@@ -48,7 +48,6 @@ export default function AiQuestionsContent({ initialComplete = false }) {
               questions={MOCK_AI_QUESTIONS}
               responses={responses}
               onReturn={() => { setIsComplete(false); setNotice(""); }}
-              onDraft={() => setNotice("초안 생성은 준비 중이에요. 답변은 현재 화면에서만 유지돼요.")}
             />
           ) : (
             <Card as="section" size="md" className="min-w-0 rounded-[28px]" aria-labelledby="ai-question-title">
