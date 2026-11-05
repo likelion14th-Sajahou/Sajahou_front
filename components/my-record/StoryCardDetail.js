@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
@@ -14,36 +17,53 @@ const SUMMARY_FIELDS = [
   { key: "learned", label: "배운 점" },
 ];
 
-function DocumentBlock({ block }) {
-  const { kind, text, order } = block;
+const RECAP_TEXT = {
+  title: "회고록 전문",
+  copied: "회고록을 복사했어요. 노션에 붙여 넣어 주세요.",
+};
 
-  if (kind === "title") {
-    return <p className="text-[15.5px] leading-[27.125px]">{text}</p>;
+const PORTFOLIO_TEXT = {
+  title: "포트폴리오 전문",
+  copied: "포트폴리오를 복사했어요. 노션에 붙여 넣어 주세요.",
+};
+
+const COPY_FAILED_MESSAGE = "복사하지 못했어요. 브라우저의 클립보드 권한을 확인한 뒤 다시 시도해 주세요.";
+
+// 회고록 Markdown을 줄 단위로 읽어 시안의 글자 크기로 표시한다.
+function DocumentLine({ line }) {
+  const numbered = line.match(/^(\d+)\. (.*)$/);
+
+  if (line.startsWith("#### ")) {
+    return <p className="pt-2 text-body-sm leading-[24.5px]">{line.slice(5)}</p>;
   }
 
-  if (kind === "section") {
-    return <p className="pt-2.5 text-[14.5px] leading-[25.375px]">{text}</p>;
+  if (line.startsWith("### ")) {
+    return <p className="pt-2.5 text-[14.5px] leading-[25.375px]">{line.slice(4)}</p>;
   }
 
-  if (kind === "subheading") {
-    return <p className="pt-2 text-body-sm leading-[24.5px]">{text}</p>;
+  if (line.startsWith("## ")) {
+    return <p className="text-[15.5px] leading-[27.125px]">{line.slice(3)}</p>;
   }
 
-  if (kind === "number") {
+  if (numbered) {
     return (
       <p className="relative pl-5 text-[14.5px] leading-[25.375px]">
-        <span className="absolute left-0.5 text-label leading-[22.75px] text-accent-strong">{order}</span>
-        {text}
+        <span className="absolute left-0.5 text-label leading-[22.75px] text-accent-strong">{numbered[1]}</span>
+        {numbered[2]}
       </p>
     );
   }
 
-  return (
-    <p className="relative pl-3.5 text-[14.5px] leading-[25.375px]">
-      <span className="absolute left-[3px] text-accent-strong">·</span>
-      {text}
-    </p>
-  );
+  if (line.startsWith("- ")) {
+    return (
+      <p className="relative pl-3.5 text-[14.5px] leading-[25.375px]">
+        <span className="absolute left-[3px] text-accent-strong">·</span>
+        {line.slice(2)}
+      </p>
+    );
+  }
+
+  return <p className="text-[14.5px] leading-[25.375px]">{line}</p>;
 }
 
 function SummaryDetails({ summary }) {
@@ -86,6 +106,17 @@ export default function StoryCardDetail({ card, titleId, onClose }) {
   const { type, whenLabel, shape, color, title, tags, evidence } = card;
   const { label, tone } = STORY_CARD_TYPES[type];
   const { document, summary } = getStoryCardDetail(card);
+  const documentText = type === "project" ? PORTFOLIO_TEXT : RECAP_TEXT;
+  const [copyNotice, setCopyNotice] = useState("");
+
+  async function copyDocument() {
+    try {
+      await navigator.clipboard.writeText(document);
+      setCopyNotice(documentText.copied);
+    } catch {
+      setCopyNotice(COPY_FAILED_MESSAGE);
+    }
+  }
 
   return (
     <div className="flex flex-col items-start gap-3.5">
@@ -108,15 +139,19 @@ export default function StoryCardDetail({ card, titleId, onClose }) {
       <CompetencyTags tags={tags} />
       <section className="w-full rounded-2xl border border-line px-4 py-3.5">
         <div className="flex items-center justify-between">
-          <h3 className="text-body font-normal">
-            {type === "project" ? "포트폴리오 전문" : "회고록 전문"}
-          </h3>
-          <Button size="sm">노션에 복사</Button>
+          <h3 className="text-body font-normal">{documentText.title}</h3>
+          <Button size="sm" onClick={copyDocument}>노션에 복사</Button>
         </div>
+        {copyNotice && (
+          <p role="status" className="pt-2 text-label text-ink-subtle">{copyNotice}</p>
+        )}
         <div className="pt-2">
-          {document.map((block, index) => (
-            <DocumentBlock key={index} block={block} />
-          ))}
+          {document
+            .split("\n")
+            .filter((line) => line.trim())
+            .map((line, index) => (
+              <DocumentLine key={index} line={line} />
+            ))}
         </div>
       </section>
       <SummaryDetails summary={summary} />
