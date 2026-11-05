@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Modal from "@/components/ui/Modal";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
+import TextLink from "@/components/ui/TextLink";
 
 const FINISH_STEPS = [
   "넣을 기록 고르기",
@@ -42,16 +43,40 @@ function FinishProjectCard() {
   );
 }
 
-function RepresentativeCards({ cards, competencies, onUpdateCard, onDeleteCard }) {
+// 이미 만든 대표 카드는 자동으로 바뀌지 않아서, 기록이 바뀌면 안내한다(H-21).
+function RecordChangeNotice({ onDismiss }) {
+  return (
+    <div className="pt-4">
+      <div role="status" className="rounded-[14px] border border-accent bg-[#fff6ec] px-3.5 py-3 text-ink">
+        <p className="text-body">카드를 만든 뒤 기록이 바뀌었어요</p>
+        <p className="mt-1 text-label leading-[19.5px]">
+          이미 만든 카드는 그대로예요. 카드를 눌러 직접 고치거나, 바뀐 기록으로 대표 카드를 더 만들 수 있어요.
+        </p>
+        <TextLink onClick={onDismiss} className="mt-1.5">괜찮아요</TextLink>
+      </div>
+    </div>
+  );
+}
+
+function RepresentativeCards({
+  cards,
+  competencies,
+  showChangeNotice,
+  onDismissChangeNotice,
+  onUpdateCard,
+  onDeleteCard,
+}) {
   const [openCardId, setOpenCardId] = useState();
   const openCard = cards.find(({ id }) => id === openCardId);
+  const isNoticeVisible = showChangeNotice && cards.length > 0;
 
   return (
     <Card as="aside" size="md" aria-label="대표 카드">
       <SidebarTitle>
         대표 카드 <span className="text-ink-subtle">{cards.length}장</span>
       </SidebarTitle>
-      <ol className="flex flex-col gap-2.5 pt-4">
+      {isNoticeVisible && <RecordChangeNotice onDismiss={onDismissChangeNotice} />}
+      <ol className={`flex flex-col gap-2.5 ${isNoticeVisible ? "pt-3" : "pt-4"}`}>
         {cards.map((card, index) => (
           <li key={card.id} className="flex flex-col">
             <p className="pb-1 pl-0.5 text-caption text-accent-strong">카드 {index + 1}</p>

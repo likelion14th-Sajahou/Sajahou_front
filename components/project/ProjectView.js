@@ -13,6 +13,7 @@ export default function ProjectView({ project, storyCards, competencies }) {
   // 다른 페이지에 다녀와도 상태가 유지되므로(cacheComponents), 링크로 새로 들어오면 열려 있던 폼과 팝업을 닫는다.
   // 뒤로 가기로 돌아오면 bfcacheId가 그대로라 작성 중인 내용이 남는다. 기록과 카드 변경은 어느 경우든 유지한다.
   const { bfcacheId } = useRouter();
+  const [hasRecordChanged, setHasRecordChanged] = useState(false);
   const [cards, setCards] = useState(() =>
     project.representativeCards.map(({ recordIds }, index) => ({
       ...storyCards[index],
@@ -35,6 +36,13 @@ export default function ProjectView({ project, storyCards, competencies }) {
   }));
 
   function saveRecord(recordId, changes) {
+    const record = projectRecords.find(({ id }) => id === recordId);
+
+    // 저장만 누르고 내용이 그대로면 기록이 바뀐 것이 아니다.
+    if (Object.entries(changes).some(([key, value]) => (record[key] ?? "") !== value)) {
+      setHasRecordChanged(true);
+    }
+
     setProjectRecords((current) =>
       current.map((record) => (record.id === recordId ? { ...record, ...changes } : record)),
     );
@@ -42,6 +50,7 @@ export default function ProjectView({ project, storyCards, competencies }) {
 
   // 대표 카드에 쓴 기록을 지워도 카드 글은 남기고, 근거에 지운 개수만 표시한다(H-15).
   function deleteRecord(recordId) {
+    setHasRecordChanged(true);
     setProjectRecords((current) => current.filter(({ id }) => id !== recordId));
     setCards((current) =>
       current.map((card) =>
@@ -86,6 +95,8 @@ export default function ProjectView({ project, storyCards, competencies }) {
           status={project.status}
           cards={displayCards}
           competencies={competencies}
+          showChangeNotice={hasRecordChanged}
+          onDismissChangeNotice={() => setHasRecordChanged(false)}
           onUpdateCard={updateCard}
           onDeleteCard={deleteCard}
         />
