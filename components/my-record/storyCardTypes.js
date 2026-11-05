@@ -4,6 +4,13 @@ export const STORY_CARD_TYPES = {
   project: { label: "프로젝트", tone: "yellow" },
 };
 
+export const PORTFOLIO_TEXT = {
+  title: "포트폴리오 전문",
+  copied: "포트폴리오를 복사했어요. 노션에 붙여 넣어 주세요.",
+};
+
+export const COPY_FAILED_MESSAGE = "복사하지 못했어요. 브라우저의 클립보드 권한을 확인한 뒤 다시 시도해 주세요.";
+
 export const SUMMARY_FIELDS = [
   { key: "situation", label: "상황" },
   { key: "action", label: "행동" },

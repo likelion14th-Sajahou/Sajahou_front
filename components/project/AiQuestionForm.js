@@ -14,10 +14,11 @@ export default function AiQuestionForm({
   question,
   placeholder,
   exampleAnswer,
+  initialAnswer = "",
   onAnswer,
   onSkip,
 }) {
-  const [answer, setAnswer] = useState("");
+  const [answer, setAnswer] = useState(initialAnswer);
   const [notice, setNotice] = useState("");
 
   function submitAnswer() {

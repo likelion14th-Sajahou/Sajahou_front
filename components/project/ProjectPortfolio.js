@@ -1,31 +1,50 @@
 "use client";
 
 import { useState } from "react";
-import Card from "@/components/ui/Card";
 import PortfolioGapFill from "./PortfolioGapFill";
 import PortfolioRecordSelect from "./PortfolioRecordSelect";
+import PortfolioReview from "./PortfolioReview";
 
-export default function ProjectPortfolio({ records, onCancel }) {
+export default function ProjectPortfolio({ project, records, competencies, onCancel, onSaveCard }) {
   const [step, setStep] = useState("records");
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [filled, setFilled] = useState({});
+  // 고를 때와 같이 진행 순서(오래된 기록부터)로 글을 쓴다.
+  const selectedRecords = records.toReversed().filter(({ id }) => selectedIds.includes(id));
 
   if (step === "records") {
     return (
       <PortfolioRecordSelect
         records={records}
         onCancel={onCancel}
-        onNext={() => setStep("gaps")}
+        onNext={(nextSelectedIds) => {
+          setSelectedIds(nextSelectedIds);
+          setStep("gaps");
+        }}
       />
     );
   }
 
   if (step === "gaps") {
-    return <PortfolioGapFill onComplete={() => setStep("review")} />;
+    return (
+      <PortfolioGapFill
+        initialFilled={filled}
+        onComplete={(nextFilled) => {
+          setFilled(nextFilled);
+          setStep("review");
+        }}
+      />
+    );
   }
 
-  // 포트폴리오 검토는 다음 작업에서 이어진다.
   return (
-    <Card as="section" size="md">
-      <p role="status" className="text-body-sm text-ink-subtle">포트폴리오를 준비하고 있어요.</p>
-    </Card>
+    <PortfolioReview
+      project={project}
+      records={selectedRecords}
+      filled={filled}
+      competencies={competencies}
+      onBack={() => setStep("gaps")}
+      onSave={onSaveCard}
+    />
   );
 }

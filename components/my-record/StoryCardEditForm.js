@@ -2,22 +2,13 @@
 
 import { useState } from "react";
 import Button from "@/components/ui/Button";
-import Chip from "@/components/ui/Chip";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
+import CompetencyTagPicker from "./CompetencyTagPicker";
 import { SUMMARY_FIELDS } from "./storyCardTypes";
-
-const MIN_TAGS = 1;
-const MAX_TAGS = 3;
 
 export default function StoryCardEditForm({ card, competencies, onCancel, onSave }) {
   const [selectedTags, setSelectedTags] = useState(card.tags);
-
-  function toggleTag(tag) {
-    setSelectedTags((current) =>
-      current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag],
-    );
-  }
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -42,35 +33,12 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
     <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
       <p className="text-label text-accent-strong">카드 수정</p>
       <TextField label="제목" name="title" defaultValue={card.title} required autoFocus />
-      <div role="group" aria-labelledby="edit-tags-label" className="flex flex-col gap-1.5">
-        <p id="edit-tags-label" className="text-label text-ink-muted">
-          역량 태그{" "}
-          <span className="text-ink-subtle">
-            · AI가 정해진 역량 15개 중에서 골랐어요. 눌러서 빼거나 더할 수 있어요 (최대 3개)
-          </span>
-        </p>
-        <div className="flex flex-wrap gap-x-[3px] gap-y-1">
-          {competencies.map((tag) => {
-            const isSelected = selectedTags.includes(tag);
-            const isLocked = isSelected
-              ? selectedTags.length <= MIN_TAGS
-              : selectedTags.length >= MAX_TAGS;
-
-            return (
-              <Chip
-                key={tag}
-                size="sm"
-                selected={isSelected}
-                disabled={isLocked}
-                onClick={() => toggleTag(tag)}
-                className={`disabled:cursor-default ${isSelected ? "" : "disabled:opacity-40"}`}
-              >
-                #{tag}
-              </Chip>
-            );
-          })}
-        </div>
-      </div>
+      <CompetencyTagPicker
+        id="edit-tags-label"
+        competencies={competencies}
+        selectedTags={selectedTags}
+        onChange={setSelectedTags}
+      />
       {SUMMARY_FIELDS.map(({ key, label }) => (
         <TextField
           key={key}

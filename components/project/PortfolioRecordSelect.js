@@ -65,7 +65,7 @@ export default function PortfolioRecordSelect({ records, onCancel, onNext }) {
       ))}
       <RecordFormFooter>
         <TextLink onClick={onCancel}>취소</TextLink>
-        <Button variant="accent" className="ml-auto" disabled={selectedIds.length === 0} onClick={onNext}>
+        <Button variant="accent" className="ml-auto" disabled={selectedIds.length === 0} onClick={() => onNext(selectedIds)}>
           AI가 빈 곳 찾기 →
         </Button>
       </RecordFormFooter>

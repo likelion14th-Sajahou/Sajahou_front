@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Modal from "@/components/ui/Modal";
 import TextLink from "@/components/ui/TextLink";
+import DotList from "./DotList";
 import SidebarTitle from "./SidebarTitle";
 
 const FINISH_STEPS = [
@@ -19,14 +20,9 @@ function FinishProjectCard({ onFinish }) {
   return (
     <Card as="aside" size="md" aria-label="프로젝트 마치기">
       <SidebarTitle>프로젝트를 마치면</SidebarTitle>
-      <ul className="flex flex-col gap-1 pt-4">
-        {FINISH_STEPS.map((step) => (
-          <li key={step} className="relative pl-3.5 text-label text-ink-muted">
-            <span aria-hidden="true" className="absolute top-[8.4px] left-0 size-1.5 rounded-full bg-shape-green" />
-            {step}
-          </li>
-        ))}
-      </ul>
+      <div className="pt-4">
+        <DotList items={FINISH_STEPS} />
+      </div>
       <div className="pt-3.5">
         <Button variant="accent" className="w-full" onClick={onFinish}>
           프로젝트 마치고 포트폴리오 만들기

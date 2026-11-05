@@ -16,6 +16,12 @@ export default function ProjectView({ project, storyCards, competencies, initial
   // 뒤로 가기로 돌아오면 bfcacheId가 그대로라 작성 중인 내용이 남는다. 기록과 카드 변경은 어느 경우든 유지한다.
   const { bfcacheId } = useRouter();
   const [hasRecordChanged, setHasRecordChanged] = useState(false);
+  const [status, setStatus] = useState(project.status);
+  const currentProject = {
+    ...project,
+    status,
+    lastRecordedAt: projectRecords[0]?.date,
+  };
   // 흐름을 연 시점의 bfcacheId를 기억해, 링크로 새로 들어오면 자동으로 프로젝트 화면으로 돌아간다.
   const [portfolioBfcacheId, setPortfolioBfcacheId] = useState(null);
   const isMakingPortfolio = portfolioBfcacheId === bfcacheId;
@@ -88,22 +94,47 @@ export default function ProjectView({ project, storyCards, competencies, initial
     setCards((current) => current.filter(({ id }) => id !== cardId));
   }
 
+  // 프로젝트 API가 없어 완료 표시와 새 카드는 이 화면 안에서만 반영된다.
+  function saveCard(card) {
+    setCards((current) => [
+      ...current,
+      {
+        id: crypto.randomUUID(),
+        type: "project",
+        whenLabel: `${project.name} · ${MOCK_TODAY.date.split("/")[0]}월`,
+        shape: project.shape,
+        color: project.color,
+        deletedRecordCount: 0,
+        ...card,
+      },
+    ]);
+    setStatus("done");
+    setHasRecordChanged(false);
+    setPortfolioBfcacheId(null);
+  }
+
   return (
     <>
       <ProjectHeader
-        project={project}
+        project={currentProject}
         recordCount={records.length}
         lastRecordedAt={records[0]?.date}
       />
       {isMakingPortfolio ? (
         <div className="pt-6">
-          <ProjectPortfolio records={records} onCancel={() => setPortfolioBfcacheId(null)} />
+          <ProjectPortfolio
+            project={currentProject}
+            records={records}
+            competencies={competencies}
+            onCancel={() => setPortfolioBfcacheId(null)}
+            onSaveCard={saveCard}
+          />
         </div>
       ) : (
         <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5 pt-6">
           <ProjectRecords
             key={`records-${bfcacheId}`}
-            project={project}
+            project={currentProject}
             records={records}
             initialIsAdding={initialIsAdding}
             onAddRecord={addRecord}
@@ -112,7 +143,7 @@ export default function ProjectView({ project, storyCards, competencies, initial
           />
           <ProjectSidebar
             key={`sidebar-${bfcacheId}`}
-            status={project.status}
+            status={status}
             cards={displayCards}
             competencies={competencies}
             showChangeNotice={hasRecordChanged}

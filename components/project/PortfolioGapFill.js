@@ -40,10 +40,10 @@ function GapList({ gaps, getStatus }) {
   );
 }
 
-export default function PortfolioGapFill({ onComplete }) {
+export default function PortfolioGapFill({ initialFilled, onComplete }) {
   const gaps = MOCK_PORTFOLIO_GAPS;
   const [index, setIndex] = useState(0);
-  const [filled, setFilled] = useState({});
+  const [filled, setFilled] = useState(initialFilled);
   const gap = gaps[index];
   const progress = `${index + 1} / ${gaps.length}`;
 
@@ -62,11 +62,11 @@ export default function PortfolioGapFill({ onComplete }) {
       return "current";
     }
 
-    if (gapIndex > index) {
-      return "waiting";
+    if (filled[id]) {
+      return "filled";
     }
 
-    return filled[id] ? "filled" : "skipped";
+    return gapIndex < index ? "skipped" : "waiting";
   }
 
   return (
@@ -81,8 +81,9 @@ export default function PortfolioGapFill({ onComplete }) {
               progress={progress}
               question={gap.question}
               exampleAttachments={gap.exampleAttachments}
+              initialAttachments={filled[gap.id]}
               onSubmit={(attachments) => goNext({ ...filled, [gap.id]: attachments })}
-              onSkip={() => goNext(filled)}
+              onSkip={() => goNext({ ...filled, [gap.id]: undefined })}
             />
           ) : (
             <AiQuestionForm
@@ -93,8 +94,9 @@ export default function PortfolioGapFill({ onComplete }) {
               question={gap.question}
               placeholder="확인할 수 있는 것만 적어 주세요"
               exampleAnswer={gap.exampleAnswer}
+              initialAnswer={filled[gap.id]}
               onAnswer={(answer) => goNext({ ...filled, [gap.id]: answer })}
-              onSkip={() => goNext(filled)}
+              onSkip={() => goNext({ ...filled, [gap.id]: undefined })}
             />
           )}
         </Card>

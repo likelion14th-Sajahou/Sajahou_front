@@ -11,10 +11,11 @@ export default function PortfolioArtifactRequest({
   progress,
   question,
   exampleAttachments,
+  initialAttachments = [],
   onSubmit,
   onSkip,
 }) {
-  const [attachments, setAttachments] = useState([]);
+  const [attachments, setAttachments] = useState(initialAttachments);
 
   return (
     <div className="flex flex-col gap-4">
