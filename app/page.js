@@ -6,10 +6,13 @@ import StickerBoard from "@/components/home/StickerBoard";
 import { MOCK_HOME } from "@/lib/mock/home";
 import { MOCK_USER } from "@/lib/mock/user";
 
+// 이번 주 회고를 완료했거나 휴회한 주에는 스티커 보드의 + 자리를 숨긴다.
+const STATUSES_WITHOUT_CURRENT_SLOT = ["done", "rest"];
+
 export default function HomePage() {
   const { week, weekStatus, stickerCount, stickers, projects, recentRetrospectives } = MOCK_HOME;
   const visibleStickers =
-    weekStatus === "rest"
+    STATUSES_WITHOUT_CURRENT_SLOT.includes(weekStatus)
       ? stickers.filter(({ kind }) => kind !== "current")
       : stickers;
 

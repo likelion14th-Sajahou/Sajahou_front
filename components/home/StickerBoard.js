@@ -15,8 +15,21 @@ const LABEL_CLASSES = {
 const ITEM_CLASSES = "flex w-[72px] flex-col items-center gap-1 md:w-[92px]";
 const ICON_SIZE_CLASSES = "size-[54px] md:size-[70px]";
 
+// 스티커별 이동 경로와 화면 낭독기용 이름이다. 중커톤처럼 아직 받지 않은 스티커는 누를 수 없다.
+function getStickerLink({ kind, week, title }) {
+  if (kind === "current") {
+    return { href: "/retrospective", label: `${week}주차 회고 쓰고 스티커 받기` };
+  }
+
+  if (kind === "upcoming") {
+    return null;
+  }
+
+  return { href: `/my-record?week=${week}`, label: `${week}주차 ${title} 스티커` };
+}
+
 function StickerIcon({ sticker }) {
-  const { kind, week, title, shape, color } = sticker;
+  const { kind, title, shape, color } = sticker;
 
   if (kind === "current") {
     return (
@@ -40,7 +53,6 @@ function StickerIcon({ sticker }) {
       color={color}
       sticker
       className={ICON_SIZE_CLASSES}
-      label={`${week}주차 ${title} 스티커`}
     />
   );
 }
@@ -55,19 +67,17 @@ function Sticker({ sticker }) {
     </>
   );
 
-  if (sticker.kind === "current") {
-    return (
-      <Link
-        href="/retrospective"
-        aria-label={`${sticker.week}주차 회고 쓰고 스티커 받기`}
-        className={ITEM_CLASSES}
-      >
-        {content}
-      </Link>
-    );
+  const link = getStickerLink(sticker);
+
+  if (!link) {
+    return <div className={ITEM_CLASSES}>{content}</div>;
   }
 
-  return <div className={ITEM_CLASSES}>{content}</div>;
+  return (
+    <Link href={link.href} aria-label={link.label} className={ITEM_CLASSES}>
+      {content}
+    </Link>
+  );
 }
 
 export default function StickerBoard({ count, stickers }) {

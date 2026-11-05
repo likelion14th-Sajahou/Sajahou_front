@@ -6,6 +6,10 @@ import TextLink from "@/components/ui/TextLink";
 import SectionHeader from "./SectionHeader";
 
 export default function RecentRetrospectives({ items }) {
+  if (items.length === 0) {
+    return null;
+  }
+
   return (
     <section className="flex flex-col gap-4 pt-8">
       <SectionHeader
@@ -19,7 +23,7 @@ export default function RecentRetrospectives({ items }) {
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
         {items.map(({ id, title, type, shape, color }) => (
           <li key={id}>
-            <Card as={Link} href="/my-record" size="xs" className="flex h-full items-center gap-3">
+            <Card as={Link} href={`/my-record?card=${id}`} size="xs" className="flex h-full items-center gap-3">
               <ShapeCharacter shape={shape} color={color} face="none" size={26} />
               <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
                 <span className="w-full truncate text-body leading-[21px] text-ink">
