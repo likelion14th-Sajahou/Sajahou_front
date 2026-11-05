@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -30,6 +31,7 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
 }
 
 export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLabel, changePreview = null }) {
+  const router = useRouter();
   const { part, assignmentStatus, setAssignmentStatus } = useRetrospectivePreview();
   const [drafts, setDrafts] = useState(initialMaterialsByPart);
   const materials = drafts[part];
@@ -45,7 +47,7 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
       setIsChangeNoticeOpen(true);
       return;
     }
-    setNotice("AI 질문 받기는 준비 중이에요. 입력한 내용은 현재 화면에서만 유지돼요.");
+    router.push("/retrospective?step=questions");
   }
 
   // 파트를 바꾸거나 입력 영역을 숨겨도 각 파트에서 작성한 내용은 유지한다.
