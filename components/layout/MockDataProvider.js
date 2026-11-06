@@ -1,10 +1,29 @@
 "use client";
 
 import { createContext, use, useState } from "react";
+import { FOOTPRINT_WEEKS } from "@/lib/mock/myRecord";
 import { MOCK_PROJECTS } from "@/lib/mock/projects";
 import { MOCK_STORY_CARDS } from "@/lib/mock/storyCards";
+import { MOCK_WEEK } from "@/lib/mock/week";
 
 const MockDataContext = createContext(null);
+
+const CURRENT_WEEK_STICKER = { shape: "circle", color: "blue" };
+
+// 사자 발자국과 스티커 보드가 함께 쓰는 주차 목록이다. 이번 주 칸은 회고 상태에 따라 바뀐다.
+function getFootprintWeeks(weekStatus) {
+  return FOOTPRINT_WEEKS.map((item) => {
+    if (item.week !== MOCK_WEEK.week) {
+      return item;
+    }
+
+    if (weekStatus === "done") {
+      return { ...item, status: "done", ...CURRENT_WEEK_STICKER };
+    }
+
+    return weekStatus === "paused" ? { ...item, status: "none", title: "휴회" } : item;
+  });
+}
 
 // 스토리 카드 중 프로젝트의 대표 카드에는 어느 프로젝트의 어떤 기록으로 만들었는지 함께 담는다.
 const INITIAL_STORY_CARDS = MOCK_STORY_CARDS.map((card) => {
@@ -31,6 +50,7 @@ function withDeletedRecordEvidence(card) {
 export default function MockDataProvider({ children }) {
   const [projects, setProjects] = useState(MOCK_PROJECTS);
   const [storyCards, setStoryCards] = useState(INITIAL_STORY_CARDS);
+  const [weekStatus, setWeekStatus] = useState(MOCK_WEEK.status);
 
   function addProject(project) {
     setProjects((current) => [...current, project]);
@@ -70,6 +90,19 @@ export default function MockDataProvider({ children }) {
     );
   }
 
+  // 고쳐서 다시 저장해도 카드가 늘어나지 않도록 같은 카드는 바꿔 넣는다.
+  function completeWeek(card) {
+    setStoryCards((current) => [...current.filter(({ id }) => id !== card.id), card]);
+    setWeekStatus("done");
+  }
+
+  function resetWeek() {
+    setStoryCards((current) =>
+      current.filter(({ week, type }) => week !== MOCK_WEEK.week || type === "project"),
+    );
+    setWeekStatus("idle");
+  }
+
   return (
     <MockDataContext
       value={{
@@ -81,6 +114,11 @@ export default function MockDataProvider({ children }) {
         updateStoryCard,
         deleteStoryCard,
         removeRecordFromCards,
+        footprintWeeks: getFootprintWeeks(weekStatus),
+        weekStatus,
+        setWeekStatus,
+        completeWeek,
+        resetWeek,
       }}
     >
       {children}

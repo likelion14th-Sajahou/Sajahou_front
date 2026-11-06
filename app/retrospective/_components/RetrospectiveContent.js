@@ -7,23 +7,23 @@ import MaterialsContent from "./MaterialsContent";
 import AiQuestionsContent from "./AiQuestionsContent";
 import ReviewContent from "./ReviewContent";
 import CompleteContent from "./CompleteContent";
+import RetrospectiveWeekGate from "./RetrospectiveWeekGate";
 import { MOCK_REVIEW_DRAFT } from "@/lib/mock/retrospective";
 
 export default async function RetrospectiveContent({ searchParams, retrospective }) {
   const { preview, step, type } = await searchParams;
   const isAssignment = type === "assignment";
   const { week, deadlines } = retrospective;
-  const status = preview === "writing" || preview === "paused"
-    ? preview
-    : retrospective.status;
-  if (status === "paused") return <PausedRetrospective week={week} />;
+  const pausedContent = <PausedRetrospective week={week} />;
+  if (preview === "paused") return pausedContent;
   if (step === "materials") return <MaterialsContent preview={preview} />;
   if (step === "questions") return <AiQuestionsContent key={preview} initialComplete={preview === "questions-complete"} />;
   if (step === "review") return <ReviewContent initialDraft={MOCK_REVIEW_DRAFT} />;
-  if (step === "complete") return <CompleteContent week={week} initialDraft={MOCK_REVIEW_DRAFT} assignmentDueLabel={deadlines.find(({ id }) => id === "assignment").dueLabel} />;
+  const completeContent = <CompleteContent week={week} initialDraft={MOCK_REVIEW_DRAFT} assignmentDueLabel={deadlines.find(({ id }) => id === "assignment").dueLabel} />;
+  if (step === "complete") return completeContent;
 
   return (
-    <>
+    <RetrospectiveWeekGate isAssignment={isAssignment} paused={pausedContent} complete={completeContent}>
       <RetrospectiveSteps />
 
       <div className={`mt-7 grid items-start gap-5 ${isAssignment ? "grid-cols-[minmax(0,1fr)_320px]" : "grid-cols-1 min-[901px]:grid-cols-[minmax(0,1fr)_320px]"}`}>
@@ -46,7 +46,7 @@ export default async function RetrospectiveContent({ searchParams, retrospective
               <p>{isAssignment ? "면접에서 제일 할 말 많은 이야기가 돼요." : "쌓이면 나만의 큰 자산이 돼요!"}</p>
             </div>
           </div>
-          <StartActions key={status} status={status} isAssignment={isAssignment} />
+          <StartActions isWritingPreview={preview === "writing"} isAssignment={isAssignment} />
         </Card>
 
         <Card as="aside" size="md" aria-labelledby="deadline-title">
@@ -66,6 +66,6 @@ export default async function RetrospectiveContent({ searchParams, retrospective
           </dl>
         </Card>
       </div>
-    </>
+    </RetrospectiveWeekGate>
   );
 }

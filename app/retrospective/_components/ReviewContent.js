@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Chip from "@/components/ui/Chip";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
+import { buildWeekStoryCard } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 
@@ -18,7 +20,8 @@ const STORY_FIELDS = [
 ];
 
 export default function ReviewContent({ initialDraft }) {
-  const { setCompletedDraft, getStepHref } = useRetrospectivePreview();
+  const { setCompletedDraft, getStepHref, isAssignment } = useRetrospectivePreview();
+  const { completeWeek } = useMockData();
   const [draft, setDraft] = useState(initialDraft);
   const [notice, setNotice] = useState("");
 
@@ -112,7 +115,10 @@ export default function ReviewContent({ initialDraft }) {
               <TextLink href={`${getStepHref("questions")}&preview=questions-complete`}>← 질문으로</TextLink>
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 수정한 내용이 사라져요.")}>나중에 이어쓰기</Button>
-                <Button variant="accent" href={getStepHref("complete")} onClick={() => setCompletedDraft(draft)}>저장하고 사자록에 추가</Button>
+                <Button variant="accent" href={getStepHref("complete")} onClick={() => {
+                  setCompletedDraft(draft);
+                  completeWeek(buildWeekStoryCard(draft, isAssignment));
+                }}>저장하고 사자록에 추가</Button>
               </div>
             </div>
           </div>

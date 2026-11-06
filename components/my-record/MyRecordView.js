@@ -14,8 +14,8 @@ export default function MyRecordView({
   requestedHighlightId,
   initialCompetency,
 }) {
-  const { currentWeek, competencies, footprintSections, footprintWeeks } = record;
-  const { storyCards, updateStoryCard, deleteStoryCard } = useMockData();
+  const { currentWeek, competencies, footprintSections } = record;
+  const { footprintWeeks, storyCards, updateStoryCard, deleteStoryCard } = useMockData();
   // 프로젝트에서 새로 만든 카드도 주차 순서에 맞게 보여 준다.
   const cards = storyCards.toSorted((a, b) => b.week - a.week);
   const initialCardId = cards.find(({ id }) => id === requestedCardId)?.id;

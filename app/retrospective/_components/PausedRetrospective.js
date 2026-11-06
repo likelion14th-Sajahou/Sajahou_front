@@ -1,7 +1,12 @@
+"use client";
+
+import { useMockData } from "@/components/layout/MockDataProvider";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import Button from "@/components/ui/Button";
 
 export default function PausedRetrospective({ week }) {
+  const { setWeekStatus } = useMockData();
+
   return (
     <section
       aria-labelledby="paused-title"
@@ -24,7 +29,7 @@ export default function PausedRetrospective({ week }) {
       </p>
       <div className="flex w-full flex-col justify-center gap-2 sm:w-auto sm:flex-row">
         <Button href="/">홈으로</Button>
-        <Button variant="secondary" href="/retrospective">
+        <Button variant="secondary" href="/retrospective" onClick={() => setWeekStatus("idle")}>
           휴회가 아니었어요
         </Button>
       </div>
