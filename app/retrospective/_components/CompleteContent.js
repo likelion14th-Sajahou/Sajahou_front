@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
+import { getWeekCardId } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 
 export default function CompleteContent({ week, initialDraft, assignmentDueLabel }) {
   const { completedDraft, setCompletedDraft, setAssignmentStatus, assignmentPending, isAssignment } = useRetrospectivePreview();
+  const { resetWeek } = useMockData();
   const [notice, setNotice] = useState("");
 
   async function copyRetrospective() {
@@ -24,6 +27,7 @@ export default function CompleteContent({ week, initialDraft, assignmentDueLabel
   function restartDemo() {
     setCompletedDraft(null);
     setAssignmentStatus("record");
+    resetWeek();
   }
 
   return (
@@ -41,7 +45,7 @@ export default function CompleteContent({ week, initialDraft, assignmentDueLabel
           <p className="text-body text-ink-subtle">노션에 붙여넣기 했나요? 아직이면 지금 복사해 두세요.</p>
           <div className="flex justify-center gap-2 pt-1.5">
             <Button onClick={copyRetrospective}>회고록 복사</Button>
-            <Button variant="secondary" onClick={() => setNotice("나의 사자록 화면은 준비 중이에요.")}>나의 사자록 보기</Button>
+            <Button variant="secondary" href={`/my-record?card=${getWeekCardId(isAssignment)}`}>나의 사자록 보기</Button>
           </div>
           {assignmentPending && !isAssignment && (
             <div className="w-full pt-2">

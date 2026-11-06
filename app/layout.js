@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Gowun_Dodum } from "next/font/google";
 import Header from "@/components/layout/Header";
+import MockDataProvider from "@/components/layout/MockDataProvider";
 import ScrollToTopOnNavigate from "@/components/layout/ScrollToTopOnNavigate";
 import { MOCK_USER } from "@/lib/mock/user";
 import "./globals.css";
@@ -26,7 +27,7 @@ export default function RootLayout({ children }) {
           <ScrollToTopOnNavigate />
         </Suspense>
         <Header userName={MOCK_USER.name} userPart={MOCK_USER.part} />
-        {children}
+        <MockDataProvider>{children}</MockDataProvider>
       </body>
     </html>
   );

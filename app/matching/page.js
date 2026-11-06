@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { MOCK_STORY_CARD_COUNT } from "@/lib/mock/matching";
 import MatchingForm from "./_components/MatchingForm";
+import StoryCardCount from "./_components/StoryCardCount";
 
 export const metadata = { title: "자소서 매칭 | 사자록" };
 
@@ -15,7 +15,7 @@ export default function MatchingPage() {
         </div>
         <div>
           <p className="text-caption text-ink-subtle">내 스토리 카드</p>
-          <p className="text-[26px] leading-[1.2]">{MOCK_STORY_CARD_COUNT}</p>
+          <StoryCardCount />
         </div>
       </div>
       <MatchingForm />

@@ -63,7 +63,7 @@ export default function MatchingAnswerCard({ answer, index, company, onEdit, onC
             <ul className="flex flex-col gap-0.5">
               {answer.records.map((record, recordIndex) => (
                 <li key={record.id}>
-                  <Link href={`/my-record/${encodeURIComponent(record.id)}`} className="flex w-full items-center gap-2 rounded-[10px] px-2 py-[7px] text-left">
+                  <Link href={`/my-record?tab=cards&highlight=${record.id}`} className="flex w-full items-center gap-2 rounded-[10px] px-2 py-[7px] text-left">
                     <span className="w-4 text-label text-accent-strong">{SOURCE_MARKS[recordIndex + 1]}</span>
                     <RecordIcon icon={record.icon} />
                     <span className="text-body-sm">{record.title}</span>

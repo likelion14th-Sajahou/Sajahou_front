@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { STORY_CARD_TYPES } from "@/components/my-record/storyCardTypes";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
@@ -29,7 +30,7 @@ export default function RecentRetrospectives({ items }) {
                 <span className="w-full truncate text-body leading-[21px] text-ink">
                   {title}
                 </span>
-                <Badge tone="blue">{type}</Badge>
+                <Badge tone={STORY_CARD_TYPES[type].tone}>{STORY_CARD_TYPES[type].label}</Badge>
               </span>
             </Card>
           </li>
