@@ -7,23 +7,17 @@ import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
 import CompetencyTags from "./CompetencyTags";
 import StoryCardEditForm from "./StoryCardEditForm";
-import { STORY_CARD_TYPES, SUMMARY_FIELDS } from "./storyCardTypes";
+import { COPY_FAILED_MESSAGE, PORTFOLIO_TEXT, STORY_CARD_TYPES, SUMMARY_FIELDS } from "./storyCardTypes";
 
 const RECAP_TEXT = {
   title: "회고록 전문",
   copied: "회고록을 복사했어요. 노션에 붙여 넣어 주세요.",
 };
 
-const PORTFOLIO_TEXT = {
-  title: "포트폴리오 전문",
-  copied: "포트폴리오를 복사했어요. 노션에 붙여 넣어 주세요.",
-};
-
-const COPY_FAILED_MESSAGE = "복사하지 못했어요. 브라우저의 클립보드 권한을 확인한 뒤 다시 시도해 주세요.";
-
 // 회고록 Markdown을 줄 단위로 읽어 시안의 글자 크기로 표시한다.
 function DocumentLine({ line }) {
   const numbered = line.match(/^(\d+)\. (.*)$/);
+  const heading = line.match(/^#{1,2} (.*)$/);
 
   if (line.startsWith("#### ")) {
     return <p className="pt-2 text-body-sm leading-[24.5px]">{line.slice(5)}</p>;
@@ -33,8 +27,8 @@ function DocumentLine({ line }) {
     return <p className="pt-2.5 text-[14.5px] leading-[25.375px]">{line.slice(4)}</p>;
   }
 
-  if (line.startsWith("## ")) {
-    return <p className="text-[15.5px] leading-[27.125px]">{line.slice(3)}</p>;
+  if (heading) {
+    return <p className="text-[15.5px] leading-[27.125px]">{heading[1]}</p>;
   }
 
   if (numbered) {

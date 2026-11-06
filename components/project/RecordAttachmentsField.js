@@ -28,7 +28,12 @@ function parseLink(value) {
   }
 }
 
-export default function RecordAttachmentsField({ attachments, onChange }) {
+export default function RecordAttachmentsField({
+  label,
+  attachments,
+  linkPlaceholder = "피그마·노션·GitHub 링크",
+  onChange,
+}) {
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
 
@@ -58,9 +63,7 @@ export default function RecordAttachmentsField({ attachments, onChange }) {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <p className="text-label text-ink-muted">
-        자료 첨부 <span className="text-ink-subtle">· 선택 · 회의록, 발표 자료, 디자인 화면, 피그마 링크</span>
-      </p>
+      {label && <p className="text-label text-ink-muted">{label}</p>}
       {attachments.length > 0 && (
         <ul aria-label="첨부 자료" className="flex flex-wrap gap-2">
           {attachments.map((attachment) => (
@@ -81,7 +84,7 @@ export default function RecordAttachmentsField({ attachments, onChange }) {
           <TextField
             size="sm"
             aria-label="링크"
-            placeholder="피그마·노션·GitHub 링크"
+            placeholder={linkPlaceholder}
             value={link}
             onChange={(event) => {
               setLink(event.target.value);

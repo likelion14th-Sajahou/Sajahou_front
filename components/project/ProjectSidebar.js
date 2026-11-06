@@ -6,8 +6,9 @@ import StoryCardDetail from "@/components/my-record/StoryCardDetail";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Modal from "@/components/ui/Modal";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
+import DotList from "./DotList";
+import SidebarTitle from "./SidebarTitle";
 
 const FINISH_STEPS = [
   "넣을 기록 고르기",
@@ -15,29 +16,17 @@ const FINISH_STEPS = [
   "포트폴리오와 대표 카드 완성",
 ];
 
-function SidebarTitle({ children }) {
-  return (
-    <div className="flex items-center justify-between border-b border-ink pb-3">
-      <h2 className="text-[18px] tracking-[-0.18px] text-ink">{children}</h2>
-      <ShapeCharacter shape="sunFine" color="yellow" face="none" size={18} />
-    </div>
-  );
-}
-
-function FinishProjectCard() {
+function FinishProjectCard({ onFinish }) {
   return (
     <Card as="aside" size="md" aria-label="프로젝트 마치기">
       <SidebarTitle>프로젝트를 마치면</SidebarTitle>
-      <ul className="flex flex-col gap-1 pt-4">
-        {FINISH_STEPS.map((step) => (
-          <li key={step} className="relative pl-3.5 text-label text-ink-muted">
-            <span aria-hidden="true" className="absolute top-[8.4px] left-0 size-1.5 rounded-full bg-shape-green" />
-            {step}
-          </li>
-        ))}
-      </ul>
+      <div className="pt-4">
+        <DotList items={FINISH_STEPS} />
+      </div>
       <div className="pt-3.5">
-        <Button variant="accent" className="w-full">프로젝트 마치고 포트폴리오 만들기</Button>
+        <Button variant="accent" className="w-full" onClick={onFinish}>
+          프로젝트 마치고 포트폴리오 만들기
+        </Button>
       </div>
     </Card>
   );
@@ -65,6 +54,7 @@ function RepresentativeCards({
   onDismissChangeNotice,
   onUpdateCard,
   onDeleteCard,
+  onAddCard,
 }) {
   const [openCardId, setOpenCardId] = useState();
   const openCard = cards.find(({ id }) => id === openCardId);
@@ -85,7 +75,7 @@ function RepresentativeCards({
         ))}
       </ol>
       <div className="pt-3.5">
-        <Button variant="secondary" className="w-full">+ 대표 카드 더 만들기</Button>
+        <Button variant="secondary" className="w-full" onClick={onAddCard}>+ 대표 카드 더 만들기</Button>
         <p className="pt-1.5 text-label leading-[19.5px] text-ink-subtle">
           회의나 발표가 끝날 때마다 새 기록으로 카드를 만들어 두면, 자소서 문항마다 다른 경험을 꺼내 쓸 수 있어요.
         </p>
@@ -114,6 +104,8 @@ function RepresentativeCards({
   );
 }
 
-export default function ProjectSidebar({ status, ...cardProps }) {
-  return status === "done" ? <RepresentativeCards {...cardProps} /> : <FinishProjectCard />;
+export default function ProjectSidebar({ status, onMakePortfolio, ...cardProps }) {
+  return status === "done"
+    ? <RepresentativeCards {...cardProps} onAddCard={onMakePortfolio} />
+    : <FinishProjectCard onFinish={onMakePortfolio} />;
 }

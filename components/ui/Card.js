@@ -1,4 +1,5 @@
 const SIZE_CLASSES = {
+  xl: "rounded-[28px] px-8 py-7",
   lg: "rounded-[28px] px-6 py-[22px]",
   md: "rounded-[24px] px-7 py-6",
   sm: "rounded-[22px] px-[22px] py-5",

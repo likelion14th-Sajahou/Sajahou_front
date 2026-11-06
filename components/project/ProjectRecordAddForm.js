@@ -96,6 +96,11 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
           <div className="flex flex-col items-start gap-4">
             <div className="w-full">
               <RecordAttachmentsField
+                label={
+                  <>
+                    자료 첨부 <span className="text-ink-subtle">· 선택 · 회의록, 발표 자료, 디자인 화면, 피그마 링크</span>
+                  </>
+                }
                 attachments={attachments}
                 onChange={(next) => {
                   setAttachments(next);
