@@ -1,11 +1,13 @@
 import { useState } from "react";
 import Link from "next/link";
+import { useMockData } from "@/components/layout/MockDataProvider";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { draftText } from "@/lib/mock/matchingResult";
 import MatchingAnswerCard from "./MatchingAnswerCard";
 
 export default function MatchingResults({ result, onEdit, headingRef }) {
+  const { storyCards } = useMockData();
   const [notice, setNotice] = useState("");
 
   async function copy(text, message) {
@@ -30,19 +32,24 @@ export default function MatchingResults({ result, onEdit, headingRef }) {
           <p className="text-label text-ink-subtle">공고·우대사항·인재상에서 찾았어요</p>
         </div>
           <ul className="grid grid-cols-2 gap-x-10">
-            {result.competencies.map((competency) => (
+            {result.competencies.map((competency) => {
+              // 눌러서 보는 나의 사자록의 역량 필터 결과와 같은 수를 보여 준다.
+              const cardCount = storyCards.filter(({ tags }) => tags.includes(competency.name)).length;
+
+              return (
               <li key={competency.name} className="border-b border-line px-0.5 py-3.5">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-[16px]">#{competency.name}</h3>
-                  {competency.records.length ? (
-                    <Link href={`/my-record?tag=${encodeURIComponent(competency.name)}`} className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${competency.name} 카드 ${competency.records.length}장 보기`}>
-                      <Badge tone="green" size="count">{competency.records.length}장 보기 →</Badge>
+                  {cardCount > 0 ? (
+                    <Link href={`/my-record?tag=${encodeURIComponent(competency.name)}`} className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${competency.name} 카드 ${cardCount}장 보기`}>
+                      <Badge tone="green" size="count">{cardCount}장 보기 →</Badge>
                     </Link>
                   ) : <Badge>없음</Badge>}
                 </div>
                 <p className="mt-1 text-body-sm text-ink-subtle">“{competency.quote}”</p>
               </li>
-            ))}
+              );
+            })}
           </ul>
       </section>
       <section aria-labelledby="matching-answers" className="mt-24 flex flex-col gap-7 border-t-2 border-dashed border-[#d9d4ca] pt-12">
