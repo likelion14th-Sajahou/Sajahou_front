@@ -1,23 +1,30 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMockData } from "@/components/layout/MockDataProvider";
 import FootprintsPanel from "./FootprintsPanel";
 import MyRecordTabs from "./MyRecordTabs";
 import StoryCardsPanel from "./StoryCardsPanel";
 
-// 두 탭이 같은 카드 목록을 쓰도록 여기서 관리한다.
-// 카드 API가 없어 수정과 삭제는 화면 안에서만 반영되고, 새로고침하면 되돌아온다.
 export default function MyRecordView({
   record,
-  activeTab,
+  requestedTab,
   week,
-  initialCardId,
-  initialHighlightedCardId,
+  requestedCardId,
+  requestedHighlightId,
   initialCompetency,
 }) {
-  const { currentWeek, competencies, storyCards, footprintSections, footprintWeeks } = record;
-  const [cards, setCards] = useState(storyCards);
+  const { currentWeek, competencies, footprintSections, footprintWeeks } = record;
+  const { storyCards, updateStoryCard, deleteStoryCard } = useMockData();
+  // 프로젝트에서 새로 만든 카드도 주차 순서에 맞게 보여 준다.
+  const cards = storyCards.toSorted((a, b) => b.week - a.week);
+  const initialCardId = cards.find(({ id }) => id === requestedCardId)?.id;
+  const initialHighlightedCardId = cards.find(({ id }) => id === requestedHighlightId)?.id;
+  // 다른 화면에서 카드로 이동해 오면 스토리 카드 탭으로 연다.
+  const activeTab =
+    requestedTab === "cards" || initialCardId || initialHighlightedCardId || initialCompetency
+      ? "cards"
+      : "footprints";
   // cacheComponents가 켜져 있으면 다른 페이지에 다녀와도 상태가 유지된다.
   // 스티커나 카드를 눌러 새로 들어온 경우에는 주소 값을 다시 읽도록 key로 초기화하고,
   // 뒤로 가기로 돌아온 경우에는 bfcacheId가 그대로라 보던 상태가 유지된다.
@@ -28,16 +35,6 @@ export default function MyRecordView({
 
     return { ...item, cardIds, cardCount: cardIds.length };
   });
-
-  function deleteCard(cardId) {
-    setCards((current) => current.filter(({ id }) => id !== cardId));
-  }
-
-  function updateCard(cardId, changes) {
-    setCards((current) =>
-      current.map((card) => (card.id === cardId ? { ...card, ...changes } : card)),
-    );
-  }
 
   return (
     <>
@@ -59,8 +56,8 @@ export default function MyRecordView({
           initialCardId={initialCardId}
           initialHighlightedCardId={initialHighlightedCardId}
           initialCompetency={initialCompetency}
-          onDeleteCard={deleteCard}
-          onUpdateCard={updateCard}
+          onDeleteCard={deleteStoryCard}
+          onUpdateCard={updateStoryCard}
         />
       )}
     </>

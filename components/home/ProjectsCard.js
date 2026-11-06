@@ -48,13 +48,13 @@ function ActiveProjectRow({ project }) {
   );
 }
 
-function DoneProjectRow({ project }) {
-  const { id, name, records, representativeCards } = project;
+function DoneProjectRow({ project, cardCount }) {
+  const { id, name, records } = project;
 
   return (
     <ProjectRow
       project={project}
-      summary={`대표 카드 ${representativeCards.length}장 · 기록 ${records.length}`}
+      summary={`대표 카드 ${cardCount}장 · 기록 ${records.length}`}
       action={
         <Link
           href={`/projects/${id}`}
@@ -69,7 +69,7 @@ function DoneProjectRow({ project }) {
 }
 
 export default function ProjectsCard() {
-  const { projects, addProject } = useMockData();
+  const { projects, addProject, storyCards } = useMockData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const activeProjects = projects.filter(({ status }) => status === "active");
   const doneProjects = projects.filter(({ status }) => status === "done");
@@ -82,7 +82,6 @@ export default function ProjectsCard() {
       status: "active",
       role,
       startedAt: MOCK_TODAY.date,
-      representativeCards: [],
       shape: "pentagon",
       color: "blue",
       records: [],
@@ -107,7 +106,11 @@ export default function ProjectsCard() {
           <p className="h-6 pt-1.5 pl-1 text-[12.5px] leading-5 text-ink-subtle">완료</p>
           <ul className="flex w-full flex-col gap-2">
             {doneProjects.map((project) => (
-              <DoneProjectRow key={project.id} project={project} />
+              <DoneProjectRow
+                key={project.id}
+                project={project}
+                cardCount={storyCards.filter(({ projectId }) => projectId === project.id).length}
+              />
             ))}
           </ul>
         </>

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import Toast from "@/components/ui/Toast";
 import { MOCK_TODAY } from "@/lib/mock/projects";
-import { MOCK_STORY_CARDS } from "@/lib/mock/storyCards";
+import { MOCK_WEEK } from "@/lib/mock/week";
 import ProjectPortfolio from "./ProjectPortfolio";
 import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
@@ -28,19 +28,9 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   const [portfolioBfcacheId, setPortfolioBfcacheId] = useState(null);
   const isMakingPortfolio = portfolioBfcacheId === bfcacheId;
   const [toastMessage, setToastMessage] = useState("");
-  const [cards, setCards] = useState(() =>
-    project.representativeCards.map(({ cardId, recordIds }) => ({
-      ...MOCK_STORY_CARDS.find(({ id }) => id === cardId),
-      recordIds,
-      deletedRecordCount: 0,
-    })),
-  );
-
-  const displayCards = cards.map((card) =>
-    card.deletedRecordCount > 0
-      ? { ...card, evidence: `${card.evidence} · 삭제된 기록 ${card.deletedRecordCount}개` }
-      : card,
-  );
+  const { storyCards, addStoryCard, updateStoryCard, deleteStoryCard, removeRecordFromCards } =
+    useMockData();
+  const cards = storyCards.filter(({ projectId }) => projectId === project.id);
 
   const records = projectRecords.map((record) => ({
     ...record,
@@ -70,46 +60,24 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
     );
   }
 
-  // 대표 카드에 쓴 기록을 지워도 카드 글은 남기고, 근거에 지운 개수만 표시한다(H-15).
   function deleteRecord(recordId) {
     setHasRecordChanged(true);
     changeRecords((current) => current.filter(({ id }) => id !== recordId));
-    setCards((current) =>
-      current.map((card) =>
-        card.recordIds.includes(recordId)
-          ? {
-              ...card,
-              recordIds: card.recordIds.filter((id) => id !== recordId),
-              deletedRecordCount: card.deletedRecordCount + 1,
-            }
-          : card,
-      ),
-    );
-  }
-
-  function updateCard(cardId, changes) {
-    setCards((current) =>
-      current.map((card) => (card.id === cardId ? { ...card, ...changes } : card)),
-    );
-  }
-
-  function deleteCard(cardId) {
-    setCards((current) => current.filter(({ id }) => id !== cardId));
+    removeRecordFromCards(recordId);
   }
 
   function saveCard(card) {
-    setCards((current) => [
-      ...current,
-      {
-        id: crypto.randomUUID(),
-        type: "project",
-        whenLabel: `${project.name} · ${MOCK_TODAY.date.split("/")[0]}월`,
-        shape: "sunFine",
-        color: "yellow",
-        deletedRecordCount: 0,
-        ...card,
-      },
-    ]);
+    addStoryCard({
+      id: crypto.randomUUID(),
+      projectId: project.id,
+      week: MOCK_WEEK.week,
+      type: "project",
+      whenLabel: `${project.name} · ${MOCK_TODAY.date.split("/")[0]}월`,
+      shape: "sunFine",
+      color: "yellow",
+      deletedRecordCount: 0,
+      ...card,
+    });
     // 처음 마칠 때는 완료 표시가 저장을 알려 주므로, 더 만들 때만 안내한다(H-18).
     if (status === "done") {
       setToastMessage(`대표 카드를 하나 더 저장했어요 (${cards.length + 1}장)`);
@@ -154,12 +122,12 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
           <ProjectSidebar
             key={`sidebar-${bfcacheId}`}
             status={status}
-            cards={displayCards}
+            cards={cards}
             competencies={competencies}
             showChangeNotice={hasRecordChanged}
             onDismissChangeNotice={() => setHasRecordChanged(false)}
-            onUpdateCard={updateCard}
-            onDeleteCard={deleteCard}
+            onUpdateCard={updateStoryCard}
+            onDeleteCard={deleteStoryCard}
             onMakePortfolio={() => setPortfolioBfcacheId(bfcacheId)}
           />
         </div>
