@@ -9,10 +9,25 @@ import { MOCK_WEEK } from "@/lib/mock/week";
 const MockDataContext = createContext(null);
 
 const CURRENT_WEEK_STICKER = { shape: "circle", color: "blue" };
+const PROJECT_RECAP_STICKER = { shape: "sun", color: "yellow", isProjectRecap: true };
 
-// 사자 발자국과 스티커 보드가 함께 쓰는 주차 목록이다. 이번 주 칸은 회고 상태에 따라 바뀐다.
-function getFootprintWeeks(weekStatus) {
+// 사자 발자국과 스티커 보드가 함께 쓰는 주차 목록이다.
+// 이번 주 칸은 회고 상태에 따라, 프로젝트 회고 칸은 프로젝트를 완료하면 바뀐다.
+function getFootprintWeeks(weekStatus, projects) {
   return FOOTPRINT_WEEKS.map((item) => {
+    const doneProject = projects.find(
+      ({ recap, status }) => status === "done" && recap?.week === item.week,
+    );
+
+    if (doneProject) {
+      return {
+        ...item,
+        ...PROJECT_RECAP_STICKER,
+        status: "done",
+        title: doneProject.recap.title,
+      };
+    }
+
     if (item.week !== MOCK_WEEK.week) {
       return item;
     }
@@ -114,7 +129,7 @@ export default function MockDataProvider({ children }) {
         updateStoryCard,
         deleteStoryCard,
         removeRecordFromCards,
-        footprintWeeks: getFootprintWeeks(weekStatus),
+        footprintWeeks: getFootprintWeeks(weekStatus, projects),
         weekStatus,
         setWeekStatus,
         completeWeek,

@@ -22,9 +22,12 @@ export default function HomeContent({ userName }) {
   const { footprintWeeks, storyCards, weekStatus } = useMockData();
   const homeStatus = HOME_WEEK_STATUS[weekStatus];
   const earnedStickers = getEarnedStickers(footprintWeeks);
-  const visiblePlaceholders = STATUSES_WITHOUT_CURRENT_SLOT.includes(homeStatus)
-    ? HOME_PLACEHOLDER_STICKERS.filter(({ kind }) => kind !== "current")
-    : HOME_PLACEHOLDER_STICKERS;
+  // 이미 받은 스티커의 예정 자리와, 이번 주가 끝났을 때의 + 자리는 보여 주지 않는다.
+  const visiblePlaceholders = HOME_PLACEHOLDER_STICKERS.filter(
+    ({ kind, week }) =>
+      !earnedStickers.some((sticker) => sticker.week === week) &&
+      (kind !== "current" || !STATUSES_WITHOUT_CURRENT_SLOT.includes(homeStatus)),
+  );
 
   return (
     <>
@@ -33,7 +36,9 @@ export default function HomeContent({ userName }) {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.75fr_1fr]">
           <StickerBoard
             count={earnedStickers.length}
-            stickers={[...selectBoardStickers(earnedStickers), ...visiblePlaceholders]}
+            stickers={[...selectBoardStickers(earnedStickers), ...visiblePlaceholders].toSorted(
+              (a, b) => a.week - b.week,
+            )}
           />
           <div className="grid gap-4 md:grid-cols-2 lg:flex lg:flex-col">
             <ProjectsCard />

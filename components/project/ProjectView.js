@@ -70,7 +70,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
     addStoryCard({
       id: crypto.randomUUID(),
       projectId: project.id,
-      week: MOCK_WEEK.week,
+      week: project.recap?.week ?? MOCK_WEEK.week,
       type: "project",
       whenLabel: `${project.name} · ${MOCK_TODAY.date.split("/")[0]}월`,
       shape: "sunFine",
