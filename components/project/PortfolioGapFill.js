@@ -42,7 +42,8 @@ function GapList({ gaps, getStatus }) {
 
 export default function PortfolioGapFill({ projectId, initialFilled, onComplete }) {
   const gaps = MOCK_PORTFOLIO_GAPS;
-  const examples = MOCK_PORTFOLIO_EXAMPLES[projectId];
+  // 새로 만든 프로젝트는 예시가 없어 시안의 예시를 함께 쓴다.
+  const examples = MOCK_PORTFOLIO_EXAMPLES[projectId] ?? MOCK_PORTFOLIO_EXAMPLES["central-hackathon"];
   const [index, setIndex] = useState(0);
   const [filled, setFilled] = useState(initialFilled);
   const gap = gaps[index];

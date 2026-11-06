@@ -17,7 +17,6 @@ export default function HomePage() {
     stickerCount,
     earnedStickers,
     placeholderStickers,
-    projects,
     recentRetrospectives,
   } = MOCK_HOME;
   const visiblePlaceholders = STATUSES_WITHOUT_CURRENT_SLOT.includes(weekStatus)
@@ -32,7 +31,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.75fr_1fr]">
           <StickerBoard count={stickerCount} stickers={visibleStickers} />
           <div className="grid gap-4 md:grid-cols-2 lg:flex lg:flex-col">
-            <ProjectsCard initialProjects={projects} />
+            <ProjectsCard />
             <MatchingPromoCard />
           </div>
         </div>

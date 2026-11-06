@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useMockData } from "@/components/layout/MockDataProvider";
 import Card from "@/components/ui/Card";
 import Modal from "@/components/ui/Modal";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
+import { MOCK_TODAY } from "@/lib/mock/projects";
 import NewProjectForm from "./NewProjectForm";
 import SectionHeader from "./SectionHeader";
 
@@ -27,12 +29,12 @@ function ProjectRow({ project, summary, action }) {
 }
 
 function ActiveProjectRow({ project }) {
-  const { id, name, recordCount, lastRecordedAt } = project;
+  const { id, name, records, startedAt } = project;
 
   return (
     <ProjectRow
       project={project}
-      summary={`기록 ${recordCount} · ${lastRecordedAt}`}
+      summary={`기록 ${records.length} · ${records[0]?.date ?? startedAt}`}
       action={
         <Link
           href={`/projects/${id}?record=new`}
@@ -47,12 +49,12 @@ function ActiveProjectRow({ project }) {
 }
 
 function DoneProjectRow({ project }) {
-  const { id, name, recordCount, cardCount } = project;
+  const { id, name, records, representativeCards } = project;
 
   return (
     <ProjectRow
       project={project}
-      summary={`대표 카드 ${cardCount}장 · 기록 ${recordCount}`}
+      summary={`대표 카드 ${representativeCards.length}장 · 기록 ${records.length}`}
       action={
         <Link
           href={`/projects/${id}`}
@@ -66,29 +68,25 @@ function DoneProjectRow({ project }) {
   );
 }
 
-export default function ProjectsCard({ initialProjects }) {
-  const [projects, setProjects] = useState(initialProjects);
+export default function ProjectsCard() {
+  const { projects, addProject } = useMockData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const activeProjects = projects.filter(({ status }) => status === "active");
   const doneProjects = projects.filter(({ status }) => status === "done");
 
-  function handleCreate({ name }) {
-    const today = new Date();
-
-    // 프로젝트 API가 없어 화면 안에서만 추가한다. 새로고침하면 사라진다.
-    setProjects((current) => [
-      ...current,
-      {
-        id: crypto.randomUUID(),
-        name,
-        status: "active",
-        recordCount: 0,
-        cardCount: 0,
-        lastRecordedAt: `${today.getMonth() + 1}/${today.getDate()}`,
-        shape: "pentagon",
-        color: "blue",
-      },
-    ]);
+  function handleCreate({ name, role }) {
+    addProject({
+      id: crypto.randomUUID(),
+      name,
+      subtitle: "",
+      status: "active",
+      role,
+      startedAt: MOCK_TODAY.date,
+      representativeCards: [],
+      shape: "pentagon",
+      color: "blue",
+      records: [],
+    });
     setIsModalOpen(false);
   }
 

@@ -35,11 +35,12 @@ function ReviewTitle({ id, action, children }) {
 
 export default function PortfolioReview({ project, records, filled, competencies, onBack, onSave }) {
   const isFirstCard = project.status === "active";
+  const firstCardPreset = isFirstCard ? MOCK_PORTFOLIO_CARD.firstCardByProject[project.id] : undefined;
   const attachmentCount = getPortfolioAttachments(records, filled).length;
   const [markdown, setMarkdown] = useState(() => buildPortfolioMarkdown(project, records, filled));
   const [title, setTitle] = useState(() => {
-    if (isFirstCard) {
-      return MOCK_PORTFOLIO_CARD.first.title;
+    if (firstCardPreset) {
+      return firstCardPreset.title;
     }
 
     const did = records.find((record) => record.did)?.did;
@@ -47,9 +48,7 @@ export default function PortfolioReview({ project, records, filled, competencies
     return did ? `${project.name} · ${did} 경험` : "";
   });
   const [fields, setFields] = useState(() => buildCardDraft(project, records, filled));
-  const [tags, setTags] = useState(
-    isFirstCard ? MOCK_PORTFOLIO_CARD.first.tags : MOCK_PORTFOLIO_CARD.more.tags,
-  );
+  const [tags, setTags] = useState(firstCardPreset?.tags ?? MOCK_PORTFOLIO_CARD.defaultTags);
   const [copyNotice, setCopyNotice] = useState("");
 
   async function copyMarkdown() {

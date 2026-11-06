@@ -12,6 +12,11 @@ function joinSentences(sentences) {
   return sentences.map((sentence) => sentence.replace(/\.$/, "")).join(". ");
 }
 
+// 새로 만든 프로젝트는 부제가 없다.
+function getProjectTitle({ name, subtitle }) {
+  return subtitle ? `${name} · ${subtitle}` : name;
+}
+
 function getRecordDate({ date, weekday }) {
   return `${date}(${weekday})`;
 }
@@ -29,7 +34,7 @@ export function getPortfolioAttachments(records, filled) {
 }
 
 export function buildPortfolioMarkdown(project, records, filled) {
-  const { name, subtitle, status, role, startedAt, lastRecordedAt } = project;
+  const { status, role, startedAt, lastRecordedAt } = project;
   const results = [
     filled.result,
     ...records.map(({ result }) => result),
@@ -37,7 +42,7 @@ export function buildPortfolioMarkdown(project, records, filled) {
   ].filter(Boolean);
 
   return [
-    `# ${name} · ${subtitle}`,
+    `# ${getProjectTitle(project)}`,
     `- 기간: ${startedAt} ~ ${status === "active" ? "진행 중" : lastRecordedAt}\n- 역할: ${role}`,
     `## 내 역할\n${filled.role ?? missing("내 역할을")}`,
     `## 주요 기여\n${bulletLines(
@@ -58,7 +63,7 @@ export function buildCardDraft(project, records, filled) {
 
   return {
     situation: problems.length > 0
-      ? `${project.name} · ${project.subtitle}에서 ${problems.join(", ")}`
+      ? `${getProjectTitle(project)}에서 ${problems.join(", ")}`
       : missing("상황을"),
     action: actions.length > 0 ? joinSentences(actions) : missing("행동을"),
     result: results.length > 0 ? joinSentences(results) : missing("결과를"),
