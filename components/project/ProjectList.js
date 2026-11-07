@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
+import Toast from "@/components/ui/Toast";
 import NewProjectModal from "./NewProjectModal";
 import { formatRoles } from "./projectRoles";
 
@@ -52,7 +53,7 @@ function ProjectListCard({ project }) {
 
 // 프로젝트 목록(H-23, 15). 상단 메뉴 '프로젝트'로 들어온다.
 export default function ProjectList() {
-  const { projects } = useMockData();
+  const { projects, flashToast, hideFlashToast } = useMockData();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -84,6 +85,8 @@ export default function ProjectList() {
         );
       })}
       <NewProjectModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {/* 프로젝트를 지우고 넘어오면 안내한다(H-25). */}
+      <Toast toast={flashToast} onDismiss={hideFlashToast} />
     </>
   );
 }

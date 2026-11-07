@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { startTransition, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMockData } from "@/components/layout/MockDataProvider";
@@ -17,7 +17,8 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   const { records: projectRecords, status } = project;
   // 다른 페이지에 다녀와도 상태가 유지되므로(cacheComponents), 링크로 새로 들어오면 열려 있던 폼과 팝업을 닫는다.
   // 뒤로 가기로 돌아오면 bfcacheId가 그대로라 작성 중인 내용이 남는다. 기록과 카드 변경은 어느 경우든 유지한다.
-  const { bfcacheId } = useRouter();
+  const router = useRouter();
+  const { bfcacheId } = router;
 
   // 흐름을 연 시점의 bfcacheId를 기억해, 링크로 새로 들어오면 자동으로 프로젝트 화면으로 돌아간다.
   const [portfolioBfcacheId, setPortfolioBfcacheId] = useState(null);
@@ -32,6 +33,8 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
     addProjectRecord,
     updateProjectRecord,
     deleteProjectRecord,
+    deleteProject,
+    showFlashToast,
   } = useMockData();
   const cards = storyCards.filter(({ projectId }) => projectId === project.id);
   const viewingCard =
@@ -53,6 +56,15 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
 
   function deleteRecord(recordId) {
     deleteProjectRecord(project.id, recordId);
+  }
+
+  // 지우면 프로젝트 목록으로 옮겨 가서 안내한다(H-25). 이동과 삭제를 한 번에 반영해, 지운 프로젝트의 '찾을 수 없어요' 화면이 잠깐 보이지 않게 한다.
+  function removeProject() {
+    showFlashToast(`‘${project.name}’ 프로젝트를 지웠어요`);
+    startTransition(() => {
+      router.push("/projects");
+      deleteProject(project.id);
+    });
   }
 
   // 포트폴리오 Markdown만 저장한다. 처음이면 프로젝트를 완료로 바꾸고, 다시 만들면 안내한다(H-18).
@@ -109,6 +121,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
             key={`sidebar-${bfcacheId}`}
             status={status}
             portfolio={project.portfolio}
+            deleteProps={{ recordCount: records.length, cardCount: cards.length, onDelete: removeProject }}
             onMakePortfolio={() => setPortfolioBfcacheId(bfcacheId)}
           />
         </div>
