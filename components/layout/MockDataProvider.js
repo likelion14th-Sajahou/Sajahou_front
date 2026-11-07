@@ -70,10 +70,6 @@ export default function MockDataProvider({ children }) {
     );
   }
 
-  function addStoryCard(card) {
-    setStoryCards((current) => [...current, card]);
-  }
-
   function updateStoryCard(cardId, changes) {
     setStoryCards((current) =>
       current.map((card) => (card.id === cardId ? { ...card, ...changes } : card)),
@@ -148,7 +144,6 @@ export default function MockDataProvider({ children }) {
         addProject,
         updateProject,
         storyCards,
-        addStoryCard,
         updateStoryCard,
         deleteStoryCard,
         addProjectRecord,

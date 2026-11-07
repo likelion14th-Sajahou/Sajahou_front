@@ -5,7 +5,6 @@ export const STORY_CARD_TYPES = {
 };
 
 export const PORTFOLIO_TEXT = {
-  title: "포트폴리오 전문",
   copied: "포트폴리오를 복사했어요. 노션에 붙여 넣어 주세요.",
 };
 

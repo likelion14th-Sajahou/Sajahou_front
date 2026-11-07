@@ -33,7 +33,7 @@ function RecordOption({ record, isSelected, onToggle }) {
   );
 }
 
-export default function PortfolioRecordSelect({ isFirstCard, cardNumber, records, initialSelectedIds, onCancel, onNext }) {
+export default function PortfolioRecordSelect({ records, initialSelectedIds, onCancel, onNext }) {
   // 처음 마칠 때도 다시 만들 때도 모든 기록을 고른 채로 시작한다(H-16). 빈 곳 질문에서 돌아오면 고른 기록을 그대로 둔다.
   const [selectedIds, setSelectedIds] = useState(() => initialSelectedIds ?? records.map(({ id }) => id));
 
@@ -49,13 +49,12 @@ export default function PortfolioRecordSelect({ isFirstCard, cardNumber, records
     <Card as="section" size="md" aria-labelledby="portfolio-select-title" className="flex flex-col gap-4">
       <div>
         <p className="text-label leading-[20.8px] text-accent-strong">
-          1 / 3 · 기록 고르기{!isFirstCard && ` · 대표 카드 ${cardNumber}번째`}
+          1 / 3 · 기록 고르기
         </p>
         <h2 id="portfolio-select-title" className="text-title leading-8 tracking-[-0.4px] text-ink">
-          {isFirstCard ? "포트폴리오에 넣을 기록 고르기" : "새 대표 카드에 쓸 기록 고르기"}
+          포트폴리오에 넣을 기록 고르기
         </h2>
         <p className="text-label leading-[19.5px] text-ink-subtle">
-          {!isFirstCard && "이미 카드에 쓴 기록도 다시 고를 수 있어요. 같은 기록에서 다른 장면을 꺼내도 돼요. "}
           고른 기록만 근거로 써요. 기록에 없는 성과는 넣지 않아요.
         </p>
       </div>

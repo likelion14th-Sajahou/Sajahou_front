@@ -8,9 +8,6 @@ function bulletLines(lines, emptyLabel) {
   return lines.length > 0 ? lines.map((line) => `- ${line}`).join("\n") : missing(emptyLabel);
 }
 
-function joinSentences(sentences) {
-  return sentences.map((sentence) => sentence.replace(/\.$/, "")).join(". ");
-}
 
 // 새로 만든 프로젝트는 부제가 없다.
 function getProjectTitle({ name, subtitle }) {
@@ -54,25 +51,4 @@ export function buildPortfolioMarkdown(project, records, filled) {
     `## 산출물\n${bulletLines(getPortfolioAttachments(records, filled).map(getArtifactLine), "산출물을")}`,
     `## 배운 점\n${filled.learned ?? missing("배운 점을")}`,
   ].join("\n\n");
-}
-
-export function buildCardDraft(project, records, filled) {
-  const problems = records.map(({ problem }) => problem).filter(Boolean);
-  const actions = [filled.role, ...records.map(({ choice }) => choice)].filter(Boolean);
-  const results = [filled.result, ...records.map(({ result }) => result)].filter(Boolean);
-
-  return {
-    situation: problems.length > 0
-      ? `${getProjectTitle(project)}에서 ${problems.join(", ")}`
-      : missing("상황을"),
-    action: actions.length > 0 ? joinSentences(actions) : missing("행동을"),
-    result: results.length > 0 ? joinSentences(results) : missing("결과를"),
-  };
-}
-
-export function getEvidenceItems(records, attachmentCount) {
-  return [
-    ...records.map((record) => `${getRecordDate(record)} 기록 · ${record.did ?? ""}`),
-    ...(attachmentCount > 0 ? [`산출물 ${attachmentCount}개`] : []),
-  ];
 }

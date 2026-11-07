@@ -8,7 +8,6 @@ import StoryCardDetail from "@/components/my-record/StoryCardDetail";
 import Modal from "@/components/ui/Modal";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { MOCK_TODAY } from "@/lib/mock/projects";
-import { MOCK_WEEK } from "@/lib/mock/week";
 import ProjectPortfolio from "./ProjectPortfolio";
 import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
@@ -30,7 +29,6 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   const { toast, showToast, hideToast } = useToast();
   const {
     storyCards,
-    addStoryCard,
     updateStoryCard,
     deleteStoryCard,
     addProjectRecord,
@@ -67,23 +65,17 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
     deleteProjectRecord(project.id, recordId);
   }
 
-  function saveCard(card) {
-    addStoryCard({
-      id: crypto.randomUUID(),
-      projectId: project.id,
-      week: project.recap?.week ?? MOCK_WEEK.week,
-      type: "project",
-      whenLabel: project.name,
-      shape: "sunFine",
-      color: "yellow",
-      ...card,
-    });
-    // 처음 마칠 때는 완료 표시가 저장을 알려 주므로, 더 만들 때만 안내한다(H-18).
+  // 포트폴리오 Markdown만 저장한다. 처음이면 프로젝트를 완료로 바꾸고, 다시 만들면 안내한다(H-18).
+  function savePortfolio(markdown) {
+    // 검토 화면에서 '진행 중'이던 기간은 완료한 날로 바꿔 저장한다.
+    const periodLine = `- 기간: ${project.startedAt} ~ 진행 중`;
+    const savedMarkdown = markdown.replace(periodLine, `- 기간: ${project.startedAt} ~ ${MOCK_TODAY.date}`);
+
     if (status === "done") {
-      showToast(`대표 카드를 하나 더 저장했어요 (${cards.length + 1}장)`);
+      showToast("포트폴리오를 다시 저장했어요");
     }
 
-    onChangeProject((current) => ({ ...current, status: "done" }));
+    onChangeProject((current) => ({ ...current, status: "done", portfolio: { markdown: savedMarkdown } }));
     setHasRecordChanged(false);
     setPortfolioBfcacheId(null);
     // 검토 화면 아래쪽에서 저장하므로, 바뀐 프로젝트 화면을 처음부터 보여 준다.
@@ -101,11 +93,9 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
         <div className="pt-6">
           <ProjectPortfolio
             project={currentProject}
-            cardNumber={cards.length + 1}
             records={records}
-            competencies={competencies}
             onCancel={() => setPortfolioBfcacheId(null)}
-            onSaveCard={saveCard}
+            onSave={savePortfolio}
           />
         </div>
       ) : (
