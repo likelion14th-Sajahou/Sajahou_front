@@ -6,7 +6,7 @@ import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "./CompetencyTagPicker";
-import { SUMMARY_FIELDS } from "./storyCardTypes";
+import { RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTypes";
 
 export default function StoryCardEditForm({ card, competencies, onCancel, onSave }) {
   // 지금 파트 목록에 없는 태그(데모에서 파트를 바꿔 본 경우)는 빼고 시작한다.
@@ -62,7 +62,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
       ))}
       <label className="flex flex-col gap-1.5">
         <span className="text-label text-ink-muted">
-          {card.type === "project" ? "포트폴리오 전문" : "회고록 전문"}{" "}
+          {card.type === "project" ? RECORD_TEXT.title : "회고록 전문"}{" "}
           <span className="text-ink-subtle">· 노션에 붙여 넣는 글</span>
         </span>
         <textarea
