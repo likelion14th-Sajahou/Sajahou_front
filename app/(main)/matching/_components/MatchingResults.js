@@ -26,7 +26,7 @@ export default function MatchingResults({ result, onEdit, headingRef }) {
   }
 
   function copyAll() {
-    const text = result.answers.map((answer, index) => `## ${index + 1}. ${answer.question}\n\n${answer.parts.length ? answer.editedText ?? draftText(answer.parts) : "(맞는 카드가 아직 없어요)"}`).join("\n\n");
+    const text = result.answers.map((answer, index) => `## ${index + 1}. ${answer.question}\n\n${answer.parts.length ? answer.editedText ?? draftText(answer.parts) : "(이 문항에 맞는 카드가 아직 없어요)"}`).join("\n\n");
     copy(`# ${result.company} 자소서 초안\n\n${text}`, "전체 답을 복사했어요.");
   }
 
@@ -37,6 +37,8 @@ export default function MatchingResults({ result, onEdit, headingRef }) {
           <h2 id="matching-competencies" ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-[24px] tracking-[-0.48px] outline-none">공고가 원하는 역량</h2>
           <p className="text-label text-ink-subtle">공고·우대사항·인재상에서 찾았어요</p>
         </div>
+        {/* 공고에서 역량을 하나도 찾지 못하면 공고 내용을 더 넣도록 안내한다(M-06). */}
+        {result.competencies.length > 0 ? (
           <ul className="grid grid-cols-2 gap-x-10">
             {result.competencies.map((competency) => {
               // 눌러서 보는 나의 사자록의 역량 필터 결과와 같은 수를 보여 준다.
@@ -57,6 +59,9 @@ export default function MatchingResults({ result, onEdit, headingRef }) {
               );
             })}
           </ul>
+        ) : (
+          <p className="text-body-sm text-ink-subtle">주요 업무나 우대사항을 조금 더 넣어 주세요</p>
+        )}
       </section>
       <section aria-labelledby="matching-answers" className="mt-24 flex flex-col gap-7 border-t-2 border-dashed border-[#d9d4ca] pt-12">
         <div className="flex items-center justify-between gap-4">

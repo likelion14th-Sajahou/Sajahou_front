@@ -81,7 +81,10 @@ export default function MatchingAnswerCard({ answer, index, company, onEdit, onC
           </div>
           {gapCount > 0 && <p className="rounded-xl bg-tint-yellow px-3 py-2.5 text-label text-tint-yellow-ink">⚑ 빈칸 {gapCount}곳은 사자록에 기록이 없어 비워 뒀어요. 지어내지 않았어요. 회고에서 이 부분까지 남기면 다음엔 바로 채워져요.</p>}
         </>
-      ) : null}
+      ) : (
+        // 문항에 맞는 카드가 없으면 초안을 만들지 않고 안내한다(M-08).
+        <p className="text-body-sm text-ink-subtle">이 문항에 맞는 카드가 아직 없어요.</p>
+      )}
     </Card>
   );
 }
