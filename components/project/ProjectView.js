@@ -39,7 +39,8 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   // 기록을 저장하면 나의 사자록에 프로젝트 카드 1장이 함께 생긴다(H-22).
   function addRecord(record) {
     setHasRecordChanged(true);
-    addProjectRecord(project.id, { id: crypto.randomUUID(), ...MOCK_TODAY, tags: [], ...record });
+    addProjectRecord(project.id, { id: crypto.randomUUID(), ...MOCK_TODAY, ...record });
+    setToastMessage("기록을 저장했어요 · 나의 사자록에 카드 1장");
   }
 
   function saveRecord(recordId, changes) {
