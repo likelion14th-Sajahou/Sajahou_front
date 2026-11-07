@@ -1,6 +1,6 @@
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
-import LoginDecorations from "./_components/LoginDecorations";
+import AuthDecorations from "../_components/AuthDecorations";
 
 export const metadata = {
   title: "로그인 | 사자록",
@@ -9,7 +9,7 @@ export const metadata = {
 export default function LoginPage() {
   return (
     <main className="relative isolate flex min-h-[max(720px,100svh)] items-center justify-center overflow-hidden px-4 py-12">
-      <LoginDecorations />
+      <AuthDecorations />
       <section
         aria-labelledby="login-title"
         className="relative w-full max-w-[520px] rounded-[28px] bg-white px-6 pt-9 pb-[30px] shadow-[0_20px_60px_rgba(31,36,51,0.08)] sm:px-9"
