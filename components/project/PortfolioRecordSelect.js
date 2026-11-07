@@ -33,9 +33,9 @@ function RecordOption({ record, isSelected, onToggle }) {
   );
 }
 
-export default function PortfolioRecordSelect({ isFirstCard, cardNumber, records, onCancel, onNext }) {
-  // 처음 마칠 때도 다시 만들 때도 모든 기록을 고른 채로 시작한다(H-16).
-  const [selectedIds, setSelectedIds] = useState(() => records.map(({ id }) => id));
+export default function PortfolioRecordSelect({ isFirstCard, cardNumber, records, initialSelectedIds, onCancel, onNext }) {
+  // 처음 마칠 때도 다시 만들 때도 모든 기록을 고른 채로 시작한다(H-16). 빈 곳 질문에서 돌아오면 고른 기록을 그대로 둔다.
+  const [selectedIds, setSelectedIds] = useState(() => initialSelectedIds ?? records.map(({ id }) => id));
 
   function toggleRecord(recordId) {
     setSelectedIds((current) =>

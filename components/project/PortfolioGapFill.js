@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
-import { MOCK_PORTFOLIO_EXAMPLES, MOCK_PORTFOLIO_GAPS } from "@/lib/mock/projects";
+import { MOCK_PORTFOLIO_GAPS } from "@/lib/mock/projects";
 import AiQuestionForm from "./AiQuestionForm";
 import PortfolioArtifactRequest from "./PortfolioArtifactRequest";
 import SidebarTitle from "./SidebarTitle";
@@ -40,11 +40,10 @@ function GapList({ gaps, getStatus }) {
   );
 }
 
-export default function PortfolioGapFill({ projectId, initialFilled, onComplete }) {
+// 첫 질문은 '← 기록 고르기', 다음부터 '← 이전 질문'(H-17). 포트폴리오에서 '← 이전 질문으로'로 오면 마지막 질문부터 보여 준다(H-18).
+export default function PortfolioGapFill({ initialFilled, startAtLast = false, onBackToRecords, onComplete }) {
   const gaps = MOCK_PORTFOLIO_GAPS;
-  // 새로 만든 프로젝트는 예시가 없어 시안의 예시를 함께 쓴다.
-  const examples = MOCK_PORTFOLIO_EXAMPLES[projectId] ?? MOCK_PORTFOLIO_EXAMPLES["central-hackathon"];
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(startAtLast ? gaps.length - 1 : 0);
   const [filled, setFilled] = useState(initialFilled);
   const gap = gaps[index];
   const progress = `${index + 1} / ${gaps.length}`;
@@ -58,6 +57,11 @@ export default function PortfolioGapFill({ projectId, initialFilled, onComplete 
     setFilled(nextFilled);
     setIndex(index + 1);
   }
+
+  const backProps = {
+    backLabel: index === 0 ? "← 기록 고르기" : "← 이전 질문",
+    onBack: index === 0 ? onBackToRecords : () => setIndex(index - 1),
+  };
 
   function getStatus({ id }, gapIndex) {
     if (gapIndex === index) {
@@ -82,8 +86,8 @@ export default function PortfolioGapFill({ projectId, initialFilled, onComplete 
               category={<GapCategory gap={gap} />}
               progress={progress}
               question={gap.question}
-              exampleAttachments={examples[gap.id]}
               initialAttachments={filled[gap.id]}
+              {...backProps}
               onSubmit={(attachments) => goNext({ ...filled, [gap.id]: attachments })}
               onSkip={() => goNext({ ...filled, [gap.id]: undefined })}
             />
@@ -95,8 +99,8 @@ export default function PortfolioGapFill({ projectId, initialFilled, onComplete 
               source={gap.gap}
               question={gap.question}
               placeholder="확인할 수 있는 것만 적어 주세요"
-              exampleAnswer={examples[gap.id]}
               initialAnswer={filled[gap.id]}
+              {...backProps}
               onAnswer={(answer) => goNext({ ...filled, [gap.id]: answer })}
               onSkip={() => goNext({ ...filled, [gap.id]: undefined })}
             />
