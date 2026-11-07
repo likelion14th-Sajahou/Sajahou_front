@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import TextLink from "@/components/ui/TextLink";
 import RecordFormFooter from "./RecordFormFooter";
 
 function RecordOption({ record, isSelected, onToggle }) {
-  const { date, weekday, did, problem, attachments, cardNumbers } = record;
+  const { date, weekday, did, problem, attachments } = record;
   const title = [`${date}(${weekday})`, did].filter(Boolean).join(" · ");
   const summary = [problem, attachments.length > 0 && `첨부 ${attachments.length}개`]
     .filter(Boolean)
@@ -27,9 +26,6 @@ function RecordOption({ record, isSelected, onToggle }) {
       <span className="flex min-w-0 flex-col">
         <span className="flex flex-wrap items-center gap-1 text-body text-ink">
           <span className="leading-6">{title}</span>
-          {cardNumbers.map((number) => (
-            <Badge key={number} tone="amber">카드 {number}에 쓰임</Badge>
-          ))}
         </span>
         {summary && <span className="text-label leading-[19.5px] text-ink-subtle">{summary}</span>}
       </span>
@@ -38,10 +34,8 @@ function RecordOption({ record, isSelected, onToggle }) {
 }
 
 export default function PortfolioRecordSelect({ isFirstCard, cardNumber, records, onCancel, onNext }) {
-  // 아직 카드에 안 쓴 기록을 고른 채로 시작한다. 처음 마칠 때는 모든 기록이 여기에 해당한다(H-16, H-22).
-  const [selectedIds, setSelectedIds] = useState(() =>
-    records.filter(({ cardNumbers }) => cardNumbers.length === 0).map(({ id }) => id),
-  );
+  // 처음 마칠 때도 다시 만들 때도 모든 기록을 고른 채로 시작한다(H-16).
+  const [selectedIds, setSelectedIds] = useState(() => records.map(({ id }) => id));
 
   function toggleRecord(recordId) {
     setSelectedIds((current) =>

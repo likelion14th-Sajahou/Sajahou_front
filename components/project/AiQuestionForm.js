@@ -4,7 +4,7 @@ import { useState } from "react";
 import Button from "@/components/ui/Button";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
-import Toast from "@/components/ui/Toast";
+import Toast, { useToast } from "@/components/ui/Toast";
 import AiPromptHeader from "./AiPromptHeader";
 
 // 질문이 바뀌면 입력을 비우도록, 쓰는 곳에서 질문별 key를 준다.
@@ -20,11 +20,11 @@ export default function AiQuestionForm({
   onSkip,
 }) {
   const [answer, setAnswer] = useState(initialAnswer);
-  const [notice, setNotice] = useState("");
+  const { toast, showToast, hideToast } = useToast();
 
   function submitAnswer() {
     if (!answer.trim()) {
-      setNotice("답을 적거나, 모르겠으면 건너뛰어도 돼요");
+      showToast("답을 적거나, 모르겠으면 건너뛰어도 돼요");
       return;
     }
 
@@ -49,7 +49,7 @@ export default function AiQuestionForm({
         <TextLink onClick={onSkip}>건너뛰기</TextLink>
         <Button className="ml-auto" onClick={submitAnswer}>답하고 다음 →</Button>
       </div>
-      <Toast message={notice} onDismiss={() => setNotice("")} />
+      <Toast toast={toast} onDismiss={hideToast} />
     </div>
   );
 }

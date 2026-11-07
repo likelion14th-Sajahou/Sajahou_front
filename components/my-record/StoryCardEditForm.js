@@ -4,16 +4,16 @@ import { useState } from "react";
 import Button from "@/components/ui/Button";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
-import Toast from "@/components/ui/Toast";
+import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "./CompetencyTagPicker";
-import { SUMMARY_FIELDS } from "./storyCardTypes";
+import { RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTypes";
 
 export default function StoryCardEditForm({ card, competencies, onCancel, onSave }) {
   // 지금 파트 목록에 없는 태그(데모에서 파트를 바꿔 본 경우)는 빼고 시작한다.
   const [selectedTags, setSelectedTags] = useState(() =>
     card.tags.filter((tag) => competencies.includes(tag)),
   );
-  const [toastMessage, setToastMessage] = useState("");
+  const { toast, showToast, hideToast } = useToast();
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -25,7 +25,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
     }
 
     if (!selectedTags.length) {
-      setToastMessage(EMPTY_TAGS_MESSAGE);
+      showToast(EMPTY_TAGS_MESSAGE);
       return;
     }
 
@@ -48,7 +48,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         competencies={competencies}
         selectedTags={selectedTags}
         onChange={setSelectedTags}
-        onLimit={setToastMessage}
+        onLimit={showToast}
       />
       {SUMMARY_FIELDS.map(({ key, label }) => (
         <TextField
@@ -62,7 +62,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
       ))}
       <label className="flex flex-col gap-1.5">
         <span className="text-label text-ink-muted">
-          {card.type === "project" ? "포트폴리오 전문" : "회고록 전문"}{" "}
+          {card.type === "project" ? RECORD_TEXT.title : "회고록 전문"}{" "}
           <span className="text-ink-subtle">· 노션에 붙여 넣는 글</span>
         </span>
         <textarea
@@ -75,7 +75,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         <TextLink onClick={onCancel}>취소</TextLink>
         <Button type="submit">저장</Button>
       </div>
-      <Toast message={toastMessage} onDismiss={() => setToastMessage("")} />
+      <Toast toast={toast} onDismiss={hideToast} />
     </form>
   );
 }

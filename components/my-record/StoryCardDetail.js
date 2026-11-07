@@ -7,7 +7,7 @@ import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
 import CompetencyTags from "./CompetencyTags";
 import StoryCardEditForm from "./StoryCardEditForm";
-import { COPY_FAILED_MESSAGE, PORTFOLIO_TEXT, STORY_CARD_TYPES, SUMMARY_FIELDS } from "./storyCardTypes";
+import { COPY_FAILED_MESSAGE, RECORD_TEXT, STORY_CARD_TYPES, SUMMARY_FIELDS } from "./storyCardTypes";
 
 const RECAP_TEXT = {
   title: "회고록 전문",
@@ -91,7 +91,8 @@ function SummaryDetails({ summary }) {
 export default function StoryCardDetail({ card, competencies, titleId, onClose, onDelete, onUpdate }) {
   const { type, whenLabel, shape, color, title, tags, evidence, document, summary } = card;
   const { label, tone } = STORY_CARD_TYPES[type];
-  const documentText = type === "project" ? PORTFOLIO_TEXT : RECAP_TEXT;
+  const isProjectCard = type === "project";
+  const documentText = isProjectCard ? RECORD_TEXT : RECAP_TEXT;
   const [copyNotice, setCopyNotice] = useState("");
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -171,7 +172,9 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
               <p className="text-body-sm">
                 이 카드를 지울까요?
                 <br />
-                그 주 스티커는 남고, 자소서 매칭에는 더 이상 쓰이지 않아요. 지운 카드는 되돌릴 수 없어요.
+                {/* 프로젝트 카드는 기록과 한 쌍이라 기록도 함께 지워진다(H-22). */}
+                {isProjectCard ? "프로젝트의 이 기록도 함께 지워지고" : "그 주 스티커는 남고"}, 자소서 매칭에는 더 이상
+                쓰이지 않아요. 지운 카드는 되돌릴 수 없어요.
               </p>
               <div className="flex items-center justify-between gap-3.5 pt-1">
                 {/* 삭제 버튼이 사라져도 포커스를 잃지 않고, 안내가 화면에 보이도록 취소로 옮긴다. */}

@@ -13,63 +13,31 @@ import SectionHeader from "./SectionHeader";
 
 const MODAL_TITLE_ID = "new-project-title";
 
-function ProjectRow({ project, summary, action }) {
-  const { id, name, shape, color } = project;
+// 진행 중과 완료 프로젝트가 같은 모양이고, 완료 프로젝트는 스티커를 회색으로 보여 준다(H-08, 01 시안).
+// 완료한 프로젝트도 + 로 기록을 더할 수 있다(H-09, H-21).
+function ProjectRow({ project, summary }) {
+  const { id, name, status, shape, color } = project;
 
   return (
     <li className="flex items-center gap-3 rounded-2xl bg-canvas px-3 py-2.5">
-      <ShapeCharacter shape={shape} color={color} size={34} />
+      <ShapeCharacter shape={shape} color={status === "done" ? "muted" : color} size={34} />
       <Link href={`/projects/${id}`} className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-body text-ink">{name}</span>
         <span className="text-[12.5px] text-ink-subtle">{summary}</span>
       </Link>
-      {action}
+      <Link
+        href={`/projects/${id}?record=new`}
+        aria-label={`${name} 기록 추가`}
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-title text-white"
+      >
+        +
+      </Link>
     </li>
   );
 }
 
-function ActiveProjectRow({ project }) {
-  const { id, name, records, startedAt } = project;
-
-  return (
-    <ProjectRow
-      project={project}
-      summary={`기록 ${records.length} · ${records[0]?.date ?? startedAt}`}
-      action={
-        <Link
-          href={`/projects/${id}?record=new`}
-          aria-label={`${name} 기록 추가`}
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-title text-white"
-        >
-          +
-        </Link>
-      }
-    />
-  );
-}
-
-function DoneProjectRow({ project, cardCount }) {
-  const { id, name, records } = project;
-
-  return (
-    <ProjectRow
-      project={project}
-      summary={`대표 카드 ${cardCount}장 · 기록 ${records.length}`}
-      action={
-        <Link
-          href={`/projects/${id}`}
-          aria-label={`${name} 대표 카드 더 만들기`}
-          className="shrink-0 text-label text-ink underline decoration-from-font [text-underline-position:from-font]"
-        >
-          카드 더 만들기
-        </Link>
-      }
-    />
-  );
-}
-
 export default function ProjectsCard() {
-  const { projects, addProject, storyCards } = useMockData();
+  const { projects, addProject } = useMockData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const activeProjects = projects.filter(({ status }) => status === "active");
   const doneProjects = projects.filter(({ status }) => status === "done");
@@ -95,7 +63,11 @@ export default function ProjectsCard() {
       {activeProjects.length > 0 ? (
         <ul className="flex w-full flex-col gap-2">
           {activeProjects.map((project) => (
-            <ActiveProjectRow key={project.id} project={project} />
+            <ProjectRow
+              key={project.id}
+              project={project}
+              summary={`기록 ${project.records.length} · ${project.records[0]?.date ?? project.startedAt}`}
+            />
           ))}
         </ul>
       ) : (
@@ -106,10 +78,10 @@ export default function ProjectsCard() {
           <p className="h-6 pt-1.5 pl-1 text-[12.5px] leading-5 text-ink-subtle">완료</p>
           <ul className="flex w-full flex-col gap-2">
             {doneProjects.map((project) => (
-              <DoneProjectRow
+              <ProjectRow
                 key={project.id}
                 project={project}
-                cardCount={storyCards.filter(({ projectId }) => projectId === project.id).length}
+                summary={`기록 ${project.records.length}`}
               />
             ))}
           </ul>

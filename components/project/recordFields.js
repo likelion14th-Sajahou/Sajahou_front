@@ -6,3 +6,6 @@ export const RECORD_FIELDS = [
   { key: "result", label: "결과·반응", formLabel: "결과나 받은 반응", placeholder: "예) 멘토가 흐름이 명확해졌다고 함" },
   { key: "next", label: "다음", formLabel: "다음에 할 일", placeholder: "예) 프로토타입 연결" },
 ];
+
+// 5칸과 첨부가 모두 비어 있는 기록을 저장하려 할 때의 안내다(H-14). 기록 추가와 수정이 함께 쓴다.
+export const EMPTY_RECORD_MESSAGE = "5칸 중 한 칸 이상 적거나 자료를 첨부해 주세요.";
