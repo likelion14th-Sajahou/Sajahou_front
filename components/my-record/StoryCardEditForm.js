@@ -4,7 +4,7 @@ import { useState } from "react";
 import Button from "@/components/ui/Button";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
-import Toast from "@/components/ui/Toast";
+import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "./CompetencyTagPicker";
 import { SUMMARY_FIELDS } from "./storyCardTypes";
 
@@ -13,7 +13,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
   const [selectedTags, setSelectedTags] = useState(() =>
     card.tags.filter((tag) => competencies.includes(tag)),
   );
-  const [toastMessage, setToastMessage] = useState("");
+  const { toast, showToast, hideToast } = useToast();
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -25,7 +25,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
     }
 
     if (!selectedTags.length) {
-      setToastMessage(EMPTY_TAGS_MESSAGE);
+      showToast(EMPTY_TAGS_MESSAGE);
       return;
     }
 
@@ -48,7 +48,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         competencies={competencies}
         selectedTags={selectedTags}
         onChange={setSelectedTags}
-        onLimit={setToastMessage}
+        onLimit={showToast}
       />
       {SUMMARY_FIELDS.map(({ key, label }) => (
         <TextField
@@ -75,7 +75,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         <TextLink onClick={onCancel}>취소</TextLink>
         <Button type="submit">저장</Button>
       </div>
-      <Toast message={toastMessage} onDismiss={() => setToastMessage("")} />
+      <Toast toast={toast} onDismiss={hideToast} />
     </form>
   );
 }

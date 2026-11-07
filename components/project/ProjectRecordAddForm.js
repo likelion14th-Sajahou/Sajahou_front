@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
-import Toast from "@/components/ui/Toast";
+import Toast, { useToast } from "@/components/ui/Toast";
 import { MOCK_RECORD_EXAMPLE } from "@/lib/mock/projects";
 import ProjectRecordQuestions from "./ProjectRecordQuestions";
 import ProjectRecordReview from "./ProjectRecordReview";
@@ -30,7 +30,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
   const [step, setStep] = useState("materials");
   const [isOrganizedByAi, setIsOrganizedByAi] = useState(false);
   const [tags, setTags] = useState([]);
-  const [toastMessage, setToastMessage] = useState("");
+  const { toast, showToast, hideToast } = useToast();
 
   function getFieldValueProps(key) {
     return {
@@ -54,7 +54,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
   // 5칸을 직접 채운 경우에도 정리 결과 확인에서 역량 태그를 고른 뒤 저장한다(H-12).
   function organizeDirectly() {
     if (!hasRecordContent()) {
-      setToastMessage(EMPTY_RECORD_MESSAGE);
+      showToast(EMPTY_RECORD_MESSAGE);
       return;
     }
 
@@ -64,12 +64,12 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
 
   function saveRecord() {
     if (!hasRecordContent()) {
-      setToastMessage(EMPTY_RECORD_MESSAGE);
+      showToast(EMPTY_RECORD_MESSAGE);
       return;
     }
 
     if (tags.length === 0) {
-      setToastMessage(EMPTY_TAGS_MESSAGE);
+      showToast(EMPTY_TAGS_MESSAGE);
       return;
     }
 
@@ -132,7 +132,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
             tags={tags}
             getFieldValueProps={getFieldValueProps}
             onChangeTags={setTags}
-            onTagLimit={setToastMessage}
+            onTagLimit={showToast}
             onBack={returnToMaterials}
             onSave={saveRecord}
           />
@@ -198,7 +198,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
           </div>
         )}
       </div>
-      <Toast message={toastMessage} onDismiss={() => setToastMessage("")} />
+      <Toast toast={toast} onDismiss={hideToast} />
     </Card>
   );
 }

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMockData } from "@/components/layout/MockDataProvider";
-import Toast from "@/components/ui/Toast";
+import Toast, { useToast } from "@/components/ui/Toast";
 import { MOCK_TODAY } from "@/lib/mock/projects";
 import { MOCK_WEEK } from "@/lib/mock/week";
 import ProjectPortfolio from "./ProjectPortfolio";
@@ -23,7 +23,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   // 흐름을 연 시점의 bfcacheId를 기억해, 링크로 새로 들어오면 자동으로 프로젝트 화면으로 돌아간다.
   const [portfolioBfcacheId, setPortfolioBfcacheId] = useState(null);
   const isMakingPortfolio = portfolioBfcacheId === bfcacheId;
-  const [toastMessage, setToastMessage] = useState("");
+  const { toast, showToast, hideToast } = useToast();
   const {
     storyCards,
     addStoryCard,
@@ -40,7 +40,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   function addRecord(record) {
     setHasRecordChanged(true);
     addProjectRecord(project.id, { id: crypto.randomUUID(), ...MOCK_TODAY, ...record });
-    setToastMessage("기록을 저장했어요 · 나의 사자록에 카드 1장");
+    showToast("기록을 저장했어요 · 나의 사자록에 카드 1장");
   }
 
   function saveRecord(recordId, changes) {
@@ -72,7 +72,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
     });
     // 처음 마칠 때는 완료 표시가 저장을 알려 주므로, 더 만들 때만 안내한다(H-18).
     if (status === "done") {
-      setToastMessage(`대표 카드를 하나 더 저장했어요 (${cards.length + 1}장)`);
+      showToast(`대표 카드를 하나 더 저장했어요 (${cards.length + 1}장)`);
     }
 
     onChangeProject((current) => ({ ...current, status: "done" }));
@@ -124,7 +124,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
           />
         </div>
       )}
-      <Toast message={toastMessage} onDismiss={() => setToastMessage("")} />
+      <Toast toast={toast} onDismiss={hideToast} />
     </>
   );
 }

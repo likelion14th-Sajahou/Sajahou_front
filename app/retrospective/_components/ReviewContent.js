@@ -7,7 +7,7 @@ import Card from "@/components/ui/Card";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
-import Toast from "@/components/ui/Toast";
+import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import { buildWeekStoryCard } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
@@ -25,7 +25,7 @@ export default function ReviewContent({ initialDraft }) {
   const { competencies, completeWeek } = useMockData();
   const [draft, setDraft] = useState(initialDraft);
   const [notice, setNotice] = useState("");
-  const [toastMessage, setToastMessage] = useState("");
+  const { toast, showToast, hideToast } = useToast();
 
   function updateStory(name, value) {
     setDraft((previous) => ({ ...previous, story: { ...previous.story, [name]: value } }));
@@ -85,7 +85,7 @@ export default function ReviewContent({ initialDraft }) {
             selectedTags={draft.selectedTags}
             listClassName=""
             onChange={(selectedTags) => setDraft((previous) => ({ ...previous, selectedTags }))}
-            onLimit={setToastMessage}
+            onLimit={showToast}
           />
           <div className="text-label text-ink-muted">
             <h3 className="mb-1.5">기록에서 확인한 근거</h3>
@@ -103,7 +103,7 @@ export default function ReviewContent({ initialDraft }) {
                 <Button variant="accent" href={getStepHref("complete")} onClick={(event) => {
                   if (!draft.selectedTags.length) {
                     event.preventDefault();
-                    setToastMessage(EMPTY_TAGS_MESSAGE);
+                    showToast(EMPTY_TAGS_MESSAGE);
                     return;
                   }
                   setCompletedDraft(draft);
@@ -115,7 +115,7 @@ export default function ReviewContent({ initialDraft }) {
         </Card>
       </div>
       <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
-      <Toast message={toastMessage} onDismiss={() => setToastMessage("")} />
+      <Toast toast={toast} onDismiss={hideToast} />
     </>
   );
 }
