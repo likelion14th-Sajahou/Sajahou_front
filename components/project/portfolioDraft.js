@@ -1,3 +1,5 @@
+import { formatRoles } from "./projectRoles";
+
 // 실제로는 AI가 고른 기록과 답변으로 글을 쓴다. 목업에서는 기록과 답변을 시안의 틀에 그대로 넣어,
 // 기록에 없는 성과가 만들어지지 않게 한다(H-16). 빈 항목은 채워 달라는 표시로 남긴다(H-18).
 function missing(label) {
@@ -31,7 +33,7 @@ export function getPortfolioAttachments(records, filled) {
 }
 
 export function buildPortfolioMarkdown(project, records, filled) {
-  const { status, role, startedAt, endedAt } = project;
+  const { status, roles, startedAt, endedAt } = project;
   const results = [
     filled.result,
     ...records.map(({ result }) => result),
@@ -41,7 +43,7 @@ export function buildPortfolioMarkdown(project, records, filled) {
   return [
     `# ${getProjectTitle(project)}`,
     // 진행 중이면 '진행 중'으로 보여 주고, 저장할 때 마친 날로 바꾼다.
-    `- 기간: ${startedAt} ~ ${status === "active" ? "진행 중" : endedAt}\n- 역할: ${role}`,
+    `- 기간: ${startedAt} ~ ${status === "active" ? "진행 중" : endedAt}\n- 역할: ${formatRoles(roles)}`,
     `## 내 역할\n${filled.role ?? missing("내 역할을")}`,
     `## 주요 기여\n${bulletLines(
       records.filter(({ did }) => did).map((record) => `${getRecordDate(record)} ${record.did}`),

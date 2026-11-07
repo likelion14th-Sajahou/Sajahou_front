@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatRoles } from "./projectRoles";
 
 const STATUS_LABELS = {
   active: "진행 중",
@@ -6,7 +7,7 @@ const STATUS_LABELS = {
 };
 
 export default function ProjectHeader({ project, recordCount, lastRecordedAt }) {
-  const { name, subtitle, status, role, startedAt } = project;
+  const { name, subtitle, status, roles, startedAt } = project;
   const stats = [
     { label: "기록", value: recordCount },
     { label: "시작", value: startedAt },
@@ -20,7 +21,7 @@ export default function ProjectHeader({ project, recordCount, lastRecordedAt }) 
           ← 홈
         </Link>
         <p className="text-label text-accent-strong">
-          {STATUS_LABELS[status]} · {role}
+          {STATUS_LABELS[status]} · {formatRoles(roles)}
         </p>
         <h1 className="text-[38px] leading-[1.2] tracking-[-0.76px] text-ink">
           {name} <span className="text-[22.8px] text-ink-subtle">{subtitle}</span>

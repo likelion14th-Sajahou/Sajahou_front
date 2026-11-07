@@ -42,13 +42,13 @@ export default function ProjectsCard() {
   const activeProjects = projects.filter(({ status }) => status === "active");
   const doneProjects = projects.filter(({ status }) => status === "done");
 
-  function handleCreate({ name, role }) {
+  function handleCreate({ name, roles }) {
     addProject({
       id: crypto.randomUUID(),
       name,
       subtitle: "",
       status: "active",
-      role,
+      roles,
       startedAt: MOCK_TODAY.date,
       shape: "pentagon",
       color: "blue",

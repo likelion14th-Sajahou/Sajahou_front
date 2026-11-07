@@ -6,18 +6,35 @@ import Chip from "@/components/ui/Chip";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
+import { PROJECT_ROLES } from "@/components/project/projectRoles";
 
-const ROLES = ["PM", "기획", "디자인", "프론트엔드", "백엔드"];
+const DEFAULT_ROLES = ["기획"];
 
 export default function NewProjectForm({ titleId, onCancel, onCreate }) {
-  const [role, setRole] = useState("기획");
+  const [roles, setRoles] = useState(DEFAULT_ROLES);
+  const [roleError, setRoleError] = useState("");
+
+  // 역할은 여러 개 고를 수 있고, 목록 순서대로 저장한다(H-10).
+  function toggleRole(role) {
+    setRoles((current) =>
+      current.includes(role)
+        ? current.filter((item) => item !== role)
+        : PROJECT_ROLES.filter((item) => item === role || current.includes(item)),
+    );
+    setRoleError("");
+  }
 
   function handleSubmit(event) {
     event.preventDefault();
     const name = new FormData(event.currentTarget).get("name").trim();
 
+    if (roles.length === 0) {
+      setRoleError("역할을 하나 이상 골라 주세요");
+      return;
+    }
+
     if (name) {
-      onCreate({ name, role });
+      onCreate({ name, roles });
     }
   }
 
@@ -37,19 +54,21 @@ export default function NewProjectForm({ titleId, onCancel, onCreate }) {
       />
       <div role="group" aria-labelledby="new-project-role" className="flex flex-col gap-1.5">
         <span id="new-project-role" className="text-label text-ink-muted">
-          내 역할
+          내 역할 <span className="text-ink-subtle">· 여러 개 고를 수 있어요</span>
         </span>
         <div className="flex flex-wrap gap-1.5">
-          {ROLES.map((item) => (
-            <Chip key={item} selected={item === role} onClick={() => setRole(item)}>
+          {PROJECT_ROLES.map((item) => (
+            <Chip key={item} selected={roles.includes(item)} onClick={() => toggleRole(item)}>
               {item}
             </Chip>
           ))}
         </div>
+        {roleError && (
+          <p role="alert" className="pt-0.5 text-label text-tint-red-ink">
+            {roleError}
+          </p>
+        )}
       </div>
-      <p className="text-label leading-[19.5px] text-ink-subtle">
-        나머지는 진행하면서 기록으로 채워요.
-      </p>
       <div className="flex items-center justify-between gap-3.5 pt-1">
         <TextLink onClick={onCancel}>취소</TextLink>
         <Button type="submit">만들기</Button>
