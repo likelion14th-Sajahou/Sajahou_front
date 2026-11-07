@@ -31,7 +31,7 @@ export function getPortfolioAttachments(records, filled) {
 }
 
 export function buildPortfolioMarkdown(project, records, filled) {
-  const { status, role, startedAt, lastRecordedAt } = project;
+  const { status, role, startedAt, endedAt } = project;
   const results = [
     filled.result,
     ...records.map(({ result }) => result),
@@ -40,7 +40,8 @@ export function buildPortfolioMarkdown(project, records, filled) {
 
   return [
     `# ${getProjectTitle(project)}`,
-    `- 기간: ${startedAt} ~ ${status === "active" ? "진행 중" : lastRecordedAt}\n- 역할: ${role}`,
+    // 진행 중이면 '진행 중'으로 보여 주고, 저장할 때 마친 날로 바꾼다.
+    `- 기간: ${startedAt} ~ ${status === "active" ? "진행 중" : endedAt}\n- 역할: ${role}`,
     `## 내 역할\n${filled.role ?? missing("내 역할을")}`,
     `## 주요 기여\n${bulletLines(
       records.filter(({ did }) => did).map((record) => `${getRecordDate(record)} ${record.did}`),

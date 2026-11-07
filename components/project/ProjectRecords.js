@@ -10,10 +10,8 @@ import ProjectRecordAddForm from "./ProjectRecordAddForm";
 import ProjectRecordForm from "./ProjectRecordForm";
 import { RECORD_FIELDS } from "./recordFields";
 
-const ADD_RECORD_HINTS = {
-  active: "회의록·시안·링크를 올리면 AI가 정리를 도와요",
-  done: "완료한 프로젝트도 기록을 더하거나 고칠 수 있어요",
-};
+// 완료한 프로젝트에는 별도 안내 문구가 없다(H-21, 12-a).
+const ADD_RECORD_HINT = "회의록·시안·링크를 올리면 AI가 정리를 도와요";
 
 function DeleteConfirm({ onCancel, onConfirm }) {
   return (
@@ -135,7 +133,9 @@ export default function ProjectRecords({
       ) : (
         <div className="flex items-center gap-2">
           <Button onClick={() => setIsAdding(true)}>+ 기록 추가</Button>
-          <p className="text-label leading-[19.5px] text-ink-subtle">{ADD_RECORD_HINTS[status]}</p>
+          {status === "active" && (
+            <p className="text-label leading-[19.5px] text-ink-subtle">{ADD_RECORD_HINT}</p>
+          )}
         </div>
       )}
       {records.length > 0 ? (
