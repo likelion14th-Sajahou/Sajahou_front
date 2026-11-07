@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMockData } from "@/components/layout/MockDataProvider";
+import StoryCardDetail from "@/components/my-record/StoryCardDetail";
+import Modal from "@/components/ui/Modal";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { MOCK_TODAY } from "@/lib/mock/projects";
 import { MOCK_WEEK } from "@/lib/mock/week";
@@ -23,6 +25,8 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   // 흐름을 연 시점의 bfcacheId를 기억해, 링크로 새로 들어오면 자동으로 프로젝트 화면으로 돌아간다.
   const [portfolioBfcacheId, setPortfolioBfcacheId] = useState(null);
   const isMakingPortfolio = portfolioBfcacheId === bfcacheId;
+  // 기록의 '카드 보기'로 연 카드 팝업(A-10)이다. 링크로 새로 들어오면 닫히도록 연 시점의 bfcacheId도 기억한다.
+  const [cardView, setCardView] = useState(null);
   const { toast, showToast, hideToast } = useToast();
   const {
     storyCards,
@@ -34,6 +38,10 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
     deleteProjectRecord,
   } = useMockData();
   const cards = storyCards.filter(({ projectId }) => projectId === project.id);
+  const viewingCard =
+    cardView?.bfcacheId === bfcacheId
+      ? cards.find(({ recordId }) => recordId === cardView.recordId)
+      : undefined;
   const records = projectRecords;
 
   // 기록을 저장하면 나의 사자록에 프로젝트 카드 1장이 함께 생긴다(H-22).
@@ -110,6 +118,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
             onAddRecord={addRecord}
             onSaveRecord={saveRecord}
             onDeleteRecord={deleteRecord}
+            onViewCard={(recordId) => setCardView({ recordId, bfcacheId })}
           />
           <ProjectSidebar
             key={`sidebar-${bfcacheId}`}
@@ -124,6 +133,26 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
           />
         </div>
       )}
+      <Modal
+        open={Boolean(viewingCard)}
+        onClose={() => setCardView(null)}
+        size="lg"
+        aria-labelledby="record-card-title"
+      >
+        {viewingCard && (
+          <StoryCardDetail
+            card={viewingCard}
+            competencies={competencies}
+            titleId="record-card-title"
+            onClose={() => setCardView(null)}
+            onDelete={() => {
+              deleteStoryCard(viewingCard.id);
+              setCardView(null);
+            }}
+            onUpdate={(changes) => updateStoryCard(viewingCard.id, changes)}
+          />
+        )}
+      </Modal>
       <Toast toast={toast} onDismiss={hideToast} />
     </>
   );

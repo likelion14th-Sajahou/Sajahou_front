@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import CompetencyTags from "@/components/my-record/CompetencyTags";
+import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import AttachmentChip from "./AttachmentChip";
@@ -30,8 +32,8 @@ function DeleteConfirm({ onCancel, onConfirm }) {
   );
 }
 
-function RecordItem({ record, isLast, onEdit, onDelete }) {
-  const { date, weekday, attachments } = record;
+function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
+  const { date, weekday, tags, organizedByAi, attachments } = record;
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   return (
@@ -45,8 +47,10 @@ function RecordItem({ record, isLast, onEdit, onDelete }) {
         <div className="flex items-center justify-between">
           <p className="flex items-center gap-1 text-label text-ink-muted">
             {date}({weekday})
+            {organizedByAi && <Badge>AI와 정리</Badge>}
           </p>
           <div className="flex items-center gap-3">
+            <TextLink size="sm" onClick={() => onViewCard(record.id)}>카드 보기</TextLink>
             <TextLink size="sm" onClick={() => onEdit(record.id)}>수정</TextLink>
             <TextLink variant="danger" size="sm" onClick={() => setIsConfirmingDelete(true)}>삭제</TextLink>
           </div>
@@ -59,6 +63,7 @@ function RecordItem({ record, isLast, onEdit, onDelete }) {
             </div>
           ))}
         </dl>
+        {tags.length > 0 && <CompetencyTags tags={tags} />}
         {attachments.length > 0 && (
           <ul aria-label="첨부 자료" className="flex flex-wrap gap-2">
             {attachments.map((attachment) => (
@@ -84,6 +89,7 @@ export default function ProjectRecords({
   onAddRecord,
   onSaveRecord,
   onDeleteRecord,
+  onViewCard,
 }) {
   const { status } = project;
   const [editingRecordId, setEditingRecordId] = useState();
@@ -139,6 +145,7 @@ export default function ProjectRecords({
               key={record.id}
               record={record}
               isLast={index === records.length - 1}
+              onViewCard={onViewCard}
               onEdit={startEditing}
               onDelete={(recordId) => {
                 onDeleteRecord(recordId);
