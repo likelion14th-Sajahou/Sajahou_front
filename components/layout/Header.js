@@ -4,6 +4,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAuth } from "./AuthProvider";
+import TextLink from "@/components/ui/TextLink";
 
 const NAV_ITEMS = [
   { href: "/", label: "홈" },
@@ -43,6 +45,7 @@ function CurrentNavLinks() {
 
 export default function Header() {
   const { user } = useMockData();
+  const { logout } = useAuth();
 
   return (
     <header className="w-full border-b border-transparent">
@@ -64,6 +67,7 @@ export default function Header() {
               {user.name} <span className="text-ink-subtle">{user.part}</span>
             </p>
           )}
+          <TextLink size="sm" onClick={() => logout()}>로그아웃</TextLink>
         </nav>
       </div>
     </header>

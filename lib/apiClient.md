@@ -33,6 +33,7 @@ const data = await apiRequest(path, options);
 | `token` | 해당 요청에만 `Authorization: Bearer ...` 설정 |
 | `timeoutMs` | 선택 사항. 1~2147483647의 정수(ms), 생략하면 Client 자체 타임아웃 없음 |
 | `signal` | 호출부 AbortController의 signal 전달 |
+| `baseUrl` | 선택 사항. 해당 요청의 API origin을 지정. 인증 HTTP mock은 현재 origin 사용 |
 | 나머지 | `cache`, `next`, `credentials` 등 fetch 옵션 그대로 전달 |
 
 경로는 `/users/me`처럼 `/api/v1` 이후 부분을 전달한다. 동적 path 값은 호출부에서 `encodeURIComponent`로 인코딩한다. GET/HEAD에는 body 대신 query를 사용한다.

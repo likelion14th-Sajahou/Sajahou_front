@@ -1,6 +1,5 @@
-import Button from "@/components/ui/Button";
-import TextLink from "@/components/ui/TextLink";
 import AuthDecorations from "../_components/AuthDecorations";
+import LoginActions from "./_components/LoginActions";
 
 export const metadata = {
   title: "로그인 | 사자록",
@@ -26,18 +25,7 @@ export default function LoginPage() {
         <p className="mt-1 text-label leading-[19.5px] text-ink-subtle">
           멋쟁이사자처럼 중앙대 아기사자의 기록장
         </p>
-        {/* 인증 및 데모 이동은 API 명세와 동작 요구사항 확정 후 연결한다. */}
-        <div className="mt-[22px] flex flex-col items-center gap-[14px]">
-          <Button
-            variant="outline"
-            className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
-          >
-            Google 계정으로 계속하기
-          </Button>
-          <TextLink className="leading-[21px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
-            데모 계정으로 둘러보기
-          </TextLink>
-        </div>
+        <LoginActions />
       </section>
     </main>
   );
