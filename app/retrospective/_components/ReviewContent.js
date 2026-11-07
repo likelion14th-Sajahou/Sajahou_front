@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import Chip from "@/components/ui/Chip";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
+import Toast from "@/components/ui/Toast";
+import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import { buildWeekStoryCard } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
@@ -24,24 +25,10 @@ export default function ReviewContent({ initialDraft }) {
   const { competencies, completeWeek } = useMockData();
   const [draft, setDraft] = useState(initialDraft);
   const [notice, setNotice] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
 
   function updateStory(name, value) {
     setDraft((previous) => ({ ...previous, story: { ...previous.story, [name]: value } }));
-  }
-
-  function toggleTag(tag) {
-    const selected = draft.selectedTags.includes(tag);
-    if (!selected && draft.selectedTags.length >= 3) {
-      setNotice("역량 태그는 최대 3개까지 선택할 수 있어요. 선택한 태그를 먼저 빼 주세요.");
-      return;
-    }
-    setDraft((previous) => ({
-      ...previous,
-      selectedTags: selected
-        ? previous.selectedTags.filter((item) => item !== tag)
-        : [...previous.selectedTags, tag],
-    }));
-    setNotice("");
   }
 
   async function copyRetrospective() {
@@ -92,16 +79,14 @@ export default function ReviewContent({ initialDraft }) {
               className={height ?? ""}
             />
           ))}
-          <fieldset className="min-w-0">
-            <legend className="mb-1.5 text-label text-ink-muted">
-              역량 태그 <span className="text-ink-subtle">· AI가 정해진 역량 15개 중에서 골랐어요. 눌러서 빼거나 더할 수 있어요 (최대 3개)</span>
-            </legend>
-            <div className="flex flex-wrap">
-              {competencies.map((tag) => (
-                <Chip key={tag} size="sm" selected={draft.selectedTags.includes(tag)} onClick={() => toggleTag(tag)}>#{tag}</Chip>
-              ))}
-            </div>
-          </fieldset>
+          <CompetencyTagPicker
+            id="review-tags-label"
+            competencies={competencies}
+            selectedTags={draft.selectedTags}
+            listClassName=""
+            onChange={(selectedTags) => setDraft((previous) => ({ ...previous, selectedTags }))}
+            onLimit={setToastMessage}
+          />
           <div className="text-label text-ink-muted">
             <h3 className="mb-1.5">기록에서 확인한 근거</h3>
             <ul className="flex flex-col gap-1">
@@ -115,7 +100,12 @@ export default function ReviewContent({ initialDraft }) {
               <TextLink href={`${getStepHref("questions")}&preview=questions-complete`}>← 질문으로</TextLink>
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 수정한 내용이 사라져요.")}>나중에 이어쓰기</Button>
-                <Button variant="accent" href={getStepHref("complete")} onClick={() => {
+                <Button variant="accent" href={getStepHref("complete")} onClick={(event) => {
+                  if (!draft.selectedTags.length) {
+                    event.preventDefault();
+                    setToastMessage(EMPTY_TAGS_MESSAGE);
+                    return;
+                  }
                   setCompletedDraft(draft);
                   completeWeek(buildWeekStoryCard(draft, isAssignment));
                 }}>저장하고 사자록에 추가</Button>
@@ -125,6 +115,7 @@ export default function ReviewContent({ initialDraft }) {
         </Card>
       </div>
       <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
+      <Toast message={toastMessage} onDismiss={() => setToastMessage("")} />
     </>
   );
 }
