@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMockData } from "@/components/layout/MockDataProvider";
 
 const NAV_ITEMS = [
   { href: "/", label: "홈" },
@@ -40,7 +41,9 @@ function CurrentNavLinks() {
   return <NavLinks pathname={usePathname()} />;
 }
 
-export default function Header({ userName, userPart }) {
+export default function Header() {
+  const { user } = useMockData();
+
   return (
     <header className="w-full border-b border-transparent">
       <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-x-6 gap-y-2 p-4">
@@ -56,9 +59,9 @@ export default function Header({ userName, userPart }) {
           <Suspense fallback={<NavLinks />}>
             <CurrentNavLinks />
           </Suspense>
-          {userName && (
+          {user && (
             <p className="hidden text-label text-ink sm:block">
-              {userName} <span className="text-ink-subtle">{userPart}</span>
+              {user.name} <span className="text-ink-subtle">{user.part}</span>
             </p>
           )}
         </nav>

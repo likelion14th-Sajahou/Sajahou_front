@@ -21,7 +21,7 @@ const STORY_FIELDS = [
 
 export default function ReviewContent({ initialDraft }) {
   const { setCompletedDraft, getStepHref, isAssignment } = useRetrospectivePreview();
-  const { completeWeek } = useMockData();
+  const { competencies, completeWeek } = useMockData();
   const [draft, setDraft] = useState(initialDraft);
   const [notice, setNotice] = useState("");
 
@@ -97,7 +97,7 @@ export default function ReviewContent({ initialDraft }) {
               역량 태그 <span className="text-ink-subtle">· AI가 정해진 역량 15개 중에서 골랐어요. 눌러서 빼거나 더할 수 있어요 (최대 3개)</span>
             </legend>
             <div className="flex flex-wrap">
-              {initialDraft.availableTags.map((tag) => (
+              {competencies.map((tag) => (
                 <Chip key={tag} size="sm" selected={draft.selectedTags.includes(tag)} onClick={() => toggleTag(tag)}>#{tag}</Chip>
               ))}
             </div>

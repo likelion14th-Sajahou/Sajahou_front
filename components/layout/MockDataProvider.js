@@ -1,9 +1,11 @@
 "use client";
 
 import { createContext, use, useState } from "react";
+import { getCompetencyNames } from "@/lib/mock/competencies";
 import { FOOTPRINT_WEEKS } from "@/lib/mock/myRecord";
 import { MOCK_PROJECTS } from "@/lib/mock/projects";
 import { MOCK_STORY_CARDS } from "@/lib/mock/storyCards";
+import { MOCK_USER } from "@/lib/mock/user";
 import { MOCK_WEEK } from "@/lib/mock/week";
 
 const MockDataContext = createContext(null);
@@ -63,9 +65,16 @@ function withDeletedRecordEvidence(card) {
 // API가 없는 동안 화면끼리 공유하는 목업 데이터다. 페이지를 옮겨 다녀도 유지되고, 새로고침하면 처음 값으로 돌아간다.
 // API를 연결할 때 이 안쪽을 실제 요청으로 바꾸면 화면 코드는 그대로 쓸 수 있다.
 export default function MockDataProvider({ children }) {
+  const [user, setUser] = useState(MOCK_USER);
   const [projects, setProjects] = useState(MOCK_PROJECTS);
   const [storyCards, setStoryCards] = useState(INITIAL_STORY_CARDS);
   const [weekStatus, setWeekStatus] = useState(MOCK_WEEK.status);
+
+  // 회고의 '데모 · 파트 바꿔 보기'(시연용)로 바뀐다. 상단 메뉴, 역량 태그 목록, 회고 화면이 모두 이 파트를 따른다.
+  // 실제 서비스에서는 가입 때 고른 파트로 고정된다(S-04).
+  function setUserPart(part) {
+    setUser((current) => ({ ...current, part }));
+  }
 
   function addProject(project) {
     setProjects((current) => [...current, project]);
@@ -121,6 +130,9 @@ export default function MockDataProvider({ children }) {
   return (
     <MockDataContext
       value={{
+        user,
+        setUserPart,
+        competencies: getCompetencyNames(user.part),
         projects,
         addProject,
         updateProject,

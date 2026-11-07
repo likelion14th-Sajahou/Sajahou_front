@@ -3,20 +3,22 @@
 import { createContext, useContext, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useMockData } from "@/components/layout/MockDataProvider";
 import Chip from "@/components/ui/Chip";
+import { PARTS } from "@/lib/mock/user";
 
 const RetrospectivePreviewContext = createContext(null);
-const PARTS = ["기획·디자인", "프론트엔드", "백엔드"];
 
 // 데모 파트와 과제 선택을 제목 영역과 자료 폼에서 함께 사용한다.
-// 로그인한 사용자의 실제 파트나 서버 데이터는 변경하지 않는다.
-export default function RetrospectivePreview({ initialPart, children }) {
-  const [part, setPart] = useState(initialPart);
+// 데모 파트는 목업 사용자의 파트라서, 바꾸면 상단 메뉴와 다른 화면의 역량 태그 목록도 함께 바뀐다.
+// 실제 서비스에는 없는 시연용 기능이고, 서버 데이터는 변경하지 않는다.
+export default function RetrospectivePreview({ children }) {
+  const { user, setUserPart } = useMockData();
   const [assignmentStatus, setAssignmentStatus] = useState("record");
   const [completedDraft, setCompletedDraft] = useState(null);
 
   return (
-    <RetrospectivePreviewContext value={{ part, setPart, assignmentStatus, setAssignmentStatus, completedDraft, setCompletedDraft }}>
+    <RetrospectivePreviewContext value={{ part: user.part, setPart: setUserPart, assignmentStatus, setAssignmentStatus, completedDraft, setCompletedDraft }}>
       {children}
     </RetrospectivePreviewContext>
   );
