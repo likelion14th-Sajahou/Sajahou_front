@@ -53,7 +53,7 @@ export default function AiQuestionsContent({ initialComplete = false }) {
               questions={MOCK_AI_QUESTIONS}
               responses={responses}
               reviewHref={getStepHref("review")}
-              onReturn={() => { setIsComplete(false); setNotice(""); }}
+              onEdit={(index) => { setCurrentIndex(index); setIsComplete(false); setNotice(""); }}
             />
           ) : (
             <Card as="section" size="md" className="min-w-0 rounded-[28px]" aria-labelledby="ai-question-title">
