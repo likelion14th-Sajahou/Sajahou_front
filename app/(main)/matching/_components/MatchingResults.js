@@ -6,6 +6,12 @@ import Button from "@/components/ui/Button";
 import { draftText } from "@/lib/mock/matchingResult";
 import MatchingAnswerCard from "./MatchingAnswerCard";
 
+// 내 카드 수에 따라 색을 나눈다: 2장 이상 초록, 1장 노랑, 없음 빨강(M-06).
+function getCountTone(cardCount) {
+  if (cardCount >= 2) return "green";
+  return cardCount === 1 ? "yellow" : "red";
+}
+
 export default function MatchingResults({ result, onEdit, headingRef }) {
   const { storyCards } = useMockData();
   const [notice, setNotice] = useState("");
@@ -42,9 +48,9 @@ export default function MatchingResults({ result, onEdit, headingRef }) {
                   <h3 className="text-[16px]">#{competency.name}</h3>
                   {cardCount > 0 ? (
                     <Link href={`/my-record?tag=${encodeURIComponent(competency.name)}`} className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${competency.name} 카드 ${cardCount}장 보기`}>
-                      <Badge tone="green" size="count">{cardCount}장 보기 →</Badge>
+                      <Badge tone={getCountTone(cardCount)} size="count">{cardCount}장 보기 →</Badge>
                     </Link>
-                  ) : <Badge>없음</Badge>}
+                  ) : <Badge tone={getCountTone(cardCount)} size="count">없음</Badge>}
                 </div>
                 <p className="mt-1 text-body-sm text-ink-subtle">“{competency.quote}”</p>
               </li>
