@@ -4,14 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import Card from "@/components/ui/Card";
-import Modal from "@/components/ui/Modal";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
-import { MOCK_TODAY } from "@/lib/mock/projects";
-import NewProjectForm from "./NewProjectForm";
+import NewProjectModal from "@/components/project/NewProjectModal";
 import SectionHeader from "./SectionHeader";
-
-const MODAL_TITLE_ID = "new-project-title";
 
 // 진행 중과 완료 프로젝트가 같은 모양이고, 완료 프로젝트는 스티커를 회색으로 보여 준다(H-08, 01 시안).
 // 완료한 프로젝트도 + 로 기록을 더할 수 있다(H-09, H-21).
@@ -37,25 +33,10 @@ function ProjectRow({ project, summary }) {
 }
 
 export default function ProjectsCard() {
-  const { projects, addProject } = useMockData();
+  const { projects } = useMockData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const activeProjects = projects.filter(({ status }) => status === "active");
   const doneProjects = projects.filter(({ status }) => status === "done");
-
-  function handleCreate({ name, roles }) {
-    addProject({
-      id: crypto.randomUUID(),
-      name,
-      subtitle: "",
-      status: "active",
-      roles,
-      startedAt: MOCK_TODAY.date,
-      shape: "pentagon",
-      color: "blue",
-      records: [],
-    });
-    setIsModalOpen(false);
-  }
 
   return (
     <Card as="section" className="flex flex-col items-start gap-3.5">
@@ -66,7 +47,8 @@ export default function ProjectsCard() {
             <ProjectRow
               key={project.id}
               project={project}
-              summary={`기록 ${project.records.length} · ${project.records[0]?.date ?? project.startedAt}`}
+              // 기록이 없는 새 프로젝트는 마지막 기록 날짜를 빼고 보여 준다.
+              summary={[`기록 ${project.records.length}`, project.records[0]?.date].filter(Boolean).join(" · ")}
             />
           ))}
         </ul>
@@ -88,17 +70,7 @@ export default function ProjectsCard() {
         </>
       )}
       <TextLink onClick={() => setIsModalOpen(true)}>+ 새 프로젝트</TextLink>
-      <Modal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        aria-labelledby={MODAL_TITLE_ID}
-      >
-        <NewProjectForm
-          titleId={MODAL_TITLE_ID}
-          onCancel={() => setIsModalOpen(false)}
-          onCreate={handleCreate}
-        />
-      </Modal>
+      <NewProjectModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </Card>
   );
 }
