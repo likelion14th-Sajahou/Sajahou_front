@@ -7,6 +7,7 @@ import Card from "@/components/ui/Card";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
+import Toast, { useToast } from "@/components/ui/Toast";
 import { MOCK_AI_QUESTIONS } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import AiQuestionsComplete from "./AiQuestionsComplete";
@@ -16,11 +17,13 @@ export default function AiQuestionsContent({ initialComplete = false }) {
   const { getStepHref } = useRetrospectivePreview();
   const [currentIndex, setCurrentIndex] = useState(initialComplete ? MOCK_AI_QUESTIONS.length - 1 : 0);
   const [isComplete, setIsComplete] = useState(initialComplete);
-  const [responses, setResponses] = useState(() => Object.fromEntries(MOCK_AI_QUESTIONS.map((item, index) => [item.id, {
-    answer: initialComplete || index === 0 ? item.exampleAnswer : "",
+  // AI는 질문만 하고 답은 사용자가 직접 쓴다(C-07). 질문 끝 미리보기(initialComplete)만 시안의 답을 채워 보여 준다.
+  const [responses, setResponses] = useState(() => Object.fromEntries(MOCK_AI_QUESTIONS.map((item) => [item.id, {
+    answer: initialComplete ? item.exampleAnswer : "",
     status: initialComplete ? "answered" : "pending",
   }])));
   const [notice, setNotice] = useState("");
+  const { toast, showToast, hideToast } = useToast();
   const question = MOCK_AI_QUESTIONS[currentIndex];
   const answer = responses[question.id].answer;
 
@@ -31,7 +34,7 @@ export default function AiQuestionsContent({ initialComplete = false }) {
 
   function advance(skipped = false) {
     if (!skipped && !answer.trim()) {
-      setNotice("답변을 입력하거나 건너뛰기를 선택해주세요.");
+      showToast("답을 적거나, 모르겠으면 건너뛰어도 돼요");
       return;
     }
     setResponses((previous) => ({ ...previous, [question.id]: { ...previous[question.id], status: skipped ? "skipped" : "answered" } }));
@@ -77,7 +80,13 @@ export default function AiQuestionsContent({ initialComplete = false }) {
                   className="h-[98px]"
                 />
                 <div className="flex items-center gap-3">
-                  <TextLink onClick={() => { updateAnswer(question.exampleAnswer); setNotice("예시 답변을 넣었어요."); }}>예시 답변 넣기</TextLink>
+                  {/* 첫 질문은 자료 단계로, 두 번째부터는 앞 질문으로 돌아간다(R-16). */}
+                  {currentIndex === 0 ? (
+                    <TextLink href={getStepHref("materials")}>← 자료로</TextLink>
+                  ) : (
+                    <TextLink onClick={() => { setCurrentIndex(currentIndex - 1); setNotice(""); }}>← 이전 질문</TextLink>
+                  )}
+                  <span aria-hidden="true" className="h-4 w-px bg-line" />
                   <TextLink onClick={() => advance(true)}>건너뛰기</TextLink>
                   <Button className="ml-auto" onClick={() => advance()}>답하고 다음 →</Button>
                 </div>
@@ -108,6 +117,7 @@ export default function AiQuestionsContent({ initialComplete = false }) {
           </div>
         </Card>
       </div>
+      <Toast toast={toast} onDismiss={hideToast} />
     </>
   );
 }
