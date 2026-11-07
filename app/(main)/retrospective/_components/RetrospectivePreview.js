@@ -49,6 +49,9 @@ export function useRetrospectivePreview() {
 
 export function RetrospectiveHeading({ week }) {
   const { part, setPart, assignmentPending, isAssignment, isComplete, isStarted, completedDraft } = useRetrospectivePreview();
+  const searchParams = useSearchParams();
+  // 화면 확인용 주소(?preview=assignment-pending)로 들어왔으면 세션 탭으로 돌아가도 탭이 보이도록 유지한다.
+  const sessionHref = searchParams.get("preview") === "assignment-pending" ? "/retrospective?preview=assignment-pending" : "/retrospective";
   const sessionStatusLabel = (!isAssignment && isComplete) || completedDraft ? "완료" : "작성 중";
   const assignmentStatusLabel = !isAssignment || !isStarted ? "시작 전" : isComplete ? "완료" : "작성 중";
 
@@ -61,10 +64,11 @@ export function RetrospectiveHeading({ week }) {
           {week}주차 {isAssignment ? "과제" : "세션"} 회고
         </h1>
         {(assignmentPending || isAssignment) && (
-          <div aria-label="회고 작성 상태" className="flex max-w-full flex-wrap gap-1.5 pt-2">
-            <Chip selected={!isAssignment} disabled className="disabled:cursor-default">세션 회고 · {sessionStatusLabel}</Chip>
-            <Chip selected={isAssignment} disabled className="disabled:cursor-default">과제 회고 · {assignmentStatusLabel}</Chip>
-          </div>
+          <nav aria-label="회고 작성 상태" className="flex max-w-full flex-wrap gap-1.5 pt-2">
+            {/* 세션 회고와 과제 회고를 오가는 전환 탭이다(R-01). */}
+            <Chip selected={!isAssignment} href={sessionHref}>세션 회고 · {sessionStatusLabel}</Chip>
+            <Chip selected={isAssignment} href="/retrospective?type=assignment">과제 회고 · {assignmentStatusLabel}</Chip>
+          </nav>
         )}
       </div>
       <div className="flex min-w-0 max-w-full flex-col items-end gap-1.5">

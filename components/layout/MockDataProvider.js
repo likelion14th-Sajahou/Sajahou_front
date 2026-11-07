@@ -16,18 +16,19 @@ const PROJECT_RECAP_STICKER = { shape: "sun", color: "yellow", isProjectRecap: t
 
 // 사자 발자국과 스티커 보드가 함께 쓰는 주차 목록이다.
 // 이번 주 칸은 회고 상태에 따라, 프로젝트 회고 칸은 프로젝트를 완료하면 바뀐다.
-function getFootprintWeeks(weekStatus, projects) {
+// 완료한 뒤 지운 프로젝트의 스티커는 keptRecaps로 남긴다.
+function getFootprintWeeks(weekStatus, projects, keptRecaps) {
   return FOOTPRINT_WEEKS.map((item) => {
-    const doneProject = projects.find(
-      ({ recap, status }) => status === "done" && recap?.week === item.week,
-    );
+    const recap =
+      projects.find(({ recap, status }) => status === "done" && recap?.week === item.week)?.recap ??
+      keptRecaps.find(({ week }) => week === item.week);
 
-    if (doneProject) {
+    if (recap) {
       return {
         ...item,
         ...PROJECT_RECAP_STICKER,
         status: "done",
-        title: doneProject.recap.title,
+        title: recap.title,
       };
     }
 
@@ -51,6 +52,9 @@ const INITIAL_STORY_CARDS = addMissingRecordCards(MOCK_STORY_CARDS, MOCK_PROJECT
 export default function MockDataProvider({ children }) {
   const [user, setUser] = useState(MOCK_USER);
   const [projects, setProjects] = useState(MOCK_PROJECTS);
+  const [keptRecaps, setKeptRecaps] = useState([]);
+  // 다른 화면으로 옮겨 가서 띄울 토스트다. 예: 프로젝트를 지우고 목록에서 안내(H-25).
+  const [flashToast, setFlashToast] = useState(null);
   const [storyCards, setStoryCards] = useState(INITIAL_STORY_CARDS);
   const [weekStatus, setWeekStatus] = useState(MOCK_WEEK.status);
 
@@ -74,6 +78,22 @@ export default function MockDataProvider({ children }) {
     setStoryCards((current) =>
       current.map((card) => (card.id === cardId ? { ...card, ...changes } : card)),
     );
+  }
+
+  // 프로젝트의 기록·카드·포트폴리오를 함께 지운다. 이미 받은 프로젝트 스티커는 남긴다(H-25).
+  function deleteProject(projectId) {
+    const project = projects.find(({ id }) => id === projectId);
+
+    if (project?.status === "done" && project.recap) {
+      setKeptRecaps((current) => [...current, project.recap]);
+    }
+
+    setProjects((current) => current.filter(({ id }) => id !== projectId));
+    setStoryCards((current) => current.filter((card) => card.projectId !== projectId));
+  }
+
+  function showFlashToast(message) {
+    setFlashToast({ id: crypto.randomUUID(), message });
   }
 
   function changeRecords(projectId, update) {
@@ -149,7 +169,11 @@ export default function MockDataProvider({ children }) {
         addProjectRecord,
         updateProjectRecord,
         deleteProjectRecord,
-        footprintWeeks: getFootprintWeeks(weekStatus, projects),
+        deleteProject,
+        flashToast,
+        showFlashToast,
+        hideFlashToast: () => setFlashToast(null),
+        footprintWeeks: getFootprintWeeks(weekStatus, projects, keptRecaps),
         weekStatus,
         setWeekStatus,
         completeWeek,
