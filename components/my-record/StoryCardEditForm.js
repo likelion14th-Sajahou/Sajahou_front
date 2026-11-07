@@ -4,11 +4,16 @@ import { useState } from "react";
 import Button from "@/components/ui/Button";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
-import CompetencyTagPicker from "./CompetencyTagPicker";
+import Toast from "@/components/ui/Toast";
+import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "./CompetencyTagPicker";
 import { SUMMARY_FIELDS } from "./storyCardTypes";
 
 export default function StoryCardEditForm({ card, competencies, onCancel, onSave }) {
-  const [selectedTags, setSelectedTags] = useState(card.tags);
+  // 지금 파트 목록에 없는 태그(데모에서 파트를 바꿔 본 경우)는 빼고 시작한다.
+  const [selectedTags, setSelectedTags] = useState(() =>
+    card.tags.filter((tag) => competencies.includes(tag)),
+  );
+  const [toastMessage, setToastMessage] = useState("");
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -16,6 +21,11 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
     const title = formData.get("title").trim();
 
     if (!title) {
+      return;
+    }
+
+    if (!selectedTags.length) {
+      setToastMessage(EMPTY_TAGS_MESSAGE);
       return;
     }
 
@@ -38,6 +48,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         competencies={competencies}
         selectedTags={selectedTags}
         onChange={setSelectedTags}
+        onLimit={setToastMessage}
       />
       {SUMMARY_FIELDS.map(({ key, label }) => (
         <TextField
@@ -64,6 +75,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         <TextLink onClick={onCancel}>취소</TextLink>
         <Button type="submit">저장</Button>
       </div>
+      <Toast message={toastMessage} onDismiss={() => setToastMessage("")} />
     </form>
   );
 }

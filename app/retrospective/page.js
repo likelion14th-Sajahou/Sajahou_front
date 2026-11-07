@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { MOCK_RETROSPECTIVE } from "@/lib/mock/retrospective";
-import { MOCK_USER } from "@/lib/mock/user";
 import RetrospectiveContent from "./_components/RetrospectiveContent";
 import RetrospectivePreview, { RetrospectiveHeading } from "./_components/RetrospectivePreview";
 
@@ -10,7 +9,7 @@ export const metadata = {
 
 export default function RetrospectivePage({ searchParams }) {
   return (
-    <RetrospectivePreview initialPart={MOCK_USER.part}>
+    <RetrospectivePreview>
       <main className="mx-auto w-full max-w-[1120px] px-4 pt-6 pb-20">
         <Suspense
           fallback={

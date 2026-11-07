@@ -30,6 +30,7 @@ function matchesSearch({ title, tags, evidence }, search) {
 export default function StoryCardsPanel({
   cards,
   competencies,
+  filterCompetencies,
   week,
   initialCardId,
   initialHighlightedCardId,
@@ -106,7 +107,7 @@ export default function StoryCardsPanel({
           className={`w-[163px] shrink-0 cursor-pointer appearance-none bg-[url(/images/my-record/chevron-down.svg)] bg-[position:right_6px_center] bg-no-repeat pr-7 pl-4 ${FIELD_CLASSES}`}
         >
           <option value={ALL}>역량 전체</option>
-          {competencies.map((name) => {
+          {filterCompetencies.map((name) => {
             const count = candidateCards.filter(({ tags }) => tags.includes(name)).length;
 
             return (

@@ -137,8 +137,8 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   );
 }
 
-export default function ProjectView({ projectId, competencies, initialIsAdding }) {
-  const { projects, updateProject } = useMockData();
+export default function ProjectView({ projectId, initialIsAdding }) {
+  const { competencies, projects, updateProject } = useMockData();
   const project = projects.find(({ id }) => id === projectId);
 
   if (!project) {

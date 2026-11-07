@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import CompetencyTagPicker from "@/components/my-record/CompetencyTagPicker";
+import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import { COPY_FAILED_MESSAGE, PORTFOLIO_TEXT } from "@/components/my-record/storyCardTypes";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
+import Toast from "@/components/ui/Toast";
 import { MOCK_PORTFOLIO_CARD } from "@/lib/mock/projects";
 import DotList from "./DotList";
 import {
@@ -50,6 +51,7 @@ export default function PortfolioReview({ project, records, filled, competencies
   const [fields, setFields] = useState(() => buildCardDraft(project, records, filled));
   const [tags, setTags] = useState(firstCardPreset?.tags ?? MOCK_PORTFOLIO_CARD.defaultTags);
   const [copyNotice, setCopyNotice] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
 
   async function copyMarkdown() {
     try {
@@ -61,6 +63,11 @@ export default function PortfolioReview({ project, records, filled, competencies
   }
 
   function saveCard() {
+    if (!tags.length) {
+      setToastMessage(EMPTY_TAGS_MESSAGE);
+      return;
+    }
+
     onSave({
       title: title.trim(),
       tags: competencies.filter((tag) => tags.includes(tag)),
@@ -125,8 +132,8 @@ export default function PortfolioReview({ project, records, filled, competencies
             competencies={competencies}
             selectedTags={tags}
             listClassName="gap-0"
-            dimLocked={false}
             onChange={setTags}
+            onLimit={setToastMessage}
           />
           <div className="flex flex-col gap-1.5">
             <p className="text-label text-ink-muted">근거로 쓴 기록과 자료</p>
@@ -141,6 +148,7 @@ export default function PortfolioReview({ project, records, filled, competencies
           </RecordFormFooter>
         </Card>
       </div>
+      <Toast message={toastMessage} onDismiss={() => setToastMessage("")} />
     </>
   );
 }

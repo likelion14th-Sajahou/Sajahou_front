@@ -12,10 +12,15 @@ export default function MyRecordView({
   week,
   requestedCardId,
   requestedHighlightId,
-  initialCompetency,
+  requestedCompetency,
 }) {
-  const { currentWeek, competencies, footprintSections } = record;
-  const { footprintWeeks, storyCards, updateStoryCard, deleteStoryCard } = useMockData();
+  const { currentWeek, footprintSections } = record;
+  const { competencies, footprintWeeks, storyCards, updateStoryCard, deleteStoryCard } = useMockData();
+  // 파트를 바꿔 보면 지금 파트 목록에 없는 태그를 단 카드가 생길 수 있어, 걸러 보기에는 그 태그도 목록 뒤에 붙인다.
+  const filterCompetencies = [
+    ...new Set([...competencies, ...storyCards.flatMap(({ tags }) => tags)]),
+  ];
+  const initialCompetency = filterCompetencies.find((name) => name === requestedCompetency);
   // 프로젝트에서 새로 만든 카드도 주차 순서에 맞게 보여 준다.
   const cards = storyCards.toSorted((a, b) => b.week - a.week);
   const initialCardId = cards.find(({ id }) => id === requestedCardId)?.id;
@@ -52,6 +57,7 @@ export default function MyRecordView({
           key={initialCardId || initialHighlightedCardId || initialCompetency ? bfcacheId : "story-cards"}
           cards={cards}
           competencies={competencies}
+          filterCompetencies={filterCompetencies}
           week={week}
           initialCardId={initialCardId}
           initialHighlightedCardId={initialHighlightedCardId}
