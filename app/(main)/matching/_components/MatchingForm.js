@@ -5,6 +5,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
+import Toast, { useToast } from "@/components/ui/Toast";
 import { MATCHING_SAMPLE } from "@/lib/mock/matching";
 import MatchingAttachments from "./MatchingAttachments";
 import MatchingResults from "./MatchingResults";
@@ -18,6 +19,7 @@ export default function MatchingForm() {
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([]);
   const [notice, setNotice] = useState("");
+  const { toast, showToast, hideToast } = useToast();
   const [result, setResult] = useState(null);
   const resultHeadingRef = useRef(null);
   const formRef = useRef(null);
@@ -39,13 +41,15 @@ export default function MatchingForm() {
 
   function submit(event) {
     event.preventDefault();
+    // 실행하지 못하는 이유는 눈에 보이게 토스트로 안내하고, 고칠 칸으로 커서를 옮긴다(M-05, M-02).
     if (!questions.some(({ text }) => text.trim())) {
-      setNotice("자소서 문항을 하나 이상 넣어 주세요.");
+      showToast("자소서 문항을 하나 이상 넣어 주세요");
       questionRefs.current.get(questions[0].id)?.focus();
       return;
     }
     if (![fields.jd, fields.preferences, fields.companyInfo].some((text) => text.trim()) && !files.length) {
-      setNotice(links.length ? "링크 본문 읽기는 준비 중이에요. 공고 내용을 붙여 넣거나 파일을 선택해 주세요." : "공고 내용을 붙여 넣거나 파일을 선택해 주세요.");
+      // 링크 본문 읽기는 서버가 할 일이라, 지금은 링크만 넣으면 본문을 못 읽은 것으로 안내한다.
+      showToast(links.length ? "이 링크는 본문을 못 읽었어요. 공고 내용을 붙여 넣거나 PDF·캡처로 올려 주세요." : "공고 내용을 붙여 넣거나 파일을 선택해 주세요.");
       formRef.current.elements.namedItem("jd")?.focus();
       return;
     }
@@ -103,6 +107,7 @@ export default function MatchingForm() {
         </div>
       </div>
       <p role="status" className="sr-only">{notice}</p>
+      <Toast toast={toast} onDismiss={hideToast} />
       <p className="rounded-xl bg-tint-yellow px-3.5 py-2.5 text-label text-ink-muted">사자록에 기록된 내용으로만 초안을 써요. 기록에 없는 건 지어내지 않고 빈칸으로 남겨요.</p>
     </Card>
     {result && (
