@@ -15,8 +15,16 @@ import { useRetrospectivePreview } from "./RetrospectivePreview";
 const ACCEPTED_FILES = {
   sessionFiles: ".pdf",
   practiceFiles: ".zip,.png,.jpg,.jpeg,.webp,.gif",
-  assignmentFiles: ".zip,.pdf,.png,.jpg,.jpeg,.webp,.gif",
+  // 노션 ZIP·MD·PDF·이미지(R-11)
+  assignmentFiles: ".zip,.md,.pdf,.png,.jpg,.jpeg,.webp,.gif",
 };
+
+// 노션에서 내보낸 ZIP·MD는 '노션 MD' 칩으로 보여 준다.
+function getFileKind(fileName) {
+  if (fileName.endsWith(".pdf")) return "pdf";
+  if (fileName.endsWith(".zip") || fileName.endsWith(".md")) return "notion";
+  return "image";
+}
 
 function MaterialSection({ title, titleId, controls, inactive = false, children }) {
   return (
@@ -73,7 +81,7 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
     const additions = validFiles.map((file) => ({
       id: crypto.randomUUID(),
       name: file.name,
-      kind: file.name.toLowerCase().endsWith(".pdf") ? "pdf" : file.name.toLowerCase().endsWith(".zip") ? "notion" : "image",
+      kind: getFileKind(file.name.toLowerCase()),
     }));
     setMaterials((previous) => ({ ...previous, [field]: [...previous[field], ...additions] }));
     setNotice(validFiles.length !== files.length
@@ -116,26 +124,31 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
         <p className="text-label leading-[1.5] text-ink-subtle">모두 선택이에요. 있는 것만 올려요.</p>
       </div>
 
-      <MaterialSection title="세션 자료" titleId="session-materials-title" controls={<Badge>PDF</Badge>}>
-        {attachments("sessionFiles", "+ 세션 PDF")}
-      </MaterialSection>
+      {/* 과제 회고는 같은 5단계지만 자료 단계에는 과제 칸만 있다(R-23). */}
+      {!isAssignment && (
+        <>
+          <MaterialSection title="세션 자료" titleId="session-materials-title" controls={<Badge>PDF</Badge>}>
+            {attachments("sessionFiles", "+ 세션 PDF")}
+          </MaterialSection>
 
-      <MaterialSection title="세션 중 실습이 있었나요?" titleId="practice-title" inactive={!hasPractice} controls={
-        <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="practice-title">
-          {["있었어요", "없었어요"].map((label, index) => (
-            <Chip key={label} size="sm" selected={hasPractice === (index === 0)} onClick={() => setHasPractice(index === 0)}>{label}</Chip>
-          ))}
-        </div>
-      }>
-        {hasPractice ? (
-          <>
-            <TextField label="실습 내용 · 무엇을 배웠는지 적어보세요" multiline name="practice" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} className="h-[98px]" />
-            {attachments("practiceFiles", "+ 노션 ZIP · 캡처")}
-          </>
-        ) : (
-          <p className="text-body-sm break-keep text-ink-subtle">실습 질문은 건너뛰고 세션 내용만 물어볼게요.</p>
-        )}
-      </MaterialSection>
+          <MaterialSection title="세션 중 실습이 있었나요?" titleId="practice-title" inactive={!hasPractice} controls={
+            <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="practice-title">
+              {["있었어요", "없었어요"].map((label, index) => (
+                <Chip key={label} size="sm" selected={hasPractice === (index === 0)} onClick={() => setHasPractice(index === 0)}>{label}</Chip>
+              ))}
+            </div>
+          }>
+            {hasPractice ? (
+              <>
+                <TextField label="실습 내용 · 무엇을 배웠는지 적어보세요" multiline name="practice" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} className="h-[98px]" />
+                {attachments("practiceFiles", "+ 노션 ZIP · 캡처")}
+              </>
+            ) : (
+              <p className="text-body-sm break-keep text-ink-subtle">실습 질문은 건너뛰고 세션 내용만 물어볼게요.</p>
+            )}
+          </MaterialSection>
+        </>
+      )}
 
       <MaterialSection title="이번 주 과제는요?" titleId="assignment-title" inactive={assignmentStatus !== "record"} controls={!isAssignment && (
         <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="assignment-title">
@@ -157,7 +170,7 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
                 uploadOnNewLine: true,
                 children: (
                   <div className="flex w-full min-w-0 gap-1.5 sm:w-auto sm:flex-1">
-                    <TextField size="sm" className="min-w-0" name="assignmentLink" aria-label="Git 링크" placeholder={part === "프론트엔드" ? "GitHub 링크 · github.com/아이디/저장소" : "피그마·GitHub 링크"} value={link} aria-invalid={Boolean(linkError)} aria-describedby={linkError ? "assignment-link-error" : undefined} onChange={(event) => { setLink(event.target.value); setLinkError(""); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addLink(); } }} />
+                    <TextField size="sm" className="min-w-0" name="assignmentLink" aria-label="Git 링크" placeholder={part === "기획·디자인" ? "피그마·GitHub 링크" : "GitHub 링크 · github.com/아이디/저장소"} value={link} aria-invalid={Boolean(linkError)} aria-describedby={linkError ? "assignment-link-error" : undefined} onChange={(event) => { setLink(event.target.value); setLinkError(""); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addLink(); } }} />
                     <Button variant="secondary" size="sm" onClick={addLink}>추가</Button>
                   </div>
                 ),
@@ -185,7 +198,9 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
         )}
       </MaterialSection>
 
-      <TextField label="고민 메모 · 선택" multiline name="memo" placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
+      {!isAssignment && (
+        <TextField label="고민 메모 · 선택" multiline name="memo" placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
+      )}
       <MaterialsChangeNotice
         open={isChangeNoticeOpen}
         answerCount={changePreview?.answerCount ?? 0}
