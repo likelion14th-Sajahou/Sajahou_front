@@ -14,10 +14,11 @@ export default function ProjectPortfolio({
   onSaveCard,
 }) {
   const [step, setStep] = useState("records");
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedIds, setSelectedIds] = useState();
   const [filled, setFilled] = useState({});
+  const [gapsStartAtLast, setGapsStartAtLast] = useState(false);
   // 고를 때와 같이 진행 순서(오래된 기록부터)로 글을 쓴다.
-  const selectedRecords = records.toReversed().filter(({ id }) => selectedIds.includes(id));
+  const selectedRecords = records.toReversed().filter(({ id }) => selectedIds?.includes(id));
 
   if (step === "records") {
     return (
@@ -25,9 +26,11 @@ export default function ProjectPortfolio({
         isFirstCard={project.status === "active"}
         cardNumber={cardNumber}
         records={records}
+        initialSelectedIds={selectedIds}
         onCancel={onCancel}
         onNext={(nextSelectedIds) => {
           setSelectedIds(nextSelectedIds);
+          setGapsStartAtLast(false);
           setStep("gaps");
         }}
       />
@@ -37,8 +40,9 @@ export default function ProjectPortfolio({
   if (step === "gaps") {
     return (
       <PortfolioGapFill
-        projectId={project.id}
         initialFilled={filled}
+        startAtLast={gapsStartAtLast}
+        onBackToRecords={() => setStep("records")}
         onComplete={(nextFilled) => {
           setFilled(nextFilled);
           setStep("review");
@@ -53,7 +57,10 @@ export default function ProjectPortfolio({
       records={selectedRecords}
       filled={filled}
       competencies={competencies}
-      onBack={() => setStep("gaps")}
+      onBack={() => {
+        setGapsStartAtLast(true);
+        setStep("gaps");
+      }}
       onSave={onSaveCard}
     />
   );

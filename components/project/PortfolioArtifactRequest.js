@@ -10,8 +10,9 @@ export default function PortfolioArtifactRequest({
   category,
   progress,
   question,
-  exampleAttachments,
   initialAttachments = [],
+  backLabel,
+  onBack,
   onSubmit,
   onSkip,
 }) {
@@ -29,7 +30,8 @@ export default function PortfolioArtifactRequest({
         />
       </div>
       <div className="flex items-center gap-3">
-        <TextLink onClick={() => setAttachments(exampleAttachments)}>예시 산출물 넣기</TextLink>
+        <TextLink onClick={onBack}>{backLabel}</TextLink>
+        <span aria-hidden="true" className="h-4 w-px bg-line" />
         <TextLink onClick={onSkip}>아직 없어요</TextLink>
         <Button
           className="ml-auto"

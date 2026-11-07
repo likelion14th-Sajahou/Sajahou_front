@@ -8,14 +8,16 @@ import Toast, { useToast } from "@/components/ui/Toast";
 import AiPromptHeader from "./AiPromptHeader";
 
 // 질문이 바뀌면 입력을 비우도록, 쓰는 곳에서 질문별 key를 준다.
+// 버튼: [← 이전] | 건너뛰기 … 답하고 다음 →(H-13, H-17). AI는 질문만 하고 답은 사용자가 직접 쓴다(C-07).
 export default function AiQuestionForm({
   category,
   progress,
   source,
   question,
   placeholder,
-  exampleAnswer,
   initialAnswer = "",
+  backLabel,
+  onBack,
   onAnswer,
   onSkip,
 }) {
@@ -45,7 +47,12 @@ export default function AiQuestionForm({
         className="h-[98px]"
       />
       <div className="flex items-center gap-3">
-        <TextLink onClick={() => setAnswer(exampleAnswer)}>예시 답변 넣기</TextLink>
+        {backLabel && (
+          <>
+            <TextLink onClick={onBack}>{backLabel}</TextLink>
+            <span aria-hidden="true" className="h-4 w-px bg-line" />
+          </>
+        )}
         <TextLink onClick={onSkip}>건너뛰기</TextLink>
         <Button className="ml-auto" onClick={submitAnswer}>답하고 다음 →</Button>
       </div>

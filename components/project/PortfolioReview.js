@@ -140,7 +140,7 @@ export default function PortfolioReview({ project, records, filled, competencies
           </div>
           {/* 시안의 간격(14px)이면 버튼이 카드 안쪽 여백을 넘어가서 좁힌다. */}
           <RecordFormFooter gapClassName="gap-2">
-            <TextLink onClick={onBack}>← 빈 곳 다시 채우기</TextLink>
+            <TextLink onClick={onBack}>← 이전 질문으로</TextLink>
             <Button variant="accent" className="ml-auto" disabled={!title.trim()} onClick={saveCard}>
               {isFirstCard ? "대표 카드 저장하고 프로젝트 완료로 표시" : "대표 카드 저장"}
             </Button>
