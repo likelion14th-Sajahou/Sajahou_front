@@ -8,7 +8,6 @@ import StoryCardDetail from "@/components/my-record/StoryCardDetail";
 import Modal from "@/components/ui/Modal";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { MOCK_TODAY } from "@/lib/mock/projects";
-import { MOCK_WEEK } from "@/lib/mock/week";
 import ProjectPortfolio from "./ProjectPortfolio";
 import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
@@ -19,8 +18,6 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   // 다른 페이지에 다녀와도 상태가 유지되므로(cacheComponents), 링크로 새로 들어오면 열려 있던 폼과 팝업을 닫는다.
   // 뒤로 가기로 돌아오면 bfcacheId가 그대로라 작성 중인 내용이 남는다. 기록과 카드 변경은 어느 경우든 유지한다.
   const { bfcacheId } = useRouter();
-  const [hasRecordChanged, setHasRecordChanged] = useState(false);
-  const currentProject = { ...project, lastRecordedAt: projectRecords[0]?.date };
 
   // 흐름을 연 시점의 bfcacheId를 기억해, 링크로 새로 들어오면 자동으로 프로젝트 화면으로 돌아간다.
   const [portfolioBfcacheId, setPortfolioBfcacheId] = useState(null);
@@ -30,7 +27,6 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   const { toast, showToast, hideToast } = useToast();
   const {
     storyCards,
-    addStoryCard,
     updateStoryCard,
     deleteStoryCard,
     addProjectRecord,
@@ -46,45 +42,36 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
 
   // 기록을 저장하면 나의 사자록에 프로젝트 카드 1장이 함께 생긴다(H-22).
   function addRecord(record) {
-    setHasRecordChanged(true);
     addProjectRecord(project.id, { id: crypto.randomUUID(), ...MOCK_TODAY, ...record });
     showToast("기록을 저장했어요 · 나의 사자록에 카드 1장");
   }
 
+  // 기록을 고치거나 지우면 카드도 함께 바뀌고, 따로 안내하지 않는다(H-21).
   function saveRecord(recordId, changes) {
-    const record = projectRecords.find(({ id }) => id === recordId);
-
-    // 저장만 누르고 내용이 그대로면 기록이 바뀐 것이 아니다.
-    if (Object.entries(changes).some(([key, value]) => (record[key] ?? "") !== value)) {
-      setHasRecordChanged(true);
-    }
-
     updateProjectRecord(project.id, recordId, changes);
   }
 
   function deleteRecord(recordId) {
-    setHasRecordChanged(true);
     deleteProjectRecord(project.id, recordId);
   }
 
-  function saveCard(card) {
-    addStoryCard({
-      id: crypto.randomUUID(),
-      projectId: project.id,
-      week: project.recap?.week ?? MOCK_WEEK.week,
-      type: "project",
-      whenLabel: project.name,
-      shape: "sunFine",
-      color: "yellow",
-      ...card,
-    });
-    // 처음 마칠 때는 완료 표시가 저장을 알려 주므로, 더 만들 때만 안내한다(H-18).
+  // 포트폴리오 Markdown만 저장한다. 처음이면 프로젝트를 완료로 바꾸고, 다시 만들면 안내한다(H-18).
+  function savePortfolio(markdown) {
+    // 처음 마치면 오늘을 마친 날로 기록하고, 검토 화면에서 '진행 중'이던 기간도 그 날로 바꿔 저장한다.
+    const endedAt = project.endedAt ?? MOCK_TODAY.date;
+    const periodLine = `- 기간: ${project.startedAt} ~ 진행 중`;
+    const savedMarkdown = markdown.replace(periodLine, `- 기간: ${project.startedAt} ~ ${endedAt}`);
+
     if (status === "done") {
-      showToast(`대표 카드를 하나 더 저장했어요 (${cards.length + 1}장)`);
+      showToast("포트폴리오를 다시 저장했어요");
     }
 
-    onChangeProject((current) => ({ ...current, status: "done" }));
-    setHasRecordChanged(false);
+    onChangeProject((current) => ({
+      ...current,
+      status: "done",
+      endedAt,
+      portfolio: { markdown: savedMarkdown },
+    }));
     setPortfolioBfcacheId(null);
     // 검토 화면 아래쪽에서 저장하므로, 바뀐 프로젝트 화면을 처음부터 보여 준다.
     window.scrollTo(0, 0);
@@ -93,26 +80,24 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   return (
     <>
       <ProjectHeader
-        project={currentProject}
+        project={project}
         recordCount={records.length}
         lastRecordedAt={records[0]?.date}
       />
       {isMakingPortfolio ? (
         <div className="pt-6">
           <ProjectPortfolio
-            project={currentProject}
-            cardNumber={cards.length + 1}
+            project={project}
             records={records}
-            competencies={competencies}
             onCancel={() => setPortfolioBfcacheId(null)}
-            onSaveCard={saveCard}
+            onSave={savePortfolio}
           />
         </div>
       ) : (
         <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5 pt-6">
           <ProjectRecords
             key={`records-${bfcacheId}`}
-            project={currentProject}
+            project={project}
             records={records}
             initialIsAdding={initialIsAdding}
             onAddRecord={addRecord}
@@ -123,12 +108,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
           <ProjectSidebar
             key={`sidebar-${bfcacheId}`}
             status={status}
-            cards={cards}
-            competencies={competencies}
-            showChangeNotice={hasRecordChanged}
-            onDismissChangeNotice={() => setHasRecordChanged(false)}
-            onUpdateCard={updateStoryCard}
-            onDeleteCard={deleteStoryCard}
+            portfolio={project.portfolio}
             onMakePortfolio={() => setPortfolioBfcacheId(bfcacheId)}
           />
         </div>

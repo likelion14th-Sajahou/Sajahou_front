@@ -7,11 +7,9 @@ import PortfolioReview from "./PortfolioReview";
 
 export default function ProjectPortfolio({
   project,
-  cardNumber,
   records,
-  competencies,
   onCancel,
-  onSaveCard,
+  onSave,
 }) {
   const [step, setStep] = useState("records");
   const [selectedIds, setSelectedIds] = useState();
@@ -23,8 +21,6 @@ export default function ProjectPortfolio({
   if (step === "records") {
     return (
       <PortfolioRecordSelect
-        isFirstCard={project.status === "active"}
-        cardNumber={cardNumber}
         records={records}
         initialSelectedIds={selectedIds}
         onCancel={onCancel}
@@ -56,12 +52,11 @@ export default function ProjectPortfolio({
       project={project}
       records={selectedRecords}
       filled={filled}
-      competencies={competencies}
       onBack={() => {
         setGapsStartAtLast(true);
         setStep("gaps");
       }}
-      onSave={onSaveCard}
+      onSave={onSave}
     />
   );
 }

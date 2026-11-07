@@ -44,9 +44,7 @@ export default function ProjectRecordQuestions({ attachments, startAtLast = fals
 
   // 건너뛴 질문은 전에 답했더라도 정리에 쓰지 않는다. 입력칸이 비어 보이는 것과 맞춘다.
   function skipQuestion() {
-    const { [question.fieldKey]: _skipped, ...rest } = answers;
-
-    goNext(rest);
+    goNext(Object.fromEntries(Object.entries(answers).filter(([key]) => key !== question.fieldKey)));
   }
 
   return (

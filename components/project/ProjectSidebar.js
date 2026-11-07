@@ -1,20 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import StoryCard from "@/components/my-record/StoryCard";
-import StoryCardDetail from "@/components/my-record/StoryCardDetail";
+import { COPY_FAILED_MESSAGE, PORTFOLIO_TEXT } from "@/components/my-record/storyCardTypes";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import Modal from "@/components/ui/Modal";
-import TextLink from "@/components/ui/TextLink";
+import TextField from "@/components/ui/TextField";
+import Toast, { useToast } from "@/components/ui/Toast";
 import DotList from "./DotList";
 import SidebarTitle from "./SidebarTitle";
 
-const FINISH_STEPS = [
-  "넣을 기록 고르기",
-  "AI가 빈 곳을 찾아 질문·요청",
-  "포트폴리오와 대표 카드 완성",
-];
+const FINISH_STEPS = ["넣을 기록 고르기", "AI가 빈 곳을 찾아 질문·요청", "포트폴리오 완성"];
 
 function FinishProjectCard({ onFinish }) {
   return (
@@ -32,80 +26,51 @@ function FinishProjectCard({ onFinish }) {
   );
 }
 
-// 이미 만든 대표 카드는 자동으로 바뀌지 않아서, 기록이 바뀌면 안내한다(H-21).
-function RecordChangeNotice({ onDismiss }) {
-  return (
-    <div className="pt-4">
-      <div role="status" className="rounded-[14px] border border-accent bg-[#fff6ec] px-3.5 py-3 text-ink">
-        <p className="text-body">카드를 만든 뒤 기록이 바뀌었어요</p>
-        <p className="mt-1 text-label leading-[19.5px]">
-          이미 만든 카드는 그대로예요. 카드를 눌러 직접 고치거나, 바뀐 기록으로 대표 카드를 더 만들 수 있어요.
-        </p>
-        <TextLink onClick={onDismiss} className="mt-1.5">괜찮아요</TextLink>
-      </div>
-    </div>
-  );
-}
+// 완료한 프로젝트의 오른쪽 칸(H-21, 12-a). 저장한 포트폴리오는 기록을 바꿔도 자동으로 바뀌지 않아서, 필요하면 다시 만든다.
+function PortfolioCard({ portfolio, onRemake }) {
+  const { toast, showToast, hideToast } = useToast();
 
-function RepresentativeCards({
-  cards,
-  competencies,
-  showChangeNotice,
-  onDismissChangeNotice,
-  onUpdateCard,
-  onDeleteCard,
-  onAddCard,
-}) {
-  const [openCardId, setOpenCardId] = useState();
-  const openCard = cards.find(({ id }) => id === openCardId);
-  const isNoticeVisible = showChangeNotice && cards.length > 0;
+  async function copyMarkdown() {
+    try {
+      await navigator.clipboard.writeText(portfolio.markdown);
+      showToast(PORTFOLIO_TEXT.copied);
+    } catch {
+      showToast(COPY_FAILED_MESSAGE);
+    }
+  }
 
   return (
-    <Card as="aside" size="md" aria-label="대표 카드">
-      <SidebarTitle>
-        대표 카드 <span className="text-ink-subtle">{cards.length}장</span>
-      </SidebarTitle>
-      {isNoticeVisible && <RecordChangeNotice onDismiss={onDismissChangeNotice} />}
-      <ol className={`flex flex-col gap-2.5 ${isNoticeVisible ? "pt-3" : "pt-4"}`}>
-        {cards.map((card, index) => (
-          <li key={card.id} className="flex flex-col">
-            <p className="pb-1 pl-0.5 text-caption text-accent-strong">카드 {index + 1}</p>
-            <StoryCard card={card} onOpen={setOpenCardId} />
-          </li>
-        ))}
-      </ol>
-      <div className="pt-3.5">
-        <Button variant="secondary" className="w-full" onClick={onAddCard}>+ 대표 카드 더 만들기</Button>
-        <p className="pt-1.5 text-label leading-[19.5px] text-ink-subtle">
-          회의나 발표가 끝날 때마다 새 기록으로 카드를 만들어 두면, 자소서 문항마다 다른 경험을 꺼내 쓸 수 있어요.
-        </p>
-      </div>
-      <Modal
-        open={Boolean(openCard)}
-        onClose={() => setOpenCardId(undefined)}
-        size="lg"
-        aria-labelledby="representative-card-title"
-      >
-        {openCard && (
-          <StoryCardDetail
-            card={openCard}
-            competencies={competencies}
-            titleId="representative-card-title"
-            onClose={() => setOpenCardId(undefined)}
-            onDelete={() => {
-              onDeleteCard(openCardId);
-              setOpenCardId(undefined);
-            }}
-            onUpdate={(changes) => onUpdateCard(openCardId, changes)}
-          />
-        )}
-      </Modal>
+    <Card as="aside" size="md" aria-label="포트폴리오">
+      <SidebarTitle>포트폴리오</SidebarTitle>
+      {portfolio ? (
+        <>
+          <div className="pt-4">
+            <TextField
+              multiline
+              readOnly
+              aria-label="저장한 포트폴리오"
+              value={portfolio.markdown}
+              className="h-[560px] text-[14.5px]! leading-[25.375px]"
+            />
+          </div>
+          <div className="flex gap-2 pt-3">
+            <Button size="sm" onClick={copyMarkdown}>Markdown 복사</Button>
+            <Button size="sm" variant="secondary" onClick={onRemake}>다시 만들기</Button>
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col items-start gap-3 pt-4">
+          <p className="text-body-sm text-ink-subtle">아직 포트폴리오가 없어요</p>
+          <Button size="sm" variant="secondary" onClick={onRemake}>포트폴리오 만들기</Button>
+        </div>
+      )}
+      <Toast toast={toast} onDismiss={hideToast} />
     </Card>
   );
 }
 
-export default function ProjectSidebar({ status, onMakePortfolio, ...cardProps }) {
+export default function ProjectSidebar({ status, portfolio, onMakePortfolio }) {
   return status === "done"
-    ? <RepresentativeCards {...cardProps} onAddCard={onMakePortfolio} />
+    ? <PortfolioCard portfolio={portfolio} onRemake={onMakePortfolio} />
     : <FinishProjectCard onFinish={onMakePortfolio} />;
 }
