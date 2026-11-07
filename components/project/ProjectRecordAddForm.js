@@ -15,8 +15,8 @@ import RecordAttachmentsField from "./RecordAttachmentsField";
 import RecordFieldsGrid from "./RecordFieldsGrid";
 import RecordFormFooter from "./RecordFormFooter";
 import RecordFormTitle from "./RecordFormTitle";
+import { EMPTY_RECORD_MESSAGE } from "./recordFields";
 
-const EMPTY_RECORD_MESSAGE = "5칸 중 한 칸 이상 적거나 자료를 첨부해 주세요.";
 // 한 일이 비면 카드 제목이 비지 않도록 메모 첫 줄을 쓰고, 메모도 없으면 이 문구를 쓴다.
 const EMPTY_DID_TITLE = "(한 일 비어 있음)";
 
