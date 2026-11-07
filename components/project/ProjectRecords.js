@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import AttachmentChip from "./AttachmentChip";
@@ -14,14 +13,13 @@ const ADD_RECORD_HINTS = {
   done: "완료한 프로젝트도 기록을 더하거나 고칠 수 있어요",
 };
 
-function DeleteConfirm({ isUsedInCard, onCancel, onConfirm }) {
+function DeleteConfirm({ onCancel, onConfirm }) {
   return (
     <div role="alert" className="flex flex-col gap-2.5 rounded-[14px] border border-[#f3c4be] bg-[#fff4f2] px-3.5 py-3">
       <p className="text-body-sm text-ink">
         이 기록을 지울까요?
         <br />
-        {isUsedInCard && "대표 카드에 쓰인 기록이에요. 카드 글은 그대로 남고, 근거에 '삭제된 기록'으로 표시돼요. "}
-        지운 기록은 되돌릴 수 없어요.
+        나의 사자록의 카드도 함께 지워져요. 지운 기록은 되돌릴 수 없어요.
       </p>
       <div className="flex items-center justify-end gap-3">
         {/* 삭제 버튼을 눌러도 포커스를 잃지 않도록 안전한 쪽인 취소로 옮긴다. */}
@@ -33,7 +31,7 @@ function DeleteConfirm({ isUsedInCard, onCancel, onConfirm }) {
 }
 
 function RecordItem({ record, isLast, onEdit, onDelete }) {
-  const { date, weekday, cardNumbers, attachments } = record;
+  const { date, weekday, attachments } = record;
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   return (
@@ -47,9 +45,6 @@ function RecordItem({ record, isLast, onEdit, onDelete }) {
         <div className="flex items-center justify-between">
           <p className="flex items-center gap-1 text-label text-ink-muted">
             {date}({weekday})
-            {cardNumbers.map((number) => (
-              <Badge key={number} tone="amber">카드 {number}에 쓰임</Badge>
-            ))}
           </p>
           <div className="flex items-center gap-3">
             <TextLink size="sm" onClick={() => onEdit(record.id)}>수정</TextLink>
@@ -73,7 +68,6 @@ function RecordItem({ record, isLast, onEdit, onDelete }) {
         )}
         {isConfirmingDelete && (
           <DeleteConfirm
-            isUsedInCard={cardNumbers.length > 0}
             onCancel={() => setIsConfirmingDelete(false)}
             onConfirm={() => onDelete(record.id)}
           />

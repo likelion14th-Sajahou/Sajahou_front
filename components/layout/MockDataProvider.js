@@ -3,6 +3,7 @@
 import { createContext, use, useState } from "react";
 import { getCompetencyNames } from "@/lib/mock/competencies";
 import { FOOTPRINT_WEEKS } from "@/lib/mock/myRecord";
+import { addMissingRecordCards, buildRecordCard } from "@/lib/mock/projectRecordCards";
 import { MOCK_PROJECTS } from "@/lib/mock/projects";
 import { MOCK_STORY_CARDS } from "@/lib/mock/storyCards";
 import { MOCK_USER } from "@/lib/mock/user";
@@ -42,25 +43,8 @@ function getFootprintWeeks(weekStatus, projects) {
   });
 }
 
-// 스토리 카드 중 프로젝트의 대표 카드에는 어느 프로젝트의 어떤 기록으로 만들었는지 함께 담는다.
-const INITIAL_STORY_CARDS = MOCK_STORY_CARDS.map((card) => {
-  for (const { id: projectId, representativeCards } of MOCK_PROJECTS) {
-    const representativeCard = representativeCards.find(({ cardId }) => cardId === card.id);
-
-    if (representativeCard) {
-      return { ...card, projectId, recordIds: representativeCard.recordIds, deletedRecordCount: 0 };
-    }
-  }
-
-  return card;
-});
-
-// 대표 카드에 쓴 기록을 지워도 카드 글은 남기고, 근거에 지운 개수만 표시한다(H-15).
-function withDeletedRecordEvidence(card) {
-  return card.deletedRecordCount > 0
-    ? { ...card, evidence: `${card.evidence} · 삭제된 기록 ${card.deletedRecordCount}개` }
-    : card;
-}
+// 카드가 없는 목업 기록에도 카드를 만들어, 모든 프로젝트 기록이 카드 1장씩을 갖게 한다(H-22).
+const INITIAL_STORY_CARDS = addMissingRecordCards(MOCK_STORY_CARDS, MOCK_PROJECTS);
 
 // API가 없는 동안 화면끼리 공유하는 목업 데이터다. 페이지를 옮겨 다녀도 유지되고, 새로고침하면 처음 값으로 돌아간다.
 // API를 연결할 때 이 안쪽을 실제 요청으로 바꾸면 화면 코드는 그대로 쓸 수 있다.
@@ -96,22 +80,49 @@ export default function MockDataProvider({ children }) {
     );
   }
 
-  function deleteStoryCard(cardId) {
-    setStoryCards((current) => current.filter(({ id }) => id !== cardId));
-  }
-
-  function removeRecordFromCards(recordId) {
-    setStoryCards((current) =>
-      current.map((card) =>
-        card.recordIds?.includes(recordId)
-          ? {
-              ...card,
-              recordIds: card.recordIds.filter((id) => id !== recordId),
-              deletedRecordCount: card.deletedRecordCount + 1,
-            }
-          : card,
+  function changeRecords(projectId, update) {
+    setProjects((current) =>
+      current.map((project) =>
+        project.id === projectId ? { ...project, records: update(project.records) } : project,
       ),
     );
+  }
+
+  // 기록과 카드는 함께 생기고, 함께 바뀌고, 함께 지워진다(H-22, H-15).
+  function addProjectRecord(projectId, record) {
+    const project = projects.find(({ id }) => id === projectId);
+
+    changeRecords(projectId, (records) => [record, ...records]);
+    setStoryCards((current) => [...current, buildRecordCard(project, record)]);
+  }
+
+  function updateProjectRecord(projectId, recordId, changes) {
+    const project = projects.find(({ id }) => id === projectId);
+    const record = { ...project.records.find(({ id }) => id === recordId), ...changes };
+
+    changeRecords(projectId, (records) =>
+      records.map((item) => (item.id === recordId ? record : item)),
+    );
+    setStoryCards((current) =>
+      current.map((card) =>
+        card.recordId === recordId ? buildRecordCard(project, record, card) : card,
+      ),
+    );
+  }
+
+  function deleteProjectRecord(projectId, recordId) {
+    changeRecords(projectId, (records) => records.filter(({ id }) => id !== recordId));
+    setStoryCards((current) => current.filter((card) => card.recordId !== recordId));
+  }
+
+  // 카드를 고치면 카드만 바뀌지만(updateStoryCard), 프로젝트 카드를 지우면 그 기록도 함께 지운다(H-22).
+  function deleteStoryCard(cardId) {
+    const card = storyCards.find(({ id }) => id === cardId);
+
+    setStoryCards((current) => current.filter(({ id }) => id !== cardId));
+    if (card?.recordId) {
+      changeRecords(card.projectId, (records) => records.filter(({ id }) => id !== card.recordId));
+    }
   }
 
   // 고쳐서 다시 저장해도 카드가 늘어나지 않도록 같은 카드는 바꿔 넣는다.
@@ -136,11 +147,13 @@ export default function MockDataProvider({ children }) {
         projects,
         addProject,
         updateProject,
-        storyCards: storyCards.map(withDeletedRecordEvidence),
+        storyCards,
         addStoryCard,
         updateStoryCard,
         deleteStoryCard,
-        removeRecordFromCards,
+        addProjectRecord,
+        updateProjectRecord,
+        deleteProjectRecord,
         footprintWeeks: getFootprintWeeks(weekStatus, projects),
         weekStatus,
         setWeekStatus,

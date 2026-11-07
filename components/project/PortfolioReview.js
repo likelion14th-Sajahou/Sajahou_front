@@ -80,7 +80,6 @@ export default function PortfolioReview({ project, records, filled, competencies
         result: fields.result.trim(),
         learned: filled.learned ?? "",
       },
-      recordIds: records.map(({ id }) => id),
     });
   }
 

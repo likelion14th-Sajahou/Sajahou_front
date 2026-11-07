@@ -12,7 +12,6 @@ import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
 import ProjectSidebar from "./ProjectSidebar";
 
-// 기록의 "카드 N에 쓰임"은 대표 카드 순서로 계산해서, 카드를 지우면 함께 바뀐다.
 function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject }) {
   const { records: projectRecords, status } = project;
   // 다른 페이지에 다녀와도 상태가 유지되므로(cacheComponents), 링크로 새로 들어오면 열려 있던 폼과 팝업을 닫는다.
@@ -21,30 +20,26 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   const [hasRecordChanged, setHasRecordChanged] = useState(false);
   const currentProject = { ...project, lastRecordedAt: projectRecords[0]?.date };
 
-  function changeRecords(update) {
-    onChangeProject((current) => ({ ...current, records: update(current.records) }));
-  }
   // 흐름을 연 시점의 bfcacheId를 기억해, 링크로 새로 들어오면 자동으로 프로젝트 화면으로 돌아간다.
   const [portfolioBfcacheId, setPortfolioBfcacheId] = useState(null);
   const isMakingPortfolio = portfolioBfcacheId === bfcacheId;
   const [toastMessage, setToastMessage] = useState("");
-  const { storyCards, addStoryCard, updateStoryCard, deleteStoryCard, removeRecordFromCards } =
-    useMockData();
+  const {
+    storyCards,
+    addStoryCard,
+    updateStoryCard,
+    deleteStoryCard,
+    addProjectRecord,
+    updateProjectRecord,
+    deleteProjectRecord,
+  } = useMockData();
   const cards = storyCards.filter(({ projectId }) => projectId === project.id);
+  const records = projectRecords;
 
-  const records = projectRecords.map((record) => ({
-    ...record,
-    cardNumbers: cards.flatMap(({ recordIds }, index) =>
-      recordIds.includes(record.id) ? [index + 1] : [],
-    ),
-  }));
-
+  // 기록을 저장하면 나의 사자록에 프로젝트 카드 1장이 함께 생긴다(H-22).
   function addRecord(record) {
     setHasRecordChanged(true);
-    changeRecords((current) => [
-      { id: crypto.randomUUID(), ...MOCK_TODAY, ...record },
-      ...current,
-    ]);
+    addProjectRecord(project.id, { id: crypto.randomUUID(), ...MOCK_TODAY, tags: [], ...record });
   }
 
   function saveRecord(recordId, changes) {
@@ -55,15 +50,12 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
       setHasRecordChanged(true);
     }
 
-    changeRecords((current) =>
-      current.map((record) => (record.id === recordId ? { ...record, ...changes } : record)),
-    );
+    updateProjectRecord(project.id, recordId, changes);
   }
 
   function deleteRecord(recordId) {
     setHasRecordChanged(true);
-    changeRecords((current) => current.filter(({ id }) => id !== recordId));
-    removeRecordFromCards(recordId);
+    deleteProjectRecord(project.id, recordId);
   }
 
   function saveCard(card) {
@@ -72,10 +64,9 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
       projectId: project.id,
       week: project.recap?.week ?? MOCK_WEEK.week,
       type: "project",
-      whenLabel: `${project.name} · ${MOCK_TODAY.date.split("/")[0]}월`,
+      whenLabel: project.name,
       shape: "sunFine",
       color: "yellow",
-      deletedRecordCount: 0,
       ...card,
     });
     // 처음 마칠 때는 완료 표시가 저장을 알려 주므로, 더 만들 때만 안내한다(H-18).
