@@ -17,8 +17,9 @@ export default function ProjectHeader({ project, recordCount, lastRecordedAt }) 
   return (
     <header className="flex items-end gap-6">
       <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
-        <Link href="/" className="text-body-sm text-ink-muted">
-          ← 홈
+        {/* 프로젝트는 홈 타일이나 상단 메뉴 '프로젝트'로 들어오므로 목록으로 돌아간다(H-11, H-24). */}
+        <Link href="/projects" className="text-body-sm text-ink-muted">
+          ← 프로젝트
         </Link>
         <p className="text-label text-accent-strong">
           {STATUS_LABELS[status]} · {formatRoles(roles)}

@@ -145,8 +145,8 @@ export default function ProjectView({ projectId, initialIsAdding }) {
   if (!project) {
     return (
       <div className="flex flex-col items-start gap-3">
-        <Link href="/" className="text-body-sm text-ink-muted">
-          ← 홈
+        <Link href="/projects" className="text-body-sm text-ink-muted">
+          ← 프로젝트
         </Link>
         <p role="status" className="text-body text-ink-subtle">
           프로젝트를 찾을 수 없어요.
