@@ -47,7 +47,7 @@ export default function ProjectRecordReview({
       />
       <SavedAttachments attachments={attachments} />
       <RecordFormFooter>
-        <TextLink onClick={onBack}>← 자료로</TextLink>
+        <TextLink onClick={onBack}>{isOrganizedByAi ? "← 질문으로" : "← 자료로"}</TextLink>
         <Button className="ml-auto" onClick={onSave}>기록 저장</Button>
       </RecordFormFooter>
     </>

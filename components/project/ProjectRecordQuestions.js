@@ -23,9 +23,11 @@ function getSourceLabel(attachments) {
   return [...fileNames, ...(linkCount > 0 ? [`링크 ${linkCount}개`] : [])].join(", ");
 }
 
-export default function ProjectRecordQuestions({ attachments, onComplete }) {
+// startAtLast: 정리 결과에서 '← 질문으로'로 돌아오면 마지막 질문부터 보여 준다(H-14).
+// 이전 질문으로 돌아가도 전에 쓴 답은 아직 채워 주지 않는다(답 유지는 기능 개발 때 한다).
+export default function ProjectRecordQuestions({ attachments, startAtLast = false, onBackToMaterials, onComplete }) {
   const [questions] = useState(() => selectQuestions(attachments));
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(startAtLast ? questions.length - 1 : 0);
   const [answers, setAnswers] = useState({});
   const question = questions[index];
   const sourceLabel = getSourceLabel(attachments);
@@ -38,6 +40,13 @@ export default function ProjectRecordQuestions({ attachments, onComplete }) {
 
     setAnswers(nextAnswers);
     setIndex(index + 1);
+  }
+
+  // 건너뛴 질문은 전에 답했더라도 정리에 쓰지 않는다. 입력칸이 비어 보이는 것과 맞춘다.
+  function skipQuestion() {
+    const { [question.fieldKey]: _skipped, ...rest } = answers;
+
+    goNext(rest);
   }
 
   return (
@@ -54,9 +63,10 @@ export default function ProjectRecordQuestions({ attachments, onComplete }) {
       }
       question={question.question}
       placeholder="한두 문장이면 충분해요"
-      exampleAnswer={question.exampleAnswer}
+      backLabel={index === 0 ? "← 자료로" : "← 이전 질문"}
+      onBack={index === 0 ? onBackToMaterials : () => setIndex(index - 1)}
       onAnswer={(answer) => goNext({ ...answers, [question.fieldKey]: answer })}
-      onSkip={() => goNext(answers)}
+      onSkip={skipQuestion}
     />
   );
 }

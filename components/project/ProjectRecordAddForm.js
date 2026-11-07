@@ -29,6 +29,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
   const [notice, setNotice] = useState("");
   const [step, setStep] = useState("materials");
   const [isOrganizedByAi, setIsOrganizedByAi] = useState(false);
+  const [startsAtLastQuestion, setStartsAtLastQuestion] = useState(false);
   const [tags, setTags] = useState([]);
   const { toast, showToast, hideToast } = useToast();
 
@@ -99,6 +100,13 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
     }
 
     setNotice("");
+    setStartsAtLastQuestion(false);
+    setStep("questions");
+  }
+
+  // 정리 결과에서 '← 질문으로'를 누르면 마지막 질문으로 돌아간다(H-14).
+  function returnToQuestions() {
+    setStartsAtLastQuestion(true);
     setStep("questions");
   }
 
@@ -121,7 +129,12 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
       <div className="flex flex-col gap-4">
         <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
         {step === "questions" && (
-          <ProjectRecordQuestions attachments={attachments} onComplete={showReview} />
+          <ProjectRecordQuestions
+            attachments={attachments}
+            startAtLast={startsAtLastQuestion}
+            onBackToMaterials={returnToMaterials}
+            onComplete={showReview}
+          />
         )}
         {step === "review" && (
           <ProjectRecordReview
@@ -133,7 +146,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
             getFieldValueProps={getFieldValueProps}
             onChangeTags={setTags}
             onTagLimit={showToast}
-            onBack={returnToMaterials}
+            onBack={isOrganizedByAi ? returnToQuestions : returnToMaterials}
             onSave={saveRecord}
           />
         )}
