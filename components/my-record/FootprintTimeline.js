@@ -14,7 +14,7 @@ function WeekIcon({ week }) {
   if (status === "none") {
     return (
       <span className="flex size-[34px] shrink-0 items-center justify-center">
-        <span className="size-[10.88px] rounded-full bg-[#c9c5bb]" />
+        <span className="size-[10.88px] rounded-full bg-line-strong" />
       </span>
     );
   }

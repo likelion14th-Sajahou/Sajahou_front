@@ -33,7 +33,7 @@ export default function MaterialAttachments({
   });
 
   const upload = (
-    <label className="relative inline-flex shrink-0 cursor-pointer items-center rounded-xl border border-dashed border-[#c9c5bb] px-3 py-[7px] text-label text-ink-muted focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink">
+    <label className="relative inline-flex shrink-0 cursor-pointer items-center rounded-xl border border-dashed border-line-strong px-3 py-[7px] text-label text-ink-muted focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink">
       {uploadLabel}
       <input
         type="file"

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
+import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
 import StoryCardDetail from "./StoryCardDetail";
 import StoryCardList from "./StoryCardList";
@@ -144,9 +145,7 @@ export default function StoryCardsPanel({
           onOpenCard={setOpenCardId}
         />
       ) : (
-        <p role="status" className="rounded-[20px] border border-dashed border-[#d7d3cb] p-6 text-center text-body text-ink-subtle">
-          조건에 맞는 카드가 없어요.
-        </p>
+        <EmptyState role="status">조건에 맞는 카드가 없어요.</EmptyState>
       )}
 
       <Modal

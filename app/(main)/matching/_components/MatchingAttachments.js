@@ -45,7 +45,7 @@ export default function MatchingAttachments({ files, links, onFilesChange, onLin
         </p>
       )}
       <div className="flex items-center gap-2">
-        <label className="inline-flex shrink-0 cursor-pointer items-center rounded-xl border border-dashed border-[#c9c5bb] px-3 py-[7px] text-label text-ink-muted focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink">
+        <label className="inline-flex shrink-0 cursor-pointer items-center rounded-xl border border-dashed border-line-strong px-3 py-[7px] text-label text-ink-muted focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink">
           + 공고 파일
           <input type="file" multiple accept=".pdf,.png,.jpg,.jpeg" aria-label="공고 파일" className="sr-only" onChange={(event) => {
             const selected = Array.from(event.target.files);

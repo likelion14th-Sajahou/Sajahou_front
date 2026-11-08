@@ -71,7 +71,7 @@ function SummaryDetails({ summary }) {
             <dt className="pt-0.5 text-label text-accent-strong">{label}</dt>
             <dd className="text-body leading-[25.5px]">
               {summary[key] || (
-                <span className="inline-block rounded-lg border border-dashed border-[#d7d3cb] px-2.5 text-body-sm text-ink-subtle">
+                <span className="inline-block rounded-lg border border-dashed border-line-medium px-2.5 text-body-sm text-ink-subtle">
                   아직 기록에 없어요
                 </span>
               )}

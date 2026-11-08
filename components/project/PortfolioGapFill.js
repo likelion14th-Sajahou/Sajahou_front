@@ -9,7 +9,7 @@ import PortfolioArtifactRequest from "./PortfolioArtifactRequest";
 import SidebarTitle from "./SidebarTitle";
 
 const GAP_STATUS = {
-  current: { label: "지금", className: "bg-[#fff0e6]" },
+  current: { label: "지금", className: "bg-tint-orange" },
   filled: { label: "채움 ✓", className: "bg-canvas opacity-70" },
   skipped: { label: "건너뜀", className: "bg-canvas opacity-70" },
   waiting: { label: "대기", className: "bg-canvas" },

@@ -4,6 +4,7 @@ import { useState } from "react";
 import CompetencyTags from "@/components/my-record/CompetencyTags";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
 import TextLink from "@/components/ui/TextLink";
 import AttachmentChip from "./AttachmentChip";
 import DeleteConfirm from "./DeleteConfirm";
@@ -141,9 +142,7 @@ export default function ProjectRecords({
           ))}
         </ol>
       ) : (
-        <p className="rounded-[20px] border border-dashed border-[#d7d3cb] p-6 text-center text-body text-ink-subtle">
-          첫 기록을 남겨 보세요. 한 줄이어도 괜찮아요.
-        </p>
+        <EmptyState>첫 기록을 남겨 보세요. 한 줄이어도 괜찮아요.</EmptyState>
       )}
     </section>
   );

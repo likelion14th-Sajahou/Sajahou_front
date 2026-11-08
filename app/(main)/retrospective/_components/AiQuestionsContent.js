@@ -103,7 +103,7 @@ export default function AiQuestionsContent({ initialComplete = false }) {
           </div>
           <ol className="mt-4 flex flex-col gap-2">
             {MOCK_AI_QUESTIONS.map((item, index) => (
-              <li key={item.id} aria-current={!isComplete && index === currentIndex ? "step" : undefined} className={`flex flex-col items-start gap-1 rounded-xl px-3 py-2.5 ${!isComplete && index === currentIndex ? "bg-[#fff0e6]" : `bg-canvas ${responses[item.id].status !== "pending" ? "opacity-70" : ""}`}`}>
+              <li key={item.id} aria-current={!isComplete && index === currentIndex ? "step" : undefined} className={`flex flex-col items-start gap-1 rounded-xl px-3 py-2.5 ${!isComplete && index === currentIndex ? "bg-tint-orange" : `bg-canvas ${responses[item.id].status !== "pending" ? "opacity-70" : ""}`}`}>
                 <Badge tone={item.tone} size="sm">{item.category}</Badge>
                 <p className="text-[13.5px] leading-[1.6]">“{item.source}”</p>
                 <p className="text-label leading-[1.5] text-ink-subtle">{!isComplete && index === currentIndex ? "지금 질문 중" : responses[item.id].status === "answered" ? "답함 ✓" : responses[item.id].status === "skipped" ? "건너뜀" : "대기"}</p>

@@ -18,8 +18,14 @@
   --color-ink-subtle: #5a606c;
   --color-placeholder: #8a8f9a;
   --color-line: #e4e2dd;
+  /* 빈 상태 점선 상자, 카드의 빈칸 표시 */
+  --color-line-medium: #d7d3cb;
+  /* 업로드 버튼 점선, 사자 발자국의 기록 없음 점 */
+  --color-line-strong: #c9c5bb;
   --color-error: #c4321f;
   --color-error-line: #e0533d;
+  /* 삭제처럼 되돌릴 수 없는 동작의 버튼·링크 */
+  --color-danger: #b42318;
   --color-selection: #fffcf4;
   --color-canvas: #f4f4f2;
   --color-accent: #ff6000;
@@ -41,6 +47,8 @@
   --color-draft: #fffbee;
   --color-tint-red: #ffe6df;
   --color-tint-red-ink: #b33a1f;
+  /* 지금 답하는 질문 칸의 배경 */
+  --color-tint-orange: #fff0e6;
   --color-tint-green: #e5f3e1;
   --color-tint-green-ink: #3d7a33;
 

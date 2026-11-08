@@ -76,7 +76,7 @@ export default function RecordAttachmentsField({
         </ul>
       )}
       <div className="flex items-center gap-2">
-        <label className="shrink-0 cursor-pointer rounded-xl border border-dashed border-[#c9c5bb] px-3 py-[7px] text-label text-ink-muted">
+        <label className="shrink-0 cursor-pointer rounded-xl border border-dashed border-line-strong px-3 py-[7px] text-label text-ink-muted">
           + 파일
           <input type="file" multiple aria-label="파일 첨부" onChange={addFiles} className="sr-only" />
         </label>
