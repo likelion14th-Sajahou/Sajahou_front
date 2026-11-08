@@ -60,17 +60,19 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
           defaultValue={card.summary[key]}
         />
       ))}
-      <label className="flex flex-col gap-1.5">
-        <span className="text-label text-ink-muted">
-          {card.type === "project" ? RECORD_TEXT.title : "회고록 전문"}{" "}
-          <span className="text-ink-subtle">· 노션에 붙여 넣는 글</span>
-        </span>
-        <textarea
-          name="document"
-          defaultValue={card.document}
-          className="h-[234px] w-full resize-none rounded-[14px] border border-transparent bg-canvas px-4 py-3 font-mono text-label leading-[20.8px] text-ink"
-        />
-      </label>
+      {/* Markdown 원문이라 고정폭 글꼴과 작은 글자로 보여 준다. */}
+      <TextField
+        label={
+          <>
+            {card.type === "project" ? RECORD_TEXT.title : "회고록 전문"}{" "}
+            <span className="text-ink-subtle">· 노션에 붙여 넣는 글</span>
+          </>
+        }
+        multiline
+        name="document"
+        defaultValue={card.document}
+        className="h-[234px] font-mono text-label! leading-[20.8px]"
+      />
       <div className="flex items-center justify-between gap-3.5 pt-1">
         <TextLink onClick={onCancel}>취소</TextLink>
         <Button type="submit">저장</Button>
