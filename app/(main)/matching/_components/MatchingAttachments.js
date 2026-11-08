@@ -80,7 +80,12 @@ export default function MatchingAttachments({ files, links, onFilesChange, onLin
           onAdd={addLink}
         />
       </div>
-      <p id="matching-attachment-error" role="alert" className="sr-only">{error}</p>
+      {/* 파일 형식·링크 오류를 회고·프로젝트처럼 칸 아래 빨간 글자로 보여 준다. */}
+      {error && (
+        <p id="matching-attachment-error" role="alert" className="text-label text-tint-red-ink">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
