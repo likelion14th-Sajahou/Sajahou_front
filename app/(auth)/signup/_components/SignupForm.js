@@ -165,61 +165,61 @@ export default function SignupForm() {
     <form ref={formRef} className="mt-1" noValidate onSubmit={handleSubmit} aria-busy={submitting}>
       {requestError && <p role="alert" className="py-3 text-label text-error">{requestError}</p>}
       <fieldset disabled={submitting || signup?.submitted} className="min-w-0">
-      <legend className="sr-only">회원가입 정보</legend>
-      <section aria-labelledby="signup-info-title" className="border-t border-line pt-[18px] pb-5">
-        <h2 id="signup-info-title" className="mb-[14px] text-body leading-6 tracking-[-0.3px]">기본 정보</h2>
-        <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2">
-          <TextField label="이름" name="name" value={values.name} onChange={handleChange} autoComplete="name" placeholder="김사자" error={errors.name} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
-          <TextField label="학번" name="studentNo" value={values.studentNo} onChange={handleChange} inputMode="numeric" placeholder="20231234" error={errors.studentNo} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
-          <SignupSelect label="학과" name="department" value={values.department} onChange={handleChange} error={values.department === "other" ? undefined : errors.department}>
-            <option value="" disabled>학과 선택</option>
-            {DEPARTMENTS.map((department) => <option key={department} value={department}>{department}</option>)}
-            <option value="other">기타 (직접 입력)</option>
-          </SignupSelect>
-          <SignupSelect label="기수" name="cohort" value={values.cohort} onChange={handleChange} error={errors.cohort}>
-            <option value="14">14기</option>
-            <option value="13">13기</option>
-            <option value="12">12기</option>
-          </SignupSelect>
-          {values.department === "other" && (
-            <div className="sm:col-span-2">
-              <TextField ref={otherDepartmentRef} label="학과 직접 입력" name="otherDepartment" value={values.otherDepartment} onChange={handleChange} placeholder="학과 이름을 입력해 주세요" error={errors.department} />
-            </div>
-          )}
-        </div>
-      </section>
+        <legend className="sr-only">회원가입 정보</legend>
+        <section aria-labelledby="signup-info-title" className="border-t border-line pt-[18px] pb-5">
+          <h2 id="signup-info-title" className="mb-[14px] text-body leading-6 tracking-[-0.3px]">기본 정보</h2>
+          <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2">
+            <TextField label="이름" name="name" value={values.name} onChange={handleChange} autoComplete="name" placeholder="김사자" error={errors.name} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
+            <TextField label="학번" name="studentNo" value={values.studentNo} onChange={handleChange} inputMode="numeric" placeholder="20231234" error={errors.studentNo} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
+            <SignupSelect label="학과" name="department" value={values.department} onChange={handleChange} error={values.department === "other" ? undefined : errors.department}>
+              <option value="" disabled>학과 선택</option>
+              {DEPARTMENTS.map((department) => <option key={department} value={department}>{department}</option>)}
+              <option value="other">기타 (직접 입력)</option>
+            </SignupSelect>
+            <SignupSelect label="기수" name="cohort" value={values.cohort} onChange={handleChange} error={errors.cohort}>
+              <option value="14">14기</option>
+              <option value="13">13기</option>
+              <option value="12">12기</option>
+            </SignupSelect>
+            {values.department === "other" && (
+              <div className="sm:col-span-2">
+                <TextField ref={otherDepartmentRef} label="학과 직접 입력" name="otherDepartment" value={values.otherDepartment} onChange={handleChange} placeholder="학과 이름을 입력해 주세요" error={errors.department} />
+              </div>
+            )}
+          </div>
+        </section>
 
-      <fieldset className="min-w-0 border-t border-line pt-[18px] pb-5" aria-labelledby="signup-part-title" aria-describedby={errors.part ? "part-error" : undefined} aria-invalid={errors.part ? true : undefined}>
-        <legend className="sr-only">파트</legend>
-        <p id="signup-part-title" className="mb-[14px] text-body leading-6 tracking-[-0.3px]">파트</p>
-        <div className="grid grid-cols-3 gap-[10px]">
-          {PARTS.map(({ value, shape, color }) => (
-            <label key={value} className="group relative cursor-pointer">
-              <input type="radio" name="part" value={value} checked={values.part === value} onChange={handleChange} className="peer sr-only" />
-              <span className="flex min-h-[100px] flex-col items-center gap-1.5 rounded-[18px] border border-line px-1 py-[14px] peer-checked:border-ink peer-checked:bg-selection peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink sm:px-[14px]">
-                <span aria-hidden="true" className="relative block size-10 shrink-0">
-                  <ShapeCharacter shape={shape} color={values.part === value ? color : "muted"} size={40} />
+        <fieldset className="min-w-0 border-t border-line pt-[18px] pb-5" aria-labelledby="signup-part-title" aria-describedby={errors.part ? "part-error" : undefined} aria-invalid={errors.part ? true : undefined}>
+          <legend className="sr-only">파트</legend>
+          <p id="signup-part-title" className="mb-[14px] text-body leading-6 tracking-[-0.3px]">파트</p>
+          <div className="grid grid-cols-3 gap-[10px]">
+            {PARTS.map(({ value, shape, color }) => (
+              <label key={value} className="group relative cursor-pointer">
+                <input type="radio" name="part" value={value} checked={values.part === value} onChange={handleChange} className="peer sr-only" />
+                <span className="flex min-h-[100px] flex-col items-center gap-1.5 rounded-[18px] border border-line px-1 py-[14px] peer-checked:border-ink peer-checked:bg-selection peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink sm:px-[14px]">
+                  <span aria-hidden="true" className="relative block size-10 shrink-0">
+                    <ShapeCharacter shape={shape} color={values.part === value ? color : "muted"} size={40} />
+                  </span>
+                  <span className="text-center text-label leading-6 whitespace-nowrap sm:text-body">{AUTH_PART_LABELS[value]}</span>
                 </span>
-                <span className="text-center text-label leading-6 whitespace-nowrap sm:text-body">{AUTH_PART_LABELS[value]}</span>
-              </span>
-            </label>
-          ))}
-        </div>
-        {errors.part && <p id="part-error" className="mt-[14px] pt-0.5 text-label leading-[20.8px] text-error">{errors.part}</p>}
-      </fieldset>
+              </label>
+            ))}
+          </div>
+          {errors.part && <p id="part-error" className="mt-[14px] pt-0.5 text-label leading-[20.8px] text-error">{errors.part}</p>}
+        </fieldset>
 
-      <label className="flex cursor-pointer items-start gap-[10px] rounded-[14px] bg-canvas p-[14px]">
-        <span className="flex h-6 w-5 shrink-0 justify-center pt-[3px]">
-          <input type="checkbox" name="privacyAgreed" checked={values.privacyAgreed} onChange={handleChange} aria-invalid={errors.privacyAgreed ? true : undefined} aria-describedby={errors.privacyAgreed ? "privacyAgreed-error" : undefined} className="h-[18px] w-[13px] cursor-pointer accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
-        </span>
-        <span className="min-w-0">
-          <span className="block text-body-sm leading-[22.4px]">[필수] 개인정보 수집·이용에 동의해요</span>
-          <span className="mt-1 block text-label leading-[19.5px] text-ink-subtle">
-            사자록 회원 관리와 회고·자소서 기능 제공을 위해 이름·학번·학과·기수·파트·이메일을 수집하며, 회원 탈퇴 시까지 보관해요.
+        <label className="flex cursor-pointer items-start gap-[10px] rounded-[14px] bg-canvas p-[14px]">
+          <span className="flex h-6 w-5 shrink-0 justify-center pt-[3px]">
+            <input type="checkbox" name="privacyAgreed" checked={values.privacyAgreed} onChange={handleChange} aria-invalid={errors.privacyAgreed ? true : undefined} aria-describedby={errors.privacyAgreed ? "privacyAgreed-error" : undefined} className="h-[18px] w-[13px] cursor-pointer accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
           </span>
-        </span>
-      </label>
-      {errors.privacyAgreed && <p id="privacyAgreed-error" className="pt-0.5 text-label leading-[20.8px] text-error">{errors.privacyAgreed}</p>}
+          <span className="min-w-0">
+            <span className="block text-body-sm leading-[22.4px]">[필수] 개인정보 수집·이용에 동의해요</span>
+            <span className="mt-1 block text-label leading-[19.5px] text-ink-subtle">
+              사자록 회원 관리와 회고·자소서 기능 제공을 위해 이름·학번·학과·기수·파트·이메일을 수집하며, 회원 탈퇴 시까지 보관해요.
+            </span>
+          </span>
+        </label>
+        {errors.privacyAgreed && <p id="privacyAgreed-error" className="pt-0.5 text-label leading-[20.8px] text-error">{errors.privacyAgreed}</p>}
       </fieldset>
 
       <Button type="submit" variant="accent" disabled={submitting} className="mt-[18px] w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
