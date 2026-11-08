@@ -11,7 +11,7 @@ import GoogleSignInButton from "./GoogleSignInButton";
 
 export default function LoginActions() {
   const router = useRouter();
-  const { acceptGoogleLogin, completeLogin, clearSignup, notice, clearNotice } = useAuth();
+  const { isAuthenticated, acceptGoogleLogin, completeLogin, clearSignup, notice, clearNotice } = useAuth();
   const requestInFlight = useRef(false);
   const controllerRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -24,6 +24,10 @@ export default function LoginActions() {
     clearSignup();
     return () => controllerRef.current?.abort();
   }, [clearSignup]);
+
+  useEffect(() => {
+    if (isAuthenticated) router.replace("/");
+  }, [isAuthenticated, router]);
 
   const handleLogin = useCallback(async (idToken, demo = false) => {
     if (requestInFlight.current || pending) return;
@@ -39,7 +43,7 @@ export default function LoginActions() {
       const options = { signal: controller.signal };
       const result = demo ? await loginDemo(options) : await loginWithGoogle(idToken, options);
       const destination = demo
-        ? (await completeLogin(result, options) ? "/" : null)
+        ? (await completeLogin(options) ? "/" : null)
         : await acceptGoogleLogin(result, options);
       if (destination && !controller.signal.aborted) startTransition(() => router.replace(destination));
     } catch (failure) {
@@ -56,6 +60,8 @@ export default function LoginActions() {
 
   const handleCredential = useCallback((idToken) => handleLogin(idToken), [handleLogin]);
   const handleGoogleError = useCallback((message) => setError(message), []);
+
+  if (isAuthenticated) return <p role="status" className="mt-[22px] text-center text-label text-ink-subtle">홈으로 이동하고 있어요…</p>;
 
   return (
     <div className="mt-[22px] flex flex-col items-center gap-[14px]" aria-busy={busy}>
