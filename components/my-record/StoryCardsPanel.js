@@ -105,7 +105,7 @@ export default function StoryCardsPanel({
           aria-label="역량"
           value={competency}
           onChange={(event) => setCompetency(event.target.value)}
-          className={`w-[163px] shrink-0 cursor-pointer appearance-none bg-[url(/images/my-record/chevron-down.svg)] bg-[position:right_6px_center] bg-no-repeat pr-7 pl-4 ${FIELD_CLASSES}`}
+          className={`w-[163px] shrink-0 cursor-pointer appearance-none bg-[url(/images/common/chevron-down.svg)] bg-[position:right_6px_center] bg-no-repeat pr-7 pl-4 ${FIELD_CLASSES}`}
         >
           <option value={ALL}>역량 전체</option>
           {filterCompetencies.map((name) => {
