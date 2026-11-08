@@ -4,6 +4,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAuth } from "./AuthProvider";
+import TextLink from "@/components/ui/TextLink";
 
 const NAV_ITEMS = [
   { href: "/", label: "홈" },
@@ -45,6 +47,7 @@ function CurrentNavLinks() {
 
 export default function Header() {
   const { user } = useMockData();
+  const { logout, isLoggingOut, logoutError } = useAuth();
 
   // 768px 미만은 두 줄: 첫 줄에 로고와 사용자(로그아웃), 둘째 줄에 메뉴. 768px 이상은 한 줄(15 시안).
   // 홈 히어로가 이 높이(두 줄 110px, 한 줄 68px)를 빼서 첫 화면을 채우므로, 줄 수를 바꾸면 HomeHero도 함께 고친다.
@@ -64,20 +67,25 @@ export default function Header() {
             <CurrentNavLinks />
           </Suspense>
         </nav>
-        {/* 모바일에서는 이름·파트를 숨기고 로그아웃만 보여 준다(H-01). 로그인 기능이 생기기 전까지는 로그인 화면으로 이동만 한다. */}
+        {/* 모바일에서는 이름·파트를 숨기고 로그아웃만 보여 준다(H-01). */}
         <div className="flex items-center gap-2">
           {user && (
             <p className="hidden text-label text-ink sm:block">
               {user.name} <span className="text-ink-subtle">{user.part}</span>
             </p>
           )}
-          <Link
-            href="/login"
-            className="whitespace-nowrap text-[12.5px] leading-5 text-ink-subtle underline decoration-from-font [text-underline-position:from-font]"
+          <TextLink
+            size="sm"
+            onClick={logout}
+            disabled={isLoggingOut}
+            aria-busy={isLoggingOut}
+            aria-describedby={logoutError ? "logout-error" : undefined}
+            className="text-ink-subtle disabled:cursor-default disabled:opacity-60"
           >
-            로그아웃
-          </Link>
+            {isLoggingOut ? "로그아웃 중…" : "로그아웃"}
+          </TextLink>
         </div>
+        {logoutError && <p id="logout-error" role="alert" className="w-full text-label text-error">{logoutError}</p>}
       </div>
     </header>
   );

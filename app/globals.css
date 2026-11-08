@@ -18,6 +18,9 @@
   --color-ink-subtle: #5a606c;
   --color-placeholder: #8a8f9a;
   --color-line: #e4e2dd;
+  --color-error: #c4321f;
+  --color-error-line: #e0533d;
+  --color-selection: #fffcf4;
   --color-canvas: #f4f4f2;
   --color-accent: #ff6000;
   --color-accent-strong: #c24400;

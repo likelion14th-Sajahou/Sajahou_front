@@ -3,6 +3,7 @@ import Link from "next/link";
 const VARIANT_CLASSES = {
   primary: "border-ink bg-ink text-white",
   secondary: "border-ink bg-white text-ink",
+  outline: "border-line bg-white text-ink",
   accent: "border-accent bg-accent text-white",
   highlight: "border-shape-yellow bg-shape-yellow text-ink",
   danger: "border-ink bg-[#b42318] text-white",

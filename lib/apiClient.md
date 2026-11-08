@@ -1,8 +1,8 @@
 # 공통 API Client 사용 가이드
 
-`lib/apiClient.js`의 `apiRequest`는 요청 데이터 구성, 공통 응답 파싱, 오류 전달, 타임아웃과 취소를 담당한다. 토큰 저장·갱신, 재시도, 알림, 화면 전환은 호출부의 책임이다. UI와 Mock에는 연결하지 않았다.
+`lib/apiClient.js`의 `apiRequest`는 요청 데이터 구성, 공통 응답 파싱, 오류 전달, 타임아웃과 취소를 담당한다. 브라우저 요청에는 `credentials: "include"`를 적용해 서버의 HttpOnly 세션 쿠키를 사용한다. 재시도, 알림, 로그인 상태 관리와 화면 전환은 호출부의 책임이다.
 
-기준은 [사자록 API 명세]다. 아래 예시는 사용법을 설명하는 문서이며, 개별 엔드포인트 함수나 실제 호출을 프로젝트에 추가한 것이 아니다.
+기준은 사자록 API 명세와 백엔드에서 확정한 세션 쿠키 인증 정책이다. 아래 예시는 사용법을 설명하는 문서이며, 개별 엔드포인트 함수나 실제 호출을 프로젝트에 추가한 것이 아니다.
 
 ## 1. 환경변수
 
@@ -14,7 +14,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 
 origin 또는 `/api/v1`까지 지정할 수 있다. Client가 `/api/v1`을 한 번 연결하므로 호출 경로에는 접두사를 넣지 않는다. 환경변수가 없으면 요청 시 `TypeError`가 발생한다. 모듈을 import하는 것만으로 요청하지는 않는다.
 
-같은 함수를 서버와 브라우저에서 사용할 수 있다. `NEXT_PUBLIC_`에는 공개 가능한 백엔드 주소만 넣는다. 이 값은 Next.js 빌드 시 고정되므로 배포 주소를 바꾸면 다시 빌드한다. 비밀값이나 토큰은 넣지 않는다.
+같은 함수를 서버와 브라우저에서 사용할 수 있다. 단, 서버 호출에서는 `credentials: "include"`만으로 브라우저의 쿠키가 자동 전달되지 않는다. `NEXT_PUBLIC_`에는 공개 가능한 백엔드 주소만 넣는다. 이 값은 Next.js 빌드 시 고정되므로 배포 주소를 바꾸면 다시 빌드한다. 비밀값이나 토큰은 넣지 않는다.
 
 ## 2. 옵션과 반환값
 
@@ -30,10 +30,11 @@ const data = await apiRequest(path, options);
 | `query` | 객체 또는 URLSearchParams. URL에 있는 쿼리에 추가 |
 | `body` | JSON 값 또는 FormData |
 | `headers` | 객체, Headers, 키·값 쌍 배열 등 fetch의 HeadersInit |
-| `token` | 해당 요청에만 `Authorization: Bearer ...` 설정 |
+| `credentials` | 항상 `include` 적용. 브라우저가 세션 쿠키를 저장·전송하며 호출부에서 덮어쓸 수 없음 |
 | `timeoutMs` | 선택 사항. 1~2147483647의 정수(ms), 생략하면 Client 자체 타임아웃 없음 |
 | `signal` | 호출부 AbortController의 signal 전달 |
-| 나머지 | `cache`, `next`, `credentials` 등 fetch 옵션 그대로 전달 |
+| `baseUrl` | 선택 사항. 해당 요청의 API origin을 지정. 인증 HTTP mock은 현재 origin 사용 |
+| 나머지 | `cache`, `next` 등 fetch 옵션 그대로 전달 |
 
 경로는 `/users/me`처럼 `/api/v1` 이후 부분을 전달한다. 동적 path 값은 호출부에서 `encodeURIComponent`로 인코딩한다. GET/HEAD에는 body 대신 query를 사용한다.
 
@@ -46,27 +47,26 @@ const data = await apiRequest(path, options);
 - JSON body는 Client가 직렬화하므로 호출부에서 `JSON.stringify`하지 않는다. 문자열을 주면 JSON 문자열로 직렬화한다. 원시 바이너리·스트림 body는 현재 지원 범위가 아니다.
 - JSON body가 있으면 기본 `Content-Type: application/json`을 설정한다. 요청별 Content-Type을 명시하면 유지하므로 body와 맞는 값을 사용한다.
 - FormData는 그대로 전달하고 Content-Type을 제거한다. 런타임이 boundary를 포함해 헤더를 설정한다.
-- 공통 `Accept: application/json`은 요청별 헤더로 덮어쓸 수 있다. `token`이 있으면 요청별 Authorization보다 우선한다.
-- 토큰을 생략하면 Bearer 헤더를 자동 생성하지 않는다. 단, 호출부가 `headers.Authorization`을 직접 지정한 경우 그 헤더는 유지한다.
+- 공통 `Accept: application/json`은 요청별 헤더로 덮어쓸 수 있다.
+- accessToken을 저장하거나 Bearer 헤더를 생성하지 않는다. 호출부에서도 인증용 Authorization 헤더를 전달하지 않는다. HttpOnly 세션 쿠키는 브라우저가 관리한다.
 - query 객체의 null/undefined는 생략하고 0/false는 유지한다. 배열은 같은 키를 반복한다. 이는 Client의 표현 규칙이며, 실제 API의 쿼리 키와 허용 형식은 명세를 따른다. 현재 명세의 `/story-cards`에는 배열 쿼리가 정의되어 있지 않다.
 
 ## 3. 사용 예시
 
-각 예시는 위 import를 사용한다. `accessToken`, `idToken`, `file`, `retrospectiveId`는 호출부가 제공하는 값이다.
+각 예시는 위 import를 사용한다. `idToken`, `file`, `retrospectiveId`는 호출부가 제공하는 값이다.
 
 ### 일반 GET
 
 ```js
-const me = await apiRequest("/users/me", { token: accessToken });
+const me = await apiRequest("/users/me");
 // me는 data에 해당하는 사용자 객체다.
 ```
 
-### Bearer Token이 필요한 POST
+### 세션 인증이 필요한 POST
 
 ```js
 const project = await apiRequest("/projects", {
   method: "POST",
-  token: accessToken,
   body: { name: "사자록", subtitle: null, roles: ["FRONTEND"] },
 });
 ```
@@ -80,13 +80,12 @@ const login = await apiRequest("/auth/google", {
 });
 ```
 
-명세에서 `/auth/google`, `/auth/signup`, `/auth/demo`는 Bearer 인증 예외다. 해당 호출에는 token이나 Authorization을 전달하지 않는다. Client가 경로로 인증 여부를 추정하거나 토큰 누락을 차단하지는 않는다.
+로그인·가입 요청에도 `credentials: "include"`가 적용되어 성공 응답의 세션 쿠키를 브라우저가 저장할 수 있다. Google idToken과 가입용 signupToken은 각 API 명세대로 요청 본문에 전달한다.
 
 ### Query Parameter
 
 ```js
 const result = await apiRequest("/story-cards", {
-  token: accessToken,
   query: { type: "SESSION", competencyId: 5, weekNumber: 9, q: "협업" },
 });
 // /api/v1/story-cards?type=SESSION&competencyId=5&weekNumber=9&q=...
@@ -101,7 +100,6 @@ form.append("category", "OUTPUT");
 
 const attachment = await apiRequest("/attachments/files", {
   method: "POST",
-  token: accessToken,
   body: form,
 });
 // Content-Type을 직접 지정하지 않는다.
@@ -115,7 +113,6 @@ const pending = apiRequest(
   `/retrospectives/${encodeURIComponent(retrospectiveId)}/questions`,
   {
     method: "POST",
-    token: accessToken,
     body: { mode: "AUTO" },
     timeoutMs: 90000,
     signal: controller.signal,
@@ -136,7 +133,6 @@ const result = await pending;
 try {
   const project = await apiRequest("/projects", {
     method: "POST",
-    token: accessToken,
     body: { name: "사자록", subtitle: null, roles: ["FRONTEND"] },
   });
   // project 사용
@@ -190,7 +186,7 @@ HTTP 실패 또는 `success:false`는 `ApiError`로 전달된다. 잘못된 환�
 
 1. 담당 API의 메서드, 경로, query/body, 인증, 성공·실패 구조를 명세에서 확인한 뒤 담당 함수를 작성한다. 파일 배치는 기존 구조와 팀 합의를 따른다.
 2. 담당 함수에서 이 Client를 호출한다. 공통 헤더·JSON 직렬화·응답 파싱을 중복 구현하지 않는다.
-3. 인증 관리 계층에서 받은 토큰을 요청마다 전달한다. Client에 전역 사용자 토큰, 스토리지 조회, 자동 갱신을 추가하지 않는다.
+3. 세션 쿠키 인증을 사용한다. 요청마다 accessToken을 전달하거나 스토리지 조회·토큰 자동 갱신을 추가하지 않는다.
 4. 로딩·빈 데이터·오류 알림·화면 이동은 호출부에서 처리한다. 공통 Client에 화면별 로직을 넣지 않는다.
 5. 캐싱 정책은 요청별로 검토한다. Client가 일괄 강제하지 않으며, 필요하면 `cache: "no-store"`를 전달한다. 서버의 `next` 캐시 옵션은 브라우저에서 같은 기능을 제공하지 않는다. `cache: "no-store"`와 양수 `next.revalidate`처럼 충돌하는 옵션을 함께 주지 않는다.
 6. Mock 전환 시 실제 data 구조·상태·빈 값과 UI 요구를 비교한다. Client를 Mock 데이터 모양에 맞추거나 변환 어댑터를 넣지 않는다.

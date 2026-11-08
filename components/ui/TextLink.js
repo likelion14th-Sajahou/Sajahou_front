@@ -4,6 +4,8 @@ const VARIANT_CLASSES = {
   underline:
     "px-0.5 py-1 text-ink-muted underline decoration-from-font [text-underline-position:from-font]",
   border: "border-b border-ink text-ink",
+  accent:
+    "text-accent-strong underline decoration-from-font [text-underline-position:from-font]",
   danger:
     "px-0.5 py-1 text-[#b42318] underline decoration-from-font [text-underline-position:from-font]",
 };
