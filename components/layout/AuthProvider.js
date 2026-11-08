@@ -2,7 +2,7 @@
 
 import { createContext, use, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { authRequest, getCurrentUser, getGoogleLoginDestination, validateUser } from "@/lib/auth";
+import { authRequest, getCurrentUser, getGoogleLoginDestination, logoutSession, validateUser } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 
 const AuthContext = createContext(null);
@@ -17,6 +17,9 @@ export default function AuthProvider({ children }) {
   const restoreRequest = useRef(null);
   const [signup, setSignup] = useState(null);
   const [notice, setNotice] = useState("");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
+  const logoutInFlight = useRef(false);
   const generation = useRef(0);
   const clearSignup = useCallback(() => setSignup(null), []);
   const clearNotice = useCallback(() => setNotice(""), []);
@@ -48,14 +51,43 @@ export default function AuthProvider({ children }) {
     setRestoreAttempt((attempt) => attempt + 1);
   };
 
-  const logout = useCallback((message = "") => {
+  const clearSession = useCallback((message = "") => {
     generation.current += 1;
     setSession(null);
     setSignup(null);
     setNotice(message);
+    setLogoutError("");
     window.google?.accounts?.id?.disableAutoSelect();
     router.replace("/login");
   }, [router]);
+
+  const cancelSignup = useCallback((message) => {
+    setSignup(null);
+    setNotice(message);
+    router.replace("/login");
+  }, [router]);
+
+  const logout = useCallback(async () => {
+    if (logoutInFlight.current) return;
+    logoutInFlight.current = true;
+    setIsLoggingOut(true);
+    setLogoutError("");
+    const currentGeneration = generation.current;
+    try {
+      await logoutSession();
+      if (generation.current === currentGeneration) clearSession();
+    } catch (error) {
+      if (generation.current !== currentGeneration) return;
+      if (error.status === 401) {
+        clearSession("로그인이 만료되었어요. 다시 로그인해 주세요.");
+      } else {
+        setLogoutError("로그아웃하지 못했어요. 다시 시도해 주세요.");
+      }
+    } finally {
+      logoutInFlight.current = false;
+      setIsLoggingOut(false);
+    }
+  }, [clearSession]);
 
   const completeLogin = useCallback(async ({ signal } = {}) => {
     const currentGeneration = ++generation.current;
@@ -87,14 +119,15 @@ export default function AuthProvider({ children }) {
       if (currentGeneration !== generation.current) throw new DOMException("로그인 상태가 변경되었습니다.", "AbortError");
       return result;
     } catch (error) {
-      if (error.status === 401 && generation.current === currentGeneration) logout("로그인이 만료되었어요. 다시 로그인해 주세요.");
+      if (error.status === 401 && generation.current === currentGeneration) clearSession("로그인이 만료되었어요. 다시 로그인해 주세요.");
       throw error;
     }
-  }, [session, logout]);
+  }, [session, clearSession]);
 
   return (
     <AuthContext value={{ user: session?.user ?? null, isAuthenticated: Boolean(session), signup,
-      notice, clearNotice, clearSignup, acceptGoogleLogin, completeLogin, authenticatedRequest, logout }}>
+      notice, clearNotice, clearSignup, cancelSignup, acceptGoogleLogin, completeLogin,
+      authenticatedRequest, logout, isLoggingOut, logoutError }}>
       {restoreStatus === "ready" ? children : (
         <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
           {restoreStatus === "checking" ? (

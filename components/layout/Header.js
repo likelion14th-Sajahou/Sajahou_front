@@ -45,7 +45,7 @@ function CurrentNavLinks() {
 
 export default function Header() {
   const { user } = useMockData();
-  const { logout } = useAuth();
+  const { logout, isLoggingOut, logoutError } = useAuth();
 
   return (
     <header className="w-full border-b border-transparent">
@@ -67,7 +67,17 @@ export default function Header() {
               {user.name} <span className="text-ink-subtle">{user.part}</span>
             </p>
           )}
-          <TextLink size="sm" onClick={() => logout()}>로그아웃</TextLink>
+          <TextLink
+            size="sm"
+            onClick={logout}
+            disabled={isLoggingOut}
+            aria-busy={isLoggingOut}
+            aria-describedby={logoutError ? "logout-error" : undefined}
+            className="disabled:cursor-default disabled:opacity-60"
+          >
+            {isLoggingOut ? "로그아웃 중…" : "로그아웃"}
+          </TextLink>
+          {logoutError && <p id="logout-error" role="alert" className="w-full text-label text-error">{logoutError}</p>}
         </nav>
       </div>
     </header>

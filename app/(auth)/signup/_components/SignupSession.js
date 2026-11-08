@@ -5,20 +5,20 @@ import { useAuth } from "@/components/layout/AuthProvider";
 
 // 가입 폼은 별도 구현한다. 로그인에서 받은 가입 자격과 이메일만 연결한다.
 export default function SignupSession({ children }) {
-  const { signup, logout } = useAuth();
+  const { signup, cancelSignup } = useAuth();
   useEffect(() => {
     if (!signup) {
-      logout("가입하려면 먼저 Google 계정으로 로그인해 주세요.");
+      cancelSignup("가입하려면 먼저 Google 계정으로 로그인해 주세요.");
       return;
     }
     const remaining = signup.expiresAt - Date.now();
     if (remaining <= 0) {
-      logout("가입 시간이 만료되었어요. 다시 로그인해 주세요.");
+      cancelSignup("가입 시간이 만료되었어요. 다시 로그인해 주세요.");
       return;
     }
-    const timer = setTimeout(() => logout("가입 시간이 만료되었어요. 다시 로그인해 주세요."), remaining);
+    const timer = setTimeout(() => cancelSignup("가입 시간이 만료되었어요. 다시 로그인해 주세요."), remaining);
     return () => clearTimeout(timer);
-  }, [signup, logout]);
+  }, [signup, cancelSignup]);
 
   if (!signup) return null;
   return (
