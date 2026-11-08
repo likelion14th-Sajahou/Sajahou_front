@@ -12,6 +12,7 @@ import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/
 import { buildWeekStoryCard } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { copyText } from "@/lib/clipboard";
 
 const STORY_FIELDS = [
   { name: "title", label: "제목" },
@@ -32,12 +33,9 @@ export default function ReviewContent({ initialDraft }) {
   }
 
   async function copyRetrospective() {
-    try {
-      await navigator.clipboard.writeText(draft.retrospective);
-      setNotice("회고록을 복사했어요. 노션에 붙여 넣어 주세요.");
-    } catch {
-      setNotice("복사하지 못했어요. 회고록의 내용을 직접 선택해서 복사해 주세요.");
-    }
+    const copied = await copyText(draft.retrospective);
+
+    setNotice(copied ? "회고록을 복사했어요. 노션에 붙여 넣어 주세요." : "복사하지 못했어요. 회고록의 내용을 직접 선택해서 복사해 주세요.");
   }
 
   return (

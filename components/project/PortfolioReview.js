@@ -9,6 +9,7 @@ import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { buildPortfolioMarkdown } from "./portfolioDraft";
 import RecordFormFooter from "./RecordFormFooter";
+import { copyText } from "@/lib/clipboard";
 
 // 3단계 포트폴리오 검토(H-18, 14). 카드는 만들지 않고(카드는 기록마다 이미 있다, H-22) Markdown만 저장한다.
 export default function PortfolioReview({ project, records, filled, onBack, onSave }) {
@@ -17,12 +18,7 @@ export default function PortfolioReview({ project, records, filled, onBack, onSa
   const { toast, showToast, hideToast } = useToast();
 
   async function copyMarkdown() {
-    try {
-      await navigator.clipboard.writeText(markdown);
-      showToast(PORTFOLIO_TEXT.copied);
-    } catch {
-      showToast(COPY_FAILED_MESSAGE);
-    }
+    showToast((await copyText(markdown)) ? PORTFOLIO_TEXT.copied : COPY_FAILED_MESSAGE);
   }
 
   return (

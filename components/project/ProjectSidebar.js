@@ -10,6 +10,7 @@ import Toast, { useToast } from "@/components/ui/Toast";
 import DeleteConfirm from "./DeleteConfirm";
 import DotList from "./DotList";
 import SidebarTitle from "./SidebarTitle";
+import { copyText } from "@/lib/clipboard";
 
 const FINISH_STEPS = ["넣을 기록 고르기", "AI가 빈 곳을 찾아 질문·요청", "포트폴리오 완성"];
 
@@ -57,12 +58,7 @@ function PortfolioCard({ portfolio, deleteProps, onRemake }) {
   const { toast, showToast, hideToast } = useToast();
 
   async function copyMarkdown() {
-    try {
-      await navigator.clipboard.writeText(portfolio.markdown);
-      showToast(PORTFOLIO_TEXT.copied);
-    } catch {
-      showToast(COPY_FAILED_MESSAGE);
-    }
+    showToast((await copyText(portfolio.markdown)) ? PORTFOLIO_TEXT.copied : COPY_FAILED_MESSAGE);
   }
 
   return (
