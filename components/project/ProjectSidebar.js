@@ -9,9 +9,11 @@ import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import DeleteConfirm from "./DeleteConfirm";
 import DotList from "./DotList";
-import SidebarTitle from "./SidebarTitle";
 import { copyText } from "@/lib/clipboard";
+import CardTitle from "@/components/ui/CardTitle";
+import ShapeCharacter from "@/components/ui/ShapeCharacter";
 
+const TITLE_SHAPE = <ShapeCharacter shape="sunFine" color="yellow" face="none" size={18} />;
 const FINISH_STEPS = ["넣을 기록 고르기", "AI가 빈 곳을 찾아 질문·요청", "포트폴리오 완성"];
 
 // 오른쪽 칸 아래의 '프로젝트 삭제'(H-25, 12-g). 진행 중·완료 모두 있고, 누르면 그 자리에 확인 문구가 열린다.
@@ -39,7 +41,7 @@ function DeleteProject({ recordCount, cardCount, onDelete }) {
 function FinishProjectCard({ deleteProps, onFinish }) {
   return (
     <Card as="aside" size="md" aria-label="프로젝트 마치기">
-      <SidebarTitle>프로젝트를 마치면</SidebarTitle>
+      <CardTitle action={TITLE_SHAPE}>프로젝트를 마치면</CardTitle>
       <div className="pt-4">
         <DotList items={FINISH_STEPS} />
       </div>
@@ -63,7 +65,7 @@ function PortfolioCard({ portfolio, deleteProps, onRemake }) {
 
   return (
     <Card as="aside" size="md" aria-label="포트폴리오">
-      <SidebarTitle>포트폴리오</SidebarTitle>
+      <CardTitle action={TITLE_SHAPE}>포트폴리오</CardTitle>
       {portfolio ? (
         <>
           <div className="pt-4">

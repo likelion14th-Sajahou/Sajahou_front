@@ -12,6 +12,8 @@ import { MOCK_AI_QUESTIONS } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import AiQuestionsComplete from "./AiQuestionsComplete";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
+import CardTitle from "@/components/ui/CardTitle";
+import ActionFooter from "@/components/ui/ActionFooter";
 
 export default function AiQuestionsContent({ initialComplete = false }) {
   const { getStepHref } = useRetrospectivePreview();
@@ -97,10 +99,9 @@ export default function AiQuestionsContent({ initialComplete = false }) {
         </div>
 
         <Card as="aside" size="md" aria-labelledby="ai-question-guide-title">
-          <div className="flex items-center justify-between border-b border-ink pb-3">
-            <h2 id="ai-question-guide-title" className="text-[18px] tracking-[-0.01em]">AI가 찾은 더 물어볼 곳</h2>
-            <ShapeCharacter shape="triangle" color="coral" size={16} face="none" cropped />
-          </div>
+          <CardTitle id="ai-question-guide-title" action={<ShapeCharacter shape="triangle" color="coral" size={16} face="none" cropped />}>
+            AI가 찾은 더 물어볼 곳
+          </CardTitle>
           <ol className="mt-4 flex flex-col gap-2">
             {MOCK_AI_QUESTIONS.map((item, index) => (
               <li key={item.id} aria-current={!isComplete && index === currentIndex ? "step" : undefined} className={`flex flex-col items-start gap-1 rounded-xl px-3 py-2.5 ${!isComplete && index === currentIndex ? "bg-tint-orange" : `bg-canvas ${responses[item.id].status !== "pending" ? "opacity-70" : ""}`}`}>
@@ -111,10 +112,10 @@ export default function AiQuestionsContent({ initialComplete = false }) {
             ))}
           </ol>
           <p className="mt-3 text-label leading-[1.5] text-ink-subtle">자소서에 쓸 가치가 큰 곳부터 최대 5개만 물어요. 마지막은 느낀 점이에요.</p>
-          <div className="mt-1 flex items-center gap-3.5 border-t border-line pt-4">
+          <ActionFooter>
             <TextLink href={getStepHref("materials")}>← 자료 고치기</TextLink>
             <TextLink onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</TextLink>
-          </div>
+          </ActionFooter>
         </Card>
       </div>
       <Toast toast={toast} onDismiss={hideToast} />

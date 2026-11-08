@@ -12,6 +12,7 @@ import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
 import MaterialsChangeNotice from "./MaterialsChangeNotice";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
+import ActionFooter from "@/components/ui/ActionFooter";
 
 const ACCEPTED_FILES = {
   sessionFiles: ".pdf",
@@ -216,16 +217,14 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
         onContinue={() => setNotice("이전 질문 이어 쓰기는 준비 중이에요.")}
         onRegenerate={() => setNotice("질문 새로 만들기는 준비 중이에요. 기존 답변은 삭제하지 않았어요.")}
       />
-      <div className="pt-1">
-        <div className="flex flex-wrap items-center justify-between gap-x-3.5 gap-y-2.5 border-t border-line pt-4">
-          <TextLink href={getStepHref()}>← 이전</TextLink>
-          <div className="ml-auto grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-            <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</Button>
-            <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={requestQuestions}>AI 질문 받기 →</Button>
-          </div>
+      <ActionFooter className="flex-wrap justify-between gap-x-3.5 gap-y-2.5">
+        <TextLink href={getStepHref()}>← 이전</TextLink>
+        <div className="ml-auto grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+          <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</Button>
+          <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={requestQuestions}>AI 질문 받기 →</Button>
         </div>
-        <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
-      </div>
+      </ActionFooter>
+      <p role="status" className={notice ? "-mt-1 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
     </Card>
   );
 }

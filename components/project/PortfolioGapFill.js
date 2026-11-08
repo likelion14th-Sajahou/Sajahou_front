@@ -6,7 +6,8 @@ import Card from "@/components/ui/Card";
 import { MOCK_PORTFOLIO_GAPS } from "@/lib/mock/projects";
 import AiQuestionForm from "./AiQuestionForm";
 import PortfolioArtifactRequest from "./PortfolioArtifactRequest";
-import SidebarTitle from "./SidebarTitle";
+import CardTitle from "@/components/ui/CardTitle";
+import ShapeCharacter from "@/components/ui/ShapeCharacter";
 
 const GAP_STATUS = {
   current: { label: "지금", className: "bg-tint-orange" },
@@ -22,7 +23,7 @@ function GapCategory({ gap }) {
 function GapList({ gaps, getStatus }) {
   return (
     <Card as="aside" size="md" aria-label="AI가 찾은 빈 곳">
-      <SidebarTitle shape="triangle" color="coral" size={16}>AI가 찾은 빈 곳</SidebarTitle>
+      <CardTitle action={<ShapeCharacter shape="triangle" color="coral" face="none" size={16} />}>AI가 찾은 빈 곳</CardTitle>
       <ol className="flex flex-col gap-2 pt-4">
         {gaps.map((gap, index) => {
           const { label, className } = GAP_STATUS[getStatus(gap, index)];

@@ -13,9 +13,9 @@ import ProjectRecordQuestions from "./ProjectRecordQuestions";
 import ProjectRecordReview from "./ProjectRecordReview";
 import RecordAttachmentsField from "./RecordAttachmentsField";
 import RecordFieldsGrid from "./RecordFieldsGrid";
-import RecordFormFooter from "./RecordFormFooter";
 import RecordFormTitle from "./RecordFormTitle";
 import { EMPTY_RECORD_MESSAGE } from "./recordFields";
+import ActionFooter from "@/components/ui/ActionFooter";
 
 // 한 일이 비면 카드 제목이 비지 않도록 메모 첫 줄을 쓰고, 메모도 없으면 이 문구를 쓴다.
 const EMPTY_DID_TITLE = "(한 일 비어 있음)";
@@ -198,7 +198,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
               />
             )}
             {notice && <p role="alert" className="text-label text-tint-red-ink">{notice}</p>}
-            <RecordFormFooter>
+            <ActionFooter>
               <TextLink onClick={onCancel}>취소</TextLink>
               <TextLink onClick={fillExample}>예시 자료 넣기</TextLink>
               <div className="ml-auto flex gap-2">
@@ -207,7 +207,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
                 )}
                 <Button onClick={startAiSummary}>AI와 정리하기 →</Button>
               </div>
-            </RecordFormFooter>
+            </ActionFooter>
           </div>
         )}
       </div>

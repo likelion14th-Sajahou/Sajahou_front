@@ -13,6 +13,8 @@ import { buildWeekStoryCard } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { copyText } from "@/lib/clipboard";
+import CardTitle from "@/components/ui/CardTitle";
+import ActionFooter from "@/components/ui/ActionFooter";
 
 const STORY_FIELDS = [
   { name: "title", label: "제목" },
@@ -43,10 +45,9 @@ export default function ReviewContent({ initialDraft }) {
       <RetrospectiveSteps currentStep={3} />
       <div className="mt-7 grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-start gap-5">
         <Card as="section" size="md" className="flex min-w-0 flex-col gap-3" aria-labelledby="review-retrospective-title">
-          <div className="flex items-center justify-between border-b border-ink pb-3">
-            <h2 id="review-retrospective-title" className="text-[18px] tracking-[-0.01em]">노션용 회고록</h2>
-            <Button size="sm" onClick={copyRetrospective}>회고록 복사</Button>
-          </div>
+          <CardTitle id="review-retrospective-title" action={<Button size="sm" onClick={copyRetrospective}>회고록 복사</Button>}>
+            노션용 회고록
+          </CardTitle>
           <p id="review-retrospective-help" className="text-label leading-[1.5] text-ink-subtle">
             고칠 곳은 바로 고쳐요. 복사하면 노션에 그대로 붙여 넣을 수 있어요.
           </p>
@@ -62,10 +63,9 @@ export default function ReviewContent({ initialDraft }) {
         </Card>
 
         <Card as="section" size="md" className="flex min-w-0 flex-col gap-3" aria-labelledby="review-story-title">
-          <div className="flex items-center justify-between border-b border-ink pb-3">
-            <h2 id="review-story-title" className="text-[18px] tracking-[-0.01em]">스토리 카드 초안</h2>
-            <ShapeCharacter shape="square" color="green" size={16} face="none" cropped />
-          </div>
+          <CardTitle id="review-story-title" action={<ShapeCharacter shape="square" color="green" size={16} face="none" cropped />}>
+            스토리 카드 초안
+          </CardTitle>
           {STORY_FIELDS.map(({ name, label, height }) => (
             <TextField
               key={name}
@@ -93,23 +93,21 @@ export default function ReviewContent({ initialDraft }) {
               ))}
             </ul>
           </div>
-          <div className="pt-1">
-            <div className="flex items-center gap-3.5 border-t border-line pt-4">
-              <TextLink href={`${getStepHref("questions")}&preview=questions-complete`}>← 질문으로</TextLink>
-              <div className="flex gap-2">
-                <Button variant="secondary" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 수정한 내용이 사라져요.")}>나중에 이어쓰기</Button>
-                <Button variant="accent" href={getStepHref("complete")} onClick={(event) => {
-                  if (!draft.selectedTags.length) {
-                    event.preventDefault();
-                    showToast(EMPTY_TAGS_MESSAGE);
-                    return;
-                  }
-                  setCompletedDraft(draft);
-                  completeWeek(buildWeekStoryCard(draft, isAssignment));
-                }}>저장하고 사자록에 추가</Button>
-              </div>
+          <ActionFooter>
+            <TextLink href={`${getStepHref("questions")}&preview=questions-complete`}>← 질문으로</TextLink>
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 수정한 내용이 사라져요.")}>나중에 이어쓰기</Button>
+              <Button variant="accent" href={getStepHref("complete")} onClick={(event) => {
+                if (!draft.selectedTags.length) {
+                  event.preventDefault();
+                  showToast(EMPTY_TAGS_MESSAGE);
+                  return;
+                }
+                setCompletedDraft(draft);
+                completeWeek(buildWeekStoryCard(draft, isAssignment));
+              }}>저장하고 사자록에 추가</Button>
             </div>
-          </div>
+          </ActionFooter>
         </Card>
       </div>
       <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
