@@ -23,6 +23,9 @@ export default function AuthProvider({ children }) {
   const generation = useRef(0);
   const clearSignup = useCallback(() => setSignup(null), []);
   const clearNotice = useCallback(() => setNotice(""), []);
+  const markSignupSubmitted = useCallback(() => {
+    setSignup((current) => current ? { ...current, submitted: true } : null);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -62,6 +65,7 @@ export default function AuthProvider({ children }) {
   }, [router]);
 
   const cancelSignup = useCallback((message) => {
+    generation.current += 1;
     setSignup(null);
     setNotice(message);
     router.replace("/login");
@@ -126,7 +130,7 @@ export default function AuthProvider({ children }) {
 
   return (
     <AuthContext value={{ user: session?.user ?? null, isAuthenticated: Boolean(session), signup,
-      notice, clearNotice, clearSignup, cancelSignup, acceptGoogleLogin, completeLogin,
+      notice, clearNotice, clearSignup, cancelSignup, markSignupSubmitted, acceptGoogleLogin, completeLogin,
       authenticatedRequest, logout, isLoggingOut, logoutError, restoreStatus, retryRestore }}>
       {children}
     </AuthContext>

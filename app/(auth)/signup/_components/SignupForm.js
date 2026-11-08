@@ -8,6 +8,7 @@ import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
+import { signupWithGoogle } from "@/lib/auth";
 
 const PARTS = [
   { value: "PLAN_DESIGN", shape: "sunFine", color: "yellow" },
@@ -57,8 +58,14 @@ function SignupSelect({ label, name, value, onChange, error, children }) {
 }
 
 export default function SignupForm() {
-  const { signup } = useAuth();
+  const { signup, cancelSignup, markSignupSubmitted, completeLogin } = useAuth();
+  const formRef = useRef(null);
   const otherDepartmentRef = useRef(null);
+  const focusErrors = useRef(false);
+  const requestInFlight = useRef(false);
+  const controllerRef = useRef(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [requestError, setRequestError] = useState("");
   const [errors, setErrors] = useState({});
   const [values, setValues] = useState(() => ({
     name: signup?.suggestedName ?? "", studentNo: "", department: "", otherDepartment: "",
@@ -69,31 +76,96 @@ export default function SignupForm() {
     if (values.department === "other") otherDepartmentRef.current?.focus();
   }, [values.department]);
 
+  useEffect(() => () => controllerRef.current?.abort(), []);
+
+  useEffect(() => {
+    if (!focusErrors.current) return;
+    focusErrors.current = false;
+    const firstInvalid = Array.from(formRef.current?.elements ?? []).find((element) => {
+      const errorName = element.name === "otherDepartment" ? "department" : element.name;
+      return errors[errorName] && !(element.name === "department" && values.department === "other");
+    });
+    firstInvalid?.focus();
+  }, [errors, values.department]);
+
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
     const nextValues = { ...values, [name]: type === "checkbox" ? checked : name === "cohort" ? Number(value) : value };
     setValues(nextValues);
+    setRequestError("");
     const errorName = name === "otherDepartment" ? "department" : name;
-    if (errors[errorName] && !validateSignup(nextValues)[errorName]) {
+    if (errors[errorName]) {
+      const nextError = validateSignup(nextValues)[errorName];
       setErrors((previous) => {
         const nextErrors = { ...previous };
-        delete nextErrors[errorName];
+        if (nextError) nextErrors[errorName] = nextError;
+        else delete nextErrors[errorName];
         return nextErrors;
       });
     }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    const nextErrors = validateSignup(values);
-    setErrors(nextErrors);
-    const firstInvalidName = nextErrors.department && values.department === "other" && !nextErrors.name && !nextErrors.studentNo
-      ? "otherDepartment" : Object.keys(nextErrors)[0];
-    if (firstInvalidName) event.currentTarget.querySelector(`[name="${firstInvalidName}"]`)?.focus();
+    if (requestInFlight.current || !signup) return;
+    if (!signup.submitted) {
+      const nextErrors = validateSignup(values);
+      focusErrors.current = true;
+      setErrors(nextErrors);
+      if (Object.keys(nextErrors).length) return;
+      if (signup.expiresAt <= Date.now()) {
+        cancelSignup("가입 시간이 만료되었어요. 다시 로그인해 주세요.");
+        return;
+      }
+    }
+
+    requestInFlight.current = true;
+    setSubmitting(true);
+    setRequestError("");
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    let signupAccepted = Boolean(signup.submitted);
+    try {
+      if (!signupAccepted) {
+        await signupWithGoogle({
+          signupToken: signup.signupToken, name: values.name.trim(), studentNo: values.studentNo,
+          department: values.department === "other" ? values.otherDepartment.trim() : values.department,
+          cohort: values.cohort, part: values.part, privacyAgreed: values.privacyAgreed,
+        }, { signal: controller.signal });
+        if (controller.signal.aborted) return;
+        signupAccepted = true;
+        markSignupSubmitted();
+      }
+      // 성공하면 SignupSession이 홈으로 이동한다. 실패 시 가입 POST는 반복하지 않는다.
+      await completeLogin({ signal: controller.signal });
+    } catch (failure) {
+      if (controller.signal.aborted) return;
+      if (failure.status === 401) {
+        cancelSignup(signupAccepted ? "로그인 상태를 확인할 수 없어요. 다시 로그인해 주세요."
+          : "가입 시간이 만료되었어요. 다시 로그인해 주세요.");
+      } else if (!signupAccepted && failure.isValidationError) {
+        const fieldErrors = {};
+        for (const name of ["name", "studentNo", "department", "cohort", "part", "privacyAgreed"]) {
+          if (typeof failure.fields?.[name] === "string") fieldErrors[name] = failure.fields[name];
+        }
+        focusErrors.current = true;
+        setErrors(fieldErrors);
+        setRequestError(failure.message);
+      } else {
+        setRequestError(signupAccepted ? "가입은 완료됐어요. 로그인 상태를 다시 확인해 주세요."
+          : "가입 요청을 완료하지 못했어요. 잠시 후 다시 시도해 주세요.");
+      }
+    } finally {
+      requestInFlight.current = false;
+      if (!controller.signal.aborted) setSubmitting(false);
+    }
   }
 
   return (
-    <form className="mt-1" noValidate onSubmit={handleSubmit}>
+    <form ref={formRef} className="mt-1" noValidate onSubmit={handleSubmit} aria-busy={submitting}>
+      {requestError && <p role="alert" className="py-3 text-label text-error">{requestError}</p>}
+      <fieldset disabled={submitting || signup?.submitted} className="min-w-0">
+      <legend className="sr-only">회원가입 정보</legend>
       <section aria-labelledby="signup-info-title" className="border-t border-line pt-[18px] pb-5">
         <h2 id="signup-info-title" className="mb-[14px] text-body leading-6 tracking-[-0.3px]">기본 정보</h2>
         <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2">
@@ -148,10 +220,10 @@ export default function SignupForm() {
         </span>
       </label>
       {errors.privacyAgreed && <p id="privacyAgreed-error" className="pt-0.5 text-label leading-[20.8px] text-error">{errors.privacyAgreed}</p>}
+      </fieldset>
 
-      {/* 화면 검증만 수행한다. 가입 요청과 인증은 API 명세 확인 후 연결한다. */}
-      <Button type="submit" variant="accent" className="mt-[18px] w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
-        가입하고 시작하기
+      <Button type="submit" variant="accent" disabled={submitting} className="mt-[18px] w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
+        {submitting ? "로그인 확인 중…" : signup?.submitted ? "로그인 상태 다시 확인" : "가입하고 시작하기"}
       </Button>
       <p className="mt-3 text-center leading-[19.5px]">
         <TextLink href="/login" variant="accent" size="sm">다른 Google 계정으로 로그인</TextLink>
