@@ -14,11 +14,14 @@ import MatchingPromoCard from "./MatchingPromoCard";
 import ProjectsCard from "./ProjectsCard";
 import RecentRetrospectives from "./RecentRetrospectives";
 import StickerBoard from "./StickerBoard";
+import { useAuth } from "@/components/layout/AuthProvider";
+import Toast from "@/components/ui/Toast";
 
 // 이번 주 회고를 완료했거나 휴회한 주에는 스티커 보드의 + 자리를 숨긴다.
 const STATUSES_WITHOUT_CURRENT_SLOT = ["done", "rest"];
 
 export default function HomeContent() {
+  const { signupWelcome, clearSignupWelcome } = useAuth();
   const { user, footprintWeeks, storyCards, weekStatus } = useMockData();
   const homeStatus = HOME_WEEK_STATUS[weekStatus];
   const earnedStickers = getEarnedStickers(footprintWeeks);
@@ -47,6 +50,7 @@ export default function HomeContent() {
         </div>
         <RecentRetrospectives items={getRecentRetrospectives(storyCards)} />
       </main>
+      <Toast toast={signupWelcome} onDismiss={clearSignupWelcome} />
     </>
   );
 }

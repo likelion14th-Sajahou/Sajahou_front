@@ -8,6 +8,8 @@ import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import Toast from "@/components/ui/Toast";
 import NewProjectModal from "./NewProjectModal";
 import { formatRoles } from "./projectRoles";
+import RequireAuth from "@/components/layout/RequireAuth";
+import { useAuth } from "@/components/layout/AuthProvider";
 
 const SECTIONS = [
   { status: "active", title: "진행 중", empty: "진행 중인 프로젝트가 없어요" },
@@ -53,6 +55,7 @@ function ProjectListCard({ project }) {
 
 // 프로젝트 목록(H-23, 15). 상단 메뉴 '프로젝트'로 들어온다.
 export default function ProjectList() {
+  const { isAuthenticated } = useAuth();
   const { projects, flashToast, hideFlashToast } = useMockData();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -62,31 +65,33 @@ export default function ProjectList() {
         <h1 className="text-[38px] leading-[1.2] tracking-[-0.76px] text-ink">
           프로젝트<span className="text-accent">.</span>
         </h1>
-        <Button onClick={() => setIsModalOpen(true)}>+ 새 프로젝트</Button>
+        {isAuthenticated && <Button onClick={() => setIsModalOpen(true)}>+ 새 프로젝트</Button>}
       </div>
-      {SECTIONS.map(({ status, title, empty }, index) => {
-        const sectionProjects = projects.filter((project) => project.status === status);
+      <RequireAuth>
+        {SECTIONS.map(({ status, title, empty }, index) => {
+          const sectionProjects = projects.filter((project) => project.status === status);
 
-        return (
-          <section key={status} aria-label={title} className={index === 0 ? "pt-6" : "pt-8"}>
-            <h2 className="text-[18px] leading-[28.8px] tracking-[-0.36px] text-ink">
-              {title} <span className="text-ink-subtle">{sectionProjects.length}</span>
-            </h2>
-            {sectionProjects.length > 0 ? (
-              <ul className="grid grid-cols-1 gap-3 pt-3 sm:grid-cols-2 lg:grid-cols-3">
-                {sectionProjects.map((project) => (
-                  <ProjectListCard key={project.id} project={project} />
-                ))}
-              </ul>
-            ) : (
-              <p className="pt-3 text-body-sm text-ink-subtle">{empty}</p>
-            )}
-          </section>
-        );
-      })}
-      <NewProjectModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      {/* 프로젝트를 지우고 넘어오면 안내한다(H-25). */}
-      <Toast toast={flashToast} onDismiss={hideFlashToast} />
+          return (
+            <section key={status} aria-label={title} className={index === 0 ? "pt-6" : "pt-8"}>
+              <h2 className="text-[18px] leading-[28.8px] tracking-[-0.36px] text-ink">
+                {title} <span className="text-ink-subtle">{sectionProjects.length}</span>
+              </h2>
+              {sectionProjects.length > 0 ? (
+                <ul className="grid grid-cols-1 gap-3 pt-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {sectionProjects.map((project) => (
+                    <ProjectListCard key={project.id} project={project} />
+                  ))}
+                </ul>
+              ) : (
+                <p className="pt-3 text-body-sm text-ink-subtle">{empty}</p>
+              )}
+            </section>
+          );
+        })}
+        <NewProjectModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        {/* 프로젝트를 지우고 넘어오면 안내한다(H-25). */}
+        <Toast toast={flashToast} onDismiss={hideFlashToast} />
+      </RequireAuth>
     </>
   );
 }

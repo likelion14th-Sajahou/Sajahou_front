@@ -1,6 +1,7 @@
 import Link from "next/link";
 import MatchingForm from "./_components/MatchingForm";
 import StoryCardCount from "./_components/StoryCardCount";
+import RequireAuth from "@/components/layout/RequireAuth";
 
 export const metadata = { title: "자소서 매칭 | 사자록" };
 
@@ -18,7 +19,7 @@ export default function MatchingPage() {
           <StoryCardCount />
         </div>
       </div>
-      <MatchingForm />
+      <RequireAuth><MatchingForm /></RequireAuth>
     </main>
   );
 }

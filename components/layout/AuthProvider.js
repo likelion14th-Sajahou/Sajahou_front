@@ -4,6 +4,7 @@ import { createContext, use, useCallback, useEffect, useRef, useState } from "re
 import { useRouter } from "next/navigation";
 import { authRequest, getCurrentUser, getGoogleLoginDestination, logoutSession, validateUser } from "@/lib/auth";
 import Button from "@/components/ui/Button";
+import { AUTH_PART_LABELS } from "@/lib/authConfig";
 
 const AuthContext = createContext(null);
 const SIGNUP_LIFETIME_MS = 10 * 60 * 1000;
@@ -17,12 +18,24 @@ export default function AuthProvider({ children }) {
   const restoreRequest = useRef(null);
   const [signup, setSignup] = useState(null);
   const [notice, setNotice] = useState("");
+  const [signupWelcome, setSignupWelcome] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
   const logoutInFlight = useRef(false);
   const generation = useRef(0);
-  const clearSignup = useCallback(() => setSignup(null), []);
+  const welcomePending = useRef(false);
+  const clearSignup = useCallback(() => {
+    welcomePending.current = false;
+    setSignup(null);
+    setSignupWelcome(null);
+  }, []);
   const clearNotice = useCallback(() => setNotice(""), []);
+  const clearSignupWelcome = useCallback(() => setSignupWelcome(null), []);
+  // 사용자 변경으로 하위 목 데이터가 초기화되어도 가입 완료 안내는 유지한다.
+  const markSignupSubmitted = useCallback(() => {
+    welcomePending.current = true;
+    setSignup((current) => current ? { ...current, submitted: true } : null);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -55,6 +68,8 @@ export default function AuthProvider({ children }) {
     generation.current += 1;
     setSession(null);
     setSignup(null);
+    welcomePending.current = false;
+    setSignupWelcome(null);
     setNotice(message);
     setLogoutError("");
     window.google?.accounts?.id?.disableAutoSelect();
@@ -62,7 +77,10 @@ export default function AuthProvider({ children }) {
   }, [router]);
 
   const cancelSignup = useCallback((message) => {
+    generation.current += 1;
     setSignup(null);
+    welcomePending.current = false;
+    setSignupWelcome(null);
     setNotice(message);
     router.replace("/login");
   }, [router]);
@@ -94,6 +112,10 @@ export default function AuthProvider({ children }) {
     const user = validateUser(await getCurrentUser({ signal }));
     if (generation.current !== currentGeneration || signal?.aborted) return false;
     setSession({ user });
+    if (welcomePending.current) {
+      setSignupWelcome({ id: crypto.randomUUID(), message: `환영해요, ${user.name} 님! ${AUTH_PART_LABELS[user.part]} 파트로 시작해요` });
+      welcomePending.current = false;
+    }
     setSignup(null);
     setNotice("");
     return true;
@@ -102,6 +124,8 @@ export default function AuthProvider({ children }) {
   const acceptGoogleLogin = useCallback(async (result, options) => {
     const destination = getGoogleLoginDestination(result);
     if (destination === "/signup") {
+      welcomePending.current = false;
+      setSignupWelcome(null);
       generation.current += 1;
       setSession(null);
       setSignup({ signupToken: result.signupToken, email: result.email,
@@ -126,7 +150,8 @@ export default function AuthProvider({ children }) {
 
   return (
     <AuthContext value={{ user: session?.user ?? null, isAuthenticated: Boolean(session), signup,
-      notice, clearNotice, clearSignup, cancelSignup, acceptGoogleLogin, completeLogin,
+      notice, clearNotice, clearSignup, cancelSignup, markSignupSubmitted, acceptGoogleLogin, completeLogin,
+      signupWelcome, clearSignupWelcome,
       authenticatedRequest, logout, isLoggingOut, logoutError, restoreStatus, retryRestore }}>
       {children}
     </AuthContext>
