@@ -6,29 +6,13 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import AttachmentChip from "./AttachmentChip";
+import DeleteConfirm from "./DeleteConfirm";
 import ProjectRecordAddForm from "./ProjectRecordAddForm";
 import ProjectRecordForm from "./ProjectRecordForm";
 import { RECORD_FIELDS } from "./recordFields";
 
 // 완료한 프로젝트에는 별도 안내 문구가 없다(H-21, 12-a).
 const ADD_RECORD_HINT = "회의록·시안·링크를 올리면 AI가 정리를 도와요";
-
-function DeleteConfirm({ onCancel, onConfirm }) {
-  return (
-    <div role="alert" className="flex flex-col gap-2.5 rounded-[14px] border border-[#f3c4be] bg-[#fff4f2] px-3.5 py-3">
-      <p className="text-body-sm text-ink">
-        이 기록을 지울까요?
-        <br />
-        나의 사자록의 카드도 함께 지워져요. 지운 기록은 되돌릴 수 없어요.
-      </p>
-      <div className="flex items-center justify-end gap-3">
-        {/* 삭제 버튼을 눌러도 포커스를 잃지 않도록 안전한 쪽인 취소로 옮긴다. */}
-        <TextLink size="sm" autoFocus onClick={onCancel}>취소</TextLink>
-        <Button variant="danger" size="sm" onClick={onConfirm}>지우기</Button>
-      </div>
-    </div>
-  );
-}
 
 function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
   const { date, weekday, tags, organizedByAi, attachments } = record;
@@ -71,6 +55,8 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
         )}
         {isConfirmingDelete && (
           <DeleteConfirm
+            title="이 기록을 지울까요?"
+            message="나의 사자록의 카드도 함께 지워져요. 지운 기록은 되돌릴 수 없어요."
             onCancel={() => setIsConfirmingDelete(false)}
             onConfirm={() => onDelete(record.id)}
           />

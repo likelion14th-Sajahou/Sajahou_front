@@ -50,8 +50,8 @@ export default function HomeHero({ userName, week, weekStatus }) {
   const { title, cta } = HERO_CONTENT[weekStatus];
 
   return (
-    // 첫 화면에 히어로만 보이도록 헤더 높이(모바일 2줄 110px, sm 이상 1줄 68px)를 뺀 값을 쓴다.
-    <section className="relative grid h-[clamp(520px,calc(100svh-110px),920px)] w-full grid-rows-[24%_1fr] overflow-hidden bg-canvas sm:h-[clamp(520px,calc(100svh-68px),920px)] lg:grid-rows-[30%_1fr]">
+    // 첫 화면에 히어로만 보이도록 헤더 높이(768px 미만 2줄 110px, 이상 1줄 68px)를 뺀 값을 쓴다.
+    <section className="relative grid h-[clamp(520px,calc(100svh-110px),920px)] w-full grid-rows-[24%_1fr] overflow-hidden bg-canvas md:h-[clamp(520px,calc(100svh-68px),920px)] lg:grid-rows-[30%_1fr]">
       {HERO_LAYOUTS.map(({ id, className, decorations, dots }) => (
         <HeroDecorations key={id} className={className} decorations={decorations} dots={dots} />
       ))}
