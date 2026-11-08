@@ -30,7 +30,7 @@ export default function AuthProvider({ children }) {
     if (!result?.accessToken) throw new Error("로그인 응답을 확인할 수 없습니다.");
     validateUser(result.user);
     const currentGeneration = ++generation.current;
-    const user = validateUser(await getCurrentUser(result.accessToken, { signal }));
+    const user = validateUser(await getCurrentUser({ signal }));
     if (generation.current !== currentGeneration || signal?.aborted) return false;
     setSession({ accessToken: result.accessToken, user });
     setSignup(null);
@@ -54,7 +54,7 @@ export default function AuthProvider({ children }) {
     if (!session) throw new Error("로그인이 필요합니다.");
     const currentGeneration = generation.current;
     try {
-      const result = await authRequest(path, { ...options, token: session.accessToken });
+      const result = await authRequest(path, options);
       if (currentGeneration !== generation.current) throw new DOMException("로그인 상태가 변경되었습니다.", "AbortError");
       return result;
     } catch (error) {
