@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Chip from "@/components/ui/Chip";
 import TextField from "@/components/ui/TextField";
+import LinkInputRow from "@/components/ui/LinkInputRow";
 import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
 import MaterialsChangeNotice from "./MaterialsChangeNotice";
@@ -169,10 +170,17 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
               {attachments("assignmentFiles", "+ 파일 업로드", {
                 uploadOnNewLine: true,
                 children: (
-                  <div className="flex w-full min-w-0 gap-1.5 sm:w-auto sm:flex-1">
-                    <TextField size="sm" className="min-w-0" name="assignmentLink" aria-label="Git 링크" placeholder={part === "기획·디자인" ? "피그마·GitHub 링크" : "GitHub 링크 · github.com/아이디/저장소"} value={link} aria-invalid={Boolean(linkError)} aria-describedby={linkError ? "assignment-link-error" : undefined} onChange={(event) => { setLink(event.target.value); setLinkError(""); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addLink(); } }} />
-                    <Button variant="secondary" size="sm" onClick={addLink}>추가</Button>
-                  </div>
+                  <LinkInputRow
+                    className="w-full sm:w-auto"
+                    name="assignmentLink"
+                    aria-label="Git 링크"
+                    placeholder={part === "기획·디자인" ? "피그마·GitHub 링크" : "GitHub 링크 · github.com/아이디/저장소"}
+                    aria-invalid={Boolean(linkError)}
+                    aria-describedby={linkError ? "assignment-link-error" : undefined}
+                    value={link}
+                    onChange={(value) => { setLink(value); setLinkError(""); }}
+                    onAdd={addLink}
+                  />
                 ),
               })}
               {linkError && <p id="assignment-link-error" role="alert" className="text-label text-tint-red-ink">{linkError}</p>}
