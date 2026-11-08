@@ -6,18 +6,19 @@ import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import { loginDemo, loginWithGoogle } from "@/lib/auth";
 import { getGoogleAuthMode } from "@/lib/authConfig";
-import { useAuth } from "@/components/layout/AuthProvider";
+import { AuthRestoreStatus, useAuth } from "@/components/layout/AuthProvider";
 import GoogleSignInButton from "./GoogleSignInButton";
 
 export default function LoginActions() {
   const router = useRouter();
-  const { isAuthenticated, acceptGoogleLogin, completeLogin, clearSignup, notice, clearNotice } = useAuth();
+  const { isAuthenticated, restoreStatus, acceptGoogleLogin, completeLogin, clearSignup, notice, clearNotice } = useAuth();
   const requestInFlight = useRef(false);
   const controllerRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
-  const busy = loading || pending;
+  const submitting = loading || pending;
+  const busy = submitting || restoreStatus !== "ready";
   const googleMode = getGoogleAuthMode();
 
   useEffect(() => {
@@ -26,11 +27,11 @@ export default function LoginActions() {
   }, [clearSignup]);
 
   useEffect(() => {
-    if (isAuthenticated) router.replace("/");
-  }, [isAuthenticated, router]);
+    if (restoreStatus === "ready" && isAuthenticated) router.replace("/");
+  }, [isAuthenticated, restoreStatus, router]);
 
   const handleLogin = useCallback(async (idToken, demo = false) => {
-    if (requestInFlight.current || pending) return;
+    if (requestInFlight.current || pending || restoreStatus !== "ready" || isAuthenticated) return;
 
     requestInFlight.current = true;
     setLoading(true);
@@ -56,7 +57,7 @@ export default function LoginActions() {
       requestInFlight.current = false;
       setLoading(false);
     }
-  }, [pending, clearNotice, completeLogin, acceptGoogleLogin, router]);
+  }, [pending, restoreStatus, isAuthenticated, clearNotice, completeLogin, acceptGoogleLogin, router]);
 
   const handleCredential = useCallback((idToken) => handleLogin(idToken), [handleLogin]);
   const handleGoogleError = useCallback((message) => setError(message), []);
@@ -72,9 +73,10 @@ export default function LoginActions() {
         aria-describedby={error ? "google-login-error" : undefined}
         className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
       >
-        {busy ? "로그인 확인 중…" : "Google 계정으로 계속하기"}
+        {submitting ? "로그인 확인 중…" : "Google 계정으로 계속하기"}
       </Button> : <GoogleSignInButton disabled={busy} onCredential={handleCredential} onError={handleGoogleError} />}
-      {busy && googleMode === "google" && <p role="status" className="text-label text-ink-subtle">로그인 확인 중…</p>}
+      <AuthRestoreStatus />
+      {submitting && googleMode === "google" && <p role="status" className="text-label text-ink-subtle">로그인 확인 중…</p>}
       {error && <p id="google-login-error" role="alert" className="text-label text-error">{error}</p>}
       {!error && notice && <p role="status" className="text-label text-ink-subtle">{notice}</p>}
       <TextLink disabled={busy} onClick={() => handleLogin(null, true)} className="leading-[21px] disabled:cursor-default disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">

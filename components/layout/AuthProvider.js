@@ -127,23 +127,31 @@ export default function AuthProvider({ children }) {
   return (
     <AuthContext value={{ user: session?.user ?? null, isAuthenticated: Boolean(session), signup,
       notice, clearNotice, clearSignup, cancelSignup, acceptGoogleLogin, completeLogin,
-      authenticatedRequest, logout, isLoggingOut, logoutError }}>
-      {restoreStatus === "ready" ? children : (
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
-          {restoreStatus === "checking" ? (
-            <p role="status" className="text-body text-ink-subtle">로그인 상태를 확인하고 있어요…</p>
-          ) : (
-            <>
-              <p role="alert" className="text-body text-ink">로그인 상태를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.</p>
-              <Button onClick={retryRestore}>다시 시도</Button>
-            </>
-          )}
-        </div>
-      )}
+      authenticatedRequest, logout, isLoggingOut, logoutError, restoreStatus, retryRestore }}>
+      {children}
     </AuthContext>
   );
 }
 
 export function useAuth() {
   return use(AuthContext);
+}
+
+// 로그인 버튼 영역과 접근 제어 화면에서 같은 상태·재시도 UI를 사용한다.
+export function AuthRestoreStatus({ className = "" }) {
+  const { restoreStatus, retryRestore } = useAuth();
+  if (restoreStatus === "ready") return null;
+
+  return (
+    <div className={`flex flex-col items-center justify-center gap-4 text-center ${className}`} aria-busy={restoreStatus === "checking"}>
+      {restoreStatus === "checking" ? (
+        <p role="status" className="text-body text-ink-subtle">로그인 상태를 확인하고 있어요…</p>
+      ) : (
+        <>
+          <p role="alert" className="text-body text-ink">로그인 상태를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.</p>
+          <Button onClick={retryRestore}>다시 시도</Button>
+        </>
+      )}
+    </div>
+  );
 }
