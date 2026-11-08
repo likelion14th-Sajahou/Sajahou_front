@@ -4,7 +4,7 @@ import { useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import { MOCK_PORTFOLIO_GAPS } from "@/lib/mock/projects";
-import AiQuestionForm from "./AiQuestionForm";
+import AiQuestionForm from "@/components/ui/AiQuestionForm";
 import PortfolioArtifactRequest from "./PortfolioArtifactRequest";
 import CardTitle from "@/components/ui/CardTitle";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";

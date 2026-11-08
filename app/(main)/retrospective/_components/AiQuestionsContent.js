@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import Badge from "@/components/ui/Badge";
-import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
-import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
-import Toast, { useToast } from "@/components/ui/Toast";
+import AiQuestionForm from "@/components/ui/AiQuestionForm";
 import { MOCK_AI_QUESTIONS } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import AiQuestionsComplete from "./AiQuestionsComplete";
@@ -25,7 +23,6 @@ export default function AiQuestionsContent({ initialComplete = false }) {
     status: initialComplete ? "answered" : "pending",
   }])));
   const [notice, setNotice] = useState("");
-  const { toast, showToast, hideToast } = useToast();
   const question = MOCK_AI_QUESTIONS[currentIndex];
   const answer = responses[question.id].answer;
 
@@ -34,11 +31,8 @@ export default function AiQuestionsContent({ initialComplete = false }) {
     setNotice("");
   }
 
+  // 빈 답 검사는 AiQuestionForm이 한다. 여기서는 답함·건너뜀을 기록하고 다음 질문으로 넘어간다.
   function advance(skipped = false) {
-    if (!skipped && !answer.trim()) {
-      showToast("답을 적거나, 모르겠으면 건너뛰어도 돼요");
-      return;
-    }
     setResponses((previous) => ({ ...previous, [question.id]: { ...previous[question.id], status: skipped ? "skipped" : "answered" } }));
     setNotice("");
     if (currentIndex === MOCK_AI_QUESTIONS.length - 1) setIsComplete(true);
@@ -59,39 +53,32 @@ export default function AiQuestionsContent({ initialComplete = false }) {
             />
           ) : (
             <Card as="section" size="md" className="min-w-0 rounded-[28px]" aria-labelledby="ai-question-title">
-              <div className="flex flex-col gap-4 p-1">
-                <div className="flex items-center gap-2">
-                  <Badge tone="dark">AI 질문</Badge>
-                  <Badge tone={question.tone} size="sm">{question.category}</Badge>
-                  <p className="ml-auto text-label text-ink-subtle" aria-label={`총 ${MOCK_AI_QUESTIONS.length}개 중 ${currentIndex + 1}번째 질문`}>
-                    {currentIndex + 1} / {MOCK_AI_QUESTIONS.length}
-                  </p>
-                </div>
-                <p className="rounded-xl bg-canvas px-3.5 py-2.5 text-body-sm text-ink-muted">
-                  내 자료의 <mark className="rounded bg-shape-yellow/60 px-[3px] text-ink">“{question.source}”</mark> 에서 더 물어볼게요
-                </p>
-                <h2 id="ai-question-title" className="text-[24px] leading-[1.45] tracking-[-0.01em]">
-                  {question.question}
-                </h2>
-                <TextField
-                  label="내 답변"
-                  multiline
-                  name="answer"
-                  value={answer}
-                  onChange={(event) => updateAnswer(event.target.value)}
-                  className="h-[98px]"
+              <div className="p-1">
+                <AiQuestionForm
+                  size="lg"
+                  questionId="ai-question-title"
+                  category={<Badge tone={question.tone} size="sm">{question.category}</Badge>}
+                  progress={`${currentIndex + 1} / ${MOCK_AI_QUESTIONS.length}`}
+                  progressLabel={`총 ${MOCK_AI_QUESTIONS.length}개 중 ${currentIndex + 1}번째 질문`}
+                  source={
+                    <>
+                      내 자료의 <mark className="rounded bg-shape-yellow/60 px-[3px] text-ink">“{question.source}”</mark> 에서 더 물어볼게요
+                    </>
+                  }
+                  question={question.question}
+                  // 쓰던 답은 이 화면이 들고 있어서 앞뒤 질문을 오가도 남는다.
+                  answer={answer}
+                  onAnswerChange={updateAnswer}
+                  // 첫 질문은 자료 단계로, 두 번째부터는 앞 질문으로 돌아간다(R-16).
+                  backLabel={currentIndex === 0 ? "← 자료로" : "← 이전 질문"}
+                  backHref={currentIndex === 0 ? getStepHref("materials") : undefined}
+                  onBack={currentIndex === 0 ? undefined : () => { setCurrentIndex(currentIndex - 1); setNotice(""); }}
+                  onAnswer={(trimmedAnswer) => {
+                    updateAnswer(trimmedAnswer);
+                    advance();
+                  }}
+                  onSkip={() => advance(true)}
                 />
-                <div className="flex items-center gap-3">
-                  {/* 첫 질문은 자료 단계로, 두 번째부터는 앞 질문으로 돌아간다(R-16). */}
-                  {currentIndex === 0 ? (
-                    <TextLink href={getStepHref("materials")}>← 자료로</TextLink>
-                  ) : (
-                    <TextLink onClick={() => { setCurrentIndex(currentIndex - 1); setNotice(""); }}>← 이전 질문</TextLink>
-                  )}
-                  <span aria-hidden="true" className="h-4 w-px bg-line" />
-                  <TextLink onClick={() => advance(true)}>건너뛰기</TextLink>
-                  <Button className="ml-auto" onClick={() => advance()}>답하고 다음 →</Button>
-                </div>
               </div>
             </Card>
           )}
@@ -118,7 +105,6 @@ export default function AiQuestionsContent({ initialComplete = false }) {
           </ActionFooter>
         </Card>
       </div>
-      <Toast toast={toast} onDismiss={hideToast} />
     </>
   );
 }
