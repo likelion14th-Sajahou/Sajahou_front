@@ -47,7 +47,7 @@ function CurrentNavLinks() {
 
 export default function Header() {
   const { user } = useMockData();
-  const { isAuthenticated, restoreStatus, logout, isLoggingOut, logoutError } = useAuth();
+  const { isAuthenticated, restoreStatus, logout, isLoggingOut, isAccountBusy, logoutError } = useAuth();
 
   // 768px 미만은 두 줄: 첫 줄에 로고와 사용자(로그아웃), 둘째 줄에 메뉴. 768px 이상은 한 줄(15 시안).
   // 홈 히어로가 이 높이(두 줄 110px, 한 줄 68px)를 빼서 첫 화면을 채우므로, 줄 수를 바꾸면 HomeHero도 함께 고친다.
@@ -79,8 +79,8 @@ export default function Header() {
             <TextLink
               size="sm"
               onClick={logout}
-              disabled={isLoggingOut}
-              aria-busy={isLoggingOut}
+              disabled={isAccountBusy}
+              aria-busy={isAccountBusy}
               aria-describedby={logoutError ? "logout-error" : undefined}
               className="text-ink-subtle disabled:cursor-default disabled:opacity-60"
             >

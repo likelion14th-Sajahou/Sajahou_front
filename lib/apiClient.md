@@ -209,3 +209,11 @@ HTTP 실패 또는 `success:false`는 `ApiError`로 전달된다. 잘못된 환�
 - 실제 연동 전 백엔드의 Google 토큰 검증, 회원·연관 데이터 삭제, 서버 세션·쿠키 종료를 확인해야 한다.
 
 관련 검증: `node --test lib/mock/auth.test.js lib/profileApi.test.js`
+
+### 화면에서 사용하는 인증 상태 동작
+
+`useAuth()`의 `saveProfile(changes, { signal })`는 수정 API 응답을 검증한 뒤 현재 사용자 정보에 반영하고 갱신된 사용자를 반환한다. 현재 사용자 ID와 다른 응답, 세션 변경 후 도착한 응답, 취소된 요청은 반영하지 않는다. 같은 ID의 정보 갱신은 `MockDataProvider`의 사용자별 기록을 초기화하지 않는다.
+
+`withdraw(idToken, { signal })`는 탈퇴 성공 후 로그인 상태를 정리하고 `/login`으로 이동한다. 탈퇴의 401은 `checkWithdrawalSession`으로 재확인한다. GET 200이면 원래 재인증 오류를 전달하고, GET 401이면 세션 만료로 처리한다. 다른 계정의 세션이면 로컬 상태를 정리한다. 재조회 중 네트워크·서버 오류가 나면 세션을 유지하며 확인 실패를 전달한다. DELETE를 자동 재시도하지 않는다.
+
+`isSavingProfile`, `isWithdrawing`, `isAccountBusy`로 진행 상태를 확인한다. 저장·탈퇴·로그아웃은 동시에 실행하지 않으며 중복 저장·탈퇴는 오류로 거부한다. 헤더 로그아웃은 계정 작업 중 비활성화된다. 입력값, 필드 오류, 저장 성공 토스트와 모달은 화면에서 관리한다.

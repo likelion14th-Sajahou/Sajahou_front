@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { authRequest, getCurrentUser, getGoogleLoginDestination, logoutSession, validateUser } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
+import { checkWithdrawalSession, updateProfile, withdrawAccount } from "@/lib/profileApi";
 
 const AuthContext = createContext(null);
 const SIGNUP_LIFETIME_MS = 10 * 60 * 1000;
@@ -22,6 +23,9 @@ export default function AuthProvider({ children }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
   const logoutInFlight = useRef(false);
+  const profileMutation = useRef(null);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
   const generation = useRef(0);
   const welcomePending = useRef(false);
   const clearSignup = useCallback(() => {
@@ -67,6 +71,8 @@ export default function AuthProvider({ children }) {
   const clearSession = useCallback((message = "") => {
     generation.current += 1;
     setSession(null);
+    restoreRequest.current = null;
+    setRestoreStatus("ready");
     setSignup(null);
     welcomePending.current = false;
     setSignupWelcome(null);
@@ -86,7 +92,7 @@ export default function AuthProvider({ children }) {
   }, [router]);
 
   const logout = useCallback(async () => {
-    if (logoutInFlight.current) return;
+    if (logoutInFlight.current || profileMutation.current) return;
     logoutInFlight.current = true;
     setIsLoggingOut(true);
     setLogoutError("");
@@ -143,8 +149,69 @@ export default function AuthProvider({ children }) {
       if (currentGeneration !== generation.current) throw new DOMException("로그인 상태가 변경되었습니다.", "AbortError");
       return result;
     } catch (error) {
-      if (error.status === 401 && generation.current === currentGeneration) clearSession("로그인이 만료되었어요. 다시 로그인해 주세요.");
+      if (error.status === 401 && !options.signal?.aborted && generation.current === currentGeneration) clearSession("로그인이 만료되었어요. 다시 로그인해 주세요.");
       throw error;
+    }
+  }, [session, clearSession]);
+
+  const saveProfile = useCallback(async (changes, { signal } = {}) => {
+    if (!session) throw new Error("로그인이 필요합니다.");
+    if (logoutInFlight.current || profileMutation.current) throw new Error("진행 중인 계정 작업이 끝난 후 다시 시도해 주세요.");
+    const mutation = { generation: generation.current };
+    profileMutation.current = mutation;
+    setIsSavingProfile(true);
+    try {
+      const result = await updateProfile(changes, { signal, request: authenticatedRequest });
+      if (signal?.aborted || generation.current !== mutation.generation) throw new DOMException("로그인 상태가 변경되었거나 요청이 취소되었습니다.", "AbortError");
+      const user = validateUser(result);
+      if (user.id !== session.user.id) throw new Error("수정한 사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.");
+      // id를 유지하므로 MockDataProvider의 사용자별 기록은 초기화되지 않는다.
+      setSession({ user });
+      return user;
+    } finally {
+      if (profileMutation.current === mutation) profileMutation.current = null;
+      setIsSavingProfile(false);
+    }
+  }, [session, authenticatedRequest]);
+
+  const withdraw = useCallback(async (idToken, { signal } = {}) => {
+    if (!session) throw new Error("로그인이 필요합니다.");
+    if (logoutInFlight.current || profileMutation.current) throw new Error("진행 중인 계정 작업이 끝난 후 다시 시도해 주세요.");
+    const mutation = { generation: generation.current };
+    const ensureCurrentSession = () => {
+      if (signal?.aborted || generation.current !== mutation.generation) throw new DOMException("로그인 상태가 변경되었거나 요청이 취소되었습니다.", "AbortError");
+    };
+    profileMutation.current = mutation;
+    setIsWithdrawing(true);
+    try {
+      try {
+        // authenticatedRequest는 모든 401에서 세션을 지우므로 탈퇴에는 사용하지 않는다.
+        await withdrawAccount(idToken, { signal });
+      } catch (error) {
+        ensureCurrentSession();
+        if (error.status === 401) {
+          let currentUser;
+          try {
+            currentUser = await checkWithdrawalSession({ signal });
+          } catch (cause) {
+            ensureCurrentSession();
+            throw new Error("로그인 상태를 다시 확인하지 못했어요. 잠시 후 다시 시도해 주세요.", { cause });
+          }
+          ensureCurrentSession();
+          if (!currentUser) {
+            clearSession("로그인이 만료되었어요. 다시 로그인해 주세요.");
+          } else if (currentUser.id !== session.user.id) {
+            clearSession("로그인한 계정이 변경되었어요. 다시 로그인해 주세요.");
+          }
+          // 세션이 유효하면 그대로 두고 원래 재인증 오류를 폼에 전달한다.
+        }
+        throw error;
+      }
+      ensureCurrentSession();
+      clearSession("회원 탈퇴가 완료되었어요.");
+    } finally {
+      if (profileMutation.current === mutation) profileMutation.current = null;
+      setIsWithdrawing(false);
     }
   }, [session, clearSession]);
 
@@ -152,7 +219,9 @@ export default function AuthProvider({ children }) {
     <AuthContext value={{ user: session?.user ?? null, isAuthenticated: Boolean(session), signup,
       notice, clearNotice, clearSignup, cancelSignup, markSignupSubmitted, acceptGoogleLogin, completeLogin,
       signupWelcome, clearSignupWelcome,
-      authenticatedRequest, logout, isLoggingOut, logoutError, restoreStatus, retryRestore }}>
+      authenticatedRequest, saveProfile, withdraw, isSavingProfile, isWithdrawing,
+      isAccountBusy: isLoggingOut || isSavingProfile || isWithdrawing,
+      logout, isLoggingOut, logoutError, restoreStatus, retryRestore }}>
       {children}
     </AuthContext>
   );
