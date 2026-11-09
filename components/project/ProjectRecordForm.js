@@ -9,10 +9,10 @@ import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import EmptyFieldsNotice from "./EmptyFieldsNotice";
 import RecordFieldsGrid from "./RecordFieldsGrid";
-import RecordFormFooter from "./RecordFormFooter";
 import RecordFormTitle from "./RecordFormTitle";
 import { EMPTY_RECORD_MESSAGE, RECORD_FIELDS } from "./recordFields";
 import SavedAttachments from "./SavedAttachments";
+import ActionFooter from "@/components/ui/ActionFooter";
 
 // 기록 수정(H-15, 12-b). 저장하면 카드도 함께 바뀐다(카드 제목은 유지).
 export default function ProjectRecordForm({ record, onCancel, onSave }) {
@@ -71,10 +71,10 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
           onLimit={showToast}
         />
         <SavedAttachments attachments={attachments} />
-        <RecordFormFooter>
+        <ActionFooter>
           <TextLink onClick={onCancel}>취소</TextLink>
           <Button type="submit" className="ml-auto">고친 내용 저장</Button>
-        </RecordFormFooter>
+        </ActionFooter>
       </form>
       <Toast toast={toast} onDismiss={hideToast} />
     </Card>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
+import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
 import StoryCardDetail from "./StoryCardDetail";
 import StoryCardList from "./StoryCardList";
@@ -104,7 +105,7 @@ export default function StoryCardsPanel({
           aria-label="역량"
           value={competency}
           onChange={(event) => setCompetency(event.target.value)}
-          className={`w-[163px] shrink-0 cursor-pointer appearance-none bg-[url(/images/my-record/chevron-down.svg)] bg-[position:right_6px_center] bg-no-repeat pr-7 pl-4 ${FIELD_CLASSES}`}
+          className={`w-[163px] shrink-0 cursor-pointer appearance-none bg-[url(/images/common/chevron-down.svg)] bg-[position:right_6px_center] bg-no-repeat pr-7 pl-4 ${FIELD_CLASSES}`}
         >
           <option value={ALL}>역량 전체</option>
           {filterCompetencies.map((name) => {
@@ -144,9 +145,7 @@ export default function StoryCardsPanel({
           onOpenCard={setOpenCardId}
         />
       ) : (
-        <p role="status" className="rounded-[20px] border border-dashed border-[#d7d3cb] p-6 text-center text-body text-ink-subtle">
-          조건에 맞는 카드가 없어요.
-        </p>
+        <EmptyState role="status">조건에 맞는 카드가 없어요.</EmptyState>
       )}
 
       <Modal

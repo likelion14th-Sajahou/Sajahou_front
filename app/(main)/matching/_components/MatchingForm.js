@@ -10,6 +10,7 @@ import { MATCHING_SAMPLE } from "@/lib/mock/matching";
 import MatchingAttachments from "./MatchingAttachments";
 import MatchingResults from "./MatchingResults";
 import { createMockMatchingResult } from "@/lib/mock/matchingResult";
+import ActionFooter from "@/components/ui/ActionFooter";
 
 const EMPTY_FORM = { company: "", role: "", jd: "", preferences: "", companyInfo: "" };
 
@@ -100,12 +101,10 @@ export default function MatchingForm() {
           }}>+ 문항 추가</TextLink>
         </div>
       </fieldset>
-      <div className="pt-1">
-        <div className="flex items-center justify-between gap-3.5 border-t border-line pt-4">
-          <TextLink onClick={loadSample}>예시 공고 넣기</TextLink>
-          <Button type="submit" variant="accent">내 사자록에서 찾기 →</Button>
-        </div>
-      </div>
+      <ActionFooter className="justify-between gap-3.5">
+        <TextLink onClick={loadSample}>예시 공고 넣기</TextLink>
+        <Button type="submit" variant="accent">내 사자록에서 찾기 →</Button>
+      </ActionFooter>
       <p role="status" className="sr-only">{notice}</p>
       <Toast toast={toast} onDismiss={hideToast} />
       <p className="rounded-xl bg-tint-yellow px-3.5 py-2.5 text-label text-ink-muted">사자록에 기록된 내용으로만 초안을 써요. 기록에 없는 건 지어내지 않고 빈칸으로 남겨요.</p>

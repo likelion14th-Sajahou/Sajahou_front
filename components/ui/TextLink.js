@@ -7,7 +7,7 @@ const VARIANT_CLASSES = {
   accent:
     "text-accent-strong underline decoration-from-font [text-underline-position:from-font]",
   danger:
-    "px-0.5 py-1 text-[#b42318] underline decoration-from-font [text-underline-position:from-font]",
+    "px-0.5 py-1 text-danger underline decoration-from-font [text-underline-position:from-font]",
 };
 
 const SIZE_CLASSES = {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
-import AiPromptHeader from "./AiPromptHeader";
+import AiPromptHeader from "@/components/ui/AiPromptHeader";
 import RecordAttachmentsField from "./RecordAttachmentsField";
 
 export default function PortfolioArtifactRequest({

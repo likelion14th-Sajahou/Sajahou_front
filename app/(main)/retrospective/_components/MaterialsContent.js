@@ -3,6 +3,7 @@ import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import { MOCK_MATERIALS_BY_PART, MOCK_MATERIALS_CHANGED_PREVIEW, MOCK_RETROSPECTIVE } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import MaterialsForm from "./MaterialsForm";
+import CardTitle from "@/components/ui/CardTitle";
 
 const UPLOAD_TIPS = [
   "노션 과제·회고 페이지 → Markdown ZIP",
@@ -25,12 +26,9 @@ export default function MaterialsContent({ preview }) {
           changePreview={changePreview}
         />
         <Card as="aside" size="md" aria-labelledby="upload-guide-title">
-          <div className="flex items-center justify-between border-b border-ink pb-3">
-            <h2 id="upload-guide-title" className="text-[18px] tracking-[-0.01em]">
-              이렇게 올리면 잘 읽어요
-            </h2>
-            <ShapeCharacter shape="circle" color="blue" size={16} face="none" cropped />
-          </div>
+          <CardTitle id="upload-guide-title" action={<ShapeCharacter shape="circle" color="blue" size={16} face="none" cropped />}>
+            이렇게 올리면 잘 읽어요
+          </CardTitle>
           <ul className="mt-4 flex flex-col gap-1 pl-10 text-label text-ink-muted">
             {UPLOAD_TIPS.map((tip) => (
               <li key={tip} className="relative pl-3.5 before:absolute before:top-[8.44px] before:left-0 before:size-1.5 before:rounded-full before:bg-shape-green">

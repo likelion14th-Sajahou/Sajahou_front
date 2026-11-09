@@ -4,7 +4,7 @@ import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import TextLink from "@/components/ui/TextLink";
-import RecordFormFooter from "./RecordFormFooter";
+import ActionFooter from "@/components/ui/ActionFooter";
 
 function RecordOption({ record, isSelected, onToggle }) {
   const { date, weekday, did, problem, attachments } = record;
@@ -67,12 +67,12 @@ export default function PortfolioRecordSelect({ records, initialSelectedIds, onC
           onToggle={() => toggleRecord(record.id)}
         />
       ))}
-      <RecordFormFooter>
+      <ActionFooter>
         <TextLink onClick={onCancel}>취소</TextLink>
         <Button variant="accent" className="ml-auto" disabled={selectedIds.length === 0} onClick={() => onNext(selectedIds)}>
           AI가 빈 곳 찾기 →
         </Button>
-      </RecordFormFooter>
+      </ActionFooter>
     </Card>
   );
 }

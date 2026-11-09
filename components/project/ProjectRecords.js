@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import CompetencyTags from "@/components/my-record/CompetencyTags";
+import AttachmentChip from "@/components/ui/AttachmentChip";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
 import TextLink from "@/components/ui/TextLink";
-import AttachmentChip from "./AttachmentChip";
 import DeleteConfirm from "./DeleteConfirm";
 import ProjectRecordAddForm from "./ProjectRecordAddForm";
 import ProjectRecordForm from "./ProjectRecordForm";
@@ -49,7 +50,7 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
         {attachments.length > 0 && (
           <ul aria-label="첨부 자료" className="flex flex-wrap gap-2">
             {attachments.map((attachment) => (
-              <AttachmentChip key={attachment.id} attachment={attachment} />
+              <AttachmentChip key={attachment.id} kind={attachment.kind} name={attachment.name} />
             ))}
           </ul>
         )}
@@ -141,9 +142,7 @@ export default function ProjectRecords({
           ))}
         </ol>
       ) : (
-        <p className="rounded-[20px] border border-dashed border-[#d7d3cb] p-6 text-center text-body text-ink-subtle">
-          첫 기록을 남겨 보세요. 한 줄이어도 괜찮아요.
-        </p>
+        <EmptyState>첫 기록을 남겨 보세요. 한 줄이어도 괜찮아요.</EmptyState>
       )}
     </section>
   );

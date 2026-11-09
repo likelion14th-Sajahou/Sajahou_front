@@ -8,6 +8,7 @@ import TextLink from "@/components/ui/TextLink";
 import CompetencyTags from "./CompetencyTags";
 import StoryCardEditForm from "./StoryCardEditForm";
 import { COPY_FAILED_MESSAGE, RECORD_TEXT, STORY_CARD_TYPES, SUMMARY_FIELDS } from "./storyCardTypes";
+import { copyText } from "@/lib/clipboard";
 
 const RECAP_TEXT = {
   title: "회고록 전문",
@@ -71,7 +72,7 @@ function SummaryDetails({ summary }) {
             <dt className="pt-0.5 text-label text-accent-strong">{label}</dt>
             <dd className="text-body leading-[25.5px]">
               {summary[key] || (
-                <span className="inline-block rounded-lg border border-dashed border-[#d7d3cb] px-2.5 text-body-sm text-ink-subtle">
+                <span className="inline-block rounded-lg border border-dashed border-line-medium px-2.5 text-body-sm text-ink-subtle">
                   아직 기록에 없어요
                 </span>
               )}
@@ -98,12 +99,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
   const [isEditing, setIsEditing] = useState(false);
 
   async function copyDocument() {
-    try {
-      await navigator.clipboard.writeText(document);
-      setCopyNotice(documentText.copied);
-    } catch {
-      setCopyNotice(COPY_FAILED_MESSAGE);
-    }
+    setCopyNotice((await copyText(document)) ? documentText.copied : COPY_FAILED_MESSAGE);
   }
 
   function handleSave(changes) {

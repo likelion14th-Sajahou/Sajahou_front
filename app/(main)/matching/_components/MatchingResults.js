@@ -5,6 +5,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { draftText } from "@/lib/mock/matchingResult";
 import MatchingAnswerCard from "./MatchingAnswerCard";
+import { copyText } from "@/lib/clipboard";
 
 // 내 카드 수에 따라 색을 나눈다: 2장 이상 초록, 1장 노랑, 없음 빨강(M-06).
 function getCountTone(cardCount) {
@@ -17,12 +18,7 @@ export default function MatchingResults({ result, onEdit, headingRef }) {
   const [notice, setNotice] = useState("");
 
   async function copy(text, message) {
-    try {
-      await navigator.clipboard.writeText(text);
-      setNotice(message);
-    } catch {
-      setNotice("복사가 막혀 있어요. 직접 고치기를 눌러 내용을 선택한 뒤 복사해 주세요.");
-    }
+    setNotice((await copyText(text)) ? message : "복사가 막혀 있어요. 직접 고치기를 눌러 내용을 선택한 뒤 복사해 주세요.");
   }
 
   function copyAll() {

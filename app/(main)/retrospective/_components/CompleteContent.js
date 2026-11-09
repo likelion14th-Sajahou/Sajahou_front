@@ -9,6 +9,7 @@ import TextLink from "@/components/ui/TextLink";
 import { getWeekCardId } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { copyText } from "@/lib/clipboard";
 
 export default function CompleteContent({ week, initialDraft, assignmentDueLabel }) {
   const { completedDraft, setCompletedDraft, setAssignmentStatus, assignmentPending, isAssignment } = useRetrospectivePreview();
@@ -16,12 +17,9 @@ export default function CompleteContent({ week, initialDraft, assignmentDueLabel
   const [notice, setNotice] = useState("");
 
   async function copyRetrospective() {
-    try {
-      await navigator.clipboard.writeText((completedDraft ?? initialDraft).retrospective);
-      setNotice("회고록을 복사했어요. 노션에 붙여 넣어 주세요.");
-    } catch {
-      setNotice("복사하지 못했어요. 브라우저의 클립보드 권한을 확인한 뒤 다시 시도해 주세요.");
-    }
+    const copied = await copyText((completedDraft ?? initialDraft).retrospective);
+
+    setNotice(copied ? "회고록을 복사했어요. 노션에 붙여 넣어 주세요." : "복사하지 못했어요. 브라우저의 클립보드 권한을 확인한 뒤 다시 시도해 주세요.");
   }
 
   function restartDemo() {

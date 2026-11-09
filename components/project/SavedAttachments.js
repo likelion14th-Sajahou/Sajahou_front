@@ -1,4 +1,4 @@
-import AttachmentChip from "./AttachmentChip";
+import AttachmentChip from "@/components/ui/AttachmentChip";
 
 export default function SavedAttachments({ attachments }) {
   if (attachments.length === 0) {
@@ -10,7 +10,7 @@ export default function SavedAttachments({ attachments }) {
       <p className="text-label text-ink-muted">함께 저장되는 자료</p>
       <ul className="flex flex-wrap gap-2">
         {attachments.map((attachment) => (
-          <AttachmentChip key={attachment.id} attachment={attachment} />
+          <AttachmentChip key={attachment.id} kind={attachment.kind} name={attachment.name} />
         ))}
       </ul>
     </div>

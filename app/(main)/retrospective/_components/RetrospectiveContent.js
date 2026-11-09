@@ -9,6 +9,7 @@ import ReviewContent from "./ReviewContent";
 import CompleteContent from "./CompleteContent";
 import RetrospectiveWeekGate from "./RetrospectiveWeekGate";
 import { MOCK_REVIEW_DRAFT } from "@/lib/mock/retrospective";
+import CardTitle from "@/components/ui/CardTitle";
 
 export default async function RetrospectiveContent({ searchParams, retrospective }) {
   const { preview, step, type } = await searchParams;
@@ -50,12 +51,9 @@ export default async function RetrospectiveContent({ searchParams, retrospective
         </Card>
 
         <Card as="aside" size="md" aria-labelledby="deadline-title">
-          <div className="flex items-center justify-between border-b border-ink pb-3">
-            <h2 id="deadline-title" className="text-[18px] tracking-[-0.01em]">
-              마감일
-            </h2>
-            <ShapeCharacter shape="circle" color="blue" size={16} face="none" cropped />
-          </div>
+          <CardTitle id="deadline-title" action={<ShapeCharacter shape="circle" color="blue" size={16} face="none" cropped />}>
+            마감일
+          </CardTitle>
           <dl className="mt-4 flex flex-col gap-2 text-body-sm">
             {deadlines.map(({ id, label, dueLabel }) => (
               <div key={id} className="flex justify-between gap-4">

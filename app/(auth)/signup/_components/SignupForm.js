@@ -50,7 +50,7 @@ function SignupSelect({ label, name, value, onChange, error, children }) {
         >
           {children}
         </select>
-        <Image src="/images/signup/ec1a1.svg" alt="" width={10} height={6} className="pointer-events-none absolute top-1/2 right-[5px] -translate-y-1/2" />
+        <Image src="/images/common/chevron-down.svg" alt="" width={10} height={6} className="pointer-events-none absolute top-1/2 right-[5px] -translate-y-1/2" />
       </span>
       {error && <span id={`${name}-error`} className="pt-0.5 text-label leading-[20.8px] text-error">{error}</span>}
     </label>

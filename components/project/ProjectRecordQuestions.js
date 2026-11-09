@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { MOCK_RECORD_QUESTIONS } from "@/lib/mock/projects";
-import AiQuestionForm from "./AiQuestionForm";
+import AiQuestionForm from "@/components/ui/AiQuestionForm";
 
 const MAX_QUESTIONS = 4;
 

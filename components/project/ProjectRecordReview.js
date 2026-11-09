@@ -3,8 +3,8 @@ import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import EmptyFieldsNotice from "./EmptyFieldsNotice";
 import RecordFieldsGrid from "./RecordFieldsGrid";
-import RecordFormFooter from "./RecordFormFooter";
 import SavedAttachments from "./SavedAttachments";
+import ActionFooter from "@/components/ui/ActionFooter";
 
 // 정리 결과 확인(H-14). AI와 정리했으면 AI 안내를 보여 주고, 5칸을 직접 채웠으면 빈 칸 안내만 보여 준다.
 export default function ProjectRecordReview({
@@ -46,10 +46,10 @@ export default function ProjectRecordReview({
         onLimit={onTagLimit}
       />
       <SavedAttachments attachments={attachments} />
-      <RecordFormFooter>
+      <ActionFooter>
         <TextLink onClick={onBack}>{isOrganizedByAi ? "← 질문으로" : "← 자료로"}</TextLink>
         <Button className="ml-auto" onClick={onSave}>기록 저장</Button>
-      </RecordFormFooter>
+      </ActionFooter>
     </>
   );
 }
