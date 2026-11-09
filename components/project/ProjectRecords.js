@@ -11,6 +11,7 @@ import DeleteConfirm from "./DeleteConfirm";
 import ProjectRecordAddForm from "./ProjectRecordAddForm";
 import ProjectRecordForm from "./ProjectRecordForm";
 import { RECORD_FIELDS } from "./recordFields";
+import useProjectAction from "./useProjectAction";
 
 // 완료한 프로젝트에는 별도 안내 문구가 없다(H-21, 12-a).
 const ADD_RECORD_HINT = "회의록·시안·링크를 올리면 AI가 정리를 도와요";
@@ -18,6 +19,7 @@ const ADD_RECORD_HINT = "회의록·시안·링크를 올리면 AI가 정리를 
 function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
   const { date, weekday, tags, organizedByAi, attachments } = record;
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const { run, busy, error } = useProjectAction();
 
   return (
     <li className="relative pb-5 pl-7">
@@ -26,8 +28,8 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
         aria-hidden="true"
         className="absolute top-1 left-0 size-4 rounded-full bg-shape-yellow shadow-[0_0_0_3px_var(--color-canvas)]"
       />
-      <article className="flex flex-col gap-2.5 rounded-[18px] bg-white px-[18px] py-4">
-        <div className="flex items-center justify-between">
+      <fieldset disabled={busy} className="flex min-w-0 flex-col gap-2.5 rounded-[18px] bg-white px-[18px] py-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="flex items-center gap-1 text-label text-ink-muted">
             {date}({weekday})
             {organizedByAi && <Badge>AI와 정리</Badge>}
@@ -42,7 +44,7 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
           {RECORD_FIELDS.filter(({ key }) => record[key]).map(({ key, label }) => (
             <div key={key} className="col-span-2 grid grid-cols-subgrid">
               <dt className="text-label leading-[20.15px] text-ink-subtle">{label}</dt>
-              <dd className="text-body-sm leading-[21.7px] text-ink">{record[key]}</dd>
+              <dd className="whitespace-pre-wrap break-words text-body-sm leading-[21.7px] text-ink">{record[key]}</dd>
             </div>
           ))}
         </dl>
@@ -59,10 +61,11 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
             title="이 기록을 지울까요?"
             message="나의 사자록의 카드도 함께 지워져요. 지운 기록은 되돌릴 수 없어요."
             onCancel={() => setIsConfirmingDelete(false)}
-            onConfirm={() => onDelete(record.id)}
+            onConfirm={() => run(() => onDelete(record.id))}
           />
         )}
-      </article>
+        {error && <p role="alert">{error}</p>}
+      </fieldset>
     </li>
   );
 }
@@ -104,8 +107,8 @@ export default function ProjectRecords({
           key={editingRecord.id}
           record={editingRecord}
           onCancel={() => setEditingRecordId(undefined)}
-          onSave={(changes) => {
-            onSaveRecord(editingRecord.id, changes);
+          onSave={async (changes, signal) => {
+            await onSaveRecord(editingRecord.id, changes, signal);
             setEditingRecordId(undefined);
           }}
         />
@@ -135,8 +138,8 @@ export default function ProjectRecords({
               isLast={index === records.length - 1}
               onViewCard={onViewCard}
               onEdit={startEditing}
-              onDelete={(recordId) => {
-                onDeleteRecord(recordId);
+              onDelete={async (recordId) => {
+                await onDeleteRecord(recordId);
                 setEditingRecordId((current) => (current === recordId ? undefined : current));
               }}
             />

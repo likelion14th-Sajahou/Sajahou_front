@@ -12,6 +12,9 @@ import ProjectPortfolio from "./ProjectPortfolio";
 import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
 import ProjectSidebar from "./ProjectSidebar";
+import RemoteProjectCard from "./RemoteProjectCard";
+import * as api from "@/lib/projectApi";
+import { recordBody } from "@/lib/projectViewModel";
 
 function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject }) {
   const { records: projectRecords, status } = project;
@@ -40,7 +43,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   const cards = storyCards.filter(({ projectId }) => projectId === project.id);
   const viewingCard =
     cardView?.bfcacheId === bfcacheId
-      ? cards.find(({ recordId }) => recordId === cardView.recordId)
+      ? projectRecords.find(({ id }) => id === cardView.recordId)
       : undefined;
   const records = projectRecords;
 
@@ -51,12 +54,15 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   }
 
   // 기록을 고치거나 지우면 카드도 함께 바뀌고, 따로 안내하지 않는다(H-21).
-  function saveRecord(recordId, changes) {
-    updateProjectRecord(project.id, recordId, changes);
+  async function saveRecord(recordId, changes, signal) {
+    const record = projectRecords.find((r) => r.id === recordId);
+    await api.updateProjectRecord(recordId, recordBody({ ...record, ...changes }, projectData.competencyItems), { signal });
+    await projectData.sync(project.id);
   }
 
-  function deleteRecord(recordId) {
-    deleteProjectRecord(project.id, recordId);
+  async function deleteRecord(recordId) {
+    await api.deleteProjectRecord(recordId);
+    await projectData.sync(project.id);
   }
 
   // 지우면 프로젝트 목록으로 옮겨 가서 안내한다(H-25). 이동과 삭제를 한 번에 반영해, 지운 프로젝트의 '찾을 수 없어요' 화면이 잠깐 보이지 않게 한다.
@@ -134,17 +140,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
         aria-labelledby="record-card-title"
       >
         {viewingCard && (
-          <StoryCardDetail
-            card={viewingCard}
-            competencies={competencies}
-            titleId="record-card-title"
-            onClose={() => setCardView(null)}
-            onDelete={() => {
-              deleteStoryCard(viewingCard.id);
-              setCardView(null);
-            }}
-            onUpdate={(changes) => updateStoryCard(viewingCard.id, changes)}
-          />
+          <RemoteProjectCard key={viewingCard.cardId} cardId={viewingCard.cardId} titleId="record-card-title" onClose={() => setCardView(null)} />
         )}
       </Modal>
       <Toast toast={toast} onDismiss={hideToast} />

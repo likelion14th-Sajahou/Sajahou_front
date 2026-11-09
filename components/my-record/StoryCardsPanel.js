@@ -7,6 +7,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
 import StoryCardDetail from "./StoryCardDetail";
 import StoryCardList from "./StoryCardList";
+import RemoteProjectCard from "@/components/project/RemoteProjectCard";
 
 const ALL = "all";
 
@@ -93,7 +94,7 @@ export default function StoryCardsPanel({
 
   return (
     <section aria-label="스토리 카드" className="flex flex-col gap-4 pt-5">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <div role="group" aria-label="카드 유형" className="flex shrink-0 gap-2">
           {TYPE_FILTERS.map(({ id, label }) => (
             <Chip key={id} selected={id === type} onClick={() => setType(id)}>
@@ -154,7 +155,7 @@ export default function StoryCardsPanel({
         size="lg"
         aria-labelledby="story-card-title"
       >
-        {openCard && (
+        {openCard?.type === "project" ? <RemoteProjectCard key={openCard.id} cardId={openCard.id} titleId="story-card-title" onClose={closeCard} /> : openCard && (
           <StoryCardDetail
             card={openCard}
             competencies={competencies}

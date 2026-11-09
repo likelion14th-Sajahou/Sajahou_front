@@ -13,10 +13,13 @@ import RecordFormTitle from "./RecordFormTitle";
 import { EMPTY_RECORD_MESSAGE, RECORD_FIELDS } from "./recordFields";
 import SavedAttachments from "./SavedAttachments";
 import ActionFooter from "@/components/ui/ActionFooter";
+import useProjectAction from "./useProjectAction";
 
 // 기록 수정(H-15, 12-b). 저장하면 카드도 함께 바뀐다(카드 제목은 유지).
 export default function ProjectRecordForm({ record, onCancel, onSave }) {
-  const { competencies } = useMockData();
+  const { projectData } = useMockData();
+  const competencies = projectData.competencyItems.map((item) => item.name);
+  const { run, busy, error } = useProjectAction();
   const [fields, setFields] = useState(() =>
     Object.fromEntries(RECORD_FIELDS.map(({ key }) => [key, record[key] ?? ""])),
   );
@@ -42,12 +45,13 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
       return;
     }
 
-    onSave({ ...changes, tags });
+    run((signal) => onSave({ ...changes, tags }, signal));
   }
 
   return (
     <Card as="section" size="md" aria-labelledby="record-form-title">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4">
         <RecordFormTitle id="record-form-title">기록 수정</RecordFormTitle>
         <p className="text-label leading-[19.5px] text-ink-subtle">고칠 칸을 바꾸고 저장하세요.</p>
         <EmptyFieldsNotice fields={fields} fieldKeys={["next"]} />
@@ -75,6 +79,8 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
           <TextLink onClick={onCancel}>취소</TextLink>
           <Button type="submit" className="ml-auto">고친 내용 저장</Button>
         </ActionFooter>
+        {error && <p role="alert">{error}</p>}
+        </fieldset>
       </form>
       <Toast toast={toast} onDismiss={hideToast} />
     </Card>
