@@ -7,7 +7,7 @@ import TextLink from "@/components/ui/TextLink";
 import { loginDemo, loginWithGoogle } from "@/lib/auth";
 import { getGoogleAuthMode } from "@/lib/authConfig";
 import { AuthRestoreStatus, useAuth } from "@/components/layout/AuthProvider";
-import GoogleSignInButton from "./GoogleSignInButton";
+import GoogleSignInButton from "@/components/ui/GoogleSignInButton";
 
 export default function LoginActions() {
   const router = useRouter();

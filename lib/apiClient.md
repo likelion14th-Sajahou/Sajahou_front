@@ -1,8 +1,8 @@
 # 공통 API Client 사용 가이드
 
-`lib/apiClient.js`의 `apiRequest`는 요청 데이터 구성, 공통 응답 파싱, 오류 전달, 타임아웃과 취소를 담당한다. 브라우저 요청에는 `credentials: "include"`를 적용해 서버의 HttpOnly 세션 쿠키를 사용한다. 재시도, 알림, 로그인 상태 관리와 화면 전환은 호출부의 책임이다.
+`lib/apiClient.js`의 `apiRequest`는 요청 데이터 구성, 공통 응답 파싱, 오류 전달, 타임아웃과 취소를 담당한다. live 모드의 브라우저 요청에는 `credentials: "include"`를 적용해 서버의 HttpOnly 세션 쿠키를 사용한다. mock 모드는 localStorage 기반으로 처리하며 동일한 응답 파싱과 오류 처리를 재사용한다. 재시도, 알림, 로그인 상태 관리와 화면 전환은 호출부의 책임이다.
 
-기준은 사자록 API 명세와 백엔드에서 확정한 세션 쿠키 인증 정책이다. 아래 예시는 사용법을 설명하는 문서이며, 개별 엔드포인트 함수나 실제 호출을 프로젝트에 추가한 것이 아니다.
+실제 연동의 기준은 사자록 API 명세와 백엔드에서 확정한 세션 쿠키 인증 정책이다. 3절은 공통 Client 사용 예시이며, 구현된 인증·프로필 호출 함수와 mock 설정은 6~7절에서 설명한다.
 
 ## 1. 환경변수
 
@@ -12,7 +12,7 @@
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ```
 
-origin 또는 `/api/v1`까지 지정할 수 있다. Client가 `/api/v1`을 한 번 연결하므로 호출 경로에는 접두사를 넣지 않는다. 환경변수가 없으면 요청 시 `TypeError`가 발생한다. 모듈을 import하는 것만으로 요청하지는 않는다.
+origin 또는 `/api/v1`까지 지정할 수 있다. Client가 `/api/v1`을 한 번 연결하므로 호출 경로에는 접두사를 넣지 않는다. 실제 요청에 환경변수나 `baseUrl`이 없으면 `TypeError`가 발생한다. 인증 mock은 현재 브라우저 origin을 지정하며 네트워크를 호출하지 않는다. 모듈을 import하는 것만으로 요청하지는 않는다.
 
 같은 함수를 서버와 브라우저에서 사용할 수 있다. 단, 서버 호출에서는 `credentials: "include"`만으로 브라우저의 쿠키가 자동 전달되지 않는다. `NEXT_PUBLIC_`에는 공개 가능한 백엔드 주소만 넣는다. 이 값은 Next.js 빌드 시 고정되므로 배포 주소를 바꾸면 다시 빌드한다. 비밀값이나 토큰은 넣지 않는다.
 
@@ -33,7 +33,8 @@ const data = await apiRequest(path, options);
 | `credentials` | 항상 `include` 적용. 브라우저가 세션 쿠키를 저장·전송하며 호출부에서 덮어쓸 수 없음 |
 | `timeoutMs` | 선택 사항. 1~2147483647의 정수(ms), 생략하면 Client 자체 타임아웃 없음 |
 | `signal` | 호출부 AbortController의 signal 전달 |
-| `baseUrl` | 선택 사항. 해당 요청의 API origin을 지정. 인증 HTTP mock은 현재 origin 사용 |
+| `baseUrl` | 선택 사항. 해당 요청의 API origin을 지정. 브라우저 mock은 현재 origin 사용 |
+| `fetcher` | 선택 사항. 기본값은 실제 `fetch`. mock 모드에서만 localStorage 기반 모의 transport를 전달 |
 | 나머지 | `cache`, `next` 등 fetch 옵션 그대로 전달 |
 
 경로는 `/users/me`처럼 `/api/v1` 이후 부분을 전달한다. 동적 path 값은 호출부에서 `encodeURIComponent`로 인코딩한다. GET/HEAD에는 body 대신 query를 사용한다.
@@ -186,8 +187,57 @@ HTTP 실패 또는 `success:false`는 `ApiError`로 전달된다. 잘못된 환�
 
 1. 담당 API의 메서드, 경로, query/body, 인증, 성공·실패 구조를 명세에서 확인한 뒤 담당 함수를 작성한다. 파일 배치는 기존 구조와 팀 합의를 따른다.
 2. 담당 함수에서 이 Client를 호출한다. 공통 헤더·JSON 직렬화·응답 파싱을 중복 구현하지 않는다.
-3. 세션 쿠키 인증을 사용한다. 요청마다 accessToken을 전달하거나 스토리지 조회·토큰 자동 갱신을 추가하지 않는다.
+3. live 모드는 세션 쿠키 인증을 사용한다. 요청마다 accessToken을 전달하거나 스토리지 조회·토큰 자동 갱신을 추가하지 않는다. mock 데이터의 localStorage 처리는 `lib/mock/auth.js`에서만 수행한다.
 4. 로딩·빈 데이터·오류 알림·화면 이동은 호출부에서 처리한다. 공통 Client에 화면별 로직을 넣지 않는다.
 5. 캐싱 정책은 요청별로 검토한다. Client가 일괄 강제하지 않으며, 필요하면 `cache: "no-store"`를 전달한다. 서버의 `next` 캐시 옵션은 브라우저에서 같은 기능을 제공하지 않는다. `cache: "no-store"`와 양수 `next.revalidate`처럼 충돌하는 옵션을 함께 주지 않는다.
 6. Mock 전환 시 실제 data 구조·상태·빈 값과 UI 요구를 비교한다. Client를 Mock 데이터 모양에 맞추거나 변환 어댑터를 넣지 않는다.
 7. 백엔드 준비 후 실제 주소, CORS·HTTPS, 인증, 업로드, 오류 응답, AI 지연을 확인한다. 현재 테스트는 실제 연동을 검증한 것이 아니다.
+
+## 6. 내 정보 수정·탈퇴
+
+`lib/profileApi.js`의 `updateProfile(changes, options)`는 변경한 API 필드를 받아 `PATCH /users/me`를 호출한다. `name`, `studentNo`, `department`, `cohort`만 전송하며 `email`, `part` 등은 제외한다. `department`에는 선택 이름 또는 직접 입력한 학과 문자열을 전달한다. 반환값은 수정 후 사용자 전체다. 조회는 기존 `lib/auth.js`의 `getCurrentUser`를 재사용한다.
+
+`withdrawAccount(idToken, options)`는 새로 받은 Google ID 토큰을 `{ idToken }` 본문에 담아 `DELETE /users/me`로 전송한다. 성공 204의 반환값은 `undefined`다. 로그인 API를 다시 호출하지 않으며 토큰을 저장하지 않는다. 최신 명세는 토큰 검증 실패·다른 Google 계정에도 401을 반환하므로, 호출부에서 세션 만료와 재인증 실패를 구분해야 한다. 이 함수 자체는 사용자 상태를 변경하거나 화면을 이동하지 않는다.
+
+두 함수의 `options`는 `signal`과 선택적인 `request`를 받는다. 기본 `request`는 기존 `authRequest`이며 `NEXT_PUBLIC_AUTH_MODE=mock|live`로 전환한다. live 모드의 쿠키 인증은 그대로 유지한다. 인증 상태 관리 단계에서 필요에 따라 `authenticatedRequest`를 전달할 수 있으나, 탈퇴에 기존의 모든 401을 로그아웃으로 처리하는 함수를 그대로 연결하지 않는다.
+
+### 브라우저 mock의 범위
+
+- mock 모드에서만 `lib/mock/auth.js`를 동적으로 불러와 `localStorage`의 `sajarok_mock_auth` 한 항목에 mock 회원·로그인·가입 진행 정보를 보관한다. 서버 Route Handler·암호화 키·외부 저장소는 필요하지 않다.
+- 로그인·가입·조회·수정·로그아웃·탈퇴는 네트워크 없이 처리한다. mock은 API와 같은 상태 코드·`success/data/error` 형식의 Response를 만들고 기존 공통 Client가 파싱하므로 화면의 응답·오류 처리를 재사용한다.
+- 회원 정보는 같은 Preview 주소의 브라우저에서 새로고침·재로그인 후에도 유지된다. 다른 주소·브라우저·시크릿 창과 공유하지 않는다. 로그인 모의 상태는 7일, 가입 진행은 10분간 유효하다.
+- Google 인증 UI는 로그인과 탈퇴 모두 `NEXT_PUBLIC_GOOGLE_AUTH_MODE=google|mock`을 따른다. 실제 Google 인증과 localStorage mock도 함께 사용할 수 있다. mock은 Google payload의 계정 식별값으로 동일 계정 여부를 모의 비교하며 서명 검증은 하지 않는다. 실제 Google ID 토큰·백엔드 인증 정보는 localStorage에 저장하지 않는다.
+- 탈퇴는 mock 회원·로그인·가입 상태를 지워 이후 신규 가입으로 진입시킨다. 데모 계정 탈퇴 거부는 유지한다. 회고·카드 등 별도 클라이언트 mock 상태는 기존 사용자 상태 변경으로 초기화한다.
+- 이 mock은 UI·기능 흐름 검증용이다. 실제 HTTP·Google 검증·HttpOnly 쿠키·CORS·서버 데이터 삭제는 live 모드에서 검증해야 한다.
+
+관련 검증: `node --test lib/mock/auth.test.js lib/profileApi.test.js`
+
+### 화면에서 사용하는 인증 상태 동작
+
+`useAuth()`의 `saveProfile(changes, { signal })`는 수정 API 응답을 검증한 뒤 현재 사용자 정보에 반영하고 갱신된 사용자를 반환한다. 현재 사용자 ID와 다른 응답, 세션 변경 후 도착한 응답, 취소된 요청은 반영하지 않는다. 같은 ID의 정보 갱신은 `MockDataProvider`의 사용자별 기록을 초기화하지 않는다.
+
+`withdraw(idToken, { signal })`는 탈퇴 성공 후 로그인 상태를 정리하고 `/login`으로 이동한다. 탈퇴의 401은 `checkWithdrawalSession`으로 재확인한다. GET 200이면 원래 재인증 오류를 전달하고, GET 401이면 세션 만료로 처리한다. 다른 계정의 세션이면 로컬 상태를 정리한다. 재조회 중 네트워크·서버 오류가 나면 세션을 유지하며 확인 실패를 전달한다. DELETE를 자동 재시도하지 않는다.
+
+`isSavingProfile`, `isWithdrawing`, `isAccountBusy`로 진행 상태를 확인한다. 저장·탈퇴·로그아웃은 동시에 실행하지 않으며 중복 저장·탈퇴는 오류로 거부한다. 헤더 로그아웃은 계정 작업 중 비활성화된다. 입력값, 필드 오류, 저장 성공 토스트와 모달은 화면에서 관리한다.
+
+### 회원 탈퇴 UI
+
+내 정보 화면의 회원 탈퇴는 확인 문구 → Google 본인 확인 → DELETE 순서로 진행한다. Google 로그인 API를 다시 호출하지 않는다. 모달 취소·닫기나 인증 창 취소만으로는 DELETE를 보내지 않는다. 요청 중에는 취소·Esc·배경 클릭으로 모달을 닫지 못하게 하고, 실패 시 오류를 표시한다. 성공 후 로그인 화면 이동과 사용자별 클라이언트 mock 상태 초기화는 기존 인증 상태 처리를 따른다.
+
+계정 유형과 관계없이 로그인한 사용자에게 탈퇴 버튼을 표시한다. 계정 유형을 브라우저 저장소에 기록하거나 유형 확인을 위해 재로그인을 요구하지 않는다. 탈퇴 직전 Google 본인 확인은 유지한다. 데모 계정 탈퇴는 시연 범위에 포함하지 않으며, 기존 mock의 데모 탈퇴 거부 동작은 유지한다. 버튼 표시를 위한 백엔드 구분 필드는 필요하지 않다.
+
+
+## 7. Vercel Preview에서 Google 없이 테스트하기
+
+Vercel 프로젝트의 **Preview 환경에만** 아래 두 값을 설정하고 재배포한다.
+
+```dotenv
+NEXT_PUBLIC_AUTH_MODE=mock
+NEXT_PUBLIC_GOOGLE_AUTH_MODE=mock
+```
+
+이전 설정인 `MOCK_COOKIE_SECRET`, `MOCK_GOOGLE_REGISTERED`는 더 이상 사용하지 않으므로 `.env.local`이나 Vercel에 등록했다면 삭제해도 된다. 처음에는 일반 로그인 버튼으로 신규 가입하고, 이후 같은 브라우저에서는 기존 회원으로 로그인한다. '데모 계정으로 둘러보기'는 가입 없이 진입하지만 탈퇴 테스트 대상은 아니다.
+
+처음부터 다시 테스트하려면 해당 사이트에서 브라우저 개발자 도구로 `localStorage`의 `sajarok_mock_auth`를 삭제하고 새로고침한다. Preview 주소가 바뀌면 새 주소에는 저장 데이터가 없어 신규 상태로 시작한다.
+
+실제 백엔드 연결 시 `NEXT_PUBLIC_AUTH_MODE=live`, `NEXT_PUBLIC_GOOGLE_AUTH_MODE=google`, 실제 `NEXT_PUBLIC_API_BASE_URL`과 Google Client ID를 설정하고 재빌드한다. live 모드는 mock 모듈이나 localStorage를 사용하지 않고 기존 `apiRequest`의 실제 fetch·`credentials: include`·HttpOnly 세션 쿠키 흐름을 그대로 따른다. 실제 연동 검증은 별도로 필요하다.
