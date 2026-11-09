@@ -67,13 +67,19 @@ export default function Header() {
             <CurrentNavLinks />
           </Suspense>
         </nav>
-        {/* 모바일에서는 이름·파트를 숨기고 로그아웃만 보여 준다(H-01). */}
+        {/* 모바일에서는 이름·파트 대신 내 정보 링크를 보여 준다. */}
         <div className="flex items-center gap-2">
           {restoreStatus === "checking" && <p role="status" className="text-label text-ink-subtle">로그인 확인 중…</p>}
           {isAuthenticated && user && (
-            <p className="hidden text-label text-ink sm:block">
-              {user.name} <span className="text-ink-subtle">{user.part}</span>
-            </p>
+            <>
+              <div className="hidden min-w-0 items-center gap-1 text-label text-ink sm:flex">
+                <Link href="/profile" aria-label={`${user.name} 님 내 정보`} className="max-w-[120px] truncate rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink hover:underline">
+                  {user.name}
+                </Link>
+                <span className="whitespace-nowrap text-ink-subtle">{user.part}</span>
+              </div>
+              <TextLink href="/profile" size="sm" className="sm:hidden">내 정보</TextLink>
+            </>
           )}
           {isAuthenticated && (
             <TextLink
