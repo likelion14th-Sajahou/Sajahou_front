@@ -3,9 +3,11 @@
 import { useMockData } from "@/components/layout/MockDataProvider";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import Button from "@/components/ui/Button";
+import { useRetrospectivePreview } from "./RetrospectivePreview";
 
-export default function PausedRetrospective({ week }) {
+export default function PausedRetrospective() {
   const { setWeekStatus } = useMockData();
+  const { week } = useRetrospectivePreview();
 
   return (
     <section
@@ -22,7 +24,7 @@ export default function PausedRetrospective({ week }) {
         />
       </div>
       <h2 id="paused-title" className="text-heading text-balance break-keep tracking-[-0.02em] sm:text-[24px]">
-        {week}주차는 휴회로 표시했어요
+        {week.weekNumber}주차는 휴회로 표시했어요
       </h2>
       <p className="text-body text-balance break-keep text-ink-subtle">
         쉬어 가는 주예요. 회고와 과제를 쓰지 않아도 돼요.

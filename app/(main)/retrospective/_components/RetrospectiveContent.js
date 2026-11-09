@@ -8,19 +8,19 @@ import AiQuestionsContent from "./AiQuestionsContent";
 import ReviewContent from "./ReviewContent";
 import CompleteContent from "./CompleteContent";
 import RetrospectiveWeekGate from "./RetrospectiveWeekGate";
+import RetrospectiveDeadlines from "./RetrospectiveDeadlines";
 import { MOCK_REVIEW_DRAFT } from "@/lib/mock/retrospective";
 import CardTitle from "@/components/ui/CardTitle";
 
-export default async function RetrospectiveContent({ searchParams, retrospective }) {
+export default async function RetrospectiveContent({ searchParams }) {
   const { preview, step, type } = await searchParams;
   const isAssignment = type === "assignment";
-  const { week, deadlines } = retrospective;
-  const pausedContent = <PausedRetrospective week={week} />;
+  const pausedContent = <PausedRetrospective />;
   if (preview === "paused") return pausedContent;
   if (step === "materials") return <MaterialsContent preview={preview} />;
   if (step === "questions") return <AiQuestionsContent key={preview} initialComplete={preview === "questions-complete"} />;
   if (step === "review") return <ReviewContent initialDraft={MOCK_REVIEW_DRAFT} />;
-  const completeContent = <CompleteContent week={week} initialDraft={MOCK_REVIEW_DRAFT} assignmentDueLabel={deadlines.find(({ id }) => id === "assignment").dueLabel} />;
+  const completeContent = <CompleteContent initialDraft={MOCK_REVIEW_DRAFT} />;
   if (step === "complete") return completeContent;
 
   return (
@@ -47,21 +47,14 @@ export default async function RetrospectiveContent({ searchParams, retrospective
               <p>{isAssignment ? "면접에서 제일 할 말 많은 이야기가 돼요." : "쌓이면 나만의 큰 자산이 돼요!"}</p>
             </div>
           </div>
-          <StartActions isWritingPreview={preview === "writing"} isAssignment={isAssignment} />
+          <StartActions isAssignment={isAssignment} />
         </Card>
 
         <Card as="aside" size="md" aria-labelledby="deadline-title">
           <CardTitle id="deadline-title" action={<ShapeCharacter shape="circle" color="blue" size={16} face="none" cropped />}>
             마감일
           </CardTitle>
-          <dl className="mt-4 flex flex-col gap-2 text-body-sm">
-            {deadlines.map(({ id, label, dueLabel }) => (
-              <div key={id} className="flex justify-between gap-4">
-                <dt>{label}</dt>
-                <dd>{dueLabel}</dd>
-              </div>
-            ))}
-          </dl>
+          <RetrospectiveDeadlines />
         </Card>
       </div>
     </RetrospectiveWeekGate>

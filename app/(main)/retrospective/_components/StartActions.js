@@ -1,12 +1,56 @@
 "use client";
 
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
+import { resetRetrospective, startRetrospective } from "@/lib/retrospectiveApi";
+import ResetRetrospectiveModal from "./ResetRetrospectiveModal";
+import { getRequestErrorMessage, getStepPath, useRetrospectivePreview } from "./RetrospectivePreview";
 
-export default function StartActions({ isWritingPreview = false, isAssignment = false }) {
-  const { weekStatus, setWeekStatus } = useMockData();
-  const isWriting = isWritingPreview || weekStatus === "writing";
+// 시작 전: '시작하기 →', 작성 중: '이어 쓰기 →' + '처음부터'(R-05).
+// 이어 쓰기는 마지막으로 저장한 단계(currentStep)로 간다(R-03).
+export default function StartActions({ isAssignment = false }) {
+  const router = useRouter();
+  const { authenticatedRequest } = useAuth();
+  const { setWeekStatus } = useMockData();
+  const { week, session, getStepHref, refreshCurrent } = useRetrospectivePreview();
+  const [pending, setPending] = useState(null);
+  const [error, setError] = useState("");
+  const [isResetOpen, setIsResetOpen] = useState(false);
+  const inFlight = useRef(false);
+  const isWriting = session.state === "IN_PROGRESS";
+
+  async function run(kind, request, fallback) {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setPending(kind);
+    setError("");
+    try {
+      const result = await request({ request: authenticatedRequest });
+      await refreshCurrent();
+      // 홈 화면은 아직 목업 상태를 보므로 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
+      setWeekStatus("writing");
+      setIsResetOpen(false);
+      router.push(getStepHref(getStepPath(result.currentStep)));
+    } catch (failure) {
+      if (failure.status !== 401) setError(getRequestErrorMessage(failure, fallback));
+    } finally {
+      inFlight.current = false;
+      setPending(null);
+    }
+  }
+
+  function start() {
+    run("start", (options) => startRetrospective({ weekId: week.weekId }, options), "회고를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.");
+  }
+
+  // 처음부터는 2단계 자료부터 빈 상태로 다시 쓴다(API 16 응답의 currentStep).
+  function reset() {
+    run("reset", (options) => resetRetrospective(session.id, options), "작성한 내용을 지우지 못했어요. 잠시 후 다시 시도해 주세요.");
+  }
 
   return (
     <div className="mt-5 border-t border-line pt-4">
@@ -22,27 +66,34 @@ export default function StartActions({ isWritingPreview = false, isAssignment = 
           <div className="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto">
             <Button
               variant="secondary"
-              href="/retrospective"
               className="min-w-0 max-sm:px-3"
-              onClick={() => setWeekStatus("idle")}
+              onClick={() => { setError(""); setIsResetOpen(true); }}
             >
               처음부터
             </Button>
             <Button
               variant="accent"
               className="min-w-0 max-sm:px-3"
-              href="/retrospective?step=materials"
+              href={getStepHref(getStepPath(session.currentStep))}
               onClick={() => setWeekStatus("writing")}
             >
               이어 쓰기 →
             </Button>
           </div>
         ) : (
-          <Button href="/retrospective?step=materials" onClick={() => setWeekStatus("writing")}>
-            시작하기 →
+          <Button onClick={start} disabled={pending === "start"} aria-busy={pending === "start"}>
+            {pending === "start" ? "시작하는 중…" : "시작하기 →"}
           </Button>
         )}
       </div>
+      {error && !isResetOpen && <p role="alert" className="mt-3 text-body-sm text-error">{error}</p>}
+      <ResetRetrospectiveModal
+        open={isResetOpen}
+        isResetting={pending === "reset"}
+        error={isResetOpen ? error : ""}
+        onCancel={() => setIsResetOpen(false)}
+        onConfirm={reset}
+      />
     </div>
   );
 }

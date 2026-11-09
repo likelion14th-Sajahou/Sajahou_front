@@ -40,13 +40,13 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
   );
 }
 
-export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLabel, changePreview = null }) {
+export default function MaterialsForm({ initialMaterials, changePreview = null }) {
   const router = useRouter();
-  const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref } = useRetrospectivePreview();
+  const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref, deadlineLabels } = useRetrospectivePreview();
   const assignmentStatus = isAssignment ? "record" : sessionAssignmentStatus;
-  const [drafts, setDrafts] = useState(initialMaterialsByPart);
-  const materials = drafts[part];
-  const [hasPractice, setHasPractice] = useState(true);
+  // 입력 영역을 숨겨도(실습 없음, 과제 나중에) 작성한 내용은 유지한다.
+  const [materials, setMaterials] = useState(initialMaterials);
+  const { hasPractice } = materials;
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
   const [notice, setNotice] = useState("");
@@ -59,11 +59,6 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
       return;
     }
     router.push(getStepHref("questions"));
-  }
-
-  // 파트를 바꾸거나 입력 영역을 숨겨도 각 파트에서 작성한 내용은 유지한다.
-  function setMaterials(update) {
-    setDrafts((previous) => ({ ...previous, [part]: update(previous[part]) }));
   }
 
   function updateField(field, value) {
@@ -136,7 +131,7 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
           <MaterialSection title="세션 중 실습이 있었나요?" titleId="practice-title" inactive={!hasPractice} controls={
             <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="practice-title">
               {["있었어요", "없었어요"].map((label, index) => (
-                <Chip key={label} size="sm" selected={hasPractice === (index === 0)} onClick={() => setHasPractice(index === 0)}>{label}</Chip>
+                <Chip key={label} size="sm" selected={hasPractice === (index === 0)} onClick={() => updateField("hasPractice", index === 0)}>{label}</Chip>
               ))}
             </div>
           }>
@@ -201,14 +196,14 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
         ) : (
           <p className="text-body-sm break-keep text-ink-subtle">
             {assignmentStatus === "later"
-              ? `과제는 ${assignmentDueLabel}까지 따로 써요. 세션 회고만 먼저 끝내요.`
+              ? `과제는 ${deadlineLabels.assignment}까지 따로 써요. 세션 회고만 먼저 끝내요.`
               : "이번 주 과제는 없어요."}
           </p>
         )}
       </MaterialSection>
 
       {!isAssignment && (
-        <TextField label="고민 메모 · 선택" multiline name="memo" placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
+        <TextField label="고민 메모 · 선택" multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
       )}
       <MaterialsChangeNotice
         open={isChangeNoticeOpen}
