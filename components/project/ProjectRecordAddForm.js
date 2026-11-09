@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import Button from "@/components/ui/Button";
@@ -16,7 +16,7 @@ import RecordFieldsGrid from "./RecordFieldsGrid";
 import RecordFormTitle from "./RecordFormTitle";
 import { EMPTY_RECORD_MESSAGE } from "./recordFields";
 import ActionFooter from "@/components/ui/ActionFooter";
-import { createProjectRecord } from "@/lib/projectApi";
+import { createProjectRecord, updateProjectRecord, getRecordQuestions } from "@/lib/projectApi";
 
 // 한 일이 비면 카드 제목이 비지 않도록 메모 첫 줄을 쓰고, 메모도 없으면 이 문구를 쓴다.
 const EMPTY_DID_TITLE = "(한 일 비어 있음)";
@@ -35,6 +35,11 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const [draftId, setDraftId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [attachmentBusy, setAttachmentBusy] = useState(false);
+  const [questionState, setQuestionState] = useState({ questions: [], inputs: {}, index: 0 });
+  const [questionMaterials, setQuestionMaterials] = useState(null);
+  const [confirmRegenerate, setConfirmRegenerate] = useState(false);
+  const request = useRef(null);
+  useEffect(() => () => request.current?.abort(), []);
   const { toast, showToast, hideToast } = useToast();
 
   function getFieldValueProps(key) {
@@ -95,27 +100,45 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     setNotice("");
   }
 
-  async function startAiSummary() {
+  function startAiSummary() {
     // 첨부와 메모가 모두 비어 있으면 AI 정리로 넘어가지 않는다(H-12).
     if (attachments.length === 0 && !memo.trim()) {
       setNotice("자료를 첨부하거나 메모를 적어 주세요.");
       return;
     }
 
-    if (busy || attachmentBusy) return;
+    const snapshot = JSON.stringify({ memo: memo.trim(), ids: attachments.map((a) => a.attachmentId).sort() });
+    if (questionMaterials && snapshot !== questionMaterials) { setConfirmRegenerate(true); return; }
+    continueAi(false);
+  }
+
+  async function continueAi(regenerate) {
+    if (request.current || attachmentBusy) return;
     if (attachments.some((a) => a.extractStatus === "PENDING")) { setNotice("첨부 자료를 읽은 뒤 진행해 주세요."); return; }
+    const controller = new AbortController(); request.current = controller;
+    const options = { signal: controller.signal };
     setBusy(true); setNotice("");
     try {
+      let recordId = draftId;
       if (!draftId) {
-        const draft = await createProjectRecord(projectId, { aiOrganize: true, memo: memo.trim() || null, attachmentIds: attachments.map((a) => a.attachmentId) });
+        const draft = await createProjectRecord(projectId, { aiOrganize: true, memo: memo.trim() || null, attachmentIds: attachments.map((a) => a.attachmentId) }, options);
+        controller.signal.throwIfAborted();
+        recordId = draft.recordId;
         setDraftId(draft.recordId);
-      }
+      } else await updateProjectRecord(draftId, { memo: memo.trim() || null, attachmentIds: attachments.map((a) => a.attachmentId) }, options);
+      const result = await getRecordQuestions(recordId, { ...options, regenerate });
+      controller.signal.throwIfAborted();
+      setQuestionState((current) => ({ questions: result.questions, inputs: regenerate ? {} : current.inputs, index: regenerate ? 0 : Math.min(current.index, Math.max(0, result.questions.length - 1)) }));
+      if (!questionMaterials || regenerate) setQuestionMaterials(JSON.stringify({ memo: memo.trim(), ids: attachments.map((a) => a.attachmentId).sort() }));
+      setConfirmRegenerate(false);
       setStartsAtLastQuestion(false); setStep("questions");
-    } catch (error) { setNotice(error.message); } finally { setBusy(false); }
+    } catch (error) { if (!controller.signal.aborted) setNotice(error.message); }
+    finally { request.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
 
   // 정리 결과에서 '← 질문으로'를 누르면 마지막 질문으로 돌아간다(H-14).
   function returnToQuestions() {
+    setQuestionState((current) => ({ ...current, index: Math.max(0, current.questions.length - 1) }));
     setStartsAtLastQuestion(true);
     setStep("questions");
   }
@@ -140,6 +163,8 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
         <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
         {step === "questions" && (
           <ProjectRecordQuestions
+            state={questionState}
+            onChange={setQuestionState}
             recordId={draftId}
             attachments={attachments}
             startAtLast={startsAtLastQuestion}
@@ -210,6 +235,12 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
               />
             )}
             {notice && <p role="alert" className="text-label text-tint-red-ink">{notice}</p>}
+            {confirmRegenerate && <div role="group" aria-label="자료 변경 확인" className="flex flex-wrap gap-2 rounded-xl bg-tint-yellow p-3">
+              <p className="w-full text-body-sm">자료가 바뀌었어요. 질문을 새로 만들면 이전 답은 지워져요.</p>
+              <Button size="sm" disabled={busy} onClick={() => setConfirmRegenerate(false)}>취소</Button>
+              <Button size="sm" disabled={busy} onClick={() => continueAi(false)}>이전 질문 이어 쓰기</Button>
+              <Button size="sm" disabled={busy} onClick={() => continueAi(true)}>질문 새로 만들기</Button>
+            </div>}
             <ActionFooter>
               <TextLink onClick={onCancel}>취소</TextLink>
               <TextLink onClick={fillExample}>예시 자료 넣기</TextLink>

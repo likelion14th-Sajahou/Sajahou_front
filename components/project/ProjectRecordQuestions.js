@@ -1,70 +1,41 @@
 "use client";
 
-import { useState } from "react";
-import { MOCK_RECORD_QUESTIONS } from "@/lib/mock/projects";
+import { useState, useRef, useEffect } from "react";
 import AiQuestionForm from "@/components/ui/AiQuestionForm";
+import Button from "@/components/ui/Button";
+import { saveQuestionAnswer } from "@/lib/projectApi";
 
-const MAX_QUESTIONS = 4;
-
-// 첨부 종류에 맞는 질문만 고른다(H-13). 실제로는 AI가 자료를 읽고 만든다.
-function selectQuestions(attachments) {
-  const kinds = attachments.map(({ kind }) => kind);
-
-  return MOCK_RECORD_QUESTIONS.filter(
-    ({ attachmentKinds }) =>
-      !attachmentKinds || attachmentKinds.some((kind) => kinds.includes(kind)),
-  ).slice(0, MAX_QUESTIONS);
-}
-
-function getSourceLabel(attachments) {
-  const fileNames = attachments.filter(({ kind }) => kind !== "link").map(({ name }) => name);
-  const linkCount = attachments.length - fileNames.length;
-
-  return [...fileNames, ...(linkCount > 0 ? [`링크 ${linkCount}개`] : [])].join(", ");
-}
-
-// startAtLast: 정리 결과에서 '← 질문으로'로 돌아오면 마지막 질문부터 보여 준다(H-14).
-// 이전 질문으로 돌아가도 전에 쓴 답은 아직 채워 주지 않는다(답 유지는 기능 개발 때 한다).
-export default function ProjectRecordQuestions({ attachments, startAtLast = false, onBackToMaterials, onComplete }) {
-  const [questions] = useState(() => selectQuestions(attachments));
-  const [index, setIndex] = useState(startAtLast ? questions.length - 1 : 0);
-  const [answers, setAnswers] = useState({});
+// 질문 ID별 입력은 상위 폼에 둔다. 자료·검토 화면으로 이동해도 미전송 답이 유지된다.
+export default function ProjectRecordQuestions({ state, onChange, onBackToMaterials, onComplete }) {
+  const { questions, index, inputs } = state;
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const active = useRef(null);
+  useEffect(() => () => active.current?.abort(), []);
   const question = questions[index];
-  const sourceLabel = getSourceLabel(attachments);
 
-  function goNext(nextAnswers) {
-    if (index === questions.length - 1) {
-      onComplete(nextAnswers);
-      return;
-    }
-
-    setAnswers(nextAnswers);
-    setIndex(index + 1);
+  async function submit(status, answer) {
+    if (active.current) return;
+    const controller = new AbortController(); active.current = controller; setBusy(true); setError("");
+    try {
+      const saved = await saveQuestionAnswer(question.questionId, { status, ...(status === "ANSWERED" ? { answer } : {}) }, { signal: controller.signal });
+      controller.signal.throwIfAborted();
+      const next = { ...state, questions: questions.map((q) => q.questionId === saved.questionId ? { ...q, ...saved } : q),
+        inputs: { ...inputs, [question.questionId]: saved.answer ?? "" }, index: Math.min(index + 1, questions.length - 1) };
+      onChange(next);
+      if (index === questions.length - 1) onComplete();
+    } catch (error) { if (!controller.signal.aborted) setError(error.message); }
+    finally { active.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
 
-  // 건너뛴 질문은 전에 답했더라도 정리에 쓰지 않는다. 입력칸이 비어 보이는 것과 맞춘다.
-  function skipQuestion() {
-    goNext(Object.fromEntries(Object.entries(answers).filter(([key]) => key !== question.fieldKey)));
-  }
-
-  return (
-    <AiQuestionForm
-      key={question.fieldKey}
-      category={<span className="px-[9px] py-0.5 text-badge text-ink">{question.category}</span>}
-      progress={`${index + 1} / ${questions.length}`}
-      source={
-        <>
-          {sourceLabel ? "첨부한 " : "적어 준 "}
-          <mark className="rounded bg-shape-yellow/60 px-[3px] text-ink">{sourceLabel || "메모"}</mark>
-          {" 을(를) 읽고 물어볼게요"}
-        </>
-      }
-      question={question.question}
-      placeholder="한두 문장이면 충분해요"
-      backLabel={index === 0 ? "← 자료로" : "← 이전 질문"}
-      onBack={index === 0 ? onBackToMaterials : () => setIndex(index - 1)}
-      onAnswer={(answer) => goNext({ ...answers, [question.fieldKey]: answer })}
-      onSkip={skipQuestion}
-    />
-  );
+  if (!question) return <div><p>질문이 없어요. 자료를 보완하거나 이대로 정리할 수 있어요.</p><Button onClick={onBackToMaterials}>← 자료로</Button><Button onClick={onComplete}>정리 결과 확인</Button></div>;
+  return <fieldset disabled={busy} className="min-w-0">
+    <AiQuestionForm category={question.tag} progress={`${index + 1} / ${questions.length}`} source={question.quote || "첨부 자료와 메모를 바탕으로 물어볼게요"}
+      question={question.content} placeholder="한두 문장이면 충분해요" answer={inputs[question.questionId] ?? question.answer ?? ""}
+      onAnswerChange={(answer) => onChange({ ...state, inputs: { ...inputs, [question.questionId]: answer } })}
+      backLabel={index === 0 ? "← 자료로" : "← 이전 질문"} onBack={index === 0 ? onBackToMaterials : () => onChange({ ...state, index: index - 1 })}
+      onAnswer={(answer) => submit("ANSWERED", answer)} onSkip={() => submit("SKIPPED")} />
+    {busy && <p role="status">답변을 저장하고 있어요…</p>}
+    {error && <p role="alert" className="text-tint-red-ink">{error}</p>}
+  </fieldset>;
 }
