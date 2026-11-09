@@ -203,7 +203,8 @@ HTTP 실패 또는 `success:false`는 `ApiError`로 전달된다. 잘못된 환�
 ### HTTP mock의 범위
 
 - 수정은 mock 서버 메모리에서 유지되며 같은 사용자의 다른 세션·재로그인에도 반영된다. 서버 재시작 시 초기화된다.
-- 탈퇴 재인증 성공 fixture는 `mock-google-id-token`이다. `mock-other-google-id-token`, `mock-expired-google-token` 등 다른 값은 401이며 세션은 유지된다. 이 fixture는 mock에서만 사용하며 실제 Google 토큰을 검증하는 기능이 아니다. 탈퇴 모달은 `NEXT_PUBLIC_AUTH_MODE=mock`이면 개발용 본인 확인 버튼을 표시하며 Google 인증 설정과 무관하게 이 fixture를 사용한다. live 모드에서는 실제 Google 인증만 허용한다.
+- Google 인증 UI는 로그인과 탈퇴 모두 `NEXT_PUBLIC_GOOGLE_AUTH_MODE=google|mock`을 따른다. API 대상은 별도로 `NEXT_PUBLIC_AUTH_MODE=mock|live`를 따른다. 따라서 실제 Google 인증과 HTTP mock을 함께 사용할 수 있다. live API와 Google mock 조합에서는 탈퇴용 개발 토큰을 전송하지 않는다.
+- HTTP mock은 로그인·가입 시 Google 토큰 payload의 `sub`를 세션에 연결하고 탈퇴 토큰의 `sub`와 비교한다. 다른 계정·만료·형식 오류는 401이며 기존 세션은 유지한다. 실제 Google 인증으로 새로 받은 토큰도 같은 계정이면 mock 탈퇴를 진행할 수 있다. Google mock 모드에서는 기존 개발용 토큰을 사용한다. payload 해석은 개발용 모의 처리이며 서명 검증이 아니다. 실제 Google 토큰 검증은 live 백엔드가 담당한다.
 - 데모 계정은 Google 계정이 연결되지 않은 것으로 모의 처리해 탈퇴 재인증을 401로 거부한다. 이는 mock 동작이며 실제 백엔드의 데모 판별 필드·거부 응답이 확정되었다는 의미는 아니다.
 - 탈퇴는 등록 사용자와 해당 사용자의 모든 mock 세션을 제거한다. 다른 사용자의 세션은 유지한다. 회고·카드 등은 별도 클라이언트 mock 상태이므로 여기서 삭제하지 않는다. 사용자 상태 변경에 따른 초기화는 인증 상태·UI 연결 단계에서 처리한다.
 - 실제 연동 전 백엔드의 Google 토큰 검증, 회원·연관 데이터 삭제, 서버 세션·쿠키 종료를 확인해야 한다.

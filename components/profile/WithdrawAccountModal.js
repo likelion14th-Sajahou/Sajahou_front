@@ -16,8 +16,8 @@ export default function WithdrawAccountModal({ onClose }) {
   const controllerRef = useRef(null);
   const active = useRef(false);
   const titleRef = useRef(null);
-  const mockMode = getAuthMode() === "mock";
-  const googleAvailable = mockMode || getGoogleAuthMode() === "google";
+  const googleMode = getGoogleAuthMode();
+  const mockMode = getAuthMode() === "mock" && googleMode === "mock";
 
   useEffect(() => {
     active.current = true;
@@ -78,9 +78,9 @@ export default function WithdrawAccountModal({ onClose }) {
           <p className="text-label text-ink-subtle">인증 창을 닫으면 탈퇴하지 않아요. 다시 인증하거나 취소할 수 있어요.</p>
           {mockMode ? (
             <Button variant="outline" className="w-full" disabled={isAccountBusy} onClick={() => handleCredential("mock-google-id-token")}>
-              Google 본인 확인 (개발용)
+              Google 계정으로 본인 확인
             </Button>
-          ) : googleAvailable ? (
+          ) : googleMode === "google" ? (
             <GoogleSignInButton disabled={isAccountBusy} onCredential={handleCredential} onError={handleGoogleError} />
           ) : <p role="alert" className="text-body-sm text-error">Google 본인 확인을 사용할 수 없어요. 잠시 후 다시 이용해 주세요.</p>}
         </div>
