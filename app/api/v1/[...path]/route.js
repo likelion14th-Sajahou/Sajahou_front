@@ -11,3 +11,5 @@ async function handle(request, { params }) {
 
 export const GET = handle;
 export const POST = handle;
+export const PATCH = handle;
+export const DELETE = handle;

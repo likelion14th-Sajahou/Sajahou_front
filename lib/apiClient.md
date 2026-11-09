@@ -191,3 +191,21 @@ HTTP 실패 또는 `success:false`는 `ApiError`로 전달된다. 잘못된 환�
 5. 캐싱 정책은 요청별로 검토한다. Client가 일괄 강제하지 않으며, 필요하면 `cache: "no-store"`를 전달한다. 서버의 `next` 캐시 옵션은 브라우저에서 같은 기능을 제공하지 않는다. `cache: "no-store"`와 양수 `next.revalidate`처럼 충돌하는 옵션을 함께 주지 않는다.
 6. Mock 전환 시 실제 data 구조·상태·빈 값과 UI 요구를 비교한다. Client를 Mock 데이터 모양에 맞추거나 변환 어댑터를 넣지 않는다.
 7. 백엔드 준비 후 실제 주소, CORS·HTTPS, 인증, 업로드, 오류 응답, AI 지연을 확인한다. 현재 테스트는 실제 연동을 검증한 것이 아니다.
+
+## 6. 내 정보 수정·탈퇴
+
+`lib/profileApi.js`의 `updateProfile(changes, options)`는 변경한 API 필드를 받아 `PATCH /users/me`를 호출한다. `name`, `studentNo`, `department`, `cohort`만 전송하며 `email`, `part` 등은 제외한다. `department`에는 선택 이름 또는 직접 입력한 학과 문자열을 전달한다. 반환값은 수정 후 사용자 전체다. 조회는 기존 `lib/auth.js`의 `getCurrentUser`를 재사용한다.
+
+`withdrawAccount(idToken, options)`는 새로 받은 Google ID 토큰을 `{ idToken }` 본문에 담아 `DELETE /users/me`로 전송한다. 성공 204의 반환값은 `undefined`다. 로그인 API를 다시 호출하지 않으며 토큰을 저장하지 않는다. 최신 명세는 토큰 검증 실패·다른 Google 계정에도 401을 반환하므로, 호출부에서 세션 만료와 재인증 실패를 구분해야 한다. 이 함수 자체는 사용자 상태를 변경하거나 화면을 이동하지 않는다.
+
+두 함수의 `options`는 `signal`과 선택적인 `request`를 받는다. 기본 `request`는 기존 `authRequest`이며 동일한 `NEXT_PUBLIC_AUTH_MODE=mock|live`와 쿠키 인증을 사용한다. 인증 상태 관리 단계에서 필요에 따라 `authenticatedRequest`를 전달할 수 있으나, 탈퇴에 기존의 모든 401을 로그아웃으로 처리하는 함수를 그대로 연결하지 않는다.
+
+### HTTP mock의 범위
+
+- 수정은 mock 서버 메모리에서 유지되며 같은 사용자의 다른 세션·재로그인에도 반영된다. 서버 재시작 시 초기화된다.
+- 탈퇴 재인증 성공 fixture는 `mock-google-id-token`이다. `mock-other-google-id-token`, `mock-expired-google-token` 등 다른 값은 401이며 세션은 유지된다. 이 fixture는 mock에서만 사용하며 실제 Google 토큰을 검증하는 기능이 아니다. 개발 중 탈퇴 흐름은 `NEXT_PUBLIC_GOOGLE_AUTH_MODE=mock`으로 재현한다.
+- 데모 계정은 Google 계정이 연결되지 않은 것으로 모의 처리해 탈퇴 재인증을 401로 거부한다. 이는 mock 동작이며 실제 백엔드의 데모 판별 필드·거부 응답이 확정되었다는 의미는 아니다.
+- 탈퇴는 등록 사용자와 해당 사용자의 모든 mock 세션을 제거한다. 다른 사용자의 세션은 유지한다. 회고·카드 등은 별도 클라이언트 mock 상태이므로 여기서 삭제하지 않는다. 사용자 상태 변경에 따른 초기화는 인증 상태·UI 연결 단계에서 처리한다.
+- 실제 연동 전 백엔드의 Google 토큰 검증, 회원·연관 데이터 삭제, 서버 세션·쿠키 종료를 확인해야 한다.
+
+관련 검증: `node --test lib/mock/auth.test.js lib/profileApi.test.js`
