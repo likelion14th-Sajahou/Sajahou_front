@@ -64,6 +64,7 @@ export default function MaterialsStep({ preview }) {
         key={changePreview ? "materials-changed" : "materials"}
         initialMaterials={changePreview?.materials ?? toFormMaterials()}
         changePreview={changePreview}
+        canSave={false}
       />
     );
   }

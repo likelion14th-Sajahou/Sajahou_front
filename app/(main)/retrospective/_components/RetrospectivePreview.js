@@ -7,7 +7,7 @@ import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
-import { formatDeadline } from "@/lib/formatDeadline";
+import { formatDeadline } from "@/lib/formatDate";
 import { PARTS } from "@/lib/mock/user";
 import { getCurrentRetrospective } from "@/lib/retrospectiveApi";
 
@@ -60,6 +60,14 @@ export default function RetrospectivePreview({ children }) {
     return result;
   }
 
+  // 임시 저장(API 14) 응답으로 단계·저장 시각을 바로 반영한다. 시작 화면의 '이어 쓰기'가 이 단계로 간다.
+  function applySaved({ state, currentStep, lastSavedAt }) {
+    setLoadState((previous) => ({
+      ...previous,
+      current: { ...previous.current, session: { ...previous.current.session, state, currentStep, lastSavedAt } },
+    }));
+  }
+
   if (!current) {
     return error ? (
       <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -85,6 +93,7 @@ export default function RetrospectivePreview({ children }) {
       assignment: formatDeadline(current.week.assignmentDeadline),
     },
     refreshCurrent,
+    applySaved,
   };
 
   return (

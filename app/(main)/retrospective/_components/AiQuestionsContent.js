@@ -10,6 +10,7 @@ import { MOCK_AI_QUESTIONS } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import AiQuestionsComplete from "./AiQuestionsComplete";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { SavedTime, useSaveLater } from "./useSaveLater";
 import CardTitle from "@/components/ui/CardTitle";
 import ActionFooter from "@/components/ui/ActionFooter";
 
@@ -23,6 +24,13 @@ export default function AiQuestionsContent({ initialComplete = false }) {
     status: initialComplete ? "answered" : "pending",
   }])));
   const [notice, setNotice] = useState("");
+  const { save, isSaving, savedLabel } = useSaveLater();
+
+  // 질문의 답은 답하기 API(18번)로 따로 저장한다. 여기서는 지금 단계만 저장한다.
+  async function saveLater() {
+    const message = await save({ currentStep: 3 });
+    if (message !== null) setNotice(message);
+  }
   const question = MOCK_AI_QUESTIONS[currentIndex];
   const answer = responses[question.id].answer;
 
@@ -99,9 +107,10 @@ export default function AiQuestionsContent({ initialComplete = false }) {
             ))}
           </ol>
           <p className="mt-3 text-label leading-[1.5] text-ink-subtle">자소서에 쓸 가치가 큰 곳부터 최대 5개만 물어요. 마지막은 느낀 점이에요.</p>
-          <ActionFooter>
+          <ActionFooter className="flex-wrap gap-x-3.5 gap-y-1">
             <TextLink href={getStepHref("materials")}>← 자료 고치기</TextLink>
-            <TextLink onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</TextLink>
+            <TextLink onClick={saveLater} disabled={isSaving} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "나중에 이어쓰기"}</TextLink>
+            <SavedTime label={savedLabel} />
           </ActionFooter>
         </Card>
       </div>

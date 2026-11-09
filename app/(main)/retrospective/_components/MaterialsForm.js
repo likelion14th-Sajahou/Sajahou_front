@@ -12,6 +12,7 @@ import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
 import MaterialsChangeNotice from "./MaterialsChangeNotice";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { SavedTime, useSaveLater } from "./useSaveLater";
 import ActionFooter from "@/components/ui/ActionFooter";
 
 const ACCEPTED_FILES = {
@@ -40,7 +41,7 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
   );
 }
 
-export default function MaterialsForm({ initialMaterials, changePreview = null }) {
+export default function MaterialsForm({ initialMaterials, changePreview = null, canSave = true }) {
   const router = useRouter();
   const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref, deadlineLabels } = useRetrospectivePreview();
   const assignmentStatus = isAssignment ? "record" : sessionAssignmentStatus;
@@ -51,6 +52,13 @@ export default function MaterialsForm({ initialMaterials, changePreview = null }
   const [linkError, setLinkError] = useState("");
   const [notice, setNotice] = useState("");
   const [isChangeNoticeOpen, setIsChangeNoticeOpen] = useState(Boolean(changePreview));
+  const { save, isSaving, savedLabel } = useSaveLater({ canSave });
+
+  // 지금은 단계(2)와 저장 시각만 저장한다(R-03). 자료 내용 저장은 회고 자료 입력 작업(FE-21)에서 더한다.
+  async function saveLater() {
+    const message = await save({ currentStep: 2 });
+    if (message !== null) setNotice(message);
+  }
 
   function requestQuestions() {
     if (changePreview) {
@@ -214,8 +222,10 @@ export default function MaterialsForm({ initialMaterials, changePreview = null }
       />
       <ActionFooter className="flex-wrap justify-between gap-x-3.5 gap-y-2.5">
         <TextLink href={getStepHref()}>← 이전</TextLink>
-        <div className="ml-auto grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-          <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</Button>
+        {/* 저장 시각이 버튼을 오른쪽으로 밀어 준다. 좁은 화면에서는 버튼이 다음 줄로 내려간다. */}
+        <SavedTime label={savedLabel} className="ml-auto" />
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+          <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={saveLater} disabled={isSaving} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
           <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={requestQuestions}>AI 질문 받기 →</Button>
         </div>
       </ActionFooter>
