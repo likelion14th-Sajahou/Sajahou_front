@@ -10,6 +10,7 @@ import { MOCK_USER } from "@/lib/mock/user";
 import { MOCK_WEEK } from "@/lib/mock/week";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { useAuth } from "./AuthProvider";
+import useProjectData from "@/components/project/useProjectData";
 
 const MockDataContext = createContext(null);
 
@@ -57,6 +58,7 @@ export default function MockDataProvider({ children }) {
 }
 
 function MockDataState({ authenticatedUser, children }) {
+  const projectData = useProjectData(authenticatedUser);
   const [previewPart, setPreviewPart] = useState(null);
   const user = authenticatedUser
     ? { ...authenticatedUser, part: previewPart ?? AUTH_PART_LABELS[authenticatedUser.part] }
@@ -170,8 +172,9 @@ function MockDataState({ authenticatedUser, children }) {
         user,
         setUserPart,
         competencies: getCompetencyNames(user.part),
-        projects,
-        addProject,
+        projects: projectData.projects,
+        addProject: projectData.create,
+        projectData,
         updateProject,
         storyCards,
         updateStoryCard,

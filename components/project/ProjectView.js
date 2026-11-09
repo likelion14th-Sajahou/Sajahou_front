@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMockData } from "@/components/layout/MockDataProvider";
@@ -106,7 +106,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
           />
         </div>
       ) : (
-        <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5 pt-6">
+        <div className="grid grid-cols-1 items-start gap-5 pt-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <ProjectRecords
             key={`records-${bfcacheId}`}
             project={project}
@@ -152,8 +152,22 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
 }
 
 export default function ProjectView({ projectId, initialIsAdding }) {
-  const { competencies, projects, updateProject } = useMockData();
+  const { competencies, projects, updateProject, projectData } = useMockData();
+  const [detailStatus, setDetailStatus] = useState("loading");
+  const [detailError, setDetailError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  const { loadProject } = projectData;
+  useEffect(() => {
+    const controller = new AbortController();
+    loadProject(projectId, { signal: controller.signal }).then(() => { if (!controller.signal.aborted) setDetailStatus("ready"); }).catch((error) => {
+      if (!controller.signal.aborted) { setDetailError(error.message); setDetailStatus("error"); }
+    });
+    return () => controller.abort();
+  }, [projectId, loadProject, attempt]);
   const project = projects.find(({ id }) => id === projectId);
+
+  if (detailStatus === "loading") return <p role="status">프로젝트를 불러오고 있어요…</p>;
+  if (detailStatus === "error") return <div><Link href="/projects">← 프로젝트</Link><p role="alert">{detailError}</p><button onClick={() => setAttempt((n) => n + 1)}>다시 시도</button></div>;
 
   if (!project) {
     return (

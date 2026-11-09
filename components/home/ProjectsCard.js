@@ -48,7 +48,7 @@ export default function ProjectsCard() {
               key={project.id}
               project={project}
               // 기록이 없는 새 프로젝트는 마지막 기록 날짜를 빼고 보여 준다.
-              summary={[`기록 ${project.records.length}`, project.records[0]?.date].filter(Boolean).join(" · ")}
+              summary={[`기록 ${project.recordCount}`, project.lastRecordDate].filter(Boolean).join(" · ")}
             />
           ))}
         </ul>
@@ -63,7 +63,7 @@ export default function ProjectsCard() {
               <ProjectRow
                 key={project.id}
                 project={project}
-                summary={`기록 ${project.records.length}`}
+                summary={`기록 ${project.recordCount}`}
               />
             ))}
           </ul>
