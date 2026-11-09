@@ -36,8 +36,8 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
         <fieldset disabled={busy} className="min-w-0">
           {isArtifact ? <div className="flex flex-col gap-3">
             <Badge>{question.tag}</Badge><p>{index + 1} / {questions.length}</p><h2>{question.content}</h2>
-            <RecordAttachmentsField attachments={attachments} onBusyChange={setAttachmentBusy} onChange={(items) => onChange({ ...state, attachments: { ...state.attachments, [question.questionId]: items } })} />
-            <div className="flex flex-wrap gap-3"><TextLink onClick={back}>← 이전</TextLink><TextLink disabled={attachmentBusy} onClick={() => submit("SKIPPED")}>아직 없어요</TextLink>
+            <RecordAttachmentsField category="OUTPUT" attachments={attachments} onBusyChange={setAttachmentBusy} onChange={(items) => onChange({ ...state, attachments: { ...state.attachments, [question.questionId]: items } })} />
+            <div className="flex flex-wrap gap-3"><TextLink onClick={back}>← 이전 질문</TextLink><TextLink disabled={attachmentBusy} onClick={() => submit("SKIPPED")}>아직 없어요</TextLink>
               <Button disabled={attachmentBusy || !attachments.length || attachments.some((a) => a.extractStatus === "PENDING")} onClick={() => submit("ANSWERED")}>첨부하고 다음 →</Button></div>
           </div> : <AiQuestionForm category={question.tag} source={question.quote || "고른 기록에서 빈 곳을 보완해 주세요"} question={question.content}
             progress={`${index + 1} / ${questions.length}`} placeholder="확인할 수 있는 것만 적어 주세요"

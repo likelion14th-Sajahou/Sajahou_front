@@ -24,7 +24,7 @@ export default function ProjectHeader({ project, recordCount, lastRecordedAt }) 
         <p className="text-label text-accent-strong">
           {STATUS_LABELS[status]} · {formatRoles(roles)}
         </p>
-        <h1 className="text-[38px] leading-[1.2] tracking-[-0.76px] text-ink">
+        <h1 className="break-words text-[38px] leading-[1.2] tracking-[-0.76px] text-ink">
           {name} <span className="text-[22.8px] text-ink-subtle">{subtitle}</span>
         </h1>
       </div>

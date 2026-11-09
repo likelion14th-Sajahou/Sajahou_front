@@ -52,9 +52,9 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
     <Card as="section" size="md" aria-labelledby="record-form-title">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4">
-        <RecordFormTitle id="record-form-title">기록 수정</RecordFormTitle>
+        <RecordFormTitle id="record-form-title" date={record.date}>기록 수정</RecordFormTitle>
         <p className="text-label leading-[19.5px] text-ink-subtle">고칠 칸을 바꾸고 저장하세요.</p>
-        <EmptyFieldsNotice fields={fields} fieldKeys={["next"]} />
+        <EmptyFieldsNotice fields={fields} />
         <RecordFieldsGrid
           getFieldProps={({ key, formLabel }, index) => ({
             label: formLabel,

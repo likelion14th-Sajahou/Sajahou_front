@@ -12,14 +12,16 @@ import ProjectRecordAddForm from "./ProjectRecordAddForm";
 import ProjectRecordForm from "./ProjectRecordForm";
 import { RECORD_FIELDS } from "./recordFields";
 import useProjectAction from "./useProjectAction";
+import TextField from "@/components/ui/TextField";
 
 // 완료한 프로젝트에는 별도 안내 문구가 없다(H-21, 12-a).
 const ADD_RECORD_HINT = "회의록·시안·링크를 올리면 AI가 정리를 도와요";
 
-function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
+function RecordItem({ record, isLast, onViewCard, onEdit, onDelete, onResult }) {
   const { date, weekday, tags, organizedByAi, attachments } = record;
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const { run, busy, error } = useProjectAction();
+  const [result, setResult] = useState("");
 
   return (
     <li className="relative pb-5 pl-7">
@@ -49,6 +51,12 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
           ))}
         </dl>
         {tags.length > 0 && <CompetencyTags tags={tags} />}
+        {!record.result && <details className="rounded-xl bg-tint-yellow p-3">
+          <summary className="cursor-pointer text-body-sm">AI 제안 · 결과를 더 남겨 볼까요?</summary>
+          <p className="pt-2 text-label">직접 확인한 결과나 받은 반응이 있나요? 모르면 비워 두어도 괜찮아요.</p>
+          <TextField label="추가할 결과" multiline value={result} onChange={(e) => setResult(e.target.value)} />
+          <Button size="sm" disabled={!result.trim()} onClick={() => run(() => onResult(record.id, result.trim()))}>결과 추가</Button>
+        </details>}
         {attachments.length > 0 && (
           <ul aria-label="첨부 자료" className="flex flex-wrap gap-2">
             {attachments.map((attachment) => (
@@ -138,6 +146,7 @@ export default function ProjectRecords({
               isLast={index === records.length - 1}
               onViewCard={onViewCard}
               onEdit={startEditing}
+              onResult={(recordId, result) => onSaveRecord(recordId, { result })}
               onDelete={async (recordId) => {
                 await onDeleteRecord(recordId);
                 setEditingRecordId((current) => (current === recordId ? undefined : current));

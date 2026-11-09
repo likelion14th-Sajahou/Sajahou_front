@@ -8,7 +8,6 @@ import Card from "@/components/ui/Card";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
-import { MOCK_RECORD_EXAMPLE } from "@/lib/mock/projects";
 import ProjectRecordQuestions from "./ProjectRecordQuestions";
 import ProjectRecordReview from "./ProjectRecordReview";
 import RecordAttachmentsField from "./RecordAttachmentsField";
@@ -95,11 +94,6 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     finally { request.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
 
-  function fillExample() {
-    setMemo(MOCK_RECORD_EXAMPLE.memo);
-    setNotice("");
-  }
-
   function startAiSummary() {
     // 첨부와 메모가 모두 비어 있으면 AI 정리로 넘어가지 않는다(H-12).
     if (attachments.length === 0 && !memo.trim()) {
@@ -114,7 +108,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
 
   async function continueAi(regenerate) {
     if (request.current || attachmentBusy) return;
-    if (attachments.some((a) => a.extractStatus === "PENDING")) { setNotice("첨부 자료를 읽은 뒤 진행해 주세요."); return; }
+    if (attachments.some((a) => a.extractStatus === "PENDING")) { setNotice("자료를 준비하고 있어요. 잠시 후 다시 진행해 주세요."); return; }
     const controller = new AbortController(); request.current = controller;
     const options = { signal: controller.signal };
     setBusy(true); setNotice("");
@@ -243,8 +237,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
             </div>}
             <ActionFooter>
               <TextLink onClick={onCancel}>취소</TextLink>
-              <TextLink onClick={fillExample}>예시 자료 넣기</TextLink>
-              <div className="ml-auto flex gap-2">
+              <div className="ml-auto flex flex-wrap gap-2">
                 {isWritingFields && (
                   <Button variant="secondary" onClick={organizeDirectly}>이대로 정리 →</Button>
                 )}

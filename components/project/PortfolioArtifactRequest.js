@@ -24,6 +24,7 @@ export default function PortfolioArtifactRequest({
       <h3 className="text-title leading-[29px] tracking-[-0.2px] text-ink">{question}</h3>
       <div className="pt-4">
         <RecordAttachmentsField
+          category="OUTPUT"
           attachments={attachments}
           linkPlaceholder="시연·피그마·GitHub 링크"
           onChange={setAttachments}

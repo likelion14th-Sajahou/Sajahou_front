@@ -14,7 +14,7 @@ import RemoteProjectCard from "./RemoteProjectCard";
 import * as api from "@/lib/projectApi";
 import { recordBody } from "@/lib/projectViewModel";
 
-function ProjectDetail({ project, initialIsAdding }) {
+function ProjectDetail({ project, initialIsAdding, onDeleted }) {
   const { records: projectRecords } = project;
   // 다른 페이지에 다녀와도 상태가 유지되므로(cacheComponents), 링크로 새로 들어오면 열려 있던 폼과 팝업을 닫는다.
   // 뒤로 가기로 돌아오면 bfcacheId가 그대로라 작성 중인 내용이 남는다. 기록과 카드 변경은 어느 경우든 유지한다.
@@ -62,6 +62,7 @@ function ProjectDetail({ project, initialIsAdding }) {
   async function removeProject(signal) {
     await api.deleteProject(project.id, { signal });
     signal?.throwIfAborted();
+    onDeleted();
     showFlashToast(`‘${project.name}’ 프로젝트를 지웠어요`);
     startTransition(() => {
       router.push("/projects");
@@ -139,16 +140,18 @@ export default function ProjectView({ projectId, initialIsAdding }) {
   const [detailStatus, setDetailStatus] = useState("loading");
   const [detailError, setDetailError] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const [leaving, setLeaving] = useState(false);
   const { loadProject } = projectData;
   useEffect(() => {
     const controller = new AbortController();
     loadProject(projectId, { signal: controller.signal }).then(() => { if (!controller.signal.aborted) setDetailStatus("ready"); }).catch((error) => {
-      if (!controller.signal.aborted) { setDetailError(error.message); setDetailStatus("error"); }
+      if (!controller.signal.aborted) { setLeaving(false); setDetailError(error.message); setDetailStatus("error"); }
     });
     return () => controller.abort();
   }, [projectId, loadProject, attempt]);
   const project = projects.find(({ id }) => id === projectId);
 
+  if (leaving) return <p role="status">프로젝트 목록으로 이동하고 있어요…</p>;
   if (detailStatus === "loading") return <p role="status">프로젝트를 불러오고 있어요…</p>;
   if (detailStatus === "error") return <div><Link href="/projects">← 프로젝트</Link><p role="alert">{detailError}</p><button onClick={() => setAttempt((n) => n + 1)}>다시 시도</button></div>;
 
@@ -169,6 +172,7 @@ export default function ProjectView({ projectId, initialIsAdding }) {
     <ProjectDetail
       project={project}
       initialIsAdding={initialIsAdding}
+      onDeleted={() => setLeaving(true)}
     />
   );
 }

@@ -20,7 +20,7 @@ export default function NewProjectModal({ open, onClose }) {
   }
 
   return (
-    <Modal open={open} onClose={busy ? () => {} : onClose} aria-labelledby={TITLE_ID}>
+    <Modal open={open} onClose={busy ? () => {} : onClose} onCancel={(event) => { if (busy) event.preventDefault(); }} aria-labelledby={TITLE_ID}>
       <fieldset disabled={busy} className="min-w-0">
         <NewProjectForm titleId={TITLE_ID} onCancel={onClose} onCreate={createProject} />
         {error && <p role="alert">{error}</p>}
