@@ -4,10 +4,8 @@ import { startTransition, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMockData } from "@/components/layout/MockDataProvider";
-import StoryCardDetail from "@/components/my-record/StoryCardDetail";
 import Modal from "@/components/ui/Modal";
 import Toast, { useToast } from "@/components/ui/Toast";
-import { MOCK_TODAY } from "@/lib/mock/projects";
 import ProjectPortfolio from "./ProjectPortfolio";
 import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
@@ -16,8 +14,8 @@ import RemoteProjectCard from "./RemoteProjectCard";
 import * as api from "@/lib/projectApi";
 import { recordBody } from "@/lib/projectViewModel";
 
-function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject }) {
-  const { records: projectRecords, status } = project;
+function ProjectDetail({ project, initialIsAdding }) {
+  const { records: projectRecords } = project;
   // 다른 페이지에 다녀와도 상태가 유지되므로(cacheComponents), 링크로 새로 들어오면 열려 있던 폼과 팝업을 닫는다.
   // 뒤로 가기로 돌아오면 bfcacheId가 그대로라 작성 중인 내용이 남는다. 기록과 카드 변경은 어느 경우든 유지한다.
   const router = useRouter();
@@ -31,12 +29,6 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   const { toast, showToast, hideToast } = useToast();
   const {
     storyCards,
-    updateStoryCard,
-    deleteStoryCard,
-    addProjectRecord,
-    updateProjectRecord,
-    deleteProjectRecord,
-    deleteProject,
     showFlashToast,
     projectData,
   } = useMockData();
@@ -48,7 +40,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   const records = projectRecords;
 
   // 기록을 저장하면 나의 사자록에 프로젝트 카드 1장이 함께 생긴다(H-22).
-  async function addRecord(record) {
+  async function addRecord() {
     await projectData.sync(project.id);
     showToast("기록을 저장했어요 · 나의 사자록에 카드 1장");
   }
@@ -56,7 +48,8 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   // 기록을 고치거나 지우면 카드도 함께 바뀌고, 따로 안내하지 않는다(H-21).
   async function saveRecord(recordId, changes, signal) {
     const record = projectRecords.find((r) => r.id === recordId);
-    await api.updateProjectRecord(recordId, recordBody({ ...record, ...changes }, projectData.competencyItems), { signal });
+    const body = Object.keys(changes).length === 1 && "result" in changes ? { result: changes.result } : recordBody({ ...record, ...changes }, projectData.competencyItems);
+    await api.updateProjectRecord(recordId, body, { signal });
     await projectData.sync(project.id);
   }
 
@@ -66,12 +59,15 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   }
 
   // 지우면 프로젝트 목록으로 옮겨 가서 안내한다(H-25). 이동과 삭제를 한 번에 반영해, 지운 프로젝트의 '찾을 수 없어요' 화면이 잠깐 보이지 않게 한다.
-  function removeProject() {
+  async function removeProject(signal) {
+    await api.deleteProject(project.id, { signal });
+    signal?.throwIfAborted();
     showFlashToast(`‘${project.name}’ 프로젝트를 지웠어요`);
     startTransition(() => {
       router.push("/projects");
-      deleteProject(project.id);
+      projectData.forget(project.id);
     });
+    await projectData.sync();
   }
 
   // 포트폴리오 Markdown만 저장한다. 처음이면 프로젝트를 완료로 바꾸고, 다시 만들면 안내한다(H-18).
@@ -115,7 +111,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
           />
           <ProjectSidebar
             key={`sidebar-${bfcacheId}`}
-            status={status}
+            status={project.status}
             portfolio={project.portfolio}
             deleteProps={{ recordCount: records.length, cardCount: cards.length, onDelete: removeProject }}
             onMakePortfolio={() => setPortfolioBfcacheId(bfcacheId)}
@@ -139,7 +135,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
 }
 
 export default function ProjectView({ projectId, initialIsAdding }) {
-  const { competencies, projects, updateProject, projectData } = useMockData();
+  const { projects, projectData } = useMockData();
   const [detailStatus, setDetailStatus] = useState("loading");
   const [detailError, setDetailError] = useState("");
   const [attempt, setAttempt] = useState(0);
@@ -172,9 +168,7 @@ export default function ProjectView({ projectId, initialIsAdding }) {
   return (
     <ProjectDetail
       project={project}
-      competencies={competencies}
       initialIsAdding={initialIsAdding}
-      onChangeProject={(update) => updateProject(projectId, update)}
     />
   );
 }

@@ -53,5 +53,10 @@ export default function useProjectData(user) {
     try { if (id) await loadProject(id); await refresh(); setSyncWarning(""); }
     catch { setSyncWarning("저장은 완료됐지만 화면을 다시 불러오지 못했어요. 새로고침해 주세요."); }
   }
-  return { projects, competencyItems, home, cards, status, error, syncWarning, refresh, loadProject, create, sync };
+  function forget(id) {
+    loaded.current.delete(id);
+    setProjects((previous) => previous.filter((p) => p.id !== id));
+    setCards((previous) => previous.filter((c) => c.projectId !== id));
+  }
+  return { projects, competencyItems, home, cards, status, error, syncWarning, refresh, loadProject, create, sync, forget };
 }

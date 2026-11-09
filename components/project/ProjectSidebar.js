@@ -12,6 +12,7 @@ import DotList from "./DotList";
 import { copyText } from "@/lib/clipboard";
 import CardTitle from "@/components/ui/CardTitle";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
+import useProjectAction from "./useProjectAction";
 
 const TITLE_SHAPE = <ShapeCharacter shape="sunFine" color="yellow" face="none" size={18} />;
 const FINISH_STEPS = ["넣을 기록 고르기", "AI가 빈 곳을 찾아 질문·요청", "포트폴리오 완성"];
@@ -19,22 +20,24 @@ const FINISH_STEPS = ["넣을 기록 고르기", "AI가 빈 곳을 찾아 질문
 // 오른쪽 칸 아래의 '프로젝트 삭제'(H-25, 12-g). 진행 중·완료 모두 있고, 누르면 그 자리에 확인 문구가 열린다.
 function DeleteProject({ recordCount, cardCount, onDelete }) {
   const [isConfirming, setIsConfirming] = useState(false);
+  const { run, busy, error } = useProjectAction();
 
   return (
-    <div className="pt-4">
+    <fieldset disabled={busy} className="min-w-0 pt-4">
       {isConfirming ? (
         <DeleteConfirm
           title="이 프로젝트를 지울까요?"
           message={`기록 ${recordCount}개와 나의 사자록의 프로젝트 카드 ${cardCount}장도 함께 지워져요. 지운 프로젝트는 되돌릴 수 없어요.`}
           onCancel={() => setIsConfirming(false)}
-          onConfirm={onDelete}
+          onConfirm={() => run(onDelete)}
         />
       ) : (
         <TextLink variant="danger" size="sm" onClick={() => setIsConfirming(true)}>
           프로젝트 삭제
         </TextLink>
       )}
-    </div>
+      {error && <p role="alert">{error}</p>}
+    </fieldset>
   );
 }
 
@@ -46,7 +49,7 @@ function FinishProjectCard({ deleteProps, onFinish }) {
         <DotList items={FINISH_STEPS} />
       </div>
       <div className="pt-3.5">
-        <Button variant="accent" className="w-full" onClick={onFinish}>
+        <Button variant="accent" className="w-full whitespace-normal!" onClick={onFinish}>
           프로젝트 마치고 포트폴리오 만들기
         </Button>
       </div>
@@ -77,7 +80,7 @@ function PortfolioCard({ portfolio, deleteProps, onRemake }) {
               className="h-[560px] text-[14.5px]! leading-[25.375px]"
             />
           </div>
-          <div className="flex gap-2 pt-3">
+          <div className="flex flex-wrap gap-2 pt-3">
             <Button size="sm" onClick={copyMarkdown}>Markdown 복사</Button>
             <Button size="sm" variant="secondary" onClick={onRemake}>다시 만들기</Button>
           </div>
