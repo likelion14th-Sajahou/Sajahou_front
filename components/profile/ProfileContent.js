@@ -18,7 +18,7 @@ export default function ProfileContent() {
 }
 
 function ProfileForm({ user }) {
-  const { saveProfile, isSavingProfile, isAccountBusy, logout, isLoggingOut, logoutError, accountType } = useAuth();
+  const { saveProfile, isSavingProfile, isAccountBusy, logout, isLoggingOut, logoutError } = useAuth();
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [values, setValues] = useState(() => createProfileValues(user));
   const [errors, setErrors] = useState({});
@@ -142,15 +142,11 @@ function ProfileForm({ user }) {
         {logoutError && <p id="profile-logout-error" role="alert" className="mt-2 text-body-sm text-error">{logoutError}</p>}
       </div>
       <div className="mt-6 border-t border-line pt-4 text-center">
-        {accountType === "google" ? (
-          <TextLink ref={withdrawButtonRef} variant="danger" size="sm" disabled={isAccountBusy} onClick={() => setWithdrawOpen(true)} className="disabled:cursor-default disabled:opacity-60">
-            회원 탈퇴
-          </TextLink>
-        ) : <p className="text-label text-ink-subtle">
-          {accountType === "demo" ? "데모 계정은 탈퇴할 수 없어요." : "회원 탈퇴를 이용하려면 로그아웃 후 Google 계정으로 다시 로그인해 주세요."}
-        </p>}
+        <TextLink ref={withdrawButtonRef} variant="danger" size="sm" disabled={isAccountBusy} onClick={() => setWithdrawOpen(true)} className="disabled:cursor-default disabled:opacity-60">
+          회원 탈퇴
+        </TextLink>
       </div>
-      {withdrawOpen && accountType === "google" && <WithdrawAccountModal onClose={() => setWithdrawOpen(false)} />}
+      {withdrawOpen && <WithdrawAccountModal onClose={() => setWithdrawOpen(false)} />}
       <Toast toast={toast} onDismiss={hideToast} />
     </>
   );

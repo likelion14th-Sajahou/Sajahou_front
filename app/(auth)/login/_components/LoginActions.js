@@ -44,7 +44,7 @@ export default function LoginActions() {
       const options = { signal: controller.signal };
       const result = demo ? await loginDemo(options) : await loginWithGoogle(idToken, options);
       const destination = demo
-        ? (await completeLogin({ ...options, accountType: "demo" }) ? "/" : null)
+        ? (await completeLogin(options) ? "/" : null)
         : await acceptGoogleLogin(result, options);
       if (destination && !controller.signal.aborted) startTransition(() => router.replace(destination));
     } catch (failure) {
