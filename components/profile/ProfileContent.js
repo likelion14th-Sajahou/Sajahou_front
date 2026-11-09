@@ -3,12 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import ProfileFields from "./ProfileFields";
+import GoogleAccountInfo from "./GoogleAccountInfo";
+import PartField from "./PartField";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
-import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
-import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { createProfileValues, toProfilePayload, validateProfile } from "@/lib/profile";
 
 export default function ProfileContent() {
@@ -109,37 +108,30 @@ function ProfileForm({ user }) {
 
   return (
     <>
-      <Card as="section" aria-label="내 정보 수정" className="mt-6">
-        <form ref={formRef} noValidate onSubmit={handleSubmit} aria-busy={isSavingProfile}>
-          <fieldset disabled={isAccountBusy} className="min-w-0">
-            <legend className="sr-only">내 정보</legend>
-            <section aria-labelledby="profile-account-title" className="pb-5">
-              <h2 id="profile-account-title" className="mb-[14px] text-body">계정 정보</h2>
-              <div className="grid min-w-0 grid-cols-1 gap-[14px] sm:grid-cols-2">
-                <TextField label="Google 계정 이메일" name="email" value={user.email ?? ""} readOnly />
-                <TextField label="파트" name="part" value={AUTH_PART_LABELS[user.part]} readOnly />
-              </div>
-            </section>
-            <section aria-labelledby="profile-info-title" className="border-t border-line pt-[18px] pb-5">
-              <h2 id="profile-info-title" className="mb-[14px] text-body">기본 정보</h2>
-              <ProfileFields values={values} onChange={handleChange} errors={errors} />
-            </section>
-          </fieldset>
-          {requestError && <p role="alert" className="pb-4 text-body-sm text-error">{requestError}</p>}
-          <div className="flex flex-wrap justify-end gap-3 border-t border-line pt-5">
-            <Button variant="outline" onClick={handleCancel} disabled={isAccountBusy}>취소</Button>
-            <Button type="submit" variant="accent" disabled={isAccountBusy || !hasChanges}>
-              {isSavingProfile ? "저장 중…" : "저장"}
-            </Button>
-          </div>
-        </form>
-        <div className="mt-6 border-t border-line pt-5">
-          <TextLink onClick={logout} disabled={isAccountBusy} aria-busy={isLoggingOut} aria-describedby={logoutError ? "profile-logout-error" : undefined} className="disabled:cursor-default disabled:opacity-60">
-            {isLoggingOut ? "로그아웃 중…" : "로그아웃"}
-          </TextLink>
-          {logoutError && <p id="profile-logout-error" role="alert" className="mt-2 text-body-sm text-error">{logoutError}</p>}
+      <GoogleAccountInfo email={user.email} />
+      <form ref={formRef} className="mt-1" noValidate onSubmit={handleSubmit} aria-busy={isSavingProfile}>
+        <fieldset disabled={isAccountBusy} className="min-w-0">
+          <legend className="sr-only">내 정보</legend>
+          <section aria-labelledby="profile-info-title" className="border-t border-line pt-[18px] pb-5">
+            <h2 id="profile-info-title" className="mb-[14px] text-body leading-6 tracking-[-0.3px]">기본 정보</h2>
+            <ProfileFields values={values} onChange={handleChange} errors={errors} />
+          </section>
+          <PartField id="profile-part" value={user.part} readOnly />
+        </fieldset>
+        {requestError && <p role="alert" className="pb-4 text-body-sm text-error">{requestError}</p>}
+        <div className="mt-[18px] grid grid-cols-2 gap-3">
+          <Button variant="outline" onClick={handleCancel} disabled={isAccountBusy} className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">취소</Button>
+          <Button type="submit" variant="accent" disabled={isAccountBusy || !hasChanges} className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
+            {isSavingProfile ? "저장 중…" : "저장"}
+          </Button>
         </div>
-      </Card>
+      </form>
+      <div className="mt-3 text-center leading-[19.5px]">
+        <TextLink variant="accent" size="sm" onClick={logout} disabled={isAccountBusy} aria-busy={isLoggingOut} aria-describedby={logoutError ? "profile-logout-error" : undefined} className="disabled:cursor-default disabled:opacity-60">
+          {isLoggingOut ? "로그아웃 중…" : "로그아웃"}
+        </TextLink>
+        {logoutError && <p id="profile-logout-error" role="alert" className="mt-2 text-body-sm text-error">{logoutError}</p>}
+      </div>
       <Toast toast={toast} onDismiss={hideToast} />
     </>
   );

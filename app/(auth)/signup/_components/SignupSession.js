@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthRestoreStatus, useAuth } from "@/components/layout/AuthProvider";
+import GoogleAccountInfo from "@/components/profile/GoogleAccountInfo";
 
 // 가입 자격과 완료 후 전환을 관리한다. 가입 POST가 성공한 뒤에는 사용자 조회만 재시도한다.
 export default function SignupSession({ children }) {
@@ -33,10 +34,7 @@ export default function SignupSession({ children }) {
   if (!signup) return null;
   return (
     <>
-      <p className="mt-[22px] flex flex-wrap items-center gap-x-[10px] rounded-[14px] bg-canvas px-[14px] py-3">
-        <span className="text-label leading-[19.5px] text-ink-subtle">Google 계정</span>
-        <span className="break-all text-body leading-6">{signup.email}</span>
-      </p>
+      <GoogleAccountInfo email={signup.email} />
       <div key={signup.signupToken}>{children}</div>
     </>
   );

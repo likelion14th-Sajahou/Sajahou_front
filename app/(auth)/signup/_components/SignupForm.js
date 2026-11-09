@@ -1,20 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
+import PartField from "@/components/profile/PartField";
 import Button from "@/components/ui/Button";
 import ProfileFields from "@/components/profile/ProfileFields";
 import TextLink from "@/components/ui/TextLink";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { signupWithGoogle } from "@/lib/auth";
 import { createProfileValues, toProfilePayload, validateProfile } from "@/lib/profile";
-
-const PARTS = [
-  { value: "PLAN_DESIGN", shape: "sunFine", color: "yellow" },
-  { value: "FRONTEND", shape: "circle", color: "blue" },
-  { value: "BACKEND", shape: "pentagon", color: "coral" },
-];
 
 function validateSignup(values) {
   const errors = validateProfile(values);
@@ -131,24 +124,7 @@ export default function SignupForm() {
           <ProfileFields values={values} onChange={handleChange} errors={errors} />
         </section>
 
-        <fieldset className="min-w-0 border-t border-line pt-[18px] pb-5" aria-labelledby="signup-part-title" aria-describedby={errors.part ? "part-error" : undefined} aria-invalid={errors.part ? true : undefined}>
-          <legend className="sr-only">파트</legend>
-          <p id="signup-part-title" className="mb-[14px] text-body leading-6 tracking-[-0.3px]">파트</p>
-          <div className="grid grid-cols-3 gap-[10px]">
-            {PARTS.map(({ value, shape, color }) => (
-              <label key={value} className="group relative cursor-pointer">
-                <input type="radio" name="part" value={value} checked={values.part === value} onChange={handleChange} className="peer sr-only" />
-                <span className="flex min-h-[100px] flex-col items-center gap-1.5 rounded-[18px] border border-line px-1 py-[14px] peer-checked:border-ink peer-checked:bg-selection peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink sm:px-[14px]">
-                  <span aria-hidden="true" className="relative block size-10 shrink-0">
-                    <ShapeCharacter shape={shape} color={values.part === value ? color : "muted"} size={40} />
-                  </span>
-                  <span className="text-center text-label leading-6 whitespace-nowrap sm:text-body">{AUTH_PART_LABELS[value]}</span>
-                </span>
-              </label>
-            ))}
-          </div>
-          {errors.part && <p id="part-error" className="mt-[14px] pt-0.5 text-label leading-[20.8px] text-error">{errors.part}</p>}
-        </fieldset>
+        <PartField id="signup-part" value={values.part} onChange={handleChange} error={errors.part} />
 
         <label className="flex cursor-pointer items-start gap-[10px] rounded-[14px] bg-canvas p-[14px]">
           <span className="flex h-6 w-5 shrink-0 justify-center pt-[3px]">
