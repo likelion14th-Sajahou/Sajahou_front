@@ -21,6 +21,20 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
   const router = useRouter();
   const { bfcacheId } = router;
 
+  // 포트폴리오로 전환되어 기록 영역이 unmount되어도 폼을 닫은 상태를 유지한다.
+  const [recordForm, setRecordForm] = useState(null);
+  const isAddingRecord = recordForm?.bfcacheId === bfcacheId ? recordForm.isAdding : initialIsAdding;
+  function changeAddForm(isAdding) {
+    setRecordForm({ bfcacheId, isAdding });
+    if (!isAdding) {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("record")) {
+        url.searchParams.delete("record");
+        window.history.replaceState(null, "", url);
+      }
+    }
+  }
+
   // 흐름을 연 시점의 bfcacheId를 기억해, 링크로 새로 들어오면 자동으로 프로젝트 화면으로 돌아간다.
   const [portfolioBfcacheId, setPortfolioBfcacheId] = useState(null);
   const isMakingPortfolio = portfolioBfcacheId === bfcacheId;
@@ -104,7 +118,8 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
             key={`records-${bfcacheId}`}
             project={project}
             records={records}
-            initialIsAdding={initialIsAdding}
+            isAdding={isAddingRecord}
+            onChangeAdding={changeAddForm}
             onAddRecord={addRecord}
             onSaveRecord={saveRecord}
             onDeleteRecord={deleteRecord}
@@ -115,7 +130,7 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
             status={project.status}
             portfolio={project.portfolio}
             deleteProps={{ recordCount: records.length, cardCount: cards.length, onDelete: removeProject }}
-            onMakePortfolio={() => setPortfolioBfcacheId(bfcacheId)}
+            onMakePortfolio={() => { changeAddForm(false); setPortfolioBfcacheId(bfcacheId); }}
           />
         </div>
       )}

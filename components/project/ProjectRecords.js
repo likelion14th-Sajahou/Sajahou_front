@@ -81,7 +81,8 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete, onResult }) 
 export default function ProjectRecords({
   project,
   records,
-  initialIsAdding,
+  isAdding,
+  onChangeAdding,
   onAddRecord,
   onSaveRecord,
   onDeleteRecord,
@@ -89,17 +90,9 @@ export default function ProjectRecords({
 }) {
   const { status } = project;
   const [editingRecordId, setEditingRecordId] = useState();
-  const [isAdding, setIsAdding] = useState(initialIsAdding);
 
   function closeAddForm() {
-    setIsAdding(false);
-
-    // 주소로 연 폼이 새로고침할 때 다시 열리지 않도록 record 값을 지운다.
-    const url = new URL(window.location.href);
-    if (url.searchParams.has("record")) {
-      url.searchParams.delete("record");
-      window.history.replaceState(null, "", url);
-    }
+    onChangeAdding(false);
   }
 
   function startEditing(recordId) {
@@ -131,7 +124,7 @@ export default function ProjectRecords({
         />
       ) : (
         <div className="flex items-center gap-2">
-          <Button onClick={() => setIsAdding(true)}>+ 기록 추가</Button>
+          <Button onClick={() => onChangeAdding(true)}>+ 기록 추가</Button>
           {status === "active" && (
             <p className="text-label leading-[19.5px] text-ink-subtle">{ADD_RECORD_HINT}</p>
           )}
