@@ -90,8 +90,10 @@ export default function RecordAttachmentsField({ label, attachments, category, l
             await api.deleteAttachment(a.attachmentId, { signal });
             if (!signal.aborted) latest.current.onChange(latest.current.attachments.filter((item) => item.id !== a.id));
           })} />
-          <p className="text-caption text-ink-muted">자료 종류: {CATEGORY_OPTIONS.find(([value]) => value === a.category)?.[1] ?? a.category}</p>
-          {EXTRACT_LABELS[a.extractStatus] && <p role="status" className="text-caption text-ink-subtle">{EXTRACT_LABELS[a.extractStatus]}</p>}
+          <p role="status" className="text-caption text-ink-muted">
+            {CATEGORY_OPTIONS.find(([value]) => value === a.category)?.[1] ?? a.category}
+            {EXTRACT_LABELS[a.extractStatus] && ` - ${EXTRACT_LABELS[a.extractStatus]}`}
+          </p>
         </li>)}
       </ul>
       {category === undefined && <label className="flex items-center gap-2 text-label text-ink-muted">
