@@ -35,6 +35,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
     deleteProjectRecord,
     deleteProject,
     showFlashToast,
+    projectData,
   } = useMockData();
   const cards = storyCards.filter(({ projectId }) => projectId === project.id);
   const viewingCard =
@@ -44,8 +45,8 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   const records = projectRecords;
 
   // 기록을 저장하면 나의 사자록에 프로젝트 카드 1장이 함께 생긴다(H-22).
-  function addRecord(record) {
-    addProjectRecord(project.id, { id: crypto.randomUUID(), ...MOCK_TODAY, ...record });
+  async function addRecord(record) {
+    await projectData.sync(project.id);
     showToast("기록을 저장했어요 · 나의 사자록에 카드 1장");
   }
 
@@ -147,6 +148,7 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
         )}
       </Modal>
       <Toast toast={toast} onDismiss={hideToast} />
+      {projectData.syncWarning && <p role="alert">{projectData.syncWarning}</p>}
     </>
   );
 }

@@ -113,8 +113,8 @@ export default function ProjectRecords({
         <ProjectRecordAddForm
           projectId={project.id}
           onCancel={closeAddForm}
-          onSave={(record) => {
-            onAddRecord(record);
+          onSave={async (record) => {
+            await onAddRecord(record);
             closeAddForm();
           }}
         />

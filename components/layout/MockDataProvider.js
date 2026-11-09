@@ -176,7 +176,7 @@ function MockDataState({ authenticatedUser, children }) {
         addProject: projectData.create,
         projectData,
         updateProject,
-        storyCards,
+        storyCards: [...storyCards.filter((card) => card.type !== "project"), ...projectData.cards],
         updateStoryCard,
         deleteStoryCard,
         addProjectRecord,

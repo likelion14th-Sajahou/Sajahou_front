@@ -16,13 +16,12 @@ import RecordFieldsGrid from "./RecordFieldsGrid";
 import RecordFormTitle from "./RecordFormTitle";
 import { EMPTY_RECORD_MESSAGE } from "./recordFields";
 import ActionFooter from "@/components/ui/ActionFooter";
-import { createProjectRecord, updateProjectRecord, getRecordQuestions } from "@/lib/projectApi";
-
-// 한 일이 비면 카드 제목이 비지 않도록 메모 첫 줄을 쓰고, 메모도 없으면 이 문구를 쓴다.
-const EMPTY_DID_TITLE = "(한 일 비어 있음)";
+import { createProjectRecord, updateProjectRecord, getRecordQuestions, organizeProjectRecord } from "@/lib/projectApi";
+import { recordBody } from "@/lib/projectViewModel";
 
 export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
-  const { competencies } = useMockData();
+  const { projectData } = useMockData();
+  const competencies = projectData.competencyItems.map((item) => item.name);
   const [attachments, setAttachments] = useState([]);
   const [memo, setMemo] = useState("");
   const [fields, setFields] = useState({});
@@ -30,7 +29,6 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const [notice, setNotice] = useState("");
   const [step, setStep] = useState("materials");
   const [isOrganizedByAi, setIsOrganizedByAi] = useState(false);
-  const [startsAtLastQuestion, setStartsAtLastQuestion] = useState(false);
   const [tags, setTags] = useState([]);
   const [draftId, setDraftId] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -56,7 +54,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     return Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, value.trim()]));
   }
 
-  // 5칸과 첨부가 모두 비어 있으면 정리 결과로 넘어가거나 저장하지 않는다(H-14). 메모는 저장되지 않는다.
+  // 메모만으로 직접 저장하지 않지만, 저장할 때 메모 원문도 함께 보관한다.
   function hasRecordContent() {
     return attachments.length > 0 || Object.values(getTrimmedFields()).some(Boolean);
   }
@@ -72,27 +70,29 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     setStep("review");
   }
 
-  function saveRecord() {
+  async function saveRecord() {
+    if (request.current) return;
     if (!hasRecordContent()) {
       showToast(EMPTY_RECORD_MESSAGE);
       return;
     }
 
-    if (tags.length === 0) {
+    if (tags.length < 1 || tags.length > 3) {
       showToast(EMPTY_TAGS_MESSAGE);
       return;
     }
 
-    const trimmedFields = getTrimmedFields();
-    const memoFirstLine = memo.trim().split("\n")[0].trim();
-
-    onSave({
-      ...trimmedFields,
-      did: trimmedFields.did || memoFirstLine || EMPTY_DID_TITLE,
-      attachments,
-      tags,
-      organizedByAi: isOrganizedByAi,
-    });
+    const controller = new AbortController(); request.current = controller; setBusy(true); setNotice("");
+    try {
+      const body = recordBody({ ...getTrimmedFields(), attachments, tags, organizedByAi: isOrganizedByAi }, projectData.competencyItems);
+      const saved = draftId
+        ? await updateProjectRecord(draftId, { ...body, memo: memo.trim() || null }, { signal: controller.signal })
+        : await createProjectRecord(projectId, { ...body, memo: memo.trim() || null, aiOrganize: false }, { signal: controller.signal });
+      controller.signal.throwIfAborted();
+      setDraftId(saved.recordId);
+      await onSave(saved);
+    } catch (error) { if (!controller.signal.aborted) setNotice(error.message); }
+    finally { request.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
 
   function fillExample() {
@@ -131,7 +131,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       setQuestionState((current) => ({ questions: result.questions, inputs: regenerate ? {} : current.inputs, index: regenerate ? 0 : Math.min(current.index, Math.max(0, result.questions.length - 1)) }));
       if (!questionMaterials || regenerate) setQuestionMaterials(JSON.stringify({ memo: memo.trim(), ids: attachments.map((a) => a.attachmentId).sort() }));
       setConfirmRegenerate(false);
-      setStartsAtLastQuestion(false); setStep("questions");
+      setStep("questions");
     } catch (error) { if (!controller.signal.aborted) setNotice(error.message); }
     finally { request.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
@@ -139,15 +139,19 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   // 정리 결과에서 '← 질문으로'를 누르면 마지막 질문으로 돌아간다(H-14).
   function returnToQuestions() {
     setQuestionState((current) => ({ ...current, index: Math.max(0, current.questions.length - 1) }));
-    setStartsAtLastQuestion(true);
     setStep("questions");
   }
 
-  // 실제로는 AI가 자료와 답변을 정리한다. 목업에서는 답변을 해당 칸에 그대로 넣는다.
-  function showReview(answers) {
-    setFields((current) => ({ ...current, ...answers }));
-    setIsOrganizedByAi(true);
-    setStep("review");
+  async function showReview() {
+    if (request.current) return;
+    const controller = new AbortController(); request.current = controller; setBusy(true); setNotice("");
+    try {
+      const result = await organizeProjectRecord(draftId, { signal: controller.signal });
+      controller.signal.throwIfAborted();
+      setFields({ did: result.did ?? "", problem: result.concern ?? "", choice: result.decision ?? "", result: result.result ?? "", next: result.nextStep ?? "" });
+      setIsOrganizedByAi(true); setStep("review");
+    } catch (error) { if (!controller.signal.aborted) setNotice(error.message); }
+    finally { request.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
 
   function returnToMaterials() {
@@ -159,15 +163,12 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
 
   return (
     <Card as="section" size="md" aria-labelledby="record-add-title">
-      <div className="flex flex-col gap-4">
+      <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4" aria-busy={busy}>
         <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
         {step === "questions" && (
           <ProjectRecordQuestions
             state={questionState}
             onChange={setQuestionState}
-            recordId={draftId}
-            attachments={attachments}
-            startAtLast={startsAtLastQuestion}
             onBackToMaterials={returnToMaterials}
             onComplete={showReview}
           />
@@ -234,7 +235,6 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
                 })}
               />
             )}
-            {notice && <p role="alert" className="text-label text-tint-red-ink">{notice}</p>}
             {confirmRegenerate && <div role="group" aria-label="자료 변경 확인" className="flex flex-wrap gap-2 rounded-xl bg-tint-yellow p-3">
               <p className="w-full text-body-sm">자료가 바뀌었어요. 질문을 새로 만들면 이전 답은 지워져요.</p>
               <Button size="sm" disabled={busy} onClick={() => setConfirmRegenerate(false)}>취소</Button>
@@ -253,7 +253,9 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
             </ActionFooter>
           </div>
         )}
-      </div>
+        {busy && <p role="status">처리 중이에요. AI 응답은 최대 50초 걸릴 수 있어요…</p>}
+        {notice && <p role="alert" className="text-label text-tint-red-ink">{notice} {step === "questions" && <button type="button" onClick={showReview}>정리 다시 시도</button>}</p>}
+      </fieldset>
       <Toast toast={toast} onDismiss={hideToast} />
     </Card>
   );

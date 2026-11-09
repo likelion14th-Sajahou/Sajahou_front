@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as api from "@/lib/projectApi";
-import { projectView, roleCodes } from "@/lib/projectViewModel";
+import { projectView, roleCodes, cardView } from "@/lib/projectViewModel";
 
 export default function useProjectData(user) {
   const [projects, setProjects] = useState([]);
   const [competencyItems, setCompetencyItems] = useState([]);
   const [home, setHome] = useState(null);
+  const [cards, setCards] = useState([]);
+  const [syncWarning, setSyncWarning] = useState("");
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState("");
   const loaded = useRef(new Map());
@@ -16,11 +18,12 @@ export default function useProjectData(user) {
   const refresh = useCallback(async ({ signal } = {}) => {
     if (!user) return;
     const version = ++current.current;
-    const [list, competencies, home] = await Promise.all([api.listProjects({ signal }), api.getProjectCompetencies({ signal }), api.getProjectHome({ signal })]);
+    const [list, competencies, home, cardList] = await Promise.all([api.listProjects({ signal }), api.getProjectCompetencies({ signal }), api.getProjectHome({ signal }), api.listProjectCards({ signal })]);
     if (signal?.aborted || version !== current.current) return;
     setProjects([...list.inProgressProjects.map((p) => projectView(p, "IN_PROGRESS")), ...list.doneProjects.map((p) => projectView(p, "DONE"))]
       .map((p) => loaded.current.has(p.id) ? { ...loaded.current.get(p.id), ...p, startedAt: loaded.current.get(p.id).startedAt, records: loaded.current.get(p.id).records } : p));
     setCompetencyItems(competencies); setHome(home); setStatus("ready"); setError("");
+    setCards(cardList.cards.map(cardView));
   }, [user]);
 
   useEffect(() => {
@@ -41,9 +44,14 @@ export default function useProjectData(user) {
 
   async function create(values) {
     const result = await api.createProject({ name: values.name, subtitle: values.subtitle ?? null, roles: roleCodes(values.roles) });
-    await refresh();
+    setProjects((previous) => [...previous, projectView({ ...result, recordCount: 0, lastRecordDate: null })]);
+    try { await refresh(); } catch { setSyncWarning("프로젝트는 생성됐지만 목록 갱신에 실패했어요. 새로고침해 주세요."); }
     return result;
   }
 
-  return { projects, competencyItems, home, status, error, refresh, loadProject, create };
+  async function sync(id) {
+    try { if (id) await loadProject(id); await refresh(); setSyncWarning(""); }
+    catch { setSyncWarning("저장은 완료됐지만 화면을 다시 불러오지 못했어요. 새로고침해 주세요."); }
+  }
+  return { projects, competencyItems, home, cards, status, error, syncWarning, refresh, loadProject, create, sync };
 }
