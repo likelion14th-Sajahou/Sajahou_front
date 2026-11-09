@@ -60,6 +60,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
 
   // 5칸을 직접 채운 경우에도 정리 결과 확인에서 역량 태그를 고른 뒤 저장한다(H-12).
   function organizeDirectly() {
+    if (attachmentBusy) { setNotice("선택한 파일을 첨부하거나 선택을 취소한 뒤 진행해 주세요."); return; }
     if (!hasRecordContent()) {
       showToast(EMPTY_RECORD_MESSAGE);
       return;
@@ -241,7 +242,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
               <TextLink onClick={onCancel}>취소</TextLink>
               <div className="ml-auto flex flex-wrap gap-2">
                 {isWritingFields && (
-                  <Button variant="secondary" onClick={organizeDirectly}>이대로 정리 →</Button>
+                  <Button variant="secondary" disabled={attachmentBusy} onClick={organizeDirectly}>이대로 정리 →</Button>
                 )}
                 <Button disabled={busy || attachmentBusy} onClick={startAiSummary}>{busy ? "기록 준비 중…" : "AI와 정리하기 →"}</Button>
               </div>
