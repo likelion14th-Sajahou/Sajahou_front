@@ -7,7 +7,10 @@ import { saveQuestionAnswer } from "@/lib/projectApi";
 
 // 질문 ID별 입력은 상위 폼에 둔다. 자료·검토 화면으로 이동해도 미전송 답이 유지된다.
 export default function ProjectRecordQuestions({ state, onChange, onBackToMaterials, onComplete }) {
-  const { questions, index, inputs } = state;
+  const { questions, index, inputs, sourceAttachments = [] } = state;
+  const files = sourceAttachments.filter((a) => a.type !== "LINK" && a.kind !== "link");
+  const linkCount = sourceAttachments.length - files.length;
+  const sourceLabel = [...files.map((a) => a.name), ...(linkCount ? [`링크 ${linkCount}개`] : [])].join(", ");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const active = useRef(null);
@@ -30,7 +33,9 @@ export default function ProjectRecordQuestions({ state, onChange, onBackToMateri
 
   if (!question) return <div><p>질문이 없어요. 자료를 보완하거나 이대로 정리할 수 있어요.</p><Button onClick={onBackToMaterials}>← 자료로</Button><Button onClick={onComplete}>정리 결과 확인</Button></div>;
   return <fieldset disabled={busy} className="min-w-0">
-    <AiQuestionForm category={question.tag} progress={`${index + 1} / ${questions.length}`} source={question.quote || "첨부 자료와 메모를 바탕으로 물어볼게요"}
+    <AiQuestionForm category={question.tag} progress={`${index + 1} / ${questions.length}`} source={sourceLabel ? <>
+      첨부한 <mark className="rounded bg-shape-yellow/60 px-[3px] break-all text-ink">{sourceLabel}</mark>을(를) 바탕으로 물어볼게요
+    </> : "적어 준 메모를 바탕으로 물어볼게요"}
       question={question.content} placeholder="한두 문장이면 충분해요" answer={inputs[question.questionId] ?? question.answer ?? ""}
       onAnswerChange={(answer) => onChange({ ...state, inputs: { ...inputs, [question.questionId]: answer } })}
       backLabel={index === 0 ? "← 자료로" : "← 이전 질문"} onBack={index === 0 ? onBackToMaterials : () => onChange({ ...state, index: index - 1 })}

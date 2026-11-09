@@ -32,7 +32,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const [draftId, setDraftId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [attachmentBusy, setAttachmentBusy] = useState(false);
-  const [questionState, setQuestionState] = useState({ questions: [], inputs: {}, index: 0 });
+  const [questionState, setQuestionState] = useState({ questions: [], inputs: {}, index: 0, sourceAttachments: [] });
   const [questionMaterials, setQuestionMaterials] = useState(null);
   const [confirmRegenerate, setConfirmRegenerate] = useState(false);
   const request = useRef(null);
@@ -122,7 +122,9 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       } else await updateProjectRecord(draftId, { memo: memo.trim() || null, attachmentIds: attachments.map((a) => a.attachmentId) }, options);
       const result = await getRecordQuestions(recordId, { ...options, regenerate });
       controller.signal.throwIfAborted();
-      setQuestionState((current) => ({ questions: result.questions, inputs: regenerate ? {} : current.inputs, index: regenerate ? 0 : Math.min(current.index, Math.max(0, result.questions.length - 1)) }));
+      setQuestionState((current) => ({ questions: result.questions, inputs: regenerate ? {} : current.inputs,
+        index: regenerate ? 0 : Math.min(current.index, Math.max(0, result.questions.length - 1)),
+        sourceAttachments: !questionMaterials || regenerate ? attachments.map((a) => ({ ...a })) : current.sourceAttachments }));
       if (!questionMaterials || regenerate) setQuestionMaterials(JSON.stringify({ memo: memo.trim(), ids: attachments.map((a) => a.attachmentId).sort() }));
       setConfirmRegenerate(false);
       setStep("questions");
