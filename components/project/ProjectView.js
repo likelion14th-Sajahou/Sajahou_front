@@ -75,22 +75,11 @@ function ProjectDetail({ project, competencies, initialIsAdding, onChangeProject
   }
 
   // 포트폴리오 Markdown만 저장한다. 처음이면 프로젝트를 완료로 바꾸고, 다시 만들면 안내한다(H-18).
-  function savePortfolio(markdown) {
-    // 처음 마치면 오늘을 마친 날로 기록하고, 검토 화면에서 '진행 중'이던 기간도 그 날로 바꿔 저장한다.
-    const endedAt = project.endedAt ?? MOCK_TODAY.date;
-    const periodLine = `- 기간: ${project.startedAt} ~ 진행 중`;
-    const savedMarkdown = markdown.replace(periodLine, `- 기간: ${project.startedAt} ~ ${endedAt}`);
-
-    if (status === "done") {
-      showToast("포트폴리오를 다시 저장했어요");
-    }
-
-    onChangeProject((current) => ({
-      ...current,
-      status: "done",
-      endedAt,
-      portfolio: { markdown: savedMarkdown },
-    }));
+  async function savePortfolio(markdown, signal) {
+    const result = await api.savePortfolio(project.id, markdown, { signal });
+    signal?.throwIfAborted();
+    await projectData.sync(project.id);
+    showToast(result.isFirstCompletion ? "프로젝트를 완료했어요" : "포트폴리오를 다시 저장했어요");
     setPortfolioBfcacheId(null);
     // 검토 화면 아래쪽에서 저장하므로, 바뀐 프로젝트 화면을 처음부터 보여 준다.
     window.scrollTo(0, 0);

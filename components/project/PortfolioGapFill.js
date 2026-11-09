@@ -3,112 +3,52 @@
 import { useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
-import { MOCK_PORTFOLIO_GAPS } from "@/lib/mock/projects";
+import Button from "@/components/ui/Button";
+import TextLink from "@/components/ui/TextLink";
 import AiQuestionForm from "@/components/ui/AiQuestionForm";
-import PortfolioArtifactRequest from "./PortfolioArtifactRequest";
-import CardTitle from "@/components/ui/CardTitle";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
+import RecordAttachmentsField from "./RecordAttachmentsField";
+import useProjectAction from "./useProjectAction";
+import { saveQuestionAnswer } from "@/lib/projectApi";
 
-const GAP_STATUS = {
-  current: { label: "지금", className: "bg-tint-orange" },
-  filled: { label: "채움 ✓", className: "bg-canvas opacity-70" },
-  skipped: { label: "건너뜀", className: "bg-canvas opacity-70" },
-  waiting: { label: "대기", className: "bg-canvas" },
-};
-
-function GapCategory({ gap }) {
-  return <Badge tone={gap.tone} size="sm">{gap.category}</Badge>;
-}
-
-function GapList({ gaps, getStatus }) {
-  return (
-    <Card as="aside" size="md" aria-label="AI가 찾은 빈 곳">
-      <CardTitle action={<ShapeCharacter shape="triangle" color="coral" face="none" size={16} />}>AI가 찾은 빈 곳</CardTitle>
-      <ol className="flex flex-col gap-2 pt-4">
-        {gaps.map((gap, index) => {
-          const { label, className } = GAP_STATUS[getStatus(gap, index)];
-
-          return (
-            <li key={gap.id} className={`flex flex-col items-start gap-1 rounded-xl px-3 py-2.5 ${className}`}>
-              <GapCategory gap={gap} />
-              <p className="text-[13.5px] leading-[21.6px] text-ink">{gap.gap}</p>
-              <p className="text-label leading-[19.5px] text-ink-subtle">{label}</p>
-            </li>
-          );
-        })}
-      </ol>
-    </Card>
-  );
-}
-
-// 첫 질문은 '← 기록 고르기', 다음부터 '← 이전 질문'(H-17). 포트폴리오에서 '← 이전 질문으로'로 오면 마지막 질문부터 보여 준다(H-18).
-export default function PortfolioGapFill({ initialFilled, startAtLast = false, onBackToRecords, onComplete }) {
-  const gaps = MOCK_PORTFOLIO_GAPS;
-  const [index, setIndex] = useState(startAtLast ? gaps.length - 1 : 0);
-  const [filled, setFilled] = useState(initialFilled);
-  const gap = gaps[index];
-  const progress = `${index + 1} / ${gaps.length}`;
-
-  function goNext(nextFilled) {
-    if (index === gaps.length - 1) {
-      onComplete(nextFilled);
-      return;
-    }
-
-    setFilled(nextFilled);
-    setIndex(index + 1);
+export default function PortfolioGapFill({ state, onChange, onBackToRecords, onComplete }) {
+  const { questions, inputs, index } = state;
+  const question = questions[index];
+  const { run, busy, error } = useProjectAction();
+  const [attachmentBusy, setAttachmentBusy] = useState(false);
+  if (!question) return <div><p>추가 질문이 없어요.</p><Button onClick={onBackToRecords}>← 기록 고르기</Button><Button onClick={onComplete}>포트폴리오 초안 만들기</Button></div>;
+  const attachments = state.attachments[question.questionId] ?? [];
+  const isArtifact = question.tag === "산출물 요청";
+  const back = () => index === 0 ? onBackToRecords() : onChange({ ...state, index: index - 1 });
+  function submit(status, answer) {
+    run(async (signal) => {
+      const result = await saveQuestionAnswer(question.questionId, { status,
+        ...(status === "ANSWERED" ? isArtifact ? { attachmentIds: attachments.map((a) => a.attachmentId) } : { answer } : {}) }, { signal });
+      signal.throwIfAborted();
+      onChange({ ...state, questions: questions.map((q) => q.questionId === result.questionId ? { ...q, ...result } : q),
+        inputs: { ...inputs, [question.questionId]: result.answer ?? "" }, index: Math.min(index + 1, questions.length - 1) });
+      if (index === questions.length - 1) onComplete();
+    });
   }
-
-  const backProps = {
-    backLabel: index === 0 ? "← 기록 고르기" : "← 이전 질문",
-    onBack: index === 0 ? onBackToRecords : () => setIndex(index - 1),
-  };
-
-  function getStatus({ id }, gapIndex) {
-    if (gapIndex === index) {
-      return "current";
-    }
-
-    if (filled[id]) {
-      return "filled";
-    }
-
-    return gapIndex < index ? "skipped" : "waiting";
-  }
-
-  return (
-    <>
-      <p className="text-label leading-[20.8px] text-accent-strong">2 / 3 · 빈 곳 채우기</p>
-      <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5 pt-3">
-        <Card as="section" size="xl" aria-label="빈 곳 채우기">
-          {gap.kind === "artifacts" ? (
-            <PortfolioArtifactRequest
-              key={gap.id}
-              category={<GapCategory gap={gap} />}
-              progress={progress}
-              question={gap.question}
-              initialAttachments={filled[gap.id]}
-              {...backProps}
-              onSubmit={(attachments) => goNext({ ...filled, [gap.id]: attachments })}
-              onSkip={() => goNext({ ...filled, [gap.id]: undefined })}
-            />
-          ) : (
-            <AiQuestionForm
-              key={gap.id}
-              category={<GapCategory gap={gap} />}
-              progress={progress}
-              source={gap.gap}
-              question={gap.question}
-              placeholder="확인할 수 있는 것만 적어 주세요"
-              initialAnswer={filled[gap.id]}
-              {...backProps}
-              onAnswer={(answer) => goNext({ ...filled, [gap.id]: answer })}
-              onSkip={() => goNext({ ...filled, [gap.id]: undefined })}
-            />
-          )}
-        </Card>
-        <GapList gaps={gaps} getStatus={getStatus} />
-      </div>
-    </>
-  );
+  return <>
+    <p className="text-label text-accent-strong">2 / 3 · 빈 곳 채우기</p>
+    <div className="grid grid-cols-1 items-start gap-5 pt-3 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <Card as="section" size="md" aria-label="빈 곳 채우기">
+        <fieldset disabled={busy} className="min-w-0">
+          {isArtifact ? <div className="flex flex-col gap-3">
+            <Badge>{question.tag}</Badge><p>{index + 1} / {questions.length}</p><h2>{question.content}</h2>
+            <RecordAttachmentsField attachments={attachments} onBusyChange={setAttachmentBusy} onChange={(items) => onChange({ ...state, attachments: { ...state.attachments, [question.questionId]: items } })} />
+            <div className="flex flex-wrap gap-3"><TextLink onClick={back}>← 이전</TextLink><TextLink disabled={attachmentBusy} onClick={() => submit("SKIPPED")}>아직 없어요</TextLink>
+              <Button disabled={attachmentBusy || !attachments.length || attachments.some((a) => a.extractStatus === "PENDING")} onClick={() => submit("ANSWERED")}>첨부하고 다음 →</Button></div>
+          </div> : <AiQuestionForm category={question.tag} source={question.quote || "고른 기록에서 빈 곳을 보완해 주세요"} question={question.content}
+            progress={`${index + 1} / ${questions.length}`} placeholder="확인할 수 있는 것만 적어 주세요"
+            answer={inputs[question.questionId] ?? question.answer ?? ""} onAnswerChange={(answer) => onChange({ ...state, inputs: { ...inputs, [question.questionId]: answer } })}
+            backLabel={index === 0 ? "← 기록 고르기" : "← 이전 질문"} onBack={back} onAnswer={(answer) => submit("ANSWERED", answer)} onSkip={() => submit("SKIPPED")} />}
+          {error && <p role="alert">{error}</p>}
+        </fieldset>
+      </Card>
+      <Card as="aside" size="md" aria-label="AI가 찾은 빈 곳"><h2>AI가 찾은 빈 곳</h2><ol className="flex flex-col gap-3 pt-3">
+        {questions.map((q, i) => <li key={q.questionId} className="rounded-xl bg-canvas p-3"><p>{q.tag}</p><p className="text-label text-ink-subtle">{i === index ? "지금" : q.status === "ANSWERED" ? "채움 ✓" : q.status === "SKIPPED" ? "건너뜀" : "대기"}</p></li>)}
+      </ol></Card>
+    </div>
+  </>;
 }
