@@ -16,11 +16,12 @@ import RecordFieldsGrid from "./RecordFieldsGrid";
 import RecordFormTitle from "./RecordFormTitle";
 import { EMPTY_RECORD_MESSAGE } from "./recordFields";
 import ActionFooter from "@/components/ui/ActionFooter";
+import { createProjectRecord } from "@/lib/projectApi";
 
 // 한 일이 비면 카드 제목이 비지 않도록 메모 첫 줄을 쓰고, 메모도 없으면 이 문구를 쓴다.
 const EMPTY_DID_TITLE = "(한 일 비어 있음)";
 
-export default function ProjectRecordAddForm({ onCancel, onSave }) {
+export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const { competencies } = useMockData();
   const [attachments, setAttachments] = useState([]);
   const [memo, setMemo] = useState("");
@@ -31,6 +32,9 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
   const [isOrganizedByAi, setIsOrganizedByAi] = useState(false);
   const [startsAtLastQuestion, setStartsAtLastQuestion] = useState(false);
   const [tags, setTags] = useState([]);
+  const [draftId, setDraftId] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [attachmentBusy, setAttachmentBusy] = useState(false);
   const { toast, showToast, hideToast } = useToast();
 
   function getFieldValueProps(key) {
@@ -87,21 +91,27 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
   }
 
   function fillExample() {
-    setAttachments(MOCK_RECORD_EXAMPLE.attachments);
     setMemo(MOCK_RECORD_EXAMPLE.memo);
     setNotice("");
   }
 
-  function startAiSummary() {
+  async function startAiSummary() {
     // 첨부와 메모가 모두 비어 있으면 AI 정리로 넘어가지 않는다(H-12).
     if (attachments.length === 0 && !memo.trim()) {
       setNotice("자료를 첨부하거나 메모를 적어 주세요.");
       return;
     }
 
-    setNotice("");
-    setStartsAtLastQuestion(false);
-    setStep("questions");
+    if (busy || attachmentBusy) return;
+    if (attachments.some((a) => a.extractStatus === "PENDING")) { setNotice("첨부 자료를 읽은 뒤 진행해 주세요."); return; }
+    setBusy(true); setNotice("");
+    try {
+      if (!draftId) {
+        const draft = await createProjectRecord(projectId, { aiOrganize: true, memo: memo.trim() || null, attachmentIds: attachments.map((a) => a.attachmentId) });
+        setDraftId(draft.recordId);
+      }
+      setStartsAtLastQuestion(false); setStep("questions");
+    } catch (error) { setNotice(error.message); } finally { setBusy(false); }
   }
 
   // 정리 결과에서 '← 질문으로'를 누르면 마지막 질문으로 돌아간다(H-14).
@@ -130,6 +140,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
         <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
         {step === "questions" && (
           <ProjectRecordQuestions
+            recordId={draftId}
             attachments={attachments}
             startAtLast={startsAtLastQuestion}
             onBackToMaterials={returnToMaterials}
@@ -154,6 +165,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
           <div className="flex flex-col items-start gap-4">
             <div className="w-full">
               <RecordAttachmentsField
+                onBusyChange={setAttachmentBusy}
                 label={
                   <>
                     자료 첨부 <span className="text-ink-subtle">· 선택 · 회의록, 발표 자료, 디자인 화면, 피그마 링크</span>
@@ -205,7 +217,7 @@ export default function ProjectRecordAddForm({ onCancel, onSave }) {
                 {isWritingFields && (
                   <Button variant="secondary" onClick={organizeDirectly}>이대로 정리 →</Button>
                 )}
-                <Button onClick={startAiSummary}>AI와 정리하기 →</Button>
+                <Button disabled={busy || attachmentBusy} onClick={startAiSummary}>{busy ? "기록 준비 중…" : "AI와 정리하기 →"}</Button>
               </div>
             </ActionFooter>
           </div>

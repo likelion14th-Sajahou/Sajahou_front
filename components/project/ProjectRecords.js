@@ -111,6 +111,7 @@ export default function ProjectRecords({
         />
       ) : isAdding ? (
         <ProjectRecordAddForm
+          projectId={project.id}
           onCancel={closeAddForm}
           onSave={(record) => {
             onAddRecord(record);

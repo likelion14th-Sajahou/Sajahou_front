@@ -1,91 +1,95 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AttachmentChip from "@/components/ui/AttachmentChip";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import LinkInputRow from "@/components/ui/LinkInputRow";
+import * as api from "@/lib/projectApi";
+import { attachmentView } from "@/lib/projectViewModel";
 
-const IMAGE_FILE = /\.(png|jpe?g|gif|webp|svg)$/i;
+const STATUS = { PENDING: "읽는 중", DONE: "본문 읽음", FAILED: "읽지 못함 · 메모로 보완해 주세요", SKIPPED: "본문 읽지 않음" };
 
-function getFileKind(fileName) {
-  if (/\.pdf$/i.test(fileName)) {
-    return "pdf";
-  }
-
-  return IMAGE_FILE.test(fileName) ? "image" : "notion";
-}
-
-// "www.figma.com/..."처럼 프로토콜 없이 붙여 넣어도 받되, http(s)만 허용한다.
-function parseLink(value) {
-  try {
-    const url = new URL(value.includes("://") ? value : `https://${value}`);
-
-    return ["http:", "https:"].includes(url.protocol) && url.hostname.includes(".")
-      ? `${url.hostname}${url.pathname === "/" ? "" : url.pathname}`
-      : null;
-  } catch {
-    return null;
-  }
-}
-
-export default function RecordAttachmentsField({
-  label,
-  attachments,
-  linkPlaceholder = "피그마·노션·GitHub 링크",
-  onChange,
-}) {
+export default function RecordAttachmentsField({ label, attachments, linkPlaceholder = "피그마·노션·GitHub 링크", onChange, onBusyChange }) {
   const [link, setLink] = useState("");
-  const [linkError, setLinkError] = useState("");
+  const [category, setCategory] = useState("MEETING_NOTE");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  const latest = useRef({ attachments, onChange, onBusyChange });
+  const mutation = useRef(null);
+  useEffect(() => { latest.current = { attachments, onChange, onBusyChange }; });
+  useEffect(() => () => mutation.current?.abort(), []);
 
-  function addFiles(files) {
-    onChange([
-      ...attachments,
-      ...files.map(({ name }) => ({ id: crypto.randomUUID(), kind: getFileKind(name), name })),
-    ]);
-  }
-
-  function addLink() {
-    const name = parseLink(link.trim());
-
-    if (!name) {
-      setLinkError("올바른 링크를 입력해 주세요.");
-      return;
+  useEffect(() => {
+    const pending = attachments.filter((a) => a.extractStatus === "PENDING");
+    if (!pending.length) return;
+    const controller = new AbortController();
+    let timer;
+    let attempts = 0;
+    async function poll() {
+      try {
+        const results = await Promise.all(pending.map((a) => api.getAttachment(a.attachmentId, { signal: controller.signal })));
+        if (controller.signal.aborted) return;
+        if (results.some((item) => item.extractStatus !== "PENDING")) {
+          latest.current.onChange(latest.current.attachments.map((a) => {
+            const item = results.find((r) => r.attachmentId === a.attachmentId);
+            return item ? attachmentView({ ...a, ...item }) : a;
+          }));
+        } else if (++attempts < 80) timer = setTimeout(poll, 1500);
+        else setError("첨부 상태 확인이 오래 걸리고 있어요. 다시 확인해 주세요.");
+      } catch (error) { if (!controller.signal.aborted) setError(error.message); }
     }
+    timer = setTimeout(poll, 1500);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [attachments, retry]);
 
-    onChange([...attachments, { id: crypto.randomUUID(), kind: "link", name }]);
-    setLink("");
-    setLinkError("");
+  async function run(action) {
+    if (mutation.current) return;
+    const controller = new AbortController();
+    mutation.current = controller; setBusy(true); setError(""); latest.current.onBusyChange?.(true);
+    try { await action(controller.signal); }
+    catch (error) { if (!controller.signal.aborted) setError(error.message); }
+    finally { mutation.current = null; if (!controller.signal.aborted) { setBusy(false); latest.current.onBusyChange?.(false); } }
   }
-
+  function addFiles(files) {
+    run(async (signal) => {
+      for (const file of files) if (file.size > 20 * 1024 * 1024 || !/\.(pdf|png|jpe?g|zip|md|txt)$/i.test(file.name)) throw new Error("PDF·PNG·JPG·ZIP·MD·TXT 파일을 20MB 이하로 올려 주세요.");
+      for (const file of files) {
+        const item = attachmentView(await api.createFileAttachment(file, category, { signal }));
+        if (!signal.aborted) { const next = [...latest.current.attachments, item]; latest.current.attachments = next; latest.current.onChange(next); }
+      }
+    });
+  }
+  function addLink() {
+    run(async (signal) => {
+      let url;
+      try { url = new URL(link.includes("://") ? link.trim() : `https://${link.trim()}`); } catch { throw new Error("올바른 링크를 입력해 주세요."); }
+      if (!["http:", "https:"].includes(url.protocol) || !url.hostname.includes(".")) throw new Error("HTTP(S) 링크를 입력해 주세요.");
+      const item = attachmentView(await api.createLinkAttachment(url.href, category, { signal }));
+      if (!signal.aborted) { latest.current.onChange([...latest.current.attachments, item]); setLink(""); }
+    });
+  }
   return (
-    <div className="flex flex-col gap-1.5">
-      {label && <p className="text-label text-ink-muted">{label}</p>}
-      {attachments.length > 0 && (
-        <ul aria-label="첨부 자료" className="flex flex-wrap gap-2">
-          {attachments.map((attachment) => (
-            <AttachmentChip
-              key={attachment.id}
-              kind={attachment.kind}
-              name={attachment.name}
-              onRemove={() => onChange(attachments.filter((item) => item.id !== attachment.id))}
-            />
-          ))}
-        </ul>
-      )}
-      <div className="flex items-center gap-2">
+    <fieldset disabled={busy} className="flex min-w-0 flex-col gap-2" aria-busy={busy}>
+      {label && <legend className="text-label text-ink-muted">{label}</legend>}
+      <label className="text-label">자료 종류 <select aria-label="자료 종류" value={category} onChange={(e) => setCategory(e.target.value)} className="rounded border border-line bg-white p-1">
+        {[["MEETING_NOTE", "회의록"], ["PRESENTATION", "발표 자료"], ["DESIGN", "디자인"], ["OUTPUT", "산출물"]].map(([value, name]) => <option key={value} value={value}>{name}</option>)}
+      </select></label>
+      <ul aria-label="첨부 자료" className="flex flex-wrap gap-2">
+        {attachments.map((a) => <li key={a.id} className="min-w-0 max-w-full">
+          <AttachmentChip kind={a.kind} name={a.name} onRemove={() => run(async (signal) => {
+            await api.deleteAttachment(a.attachmentId, { signal });
+            if (!signal.aborted) latest.current.onChange(latest.current.attachments.filter((item) => item.id !== a.id));
+          })} />
+          <p role="status" className="break-words text-caption text-ink-subtle">{STATUS[a.extractStatus]}</p>
+        </li>)}
+      </ul>
+      <div className="flex flex-wrap items-center gap-2">
         <FileUploadButton label="+ 파일" ariaLabel="파일 첨부" onSelect={addFiles} />
-        <LinkInputRow
-          aria-label="링크"
-          placeholder={linkPlaceholder}
-          value={link}
-          onChange={(value) => {
-            setLink(value);
-            setLinkError("");
-          }}
-          onAdd={addLink}
-        />
+        <LinkInputRow aria-label="링크" placeholder={linkPlaceholder} value={link} onChange={setLink} onAdd={addLink} />
       </div>
-      {linkError && <p role="alert" className="text-label text-tint-red-ink">{linkError}</p>}
-    </div>
+      {busy && <p role="status">첨부 자료를 처리하고 있어요…</p>}
+      {error && <p role="alert" className="text-label text-tint-red-ink">{error} <button type="button" onClick={() => { setError(""); setRetry((n) => n + 1); }}>상태 다시 확인</button></p>}
+    </fieldset>
   );
 }
