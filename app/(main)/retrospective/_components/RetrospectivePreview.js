@@ -7,6 +7,7 @@ import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
+import Toast, { useToast } from "@/components/ui/Toast";
 import { formatDeadline } from "@/lib/formatDate";
 import { PARTS } from "@/lib/mock/user";
 import { getCurrentRetrospective } from "@/lib/retrospectiveApi";
@@ -40,6 +41,8 @@ export default function RetrospectivePreview({ children }) {
   const [completedDraft, setCompletedDraft] = useState(null);
   const [{ current, error }, setLoadState] = useState({ current: null, error: "" });
   const [reloadKey, setReloadKey] = useState(0);
+  // 시작 화면이 휴회 화면으로 바뀌어도 토스트가 남도록 여기에 둔다(C-02).
+  const { toast, showToast, hideToast } = useToast();
 
   // 파트를 바꾸면 그 파트의 마감일로 다시 불러온다.
   useEffect(() => {
@@ -94,12 +97,14 @@ export default function RetrospectivePreview({ children }) {
     },
     refreshCurrent,
     applySaved,
+    showToast,
   };
 
   return (
     <RetrospectivePreviewContext value={value}>
       {error && <p role="alert" className="mb-4 text-body-sm text-error">{error}</p>}
       {children}
+      <Toast toast={toast} onDismiss={hideToast} />
     </RetrospectivePreviewContext>
   );
 }
