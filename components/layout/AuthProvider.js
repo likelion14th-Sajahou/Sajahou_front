@@ -6,6 +6,7 @@ import { authRequest, getCurrentUser, getGoogleLoginDestination, logoutSession, 
 import Button from "@/components/ui/Button";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { checkWithdrawalSession, updateProfile, withdrawAccount } from "@/lib/profileApi";
+import { forgetAccountType, readAccountType, rememberAccountType } from "@/lib/accountType";
 
 const AuthContext = createContext(null);
 const SIGNUP_LIFETIME_MS = 10 * 60 * 1000;
@@ -48,12 +49,14 @@ export default function AuthProvider({ children }) {
     const request = restoreRequest.current ??= getCurrentUser();
     request.then((result) => {
       if (!active || generation.current !== currentGeneration) return;
-      setSession({ user: validateUser(result) });
+      const user = validateUser(result);
+      setSession({ user, accountType: readAccountType(user.id) });
       setRestoreStatus("ready");
     }).catch((error) => {
       if (!active || generation.current !== currentGeneration) return;
       if (error.status === 401) {
         setSession(null);
+        forgetAccountType();
         setRestoreStatus("ready");
       } else {
         setRestoreStatus("error");
@@ -71,6 +74,7 @@ export default function AuthProvider({ children }) {
   const clearSession = useCallback((message = "") => {
     generation.current += 1;
     setSession(null);
+    forgetAccountType();
     restoreRequest.current = null;
     setRestoreStatus("ready");
     setSignup(null);
@@ -113,11 +117,12 @@ export default function AuthProvider({ children }) {
     }
   }, [clearSession]);
 
-  const completeLogin = useCallback(async ({ signal } = {}) => {
+  const completeLogin = useCallback(async ({ signal, accountType = "google" } = {}) => {
     const currentGeneration = ++generation.current;
     const user = validateUser(await getCurrentUser({ signal }));
     if (generation.current !== currentGeneration || signal?.aborted) return false;
-    setSession({ user });
+    rememberAccountType(user.id, accountType);
+    setSession({ user, accountType });
     if (welcomePending.current) {
       setSignupWelcome({ id: crypto.randomUUID(), message: `환영해요, ${user.name} 님! ${AUTH_PART_LABELS[user.part]} 파트로 시작해요` });
       welcomePending.current = false;
@@ -134,6 +139,7 @@ export default function AuthProvider({ children }) {
       setSignupWelcome(null);
       generation.current += 1;
       setSession(null);
+      forgetAccountType();
       setSignup({ signupToken: result.signupToken, email: result.email,
         suggestedName: result.suggestedName ?? "", expiresAt: Date.now() + SIGNUP_LIFETIME_MS });
       setNotice("");
@@ -166,7 +172,7 @@ export default function AuthProvider({ children }) {
       const user = validateUser(result);
       if (user.id !== session.user.id) throw new Error("수정한 사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.");
       // id를 유지하므로 MockDataProvider의 사용자별 기록은 초기화되지 않는다.
-      setSession({ user });
+      setSession((current) => current ? { ...current, user } : current);
       return user;
     } finally {
       if (profileMutation.current === mutation) profileMutation.current = null;
@@ -176,6 +182,7 @@ export default function AuthProvider({ children }) {
 
   const withdraw = useCallback(async (idToken, { signal } = {}) => {
     if (!session) throw new Error("로그인이 필요합니다.");
+    if (session.accountType !== "google") throw new Error("Google 계정으로 로그인한 회원만 탈퇴할 수 있어요.");
     if (logoutInFlight.current || profileMutation.current) throw new Error("진행 중인 계정 작업이 끝난 후 다시 시도해 주세요.");
     const mutation = { generation: generation.current };
     const ensureCurrentSession = () => {
@@ -216,7 +223,7 @@ export default function AuthProvider({ children }) {
   }, [session, clearSession]);
 
   return (
-    <AuthContext value={{ user: session?.user ?? null, isAuthenticated: Boolean(session), signup,
+    <AuthContext value={{ user: session?.user ?? null, accountType: session?.accountType ?? "unknown", isAuthenticated: Boolean(session), signup,
       notice, clearNotice, clearSignup, cancelSignup, markSignupSubmitted, acceptGoogleLogin, completeLogin,
       signupWelcome, clearSignupWelcome,
       authenticatedRequest, saveProfile, withdraw, isSavingProfile, isWithdrawing,

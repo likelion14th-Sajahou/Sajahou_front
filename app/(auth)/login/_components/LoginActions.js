@@ -7,7 +7,7 @@ import TextLink from "@/components/ui/TextLink";
 import { loginDemo, loginWithGoogle } from "@/lib/auth";
 import { getGoogleAuthMode } from "@/lib/authConfig";
 import { AuthRestoreStatus, useAuth } from "@/components/layout/AuthProvider";
-import GoogleSignInButton from "./GoogleSignInButton";
+import GoogleSignInButton from "@/components/ui/GoogleSignInButton";
 
 export default function LoginActions() {
   const router = useRouter();
@@ -44,7 +44,7 @@ export default function LoginActions() {
       const options = { signal: controller.signal };
       const result = demo ? await loginDemo(options) : await loginWithGoogle(idToken, options);
       const destination = demo
-        ? (await completeLogin(options) ? "/" : null)
+        ? (await completeLogin({ ...options, accountType: "demo" }) ? "/" : null)
         : await acceptGoogleLogin(result, options);
       if (destination && !controller.signal.aborted) startTransition(() => router.replace(destination));
     } catch (failure) {

@@ -203,7 +203,7 @@ HTTP 실패 또는 `success:false`는 `ApiError`로 전달된다. 잘못된 환�
 ### HTTP mock의 범위
 
 - 수정은 mock 서버 메모리에서 유지되며 같은 사용자의 다른 세션·재로그인에도 반영된다. 서버 재시작 시 초기화된다.
-- 탈퇴 재인증 성공 fixture는 `mock-google-id-token`이다. `mock-other-google-id-token`, `mock-expired-google-token` 등 다른 값은 401이며 세션은 유지된다. 이 fixture는 mock에서만 사용하며 실제 Google 토큰을 검증하는 기능이 아니다. 개발 중 탈퇴 흐름은 `NEXT_PUBLIC_GOOGLE_AUTH_MODE=mock`으로 재현한다.
+- 탈퇴 재인증 성공 fixture는 `mock-google-id-token`이다. `mock-other-google-id-token`, `mock-expired-google-token` 등 다른 값은 401이며 세션은 유지된다. 이 fixture는 mock에서만 사용하며 실제 Google 토큰을 검증하는 기능이 아니다. 탈퇴 모달은 `NEXT_PUBLIC_AUTH_MODE=mock`이면 개발용 본인 확인 버튼을 표시하며 Google 인증 설정과 무관하게 이 fixture를 사용한다. live 모드에서는 실제 Google 인증만 허용한다.
 - 데모 계정은 Google 계정이 연결되지 않은 것으로 모의 처리해 탈퇴 재인증을 401로 거부한다. 이는 mock 동작이며 실제 백엔드의 데모 판별 필드·거부 응답이 확정되었다는 의미는 아니다.
 - 탈퇴는 등록 사용자와 해당 사용자의 모든 mock 세션을 제거한다. 다른 사용자의 세션은 유지한다. 회고·카드 등은 별도 클라이언트 mock 상태이므로 여기서 삭제하지 않는다. 사용자 상태 변경에 따른 초기화는 인증 상태·UI 연결 단계에서 처리한다.
 - 실제 연동 전 백엔드의 Google 토큰 검증, 회원·연관 데이터 삭제, 서버 세션·쿠키 종료를 확인해야 한다.
@@ -217,3 +217,9 @@ HTTP 실패 또는 `success:false`는 `ApiError`로 전달된다. 잘못된 환�
 `withdraw(idToken, { signal })`는 탈퇴 성공 후 로그인 상태를 정리하고 `/login`으로 이동한다. 탈퇴의 401은 `checkWithdrawalSession`으로 재확인한다. GET 200이면 원래 재인증 오류를 전달하고, GET 401이면 세션 만료로 처리한다. 다른 계정의 세션이면 로컬 상태를 정리한다. 재조회 중 네트워크·서버 오류가 나면 세션을 유지하며 확인 실패를 전달한다. DELETE를 자동 재시도하지 않는다.
 
 `isSavingProfile`, `isWithdrawing`, `isAccountBusy`로 진행 상태를 확인한다. 저장·탈퇴·로그아웃은 동시에 실행하지 않으며 중복 저장·탈퇴는 오류로 거부한다. 헤더 로그아웃은 계정 작업 중 비활성화된다. 입력값, 필드 오류, 저장 성공 토스트와 모달은 화면에서 관리한다.
+
+### 회원 탈퇴 UI
+
+내 정보 화면의 회원 탈퇴는 확인 문구 → Google 본인 확인 → DELETE 순서로 진행한다. Google 로그인 API를 다시 호출하지 않는다. 모달 취소·닫기나 인증 창 취소만으로는 DELETE를 보내지 않는다. 요청 중에는 취소·Esc·배경 클릭으로 모달을 닫지 못하게 하고, 실패 시 오류를 표시한다. 성공 후 로그인 화면 이동과 사용자별 클라이언트 mock 상태 초기화는 기존 인증 상태 처리를 따른다.
+
+데모 계정에는 탈퇴 버튼을 표시하지 않는다. `/users/me`에 데모 구분 필드가 없어 로그인 경로에서 확인한 `google|demo` 유형과 사용자 ID만 탭의 `sessionStorage`에 UI 힌트로 기억한다. 토큰·이메일은 저장하지 않는다. 같은 회원일 때만 복원하며, 기존 세션·새 탭·저장소 차단 등으로 유형이 확인되지 않으면 로그아웃 후 Google 재로그인을 안내한다. 이 값은 서버 권한 검사를 대체하지 않으며, 백엔드의 데모 판별 계약을 추가한 것이 아니다.
