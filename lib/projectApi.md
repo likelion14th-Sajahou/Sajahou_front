@@ -28,7 +28,7 @@
 
 ## 오류·지연 시나리오
 
-테스트의 `createMockProjectFetch({ storage, now, scenario })`로 지연과 오류를 주입한다. `scenario({path, method, user})`는 `{delayMs, error, status, extractStatus}`를 반환한다. AI 호출 중 같은 대상의 중복 호출은 409다. 취소·타임아웃 후 mutation은 반영하지 않는다.
+테스트의 `createMockServerFetch({ storage, now, scenario })`(`lib/mock/server.js`)로 지연과 오류를 주입한다. `scenario({path, method, user})`는 `{delayMs, error, status, extractStatus}`를 반환한다. AI 호출 중 같은 대상의 중복 호출은 409다. 취소·타임아웃 후 mutation은 반영하지 않는다.
 
 브라우저 개발자 도구에서 `sajarok_mock_project_scenario` localStorage 키에 JSON을 설정해 오류를 재현할 수 있다. 예: `{"delayMs":800,"error":"AI_FAILED","status":502}`. 테스트 후 키를 삭제한다. 실제 50초 대기는 `delayMs:50000`, 클라이언트 시간 초과는 65000ms보다 길게 설정한다. 이 설정은 mock에서만 읽고 API 요청 본문에는 넣지 않는다.
 
