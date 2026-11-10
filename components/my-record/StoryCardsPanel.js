@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
 import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
-import StoryCardDetail from "./StoryCardDetail";
 import StoryCardList from "./StoryCardList";
+import RemoteStoryCard from "./RemoteStoryCard";
+import { getStoryCards } from "@/lib/myRecordApi";
+import { cardView } from "@/lib/projectViewModel";
+import useRecordResource from "./useRecordResource";
+import RecordRequestStatus from "./RecordRequestStatus";
+import { recordHref, resolveRecordCompetency } from "@/lib/myRecordNavigation";
 
 const ALL = "all";
 
@@ -22,97 +27,62 @@ const HIGHLIGHT_DURATION_MS = 3000;
 const FIELD_CLASSES =
   "h-[38px] rounded-[14px] border border-transparent bg-canvas text-body-sm text-ink";
 
-function matchesSearch({ title, tags, evidence }, search) {
-  const target = `${title} ${tags.map((tag) => `#${tag}`).join(" ")} ${evidence}`;
-
-  return target.toLowerCase().includes(search);
-}
-
 export default function StoryCardsPanel({
   cards,
-  competencies,
-  filterCompetencies,
-  week,
-  initialCardId,
-  initialHighlightedCardId,
-  initialCompetency = ALL,
-  onDeleteCard,
-  onUpdateCard,
+  competencyItems,
+  userId,
+  location,
+  searchParams,
+  onNavigate,
+  onChanged,
+  revision,
 }) {
-  const [type, setType] = useState(ALL);
-  const [competency, setCompetency] = useState(initialCompetency);
-  const [search, setSearch] = useState("");
-  const [openCardId, setOpenCardId] = useState(initialCardId);
-  const [highlightedCardId, setHighlightedCardId] = useState(initialHighlightedCardId);
-  const openCard = cards.find(({ id }) => id === openCardId);
-
-  // 자소서 매칭에서 넘어온 카드로 스크롤하고, 잠깐 뒤 강조를 지운다(A-09).
-  useEffect(() => {
-    if (!highlightedCardId) {
-      return undefined;
-    }
-
-    document
-      .getElementById(`story-card-${highlightedCardId}`)
-      ?.scrollIntoView({ block: "center" });
-
-    const timer = setTimeout(() => setHighlightedCardId(undefined), HIGHLIGHT_DURATION_MS);
-
-    return () => clearTimeout(timer);
-  }, [highlightedCardId]);
+  const { type, week, q: search, card: openCardId } = location;
+  const [expiredHighlight, setExpiredHighlight] = useState(null);
+  const highlightToken = `${userId}:${searchParams.toString()}`;
+  const highlightedCardId = expiredHighlight === highlightToken ? undefined : location.highlight;
 
   function closeCard() {
-    setOpenCardId(undefined);
-
-    // 주소로 연 팝업이 새로고침할 때 다시 열리지 않도록 card 값을 지우고, 지금 탭은 주소에 남긴다.
-    const url = new URL(window.location.href);
-    if (url.searchParams.has("card")) {
-      url.searchParams.delete("card");
-      url.searchParams.set("tab", "cards");
-      window.history.replaceState(null, "", url);
-    }
+    onNavigate({ card: null, tab: "cards" }, true);
   }
 
-  function deleteOpenCard() {
-    onDeleteCard(openCardId);
-    closeCard();
-  }
-
-  const normalizedSearch = search.trim().toLowerCase();
-  // 역량을 뺀 나머지 필터의 결과다. 드롭다운의 카드 수도 이 목록에서 세어 고른 뒤의 결과와 맞춘다.
-  const candidateCards = cards.filter(
-    (card) =>
-      (type === ALL || card.type === type) &&
-      (week === undefined || card.week === week) &&
-      matchesSearch(card, normalizedSearch),
-  );
-  const visibleCards =
-    competency === ALL
-      ? candidateCards
-      : candidateCards.filter(({ tags }) => tags.includes(competency));
+  const { id: competencyId, invalid: invalidCompetency } = resolveRecordCompetency(location, competencyItems);
+  const query = JSON.stringify({ type: type === ALL ? undefined : type.toUpperCase(), competencyId, weekNumber: week, q: search.trim() || undefined });
+  const load = useCallback((signal) => getStoryCards(JSON.parse(query), { signal }), [query]);
+  const filtered = useRecordResource(load, invalidCompetency || query === "{}" ? null : `${userId}:${revision}:${query}`, search ? 250 : 0);
+  const visibleCards = invalidCompetency ? [] : query === "{}" ? cards : filtered.data?.cards.map(cardView) ?? [];
+  const visibleIds = visibleCards.map((card) => card.id).join(",");
+  useEffect(() => {
+    if (!highlightedCardId || filtered.loading) return;
+    const element = document.getElementById(`story-card-${highlightedCardId}`);
+    if (!element) return;
+    element.scrollIntoView({ block: "center" });
+    const timer = setTimeout(() => setExpiredHighlight(highlightToken), HIGHLIGHT_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, [highlightedCardId, highlightToken, visibleIds, filtered.loading]);
 
   return (
     <section aria-label="스토리 카드" className="flex flex-col gap-4 pt-5">
-      <div className="flex items-center gap-2">
-        <div role="group" aria-label="카드 유형" className="flex shrink-0 gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <div role="group" aria-label="카드 유형" className="flex flex-wrap gap-2">
           {TYPE_FILTERS.map(({ id, label }) => (
-            <Chip key={id} selected={id === type} onClick={() => setType(id)}>
+            <Chip key={id} selected={id === type} onClick={() => onNavigate({ type: id, card: null })}>
               {label}
             </Chip>
           ))}
         </div>
         <select
           aria-label="역량"
-          value={competency}
-          onChange={(event) => setCompetency(event.target.value)}
+          value={invalidCompetency ? "invalid" : competencyId == null ? ALL : String(competencyId)}
+          onChange={(event) => onNavigate({ competencyId: event.target.value, tag: null, card: null })}
           className={`w-[163px] shrink-0 cursor-pointer appearance-none bg-[url(/images/common/chevron-down.svg)] bg-[position:right_6px_center] bg-no-repeat pr-7 pl-4 ${FIELD_CLASSES}`}
         >
           <option value={ALL}>역량 전체</option>
-          {filterCompetencies.map((name) => {
-            const count = candidateCards.filter(({ tags }) => tags.includes(name)).length;
+          {invalidCompetency && <option value="invalid" disabled>선택한 역량을 찾을 수 없어요</option>}
+          {competencyItems.map(({ id, name, cardCount: count }) => {
 
             return (
-              <option key={name} value={name} disabled={count === 0}>
+              <option key={id} value={String(id)} disabled={count === 0}>
                 #{name} ({count})
               </option>
             );
@@ -121,15 +91,15 @@ export default function StoryCardsPanel({
         <input
           aria-label="카드 검색"
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) => onNavigate({ q: event.target.value, card: null }, true)}
           placeholder="검색"
-          className={`min-w-0 flex-1 px-3.5 placeholder:text-placeholder ${FIELD_CLASSES}`}
+          className={`min-w-[120px] flex-1 px-3.5 placeholder:text-placeholder ${FIELD_CLASSES}`}
         />
       </div>
 
       {week !== undefined && (
         <Link
-          href="/my-record?tab=cards"
+          href={recordHref(searchParams, { week: null })}
           scroll={false}
           aria-label={`${week}주차 필터 해제`}
           className="flex h-9 w-fit items-center rounded-full border border-ink bg-ink px-3.5 text-body-sm text-white"
@@ -138,32 +108,28 @@ export default function StoryCardsPanel({
         </Link>
       )}
 
-      {visibleCards.length > 0 ? (
+      {highlightedCardId && !filtered.loading && !filtered.error && !visibleCards.some((card) => card.id === highlightedCardId) && (
+        <p role="status" className="text-body-sm text-ink-muted">강조할 카드가 현재 목록에 없어요.</p>
+      )}
+
+      {filtered.loading || filtered.error ? <RecordRequestStatus resource={filtered}>조건에 맞는 카드를 불러오는 중이에요.</RecordRequestStatus> : visibleCards.length > 0 ? (
         <StoryCardList
           cards={visibleCards}
           highlightedCardId={highlightedCardId}
-          onOpenCard={setOpenCardId}
+          onOpenCard={(card) => onNavigate({ card, tab: "cards" })}
         />
       ) : (
         <EmptyState role="status">조건에 맞는 카드가 없어요.</EmptyState>
       )}
 
       <Modal
-        open={Boolean(openCard)}
+        open={Boolean(openCardId)}
         onClose={closeCard}
         size="lg"
         aria-labelledby="story-card-title"
       >
-        {openCard && (
-          <StoryCardDetail
-            card={openCard}
-            competencies={competencies}
-            titleId="story-card-title"
-            onClose={closeCard}
-            onDelete={deleteOpenCard}
-            onUpdate={(changes) => onUpdateCard(openCardId, changes)}
-          />
-        )}
+        {openCardId && <RemoteStoryCard key={openCardId} cardId={openCardId}
+          competencyItems={competencyItems} titleId="story-card-title" onClose={closeCard} onChanged={onChanged} />}
       </Modal>
     </section>
   );

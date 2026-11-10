@@ -1,0 +1,27 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+// 요청 키와 취소 신호로 늦은 응답·사용자 전환 후의 응답을 버린다.
+export default function useRecordResource(load, key, delayMs = 0) {
+  const [attempt, setAttempt] = useState(0);
+  const [result, setResult] = useState(null);
+  useEffect(() => {
+    if (key === null) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      load(controller.signal).then((data) => {
+        if (!controller.signal.aborted) setResult({ key, attempt, data });
+      }).catch((error) => {
+        if (!controller.signal.aborted) setResult((previous) => ({ key, attempt, error,
+          data: previous?.key === key ? previous.data : undefined }));
+      });
+    }, delayMs);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [load, key, attempt, delayMs]);
+  const current = result?.key === key && result.attempt === attempt ? result : null;
+  return { data: result?.key === key ? result.data : undefined, error: current?.error, loading: key !== null && !current,
+    refresh: () => setAttempt((value) => value + 1),
+    updateData: (update) => setResult((previous) => previous?.key === key && previous.data
+      ? { ...previous, data: update(previous.data) } : previous) };
+}

@@ -9,6 +9,7 @@ import CompetencyTags from "./CompetencyTags";
 import StoryCardEditForm from "./StoryCardEditForm";
 import { COPY_FAILED_MESSAGE, RECORD_TEXT, STORY_CARD_TYPES, SUMMARY_FIELDS } from "./storyCardTypes";
 import { copyText } from "@/lib/clipboard";
+import useProjectAction from "@/components/project/useProjectAction";
 
 const RECAP_TEXT = {
   title: "회고록 전문",
@@ -90,6 +91,7 @@ function SummaryDetails({ summary }) {
 }
 
 export default function StoryCardDetail({ card, competencies, titleId, onClose, onDelete, onUpdate }) {
+  const { run, busy, error } = useProjectAction();
   const { type, whenLabel, shape, color, title, tags, evidence, document, summary } = card;
   const { label, tone } = STORY_CARD_TYPES[type];
   const isProjectCard = type === "project";
@@ -103,13 +105,15 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
   }
 
   function handleSave(changes) {
-    onUpdate(changes);
-    setCopyNotice("");
-    setIsEditing(false);
+    return run(async (signal) => {
+      await onUpdate(changes, signal);
+      if (!signal.aborted) { setCopyNotice(""); setIsEditing(false); }
+    });
   }
 
   return (
-    <div className="flex flex-col items-start gap-3.5">
+    <fieldset disabled={busy} className="flex min-w-0 flex-col items-start gap-3.5">
+      {error && <p role="alert">{error}</p>}
       <div className="flex w-full items-center gap-2.5">
         <ShapeCharacter shape={shape} color={color} size={36} />
         <Badge tone={tone}>{label}</Badge>
@@ -177,7 +181,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
                 <TextLink autoFocus onClick={() => setIsConfirmingDelete(false)}>
                   취소
                 </TextLink>
-                <Button variant="danger" onClick={onDelete}>지우기</Button>
+                <Button variant="danger" onClick={() => run((signal) => onDelete(signal))}>지우기</Button>
               </div>
             </div>
           ) : (
@@ -191,6 +195,6 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
           )}
         </>
       )}
-    </div>
+    </fieldset>
   );
 }

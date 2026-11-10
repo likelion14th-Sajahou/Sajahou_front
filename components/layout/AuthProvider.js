@@ -1,11 +1,12 @@
 "use client";
 
-import { createContext, use, useCallback, useEffect, useRef, useState } from "react";
+import { createContext, use, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authRequest, getCurrentUser, getGoogleLoginDestination, logoutSession, validateUser } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { checkWithdrawalSession, updateProfile, withdrawAccount } from "@/lib/profileApi";
+import { subscribeProjectUnauthorized } from "@/lib/projectApi";
 
 const AuthContext = createContext(null);
 const SIGNUP_LIFETIME_MS = 10 * 60 * 1000;
@@ -82,6 +83,15 @@ export default function AuthProvider({ children }) {
     window.google?.accounts?.id?.disableAutoSelect();
     router.replace("/login");
   }, [router]);
+
+  // 하위 화면의 최초 useEffect 요청보다 먼저 만료 처리를 연결한다.
+  useLayoutEffect(() => {
+    if (!session) return;
+    const currentGeneration = generation.current;
+    return subscribeProjectUnauthorized(() => {
+      if (generation.current === currentGeneration) clearSession("로그인이 만료되었어요. 다시 로그인해 주세요.");
+    });
+  }, [session, clearSession]);
 
   const cancelSignup = useCallback((message) => {
     generation.current += 1;

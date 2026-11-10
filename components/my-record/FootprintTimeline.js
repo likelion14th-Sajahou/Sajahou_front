@@ -38,7 +38,7 @@ export default function FootprintTimeline({
   onSelectWeek,
 }) {
   const scrollerRef = useRef(null);
-  const firstWeek = weeks[0].week;
+  const firstWeek = weeks[0]?.week ?? 1;
 
   // 전체 보기로 들어올 때 선택한 주차가 보이도록 가로 스크롤을 맞춘다. 주차를 누를 때는 움직이지 않는다.
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function FootprintTimeline({
     const scroller = scrollerRef.current;
     const selected = scroller.querySelector('[aria-pressed="true"]');
 
-    scroller.scrollLeft = selected.offsetLeft - (scroller.clientWidth - selected.offsetWidth) / 2;
+    if (selected) scroller.scrollLeft = selected.offsetLeft - (scroller.clientWidth - selected.offsetWidth) / 2;
   }, [showSectionNames]);
 
   const getGridColumn = (startWeek, endWeek) =>
@@ -62,9 +62,9 @@ export default function FootprintTimeline({
     >
       <div
         className={`grid grid-rows-[auto_26px_62px] gap-x-1 gap-y-2.5 ${
-          showSectionNames ? "min-w-[1482px]" : ""
+          showSectionNames ? "min-w-[1482px]" : "min-w-max"
         }`}
-        style={{ gridTemplateColumns: `repeat(${weeks.length}, minmax(0, 1fr))` }}
+        style={{ gridTemplateColumns: `repeat(${weeks.length}, minmax(36px, 1fr))` }}
       >
         {showSectionNames &&
           sections.map(({ id, label, startWeek, endWeek }) => (

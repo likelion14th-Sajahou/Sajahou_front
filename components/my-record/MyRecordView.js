@@ -1,71 +1,70 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { useMockData } from "@/components/layout/MockDataProvider";
+import { getFootprints, getStoryCards } from "@/lib/myRecordApi";
+import { footprintView, footprintSections } from "@/lib/myRecordViewModel";
+import { cardView } from "@/lib/projectViewModel";
+import { readRecordLocation, recordHref } from "@/lib/myRecordNavigation";
 import FootprintsPanel from "./FootprintsPanel";
 import MyRecordTabs from "./MyRecordTabs";
 import StoryCardsPanel from "./StoryCardsPanel";
+import useRecordResource from "./useRecordResource";
+import RecordRequestStatus from "./RecordRequestStatus";
 
-export default function MyRecordView({
-  record,
-  requestedTab,
-  week,
-  requestedCardId,
-  requestedHighlightId,
-  requestedCompetency,
-}) {
-  const { currentWeek, footprintSections } = record;
-  const { competencies, footprintWeeks, storyCards, updateStoryCard, deleteStoryCard } = useMockData();
-  // 파트를 바꿔 보면 지금 파트 목록에 없는 태그를 단 카드가 생길 수 있어, 걸러 보기에는 그 태그도 목록 뒤에 붙인다.
-  const filterCompetencies = [
-    ...new Set([...competencies, ...storyCards.flatMap(({ tags }) => tags)]),
-  ];
-  const initialCompetency = filterCompetencies.find((name) => name === requestedCompetency);
-  // 프로젝트에서 새로 만든 카드도 주차 순서에 맞게 보여 준다.
-  const cards = storyCards.toSorted((a, b) => b.week - a.week);
-  const initialCardId = cards.find(({ id }) => id === requestedCardId)?.id;
-  const initialHighlightedCardId = cards.find(({ id }) => id === requestedHighlightId)?.id;
-  // 다른 화면에서 카드로 이동해 오면 스토리 카드 탭으로 연다.
-  const activeTab =
-    requestedTab === "cards" || initialCardId || initialHighlightedCardId || initialCompetency
-      ? "cards"
-      : "footprints";
-  // cacheComponents가 켜져 있으면 다른 페이지에 다녀와도 상태가 유지된다.
-  // 스티커나 카드를 눌러 새로 들어온 경우에는 주소 값을 다시 읽도록 key로 초기화하고,
-  // 뒤로 가기로 돌아온 경우에는 bfcacheId가 그대로라 보던 상태가 유지된다.
-  const { bfcacheId } = useRouter();
+const loadFootprints = async (signal) => footprintView(await getFootprints({ signal }));
+const loadCards = (signal) => getStoryCards({}, { signal });
 
-  const weeksWithCards = footprintWeeks.map((item) => {
-    const cardIds = cards.filter((card) => card.week === item.week).map(({ id }) => id);
-
-    return { ...item, cardIds, cardCount: cardIds.length };
-  });
-
-  return (
-    <>
-      <MyRecordTabs activeTab={activeTab} storyCardCount={cards.length} />
-      {activeTab === "footprints" && (
-        <FootprintsPanel
-          key={bfcacheId}
-          sections={footprintSections}
-          weeks={weeksWithCards}
-          initialWeek={week ?? currentWeek}
-        />
-      )}
-      {activeTab === "cards" && (
-        <StoryCardsPanel
-          key={initialCardId || initialHighlightedCardId || initialCompetency ? bfcacheId : "story-cards"}
-          cards={cards}
-          competencies={competencies}
-          filterCompetencies={filterCompetencies}
-          week={week}
-          initialCardId={initialCardId}
-          initialHighlightedCardId={initialHighlightedCardId}
-          initialCompetency={initialCompetency}
-          onDeleteCard={deleteStoryCard}
-          onUpdateCard={updateStoryCard}
-        />
-      )}
-    </>
-  );
+export default function MyRecordView() {
+  const params = useSearchParams();
+  const location = readRecordLocation(params);
+  const { user, projectData } = useMockData();
+  const footprints = useRecordResource(loadFootprints, String(user.id));
+  const cardList = useRecordResource(loadCards, String(user.id));
+  const competencyItems = projectData.competencyItems;
+  const [revision, setRevision] = useState(0);
+  const cards = cardList.data?.cards.map(cardView) ?? [];
+  function navigate(changes, replace = false) {
+    const href = recordHref(new URLSearchParams(window.location.search), changes);
+    window.history[replace ? "replaceState" : "pushState"](null, "", href);
+  }
+  async function onChanged(data, previous) {
+    // PATCH 응답 또는 DELETE 204 확인 뒤에만 화면의 원본을 갱신한다.
+    cardList.updateData((current) => ({ ...current,
+      cards: data ? current.cards.map((card) => String(card.cardId) === previous.id ? data : card)
+        : current.cards.filter((card) => String(card.cardId) !== previous.id),
+      totalCount: data ? current.totalCount : Math.max(0, current.totalCount - 1) }));
+    if (!data) footprints.updateData((current) => ({ ...current, weeks: current.weeks.map((week) => {
+      const cardIds = week.cardIds.filter((id) => id !== previous.id);
+      return { ...week, cardIds, cardCount: cardIds.length };
+    }) }));
+    setRevision((value) => value + 1);
+    cardList.refresh();
+    footprints.refresh();
+    await projectData.sync(previous.projectId);
+  }
+  return <>
+    <MyRecordTabs activeTab={location.tab} storyCardCount={cardList.data?.totalCount ?? "…"} searchParams={params} />
+    {(cardList.error && cardList.data || footprints.error && footprints.data || projectData.syncWarning) && (
+      <p role="alert" className="pt-3 text-body-sm text-ink-muted">
+        변경은 완료됐지만 일부 정보를 다시 불러오지 못했어요. <button type="button" className="underline" onClick={() => {
+          cardList.refresh(); footprints.refresh(); void projectData.sync();
+        }}>다시 불러오기</button>
+      </p>
+    )}
+    {location.tab === "footprints" && (footprints.data ? (
+      <FootprintsPanel sections={footprintSections} weeks={footprints.data.weeks}
+        selectedWeek={location.week ?? footprints.data.currentWeek} sectionId={location.section}
+        onChange={navigate} searchParams={params} />
+    ) : <RecordRequestStatus resource={footprints} />)}
+    {location.tab === "cards" && !competencyItems.length && projectData.status !== "ready" ? (
+      <RecordRequestStatus resource={{ loading: projectData.status === "loading", error: projectData.error,
+        refresh: () => { void projectData.sync(); } }}>역량 목록을 불러오는 중이에요.</RecordRequestStatus>
+    ) : location.tab === "cards" && (cardList.data ? (
+      <StoryCardsPanel cards={cards} competencyItems={competencyItems} userId={user.id}
+        location={location} searchParams={params} onNavigate={navigate}
+        revision={revision} onChanged={onChanged} />
+    ) : <RecordRequestStatus resource={cardList} />)}
+  </>;
 }

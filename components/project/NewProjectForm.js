@@ -12,6 +12,7 @@ const DEFAULT_ROLES = ["기획"];
 
 export default function NewProjectForm({ titleId, onCancel, onCreate }) {
   const [roles, setRoles] = useState(DEFAULT_ROLES);
+  const [nameError, setNameError] = useState("");
   const [roleError, setRoleError] = useState("");
 
   // 역할은 여러 개 고를 수 있고, 목록 순서대로 저장한다(H-10).
@@ -26,20 +27,22 @@ export default function NewProjectForm({ titleId, onCancel, onCreate }) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    const name = new FormData(event.currentTarget).get("name").trim();
+    const formData = new FormData(event.currentTarget);
+    const name = formData.get("name").trim();
+    const subtitle = formData.get("subtitle").trim();
 
-    if (roles.length === 0) {
-      setRoleError("역할을 하나 이상 골라 주세요");
+    setNameError(name ? "" : "프로젝트 이름을 입력해 주세요");
+    setRoleError(roles.length ? "" : "역할을 하나 이상 골라 주세요");
+    if (!name) {
+      event.currentTarget.elements.namedItem("name").focus();
       return;
     }
-
-    if (name) {
-      onCreate({ name, roles });
-    }
+    if (roles.length === 0) return;
+    onCreate({ name, subtitle: subtitle || null, roles });
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <ShapeCharacter shape="pentagon" color="blue" size={40} />
         <h2 id={titleId} className="text-heading tracking-[-0.44px]">
@@ -49,8 +52,15 @@ export default function NewProjectForm({ titleId, onCancel, onCreate }) {
       <TextField
         label="프로젝트 이름"
         name="name"
-        placeholder="예) 아이디어톤 · 캠퍼스 중고마켓"
+        placeholder="예) 아이디어톤"
         required
+        error={nameError}
+        onChange={(event) => { if (event.target.value.trim()) setNameError(""); }}
+      />
+      <TextField
+        label={<>부제목 <span className="text-ink-subtle">· 선택</span></>}
+        name="subtitle"
+        placeholder="예) 캠퍼스 중고마켓"
       />
       <div role="group" aria-labelledby="new-project-role" className="flex flex-col gap-1.5">
         <span id="new-project-role" className="text-label text-ink-muted">

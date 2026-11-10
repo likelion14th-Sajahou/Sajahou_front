@@ -7,15 +7,16 @@ import Card from "@/components/ui/Card";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
-import { buildPortfolioMarkdown } from "./portfolioDraft";
 import { copyText } from "@/lib/clipboard";
 import ActionFooter from "@/components/ui/ActionFooter";
 import CardTitle from "@/components/ui/CardTitle";
+import useProjectAction from "./useProjectAction";
 
 // 3단계 포트폴리오 검토(H-18, 14). 카드는 만들지 않고(카드는 기록마다 이미 있다, H-22) Markdown만 저장한다.
-export default function PortfolioReview({ project, records, filled, onBack, onSave }) {
+export default function PortfolioReview({ project, initialMarkdown, blanks = [], onBack, onSave }) {
   const isFirstPortfolio = project.status === "active";
-  const [markdown, setMarkdown] = useState(() => buildPortfolioMarkdown(project, records, filled));
+  const [markdown, setMarkdown] = useState(initialMarkdown);
+  const { run, busy, error } = useProjectAction();
   const { toast, showToast, hideToast } = useToast();
 
   async function copyMarkdown() {
@@ -27,6 +28,8 @@ export default function PortfolioReview({ project, records, filled, onBack, onSa
       <p className="text-label leading-[20.8px] text-accent-strong">3 / 3 · 포트폴리오 검토</p>
       <div className="pt-3">
         <Card as="section" size="md" aria-labelledby="portfolio-title" className="flex min-w-0 flex-col gap-3">
+          <fieldset disabled={busy} className="flex min-w-0 flex-col gap-3">
+          {blanks.length > 0 && <p className="text-label text-accent-strong">⚑ 기록에 없는 항목 {blanks.length}곳은 직접 보완해 주세요.</p>}
           <CardTitle id="portfolio-title" action={<Button size="sm" onClick={copyMarkdown}>Markdown 복사</Button>}>
             프로젝트 포트폴리오
           </CardTitle>
@@ -42,10 +45,12 @@ export default function PortfolioReview({ project, records, filled, onBack, onSa
           />
           <ActionFooter>
             <TextLink onClick={onBack}>← 이전 질문으로</TextLink>
-            <Button variant="accent" className="ml-auto" onClick={() => onSave(markdown)}>
+            <Button variant="accent" className="ml-auto max-w-full whitespace-normal!" onClick={() => run((signal) => onSave(markdown, signal))}>
               {isFirstPortfolio ? "포트폴리오 저장하고 프로젝트 완료로 표시" : "포트폴리오 저장"}
             </Button>
           </ActionFooter>
+          {error && <p role="alert">{error}</p>}
+          </fieldset>
         </Card>
       </div>
       <Toast toast={toast} onDismiss={hideToast} />

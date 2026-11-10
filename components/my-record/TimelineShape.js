@@ -16,7 +16,7 @@ export function TimelineSticker({ shape, color, outlined = true }) {
   const { offset, eyeY, d } = TIMELINE_SHAPES[shape];
 
   return (
-    <svg width={34} height={34} viewBox="0 0 34 34" aria-hidden="true" className={`shrink-0 ${COLOR_CLASSES[color]}`}>
+    <svg width={34} height={34} viewBox="0 0 34 34" aria-hidden="true" className={`shrink-0 ${COLOR_CLASSES[color]} ${color === "accent" ? "motion-safe:animate-pulse" : ""}`}>
       <path
         d={d}
         transform={`translate(${offset[0]} ${offset[1]})`}

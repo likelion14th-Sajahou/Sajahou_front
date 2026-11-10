@@ -17,10 +17,10 @@ const SECTIONS = [
 ];
 
 // 기록이 없는 새 프로젝트는 마지막 날짜를 빼고 보여 준다.
-function getSummary({ roles, records }) {
-  const lastDate = records[0]?.date;
+function getSummary({ roles, recordCount, lastRecordDate }) {
+  const lastDate = lastRecordDate;
 
-  return [formatRoles(roles), `기록 ${records.length}`, lastDate && `마지막 ${lastDate}`]
+  return [formatRoles(roles), `기록 ${recordCount}`, lastDate && `마지막 ${lastDate}`]
     .filter(Boolean)
     .join(" · ");
 }
@@ -56,7 +56,7 @@ function ProjectListCard({ project }) {
 // 프로젝트 목록(H-23, 15). 상단 메뉴 '프로젝트'로 들어온다.
 export default function ProjectList() {
   const { isAuthenticated } = useAuth();
-  const { projects, flashToast, hideFlashToast } = useMockData();
+  const { projects, projectData, flashToast, hideFlashToast } = useMockData();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -68,7 +68,9 @@ export default function ProjectList() {
         {isAuthenticated && <Button onClick={() => setIsModalOpen(true)}>+ 새 프로젝트</Button>}
       </div>
       <RequireAuth>
-        {SECTIONS.map(({ status, title, empty }, index) => {
+        {projectData.status === "loading" && <p role="status">프로젝트를 불러오고 있어요…</p>}
+        {projectData.status === "error" && <div role="alert">{projectData.error} <Button onClick={() => projectData.refresh().catch(() => {})}>다시 시도</Button></div>}
+        {projectData.status === "ready" && SECTIONS.map(({ status, title, empty }, index) => {
           const sectionProjects = projects.filter((project) => project.status === status);
 
           return (
