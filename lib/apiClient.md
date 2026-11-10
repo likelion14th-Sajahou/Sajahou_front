@@ -50,7 +50,7 @@ const data = await apiRequest(path, options);
 - FormData는 그대로 전달하고 Content-Type을 제거한다. 런타임이 boundary를 포함해 헤더를 설정한다.
 - 공통 `Accept: application/json`은 요청별 헤더로 덮어쓸 수 있다.
 - accessToken을 저장하거나 Bearer 헤더를 생성하지 않는다. 호출부에서도 인증용 Authorization 헤더를 전달하지 않는다. HttpOnly 세션 쿠키는 브라우저가 관리한다.
-- 백엔드 CSRF 검사(이슈 #32): GET이 아닌 모든 요청(POST·PATCH·DELETE, 파일 업로드 포함)은 `lib/auth.js`의 `authRequest`가 `GET /auth/csrf`로 받은 토큰을 응답의 `data.headerName`(현재 `X-CSRF-TOKEN`) 헤더에 `data.token`으로 붙인다. 토큰은 같은 세션 동안 다시 쓰고, 로그아웃·탈퇴·401 뒤에는 버린다. 403이 오면 토큰을 새로 받아 한 번만 다시 보낸다. 두 요청 모두 공통 Client라 같은 세션 쿠키(`credentials: "include"`)를 쓴다. 호출 함수와 화면은 따로 할 일이 없다. mock도 같은 검사를 하며, 실패하면 403 `CSRF_INVALID`다.
+- 백엔드 CSRF 검사(이슈 #32): GET이 아닌 모든 요청(POST·PATCH·DELETE, 파일 업로드 포함)은 `lib/auth.js`의 `authRequest`가 `GET /auth/csrf`로 받은 토큰을 응답의 `data.headerName`(현재 `X-CSRF-TOKEN`) 헤더에 `data.token`으로 붙인다. 토큰은 같은 세션 동안 다시 쓰고, 로그아웃·탈퇴·401 뒤에는 버린다. 403 `CSRF_INVALID`가 오면 토큰을 새로 받아 한 번만 다시 보낸다. 권한 오류 등 다른 403은 다시 보내지 않는다. 두 요청 모두 공통 Client라 같은 세션 쿠키(`credentials: "include"`)를 쓴다. 호출 함수와 화면은 따로 할 일이 없다. mock도 같은 검사를 하며, 실패하면 403 `CSRF_INVALID`다.
 - query 객체의 null/undefined는 생략하고 0/false는 유지한다. 배열은 같은 키를 반복한다. 이는 Client의 표현 규칙이며, 실제 API의 쿼리 키와 허용 형식은 명세를 따른다. 현재 명세의 `/story-cards`에는 배열 쿼리가 정의되어 있지 않다.
 
 ## 3. 사용 예시
