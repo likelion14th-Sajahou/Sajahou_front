@@ -26,7 +26,9 @@ export default function NewProjectForm({ titleId, onCancel, onCreate }) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    const name = new FormData(event.currentTarget).get("name").trim();
+    const formData = new FormData(event.currentTarget);
+    const name = formData.get("name").trim();
+    const subtitle = formData.get("subtitle").trim();
 
     if (roles.length === 0) {
       setRoleError("역할을 하나 이상 골라 주세요");
@@ -34,7 +36,7 @@ export default function NewProjectForm({ titleId, onCancel, onCreate }) {
     }
 
     if (name) {
-      onCreate({ name, roles });
+      onCreate({ name, subtitle: subtitle || null, roles });
     }
   }
 
@@ -49,8 +51,13 @@ export default function NewProjectForm({ titleId, onCancel, onCreate }) {
       <TextField
         label="프로젝트 이름"
         name="name"
-        placeholder="예) 아이디어톤 · 캠퍼스 중고마켓"
+        placeholder="예) 아이디어톤"
         required
+      />
+      <TextField
+        label={<>부제목 <span className="text-ink-subtle">· 선택</span></>}
+        name="subtitle"
+        placeholder="예) 캠퍼스 중고마켓"
       />
       <div role="group" aria-labelledby="new-project-role" className="flex flex-col gap-1.5">
         <span id="new-project-role" className="text-label text-ink-muted">
