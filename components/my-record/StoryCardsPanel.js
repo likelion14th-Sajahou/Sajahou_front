@@ -11,7 +11,7 @@ import { getStoryCards } from "@/lib/myRecordApi";
 import { cardView } from "@/lib/projectViewModel";
 import useRecordResource from "./useRecordResource";
 import RecordRequestStatus from "./RecordRequestStatus";
-import { recordHref } from "@/lib/myRecordNavigation";
+import { recordHref, resolveRecordCompetency } from "@/lib/myRecordNavigation";
 
 const ALL = "all";
 
@@ -46,11 +46,11 @@ export default function StoryCardsPanel({
     onNavigate({ card: null, tab: "cards" }, true);
   }
 
-  const competencyId = location.competencyId ?? competencyItems.find((item) => item.name === location.tag)?.id;
+  const { id: competencyId, invalid: invalidCompetency } = resolveRecordCompetency(location, competencyItems);
   const query = JSON.stringify({ type: type === ALL ? undefined : type.toUpperCase(), competencyId, weekNumber: week, q: search.trim() || undefined });
   const load = useCallback((signal) => getStoryCards(JSON.parse(query), { signal }), [query]);
-  const filtered = useRecordResource(load, query === "{}" ? null : `${userId}:${revision}:${query}`, search ? 250 : 0);
-  const visibleCards = query === "{}" ? cards : filtered.data?.cards.map(cardView) ?? [];
+  const filtered = useRecordResource(load, invalidCompetency || query === "{}" ? null : `${userId}:${revision}:${query}`, search ? 250 : 0);
+  const visibleCards = invalidCompetency ? [] : query === "{}" ? cards : filtered.data?.cards.map(cardView) ?? [];
   const visibleIds = visibleCards.map((card) => card.id).join(",");
   useEffect(() => {
     if (!highlightedCardId || filtered.loading) return;
@@ -73,11 +73,12 @@ export default function StoryCardsPanel({
         </div>
         <select
           aria-label="역량"
-          value={competencyId == null ? ALL : String(competencyId)}
+          value={invalidCompetency ? "invalid" : competencyId == null ? ALL : String(competencyId)}
           onChange={(event) => onNavigate({ competencyId: event.target.value, tag: null, card: null })}
           className={`w-[163px] shrink-0 cursor-pointer appearance-none bg-[url(/images/common/chevron-down.svg)] bg-[position:right_6px_center] bg-no-repeat pr-7 pl-4 ${FIELD_CLASSES}`}
         >
           <option value={ALL}>역량 전체</option>
+          {invalidCompetency && <option value="invalid" disabled>선택한 역량을 찾을 수 없어요</option>}
           {competencyItems.map(({ id, name, cardCount: count }) => {
 
             return (

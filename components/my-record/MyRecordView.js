@@ -58,7 +58,10 @@ export default function MyRecordView() {
         selectedWeek={location.week ?? footprints.data.currentWeek} sectionId={location.section}
         onChange={navigate} searchParams={params} />
     ) : <RecordRequestStatus resource={footprints} />)}
-    {location.tab === "cards" && (cardList.data ? (
+    {location.tab === "cards" && !competencyItems.length && projectData.status !== "ready" ? (
+      <RecordRequestStatus resource={{ loading: projectData.status === "loading", error: projectData.error,
+        refresh: () => { void projectData.sync(); } }}>역량 목록을 불러오는 중이에요.</RecordRequestStatus>
+    ) : location.tab === "cards" && (cardList.data ? (
       <StoryCardsPanel cards={cards} competencyItems={competencyItems} userId={user.id}
         location={location} searchParams={params} onNavigate={navigate}
         revision={revision} onChanged={onChanged} />
