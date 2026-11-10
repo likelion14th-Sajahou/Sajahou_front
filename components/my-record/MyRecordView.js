@@ -1,7 +1,8 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import { getFootprints, getStoryCards } from "@/lib/myRecordApi";
 import { footprintView, footprintSections } from "@/lib/myRecordViewModel";
@@ -13,13 +14,13 @@ import StoryCardsPanel from "./StoryCardsPanel";
 import useRecordResource from "./useRecordResource";
 import RecordRequestStatus from "./RecordRequestStatus";
 
-const loadFootprints = async (signal) => footprintView(await getFootprints({ signal }));
-const loadCards = (signal) => getStoryCards({}, { signal });
-
 export default function MyRecordView() {
   const params = useSearchParams();
   const location = readRecordLocation(params);
   const { user, projectData } = useMockData();
+  const { authenticatedRequest } = useAuth();
+  const loadFootprints = useCallback(async (signal) => footprintView(await getFootprints({ signal, request: authenticatedRequest })), [authenticatedRequest]);
+  const loadCards = useCallback((signal) => getStoryCards({}, { signal, request: authenticatedRequest }), [authenticatedRequest]);
   const footprints = useRecordResource(loadFootprints, String(user.id));
   const cardList = useRecordResource(loadCards, String(user.id));
   const competencyItems = projectData.competencyItems;

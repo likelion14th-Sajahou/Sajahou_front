@@ -1,6 +1,7 @@
 "use client";
 
 import { startTransition, useEffect, useState } from "react";
+import { useAuth } from "@/components/layout/AuthProvider";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMockData } from "@/components/layout/MockDataProvider";
@@ -19,6 +20,7 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
   // 다른 페이지에 다녀와도 상태가 유지되므로(cacheComponents), 링크로 새로 들어오면 열려 있던 폼과 팝업을 닫는다.
   // 뒤로 가기로 돌아오면 bfcacheId가 그대로라 작성 중인 내용이 남는다. 기록과 카드 변경은 어느 경우든 유지한다.
   const router = useRouter();
+  const { authenticatedRequest } = useAuth();
   const { bfcacheId } = router;
 
   // 포트폴리오로 전환되어 기록 영역이 unmount되어도 폼을 닫은 상태를 유지한다.
@@ -63,18 +65,18 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
   async function saveRecord(recordId, changes, signal) {
     const record = projectRecords.find((r) => r.id === recordId);
     const body = Object.keys(changes).length === 1 && "result" in changes ? { result: changes.result } : recordBody({ ...record, ...changes }, projectData.competencyItems, { isUpdate: true });
-    await api.updateProjectRecord(recordId, body, { signal });
+    await api.updateProjectRecord(recordId, body, { signal, request: authenticatedRequest });
     await projectData.sync(project.id);
   }
 
   async function deleteRecord(recordId) {
-    await api.deleteProjectRecord(recordId);
+    await api.deleteProjectRecord(recordId, { request: authenticatedRequest });
     await projectData.sync(project.id);
   }
 
   // 지우면 프로젝트 목록으로 옮겨 가서 안내한다(H-25). 이동과 삭제를 한 번에 반영해, 지운 프로젝트의 '찾을 수 없어요' 화면이 잠깐 보이지 않게 한다.
   async function removeProject(signal) {
-    await api.deleteProject(project.id, { signal });
+    await api.deleteProject(project.id, { signal, request: authenticatedRequest });
     signal?.throwIfAborted();
     onDeleted();
     showFlashToast(`‘${project.name}’ 프로젝트를 지웠어요`);
@@ -87,7 +89,7 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
 
   // 포트폴리오 Markdown만 저장한다. 처음이면 프로젝트를 완료로 바꾸고, 다시 만들면 안내한다(H-18).
   async function savePortfolio(markdown, signal) {
-    const result = await api.savePortfolio(project.id, markdown, { signal });
+    const result = await api.savePortfolio(project.id, markdown, { signal, request: authenticatedRequest });
     signal?.throwIfAborted();
     await projectData.sync(project.id);
     showToast(result.isFirstCompletion ? "프로젝트를 완료했어요" : "포트폴리오를 다시 저장했어요");

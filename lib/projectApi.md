@@ -20,7 +20,7 @@
 
 ## 저장 및 한계
 
-- 기존 인증 mock으로 로그인 후 사용한다. 사용자별 `sajarok_mock_projects_v1:<id>`에 JSON을 보관한다. 처음에는 빈 프로젝트 목록이다.
+- 기존 인증 mock으로 로그인 후 사용한다. 사용자별 `sajarok_mock_v1:<id>` 한 항목에 회고·프로젝트·스토리 카드·첨부·질문을 함께 보관한다(`lib/mock/server.js`). 처음에는 빈 프로젝트 목록이다.
 - 새로고침·재로그인 후 유지하고 다른 사용자 데이터에 접근할 수 없다. 회원 탈퇴 시 해당 저장소를 삭제한다.
 - 파일 본문·실제 인증 토큰은 저장하지 않는다. 파일 크기·확장자·메타데이터만 검증하며 링크를 실제로 수집하지 않는다.
 - AI는 고정 질문과 사용자가 입력한 문장으로 모의 정리한다. 실 AI 품질·파일 추출·CORS·쿠키는 실제 서버에서 별도 검증한다.
@@ -28,15 +28,16 @@
 
 ## 오류·지연 시나리오
 
-테스트의 `createMockProjectFetch({ storage, now, scenario })`로 지연과 오류를 주입한다. `scenario({path, method, user})`는 `{delayMs, error, status, extractStatus}`를 반환한다. AI 호출 중 같은 대상의 중복 호출은 409다. 취소·타임아웃 후 mutation은 반영하지 않는다.
+테스트의 `createMockServerFetch({ storage, now, scenario })`(`lib/mock/server.js`)로 지연과 오류를 주입한다. `scenario({path, method, user})`는 `{delayMs, error, status, extractStatus}`를 반환한다. AI 호출 중 같은 대상의 중복 호출은 409다. 취소·타임아웃 후 mutation은 반영하지 않는다.
 
-브라우저 개발자 도구에서 `sajarok_mock_project_scenario` localStorage 키에 JSON을 설정해 오류를 재현할 수 있다. 예: `{"delayMs":800,"error":"AI_FAILED","status":502}`. 테스트 후 키를 삭제한다. 실제 50초 대기는 `delayMs:50000`, 클라이언트 시간 초과는 65000ms보다 길게 설정한다. 이 설정은 mock에서만 읽고 API 요청 본문에는 넣지 않는다.
+브라우저 개발자 도구에서 `sajarok_mock_scenario` localStorage 키에 JSON을 설정해 오류를 재현할 수 있다. 예: `{"delayMs":800,"error":"AI_FAILED","status":502}`. 테스트 후 키를 삭제한다. 실제 50초 대기는 `delayMs:50000`, 클라이언트 시간 초과는 65000ms보다 길게 설정한다. 이 설정은 mock에서만 읽고 API 요청 본문에는 넣지 않는다.
 
 검증: `node --test lib/projectApi.test.js lib/profileApi.test.js lib/mock/auth.test.js`
 
 ## 화면 연결 및 기능명세 재검토
 
 - 프로젝트 목록·상세·기록·카드·포트폴리오는 동일 API 함수를 사용한다. 회고 화면의 기존 시안 데이터는 별도 범위로 유지한다.
+- 첨부 호출(7~10번)과 파일 규칙(PDF·PNG·JPG·ZIP·MD·TXT, 20MB)은 회고·자소서 매칭과 함께 쓰는 `lib/attachmentApi.js`에 있다.
 - H-12에는 종류 선택 UI가 없지만 7·8번은 category를 요구한다. **PM 답변 전까지 사용자 지시에 따라 자료 종류 선택과 추출 상태 문구를 임시 제공한다.** 상단에서 회의록·발표 자료·디자인·산출물 중 하나를 선택하고, 바로 아래 한 줄의 파일 버튼·링크 입력·추가 버튼으로 첨부한다. 선택한 종류는 이후 추가하는 파일 또는 링크에 적용된다. 여러 파일을 선택하면 선택 시점의 종류로 파일마다 별도 API 요청을 보내며 각각 독립된 attachmentId를 갖는다. 다른 종류의 파일은 종류를 바꿔 추가한다.
 - 업로드된 항목에는 확정된 자료 종류를 표시한다. category 수정 API는 명세에 없으므로 업로드 후 변경하는 요청을 임의로 만들지 않는다. 잘못 첨부한 항목은 삭제 후 다시 첨부한다. 상단 종류 선택을 바꿔도 기존 첨부의 종류에는 영향을 주지 않는다.
 - 종류를 파일 확장자로 자동 추정하지 않는다. 마치기 산출물은 기존처럼 `OUTPUT`으로 지정한다. 상태는 PENDING=읽는 중, DONE=본문 읽음, FAILED=본문 읽지 못함, SKIPPED=본문 읽지 않음으로 구분한다.

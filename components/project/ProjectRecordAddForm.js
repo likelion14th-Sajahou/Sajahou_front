@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import Button from "@/components/ui/Button";
@@ -20,6 +21,7 @@ import { recordBody } from "@/lib/projectViewModel";
 
 export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const { projectData } = useMockData();
+  const { authenticatedRequest } = useAuth();
   const competencies = projectData.competencyItems.map((item) => item.name);
   const [attachments, setAttachments] = useState([]);
   const [memo, setMemo] = useState("");
@@ -86,8 +88,8 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     try {
       const body = recordBody({ ...getTrimmedFields(), attachments, tags, organizedByAi: isOrganizedByAi }, projectData.competencyItems, { isUpdate: Boolean(draftId) });
       const saved = draftId
-        ? await updateProjectRecord(draftId, { ...body, memo: memo.trim() }, { signal: controller.signal })
-        : await createProjectRecord(projectId, { ...body, memo: memo.trim() || null, aiOrganize: false }, { signal: controller.signal });
+        ? await updateProjectRecord(draftId, { ...body, memo: memo.trim() }, { signal: controller.signal, request: authenticatedRequest })
+        : await createProjectRecord(projectId, { ...body, memo: memo.trim() || null, aiOrganize: false }, { signal: controller.signal, request: authenticatedRequest });
       controller.signal.throwIfAborted();
       setDraftId(saved.recordId);
       await onSave(saved);
@@ -111,7 +113,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     if (request.current || attachmentBusy) return;
     if (attachments.some((a) => a.extractStatus === "PENDING")) { setNotice("자료를 준비하고 있어요. 잠시 후 다시 진행해 주세요."); return; }
     const controller = new AbortController(); request.current = controller;
-    const options = { signal: controller.signal };
+    const options = { signal: controller.signal, request: authenticatedRequest };
     setBusy(true); setNotice("");
     try {
       let recordId = draftId;
@@ -143,7 +145,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     if (request.current) return;
     const controller = new AbortController(); request.current = controller; setBusy(true); setNotice("");
     try {
-      const result = await organizeProjectRecord(draftId, { signal: controller.signal });
+      const result = await organizeProjectRecord(draftId, { signal: controller.signal, request: authenticatedRequest });
       controller.signal.throwIfAborted();
       setFields({ did: result.did ?? "", problem: result.concern ?? "", choice: result.decision ?? "", result: result.result ?? "", next: result.nextStep ?? "" });
       setIsOrganizedByAi(true); setStep("review");
