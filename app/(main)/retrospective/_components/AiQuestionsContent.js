@@ -11,6 +11,7 @@ import { answerQuestion, getRetrospective, requestQuestions } from "@/lib/retros
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import AiQuestionsSession from "./AiQuestionsSession";
 import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
+import { useReviewDraftRequest } from "./useReviewDraftRequest";
 
 // 과제 회고는 회고 완료·과제 회고 분기(FE-24)에서 API를 연결한다. 그 전까지는 시안 질문으로 화면만 보여 주고 저장하지 않는다.
 const ASSIGNMENT_PREVIEW_QUESTIONS = MOCK_AI_QUESTIONS.map(({ id, category, source, question }, index) => ({
@@ -20,14 +21,18 @@ const ASSIGNMENT_PREVIEW_QUESTIONS = MOCK_AI_QUESTIONS.map(({ id, category, sour
 // 자료가 부족해 질문을 만들지 못했을 때(R-15).
 function InsufficientMaterial() {
   const { getStepHref } = useRetrospectivePreview();
+  const review = useReviewDraftRequest();
 
   return (
     <Card as="section" size="md" className="mt-7 flex flex-col gap-4 rounded-[28px]" aria-labelledby="insufficient-material-title">
       <h2 id="insufficient-material-title" className="text-title tracking-[-0.02em]">세션 자료나 메모를 조금만 더 올려 주세요</h2>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <TextLink href={getStepHref("materials")}>← 자료로</TextLink>
-        <Button href={getStepHref("review")}>이대로 정리하기</Button>
+        <Button onClick={review.openReview} disabled={review.isCreating} aria-busy={review.isCreating}>
+          {review.isCreating ? "정리하는 중…" : "이대로 정리하기"}
+        </Button>
       </div>
+      {review.error && <p role="alert" className="text-body-sm text-error">{review.error}</p>}
     </Card>
   );
 }

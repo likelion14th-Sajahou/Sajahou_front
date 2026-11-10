@@ -18,7 +18,7 @@ export default async function RetrospectiveContent({ searchParams }) {
   const pausedContent = <PausedRetrospective />;
   if (step === "materials") return <MaterialsContent />;
   if (step === "questions") return <AiQuestionsContent />;
-  if (step === "review") return <ReviewContent initialDraft={MOCK_REVIEW_DRAFT} />;
+  if (step === "review") return <ReviewContent />;
   const completeContent = <CompleteContent initialDraft={MOCK_REVIEW_DRAFT} />;
   if (step === "complete") return completeContent;
 

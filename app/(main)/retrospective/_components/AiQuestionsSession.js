@@ -80,7 +80,7 @@ export default function AiQuestionsSession({ initialQuestions, saveAnswer, canSa
     <div className="mt-7 grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5">
       <div className="flex min-w-0 flex-col gap-4">
         {isComplete ? (
-          <AiQuestionsComplete questions={questions} reviewHref={getStepHref("review")} onEdit={openQuestion} />
+          <AiQuestionsComplete questions={questions} onEdit={openQuestion} />
         ) : (
           <>
             <Card as="section" size="md" className="min-w-0 rounded-[28px]" aria-labelledby="ai-question-title">
