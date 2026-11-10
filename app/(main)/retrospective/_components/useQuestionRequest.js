@@ -24,7 +24,7 @@ export function getAiErrorMessage(failure, fallback) {
 export function useQuestionRequest() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { session, getStepHref, refreshCurrent } = useRetrospectivePreview();
+  const { retrospective, getStepHref, refreshCurrent } = useRetrospectivePreview();
   const [isRequesting, setIsRequesting] = useState(false);
   // 자료가 바뀌었을 때 사라질 답 개수. null이면 확인 문구를 닫은 상태다.
   const [changedAnswerCount, setChangedAnswerCount] = useState(null);
@@ -39,7 +39,7 @@ export function useQuestionRequest() {
     controllerRef.current = controller;
     setIsRequesting(true);
     try {
-      await requestQuestions(session.id, mode, { signal: controller.signal, request: authenticatedRequest });
+      await requestQuestions(retrospective.id, mode, { signal: controller.signal, request: authenticatedRequest });
       setChangedAnswerCount(null);
       await refreshCurrent();
       router.push(getStepHref("questions"));

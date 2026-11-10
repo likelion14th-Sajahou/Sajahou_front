@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -52,8 +51,7 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
   );
 }
 
-export default function MaterialsForm({ initialMaterials, canSave = true }) {
-  const router = useRouter();
+export default function MaterialsForm({ initialMaterials }) {
   const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref, deadlineLabels } = useRetrospectivePreview();
   const assignmentStatus = isAssignment ? "record" : sessionAssignmentStatus;
   // 입력 영역을 숨겨도(실습 없음, 과제 나중에) 작성한 내용은 유지한다.
@@ -62,11 +60,11 @@ export default function MaterialsForm({ initialMaterials, canSave = true }) {
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
   const [notice, setNotice] = useState("");
-  const { save, isSaving, savedLabel } = useSaveLater({ canSave });
+  const { save, isSaving, savedLabel } = useSaveLater();
   // 어느 버튼으로 저장 중인지. 누른 버튼에만 '저장하는 중…'을 보여 준다.
   const [savingAction, setSavingAction] = useState(null);
   const questions = useQuestionRequest();
-  const files = useMaterialAttachments({ materials, setMaterials, canSave });
+  const files = useMaterialAttachments({ materials, setMaterials });
   // 파일을 올리는 동안 저장하면 막 올린 첨부가 빠질 수 있어 함께 막는다.
   const isBusy = isSaving || questions.isRequesting || files.isUploading;
 
@@ -88,11 +86,6 @@ export default function MaterialsForm({ initialMaterials, canSave = true }) {
   // 단계는 보내지 않는다. 질문을 받으면 서버가 AI 질문 단계(3)로 바꾸고, 실패하면 지금 단계로 남는다.
   // 저장에 실패하면 질문을 받지 않아 쓴 내용을 잃지 않는다.
   async function requestQuestions(mode = "AUTO") {
-    // 과제 회고는 회고 완료·과제 회고 분기(FE-24)에서 연결한다. 지금은 화면만 넘긴다.
-    if (!canSave) {
-      router.push(getStepHref("questions"));
-      return;
-    }
     const message = await saveMaterials("questions");
     if (message !== "") {
       if (message) setNotice(message);

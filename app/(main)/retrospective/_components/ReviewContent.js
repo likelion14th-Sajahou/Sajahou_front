@@ -13,7 +13,6 @@ import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import { getCompetencies, updateStoryCard } from "@/lib/myRecordApi";
-import { MOCK_REVIEW_DRAFT } from "@/lib/mock/retrospective";
 import { completeRetrospective, createReviewDraft, getRetrospective } from "@/lib/retrospectiveApi";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
@@ -31,25 +30,16 @@ const STORY_FIELDS = [
   { name: "result", label: "결과", height: "h-[76px]" },
 ];
 
-// 과제 회고는 회고 완료·과제 회고 분기(FE-24)에서 연결한다. 그 전까지는 시안 초안을 화면에서만 보여 준다.
-const ASSIGNMENT_PREVIEW_CARD = {
-  cardId: null,
-  fullMarkdown: MOCK_REVIEW_DRAFT.retrospective,
-  ...MOCK_REVIEW_DRAFT.story,
-  competencies: [],
-  evidenceSummary: MOCK_REVIEW_DRAFT.evidence,
-};
-
-function ReviewForm({ retrospectiveId, initialCard, competencyItems, canSave }) {
+function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { getStepHref, refreshCurrent } = useRetrospectivePreview();
+  const { getStepHref, refreshCurrent, isAssignment } = useRetrospectivePreview();
   const { setWeekStatus } = useMockData();
   const [fields, setFields] = useState(() => Object.fromEntries(STORY_FIELDS.map(({ name }) => [name, initialCard[name] ?? ""])));
   const [fullMarkdown, setFullMarkdown] = useState(initialCard.fullMarkdown ?? "");
   const [selectedTags, setSelectedTags] = useState(() => initialCard.competencies.map(({ name }) => name));
   const [notice, setNotice] = useState("");
-  const { save, isSaving, savedLabel } = useSaveLater({ canSave });
+  const { save, isSaving, savedLabel } = useSaveLater();
   const [isSavingCard, setIsSavingCard] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const { toast, showToast, hideToast } = useToast();
@@ -77,7 +67,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems, canSave }) 
 
   // 나중에 이어쓰기: 카드를 저장하고 지금 단계(4)와 저장 시각을 남긴다(API 14).
   async function saveLater() {
-    if (canSave && initialCard.cardId) {
+    if (initialCard.cardId) {
       const message = await saveCard();
       if (message !== "") {
         if (message) setNotice(message);
@@ -100,11 +90,6 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems, canSave }) 
       showToast(EMPTY_TAGS_MESSAGE);
       return;
     }
-    // 과제 회고는 과제 회고 분기 커밋에서 연결한다. 그 전까지는 화면만 넘긴다.
-    if (!canSave) {
-      router.push(getStepHref("complete"));
-      return;
-    }
     const message = await saveCard();
     if (message !== "") {
       if (message) setNotice(message);
@@ -114,8 +99,8 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems, canSave }) 
     try {
       await completeRetrospective(retrospectiveId, { request: authenticatedRequest });
       await refreshCurrent();
-      // 홈 화면은 아직 목업 상태를 보므로 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
-      setWeekStatus("done");
+      // 홈 화면은 아직 목업 상태를 보므로 세션 회고를 끝내면 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
+      if (!isAssignment) setWeekStatus("done");
       router.push(getStepHref("complete"));
     } catch (failure) {
       if (failure.code === "COMPETENCY_LIMIT") showToast(EMPTY_TAGS_MESSAGE);
@@ -205,25 +190,26 @@ export default function ReviewContent() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
   const { user } = useMockData();
-  const { session, isAssignment } = useRetrospectivePreview();
+  const { retrospective, getStepHref } = useRetrospectivePreview();
+  const retrospectiveId = retrospective?.id;
+  const startHref = getStepHref();
   const [loaded, setLoaded] = useState(null);
   const [error, setError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    if (!isAssignment && !session.id) {
-      router.replace("/retrospective");
+    if (!retrospectiveId) {
+      router.replace(startHref);
       return;
     }
     const controller = new AbortController();
     const options = { signal: controller.signal, request: authenticatedRequest };
     async function load() {
       const competencyItems = await getCompetencies(options);
-      if (isAssignment) return { card: ASSIGNMENT_PREVIEW_CARD, competencyItems };
-      let { card } = await getRetrospective(session.id, options);
+      let { card } = await getRetrospective(retrospectiveId, options);
       if (!card) {
-        await createReviewDraft(session.id, options);
-        ({ card } = await getRetrospective(session.id, options));
+        await createReviewDraft(retrospectiveId, options);
+        ({ card } = await getRetrospective(retrospectiveId, options));
       }
       return { card, competencyItems };
     }
@@ -235,13 +221,13 @@ export default function ReviewContent() {
       });
     return () => controller.abort();
     // 데모 파트를 바꾸면 그 파트의 역량 목록으로 다시 불러온다.
-  }, [isAssignment, session.id, authenticatedRequest, router, reloadKey, user.part]);
+  }, [retrospectiveId, startHref, authenticatedRequest, router, reloadKey, user.part]);
 
   return (
     <>
       <RetrospectiveSteps currentStep={3} />
       {loaded ? (
-        <ReviewForm key={`${loaded.card.cardId}:${user.part}`} retrospectiveId={session.id} initialCard={loaded.card} competencyItems={loaded.competencyItems} canSave={!isAssignment} />
+        <ReviewForm key={`${loaded.card.cardId}:${user.part}`} retrospectiveId={retrospectiveId} initialCard={loaded.card} competencyItems={loaded.competencyItems} />
       ) : (
         <Card as="section" size="md" className="mt-7 flex flex-wrap items-center gap-3">
           {error ? (

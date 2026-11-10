@@ -25,27 +25,28 @@ function toFormMaterials(materials = {}, attachments = []) {
 }
 
 // 2단계 자료. 저장된 자료(API 13)를 불러와 폼에 채운다. 처음 시작했거나 처음부터를 눌렀으면 빈 폼이다.
-// 과제 회고는 회고 완료·과제 회고 분기(FE-24)에서 연결해서 아직 API를 부르지 않는다.
+// 과제 회고(R-23)도 같은 자료 단계를 쓰고, 화면에는 과제 칸만 보인다.
 export default function MaterialsStep() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { session, isAssignment, setAssignmentStatus } = useRetrospectivePreview();
-  const usesApi = !isAssignment;
+  const { retrospective, isAssignment, getStepHref, setAssignmentStatus } = useRetrospectivePreview();
+  const retrospectiveId = retrospective?.id;
+  const startHref = getStepHref();
   const [loaded, setLoaded] = useState(null);
   const [error, setError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    if (!usesApi) return;
     // 시작하지 않은 회고는 시작 화면에서 '시작하기'로 연다.
-    if (!session.id) {
-      router.replace("/retrospective");
+    if (!retrospectiveId) {
+      router.replace(startHref);
       return;
     }
     const controller = new AbortController();
-    getRetrospective(session.id, { signal: controller.signal, request: authenticatedRequest })
+    getRetrospective(retrospectiveId, { signal: controller.signal, request: authenticatedRequest })
       .then((detail) => {
-        setAssignmentStatus(ASSIGNMENT_STATUS[detail.materials.assignmentMode] ?? "record");
+        // 과제 작성 방식은 세션 회고에만 있다.
+        if (!isAssignment) setAssignmentStatus(ASSIGNMENT_STATUS[detail.materials.assignmentMode] ?? "record");
         setLoaded({ id: detail.id, materials: toFormMaterials(detail.materials, detail.attachments) });
       })
       .catch((failure) => {
@@ -53,13 +54,7 @@ export default function MaterialsStep() {
         setError(getRequestErrorMessage(failure, "작성한 자료를 불러오지 못했어요. 잠시 후 다시 시도해 주세요."));
       });
     return () => controller.abort();
-  }, [usesApi, session.id, authenticatedRequest, router, setAssignmentStatus, reloadKey]);
-
-  if (!usesApi) {
-    return (
-      <MaterialsForm initialMaterials={toFormMaterials()} canSave={false} />
-    );
-  }
+  }, [retrospectiveId, isAssignment, startHref, authenticatedRequest, router, setAssignmentStatus, reloadKey]);
 
   if (!loaded) {
     return (

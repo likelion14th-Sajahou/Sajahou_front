@@ -52,15 +52,14 @@ function uploadErrorMessage(failure) {
 
 // 회고 자료의 첨부(R-08·09·11, API 7~10). 고르면 바로 올리고, 읽기 상태를 칩에 보여 준다.
 // 저장(14번)할 때 attachmentIds로 회고에 연결하고, 다시 들어오면 13번의 attachments로 칩을 되살린다.
-// canSave가 false(과제 회고)면 아직 올리지 않고 화면에서만 칩을 보여 준다.
 // 모든 함수는 성공하면 "", 실패하면 안내 문구를 돌려준다.
-export default function useMaterialAttachments({ materials, setMaterials, canSave }) {
+export default function useMaterialAttachments({ materials, setMaterials }) {
   const { authenticatedRequest } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const items = FIELDS.flatMap((field) => materials[field]);
   const options = { request: authenticatedRequest };
 
-  const polling = useAttachmentPolling(canSave ? items : [], (results) => {
+  const polling = useAttachmentPolling(items, (results) => {
     setMaterials((previous) => ({
       ...previous,
       ...Object.fromEntries(FIELDS.map((field) => [field, previous[field].map((item) => {
@@ -77,10 +76,6 @@ export default function useMaterialAttachments({ materials, setMaterials, canSav
     const validFiles = files.filter((file) => isSupportedAttachmentFile(file) && extensions.some((extension) => file.name.toLowerCase().endsWith(extension)));
     const skipped = !validFiles.length ? "올릴 수 없는 파일이에요. 업로드 버튼에 표시된 형식을 20MB 이하로 골라 주세요."
       : validFiles.length !== files.length ? "지원하지 않는 형식이나 20MB가 넘는 파일은 빼고 올렸어요." : "";
-    if (!canSave) {
-      validFiles.forEach((file) => addItem(field, { id: crypto.randomUUID(), name: file.name, kind: getFileKind(file.name) }));
-      return skipped;
-    }
     setIsUploading(true);
     try {
       for (const file of validFiles) {
@@ -95,10 +90,6 @@ export default function useMaterialAttachments({ materials, setMaterials, canSav
   }
 
   async function addLink(url) {
-    if (!canSave) {
-      addItem("assignmentFiles", { id: crypto.randomUUID(), name: url, kind: "link" });
-      return "";
-    }
     setIsUploading(true);
     try {
       addItem("assignmentFiles", toAttachmentItem(await createLinkAttachment(url, ATTACHMENT_FIELDS.assignmentFiles.category, options)));
@@ -112,7 +103,7 @@ export default function useMaterialAttachments({ materials, setMaterials, canSav
 
   async function remove(field, id) {
     const item = materials[field].find((file) => file.id === id);
-    if (canSave && item?.attachmentId) {
+    if (item?.attachmentId) {
       setIsUploading(true);
       try {
         await deleteAttachment(item.attachmentId, options);

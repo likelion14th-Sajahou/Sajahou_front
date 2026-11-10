@@ -23,7 +23,7 @@ const isAllDone = (questions) => questions.length > 0 && questions.every(({ stat
 // 3단계 AI 질문(R-16~18). 한 번에 한 질문씩 답하거나 건너뛴다.
 // saveAnswer(question, { status, answer })는 저장된 { status, answer }를 돌려준다. 실패하면 넘어가지 않는다.
 // 다시 들어오면 처음으로 안 푼 질문부터 열고, 모두 풀었으면 질문 끝 화면을 보여 준다.
-export default function AiQuestionsSession({ initialQuestions, saveAnswer, canSave = true }) {
+export default function AiQuestionsSession({ initialQuestions, saveAnswer }) {
   const { getStepHref } = useRetrospectivePreview();
   const [questions, setQuestions] = useState(initialQuestions);
   const [index, setIndex] = useState(() => firstPendingIndex(initialQuestions));
@@ -33,7 +33,7 @@ export default function AiQuestionsSession({ initialQuestions, saveAnswer, canSa
   const [isAnswering, setIsAnswering] = useState(false);
   const [notice, setNotice] = useState("");
   const inFlight = useRef(false);
-  const { save, isSaving, savedLabel } = useSaveLater({ canSave });
+  const { save, isSaving, savedLabel } = useSaveLater();
   const question = questions[index];
   const answer = drafts[question.questionId] ?? question.answer ?? "";
 
