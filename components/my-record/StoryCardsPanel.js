@@ -5,9 +5,8 @@ import Link from "next/link";
 import Chip from "@/components/ui/Chip";
 import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
-import StoryCardDetail from "./StoryCardDetail";
 import StoryCardList from "./StoryCardList";
-import RemoteProjectCard from "@/components/project/RemoteProjectCard";
+import RemoteStoryCard from "./RemoteStoryCard";
 import { getStoryCards } from "@/lib/myRecordApi";
 import { cardView } from "@/lib/projectViewModel";
 import useRecordResource from "./useRecordResource";
@@ -35,23 +34,15 @@ export default function StoryCardsPanel({
   location,
   searchParams,
   onNavigate,
-  onDeleteCard,
-  onUpdateCard,
+  onChanged,
 }) {
   const { type, week, q: search, card: openCardId } = location;
-  const competencies = competencyItems.map((item) => item.name);
   const [expiredHighlight, setExpiredHighlight] = useState(null);
   const highlightToken = `${userId}:${searchParams.toString()}`;
   const highlightedCardId = expiredHighlight === highlightToken ? undefined : location.highlight;
-  const openCard = cards.find(({ id }) => id === openCardId);
 
   function closeCard() {
     onNavigate({ card: null, tab: "cards" }, true);
-  }
-
-  function deleteOpenCard() {
-    onDeleteCard(openCardId);
-    closeCard();
   }
 
   const competencyId = location.competencyId ?? competencyItems.find((item) => item.name === location.tag)?.id;
@@ -130,21 +121,13 @@ export default function StoryCardsPanel({
       )}
 
       <Modal
-        open={Boolean(openCard)}
+        open={Boolean(openCardId)}
         onClose={closeCard}
         size="lg"
         aria-labelledby="story-card-title"
       >
-        {openCard?.type === "project" ? <RemoteProjectCard key={openCard.id} cardId={openCard.id} titleId="story-card-title" onClose={closeCard} /> : openCard && (
-          <StoryCardDetail
-            card={openCard}
-            competencies={competencies}
-            titleId="story-card-title"
-            onClose={closeCard}
-            onDelete={deleteOpenCard}
-            onUpdate={(changes) => onUpdateCard(openCardId, changes)}
-          />
-        )}
+        {openCardId && <RemoteStoryCard key={openCardId} cardId={openCardId}
+          competencyItems={competencyItems} titleId="story-card-title" onClose={closeCard} onChanged={onChanged} />}
       </Modal>
     </section>
   );

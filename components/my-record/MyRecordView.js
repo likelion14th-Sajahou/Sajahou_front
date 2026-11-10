@@ -18,7 +18,7 @@ const loadCards = (signal) => getStoryCards({}, { signal });
 export default function MyRecordView() {
   const params = useSearchParams();
   const location = readRecordLocation(params);
-  const { user, projectData, updateStoryCard, deleteStoryCard } = useMockData();
+  const { user, projectData } = useMockData();
   const footprints = useRecordResource(loadFootprints, String(user.id));
   const cardList = useRecordResource(loadCards, String(user.id));
   const competencyItems = projectData.competencyItems;
@@ -37,7 +37,7 @@ export default function MyRecordView() {
     {location.tab === "cards" && (cardList.data ? (
       <StoryCardsPanel cards={cards} competencyItems={competencyItems} userId={user.id}
         location={location} searchParams={params} onNavigate={navigate}
-        onDeleteCard={deleteStoryCard} onUpdateCard={updateStoryCard} />
+        />
     ) : <RecordRequestStatus resource={cardList} />)}
   </>;
 }
