@@ -14,6 +14,8 @@ import { getCurrentRetrospective } from "@/lib/retrospectiveApi";
 
 const RetrospectivePreviewContext = createContext(null);
 
+const SESSION_STATE_LABELS = { NOT_STARTED: "시작 전", IN_PROGRESS: "작성 중", COMPLETED: "완료", RESTED: "휴회" };
+
 const LOAD_ERROR = "회고 상태를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.";
 
 // API의 currentStep(2~4)과 화면 주소의 단계다. 1은 시작, 5는 저장이다(R-02).
@@ -38,7 +40,6 @@ export default function RetrospectivePreview({ children }) {
   const { user, setUserPart } = useMockData();
   const { authenticatedRequest } = useAuth();
   const [assignmentStatus, setAssignmentStatus] = useState("record");
-  const [completedDraft, setCompletedDraft] = useState(null);
   const [{ current, error }, setLoadState] = useState({ current: null, error: "" });
   const [reloadKey, setReloadKey] = useState(0);
   // 시작 화면이 휴회 화면으로 바뀌어도 토스트가 남도록 여기에 둔다(C-02).
@@ -87,10 +88,9 @@ export default function RetrospectivePreview({ children }) {
     setPart: setUserPart,
     assignmentStatus,
     setAssignmentStatus,
-    completedDraft,
-    setCompletedDraft,
     week: current.week,
     session: current.session,
+    openAssignments: current.openAssignments,
     deadlineLabels: {
       session: formatDeadline(current.week.sessionDeadline),
       assignment: formatDeadline(current.week.assignmentDeadline),
@@ -128,16 +128,17 @@ export function useRetrospectivePreview() {
     getStepHref,
     isStarted: Boolean(searchParams.get("step")),
     isComplete: searchParams.get("step") === "complete",
-    assignmentPending: context.assignmentStatus === "later" || searchParams.get("preview") === "assignment-pending",
+    // 과제를 '나중에 쓸게요'로 골랐으면(화면에서 막 골랐거나 저장된 값) 세션·과제 전환 탭을 보여 준다(R-01).
+    assignmentPending: context.assignmentStatus === "later" || context.session.assignmentMode === "LATER" || searchParams.get("preview") === "assignment-pending",
   };
 }
 
 export function RetrospectiveHeading() {
-  const { week, part, setPart, assignmentPending, isAssignment, isComplete, isStarted, completedDraft } = useRetrospectivePreview();
+  const { week, session, part, setPart, assignmentPending, isAssignment, isComplete, isStarted } = useRetrospectivePreview();
   const searchParams = useSearchParams();
   // 화면 확인용 주소(?preview=assignment-pending)로 들어왔으면 세션 탭으로 돌아가도 탭이 보이도록 유지한다.
   const sessionHref = searchParams.get("preview") === "assignment-pending" ? "/retrospective?preview=assignment-pending" : "/retrospective";
-  const sessionStatusLabel = (!isAssignment && isComplete) || completedDraft ? "완료" : "작성 중";
+  const sessionStatusLabel = SESSION_STATE_LABELS[session.state] ?? "작성 중";
   const assignmentStatusLabel = !isAssignment || !isStarted ? "시작 전" : isComplete ? "완료" : "작성 중";
 
   return (

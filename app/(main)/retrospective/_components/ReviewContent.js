@@ -13,8 +13,8 @@ import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import { getCompetencies, updateStoryCard } from "@/lib/myRecordApi";
-import { MOCK_REVIEW_DRAFT, buildWeekStoryCard } from "@/lib/mock/retrospective";
-import { createReviewDraft, getRetrospective } from "@/lib/retrospectiveApi";
+import { MOCK_REVIEW_DRAFT } from "@/lib/mock/retrospective";
+import { completeRetrospective, createReviewDraft, getRetrospective } from "@/lib/retrospectiveApi";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
 import { getAiErrorMessage } from "./useQuestionRequest";
@@ -40,39 +40,49 @@ const ASSIGNMENT_PREVIEW_CARD = {
   evidenceSummary: MOCK_REVIEW_DRAFT.evidence,
 };
 
-function ReviewForm({ initialCard, competencyItems, canSave }) {
+function ReviewForm({ retrospectiveId, initialCard, competencyItems, canSave }) {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { setCompletedDraft, getStepHref, isAssignment } = useRetrospectivePreview();
-  const { completeWeek } = useMockData();
+  const { getStepHref, refreshCurrent } = useRetrospectivePreview();
+  const { setWeekStatus } = useMockData();
   const [fields, setFields] = useState(() => Object.fromEntries(STORY_FIELDS.map(({ name }) => [name, initialCard[name] ?? ""])));
   const [fullMarkdown, setFullMarkdown] = useState(initialCard.fullMarkdown ?? "");
   const [selectedTags, setSelectedTags] = useState(() => initialCard.competencies.map(({ name }) => name));
   const [notice, setNotice] = useState("");
   const { save, isSaving, savedLabel } = useSaveLater({ canSave });
   const [isSavingCard, setIsSavingCard] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const { toast, showToast, hideToast } = useToast();
   // 비운 칸은 바로 안내에서 빠지거나 생기도록 입력값으로 계산한다.
   const blankLabels = STORY_FIELDS.filter(({ name }) => name !== "title" && !fields[name].trim()).map(({ label }) => label);
 
-  // 고친 회고록·카드와 고른 역량을 초안 카드에 저장하고(API 23), 지금 단계(4)와 저장 시각을 남긴다(API 14).
-  async function saveLater() {
-    if (!canSave || !initialCard.cardId) {
-      setNotice(await save({ currentStep: 4 }) ?? "");
-      return;
-    }
+  const cardChanges = () => ({
+    ...fields,
+    fullMarkdown,
+    competencyIds: selectedTags.map((name) => competencyItems.find((item) => item.name === name)?.id).filter((id) => id !== undefined),
+  });
+
+  // 고친 회고록·카드와 고른 역량을 초안 카드에 저장한다(API 23). 실패하면 안내 문구를, 성공하면 ""를 돌려준다.
+  async function saveCard() {
     setIsSavingCard(true);
     try {
-      await updateStoryCard(initialCard.cardId, {
-        ...fields,
-        fullMarkdown,
-        competencyIds: selectedTags.map((name) => competencyItems.find((item) => item.name === name)?.id).filter((id) => id !== undefined),
-      }, { request: authenticatedRequest });
+      await updateStoryCard(initialCard.cardId, cardChanges(), { request: authenticatedRequest });
+      return "";
     } catch (failure) {
-      if (failure.status !== 401) setNotice(getRequestErrorMessage(failure, "초안을 저장하지 못했어요. 잠시 후 다시 시도해 주세요."));
-      return;
+      return failure.status === 401 ? null : getRequestErrorMessage(failure, "초안을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       setIsSavingCard(false);
+    }
+  }
+
+  // 나중에 이어쓰기: 카드를 저장하고 지금 단계(4)와 저장 시각을 남긴다(API 14).
+  async function saveLater() {
+    if (canSave && initialCard.cardId) {
+      const message = await saveCard();
+      if (message !== "") {
+        if (message) setNotice(message);
+        return;
+      }
     }
     const message = await save({ currentStep: 4 });
     if (message !== null) setNotice(message);
@@ -83,19 +93,39 @@ function ReviewForm({ initialCard, competencyItems, canSave }) {
     setNotice(copied ? "회고록을 복사했어요. 노션에 붙여 넣어 주세요." : "복사하지 못했어요. 회고록의 내용을 직접 선택해서 복사해 주세요.");
   }
 
-  // '저장하고 사자록에 추가'는 저장 API(20번)를 연결하는 FE-24까지 이전 목업 흐름을 쓴다.
-  function complete() {
+  // 저장하고 사자록에 추가(R-21): 고친 카드를 저장한 뒤 회고를 완료한다(API 23 → 20). 카드가 나의 사자록에 쌓이고 이번 주 스티커를 받는다.
+  // 역량 태그는 1~3개를 골라야 한다(R-20).
+  async function complete() {
     if (!selectedTags.length) {
       showToast(EMPTY_TAGS_MESSAGE);
       return;
     }
-    const draft = { retrospective: fullMarkdown, story: fields, selectedTags, evidence: initialCard.evidenceSummary };
-    setCompletedDraft(draft);
-    completeWeek(buildWeekStoryCard(draft, isAssignment));
-    router.push(getStepHref("complete"));
+    // 과제 회고는 과제 회고 분기 커밋에서 연결한다. 그 전까지는 화면만 넘긴다.
+    if (!canSave) {
+      router.push(getStepHref("complete"));
+      return;
+    }
+    const message = await saveCard();
+    if (message !== "") {
+      if (message) setNotice(message);
+      return;
+    }
+    setIsCompleting(true);
+    try {
+      await completeRetrospective(retrospectiveId, { request: authenticatedRequest });
+      await refreshCurrent();
+      // 홈 화면은 아직 목업 상태를 보므로 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
+      setWeekStatus("done");
+      router.push(getStepHref("complete"));
+    } catch (failure) {
+      if (failure.code === "COMPETENCY_LIMIT") showToast(EMPTY_TAGS_MESSAGE);
+      else if (failure.status !== 401) setNotice(getRequestErrorMessage(failure, "저장하지 못했어요. 잠시 후 다시 시도해 주세요."));
+    } finally {
+      setIsCompleting(false);
+    }
   }
 
-  const isBusy = isSaving || isSavingCard;
+  const isBusy = isSaving || isSavingCard || isCompleting;
 
   return (
     <>
@@ -155,8 +185,8 @@ function ReviewForm({ initialCard, competencyItems, canSave }) {
             {/* 모든 질문에 답했으면 질문 화면이 질문 끝(고치기 목록)으로 열린다(R-17). */}
             <TextLink href={getStepHref("questions")}>← 질문으로</TextLink>
             <div className="flex gap-2">
-              <Button variant="secondary" onClick={saveLater} disabled={isBusy} aria-busy={isBusy}>{isBusy ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
-              <Button variant="accent" onClick={complete} disabled={isBusy}>저장하고 사자록에 추가</Button>
+              <Button variant="secondary" onClick={saveLater} disabled={isBusy} aria-busy={isBusy && !isCompleting}>{isBusy && !isCompleting ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
+              <Button variant="accent" onClick={complete} disabled={isBusy} aria-busy={isCompleting}>{isCompleting ? "저장하는 중…" : "저장하고 사자록에 추가"}</Button>
             </div>
           </ActionFooter>
           {/* 버튼 줄에 자리가 없어 바로 아래 오른쪽에 둔다. 저장 전에는 자리를 차지하지 않는다. */}
@@ -211,7 +241,7 @@ export default function ReviewContent() {
     <>
       <RetrospectiveSteps currentStep={3} />
       {loaded ? (
-        <ReviewForm key={`${loaded.card.cardId}:${user.part}`} initialCard={loaded.card} competencyItems={loaded.competencyItems} canSave={!isAssignment} />
+        <ReviewForm key={`${loaded.card.cardId}:${user.part}`} retrospectiveId={session.id} initialCard={loaded.card} competencyItems={loaded.competencyItems} canSave={!isAssignment} />
       ) : (
         <Card as="section" size="md" className="mt-7 flex flex-wrap items-center gap-3">
           {error ? (

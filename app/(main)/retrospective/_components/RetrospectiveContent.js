@@ -9,7 +9,6 @@ import ReviewContent from "./ReviewContent";
 import CompleteContent from "./CompleteContent";
 import RetrospectiveWeekGate from "./RetrospectiveWeekGate";
 import RetrospectiveDeadlines from "./RetrospectiveDeadlines";
-import { MOCK_REVIEW_DRAFT } from "@/lib/mock/retrospective";
 import CardTitle from "@/components/ui/CardTitle";
 
 export default async function RetrospectiveContent({ searchParams }) {
@@ -19,7 +18,7 @@ export default async function RetrospectiveContent({ searchParams }) {
   if (step === "materials") return <MaterialsContent />;
   if (step === "questions") return <AiQuestionsContent />;
   if (step === "review") return <ReviewContent />;
-  const completeContent = <CompleteContent initialDraft={MOCK_REVIEW_DRAFT} />;
+  const completeContent = <CompleteContent />;
   if (step === "complete") return completeContent;
 
   return (
