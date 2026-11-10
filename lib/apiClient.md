@@ -50,6 +50,7 @@ const data = await apiRequest(path, options);
 - FormData는 그대로 전달하고 Content-Type을 제거한다. 런타임이 boundary를 포함해 헤더를 설정한다.
 - 공통 `Accept: application/json`은 요청별 헤더로 덮어쓸 수 있다.
 - accessToken을 저장하거나 Bearer 헤더를 생성하지 않는다. 호출부에서도 인증용 Authorization 헤더를 전달하지 않는다. HttpOnly 세션 쿠키는 브라우저가 관리한다.
+- 백엔드 CSRF 검사(이슈 #32): Google 로그인·회원가입·로그아웃은 `lib/auth.js`가 요청마다 `GET /auth/csrf`로 토큰을 받아, 응답의 `data.headerName`을 헤더 이름으로, `data.token`을 값으로 붙여 보낸다. 두 요청 모두 공통 Client라 같은 세션 쿠키(`credentials: "include"`)를 쓴다. mock도 같은 검사를 하며, 토큰이 없거나 틀리면 403이다.
 - query 객체의 null/undefined는 생략하고 0/false는 유지한다. 배열은 같은 키를 반복한다. 이는 Client의 표현 규칙이며, 실제 API의 쿼리 키와 허용 형식은 명세를 따른다. 현재 명세의 `/story-cards`에는 배열 쿼리가 정의되어 있지 않다.
 
 ## 3. 사용 예시
