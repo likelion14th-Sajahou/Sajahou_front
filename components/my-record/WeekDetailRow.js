@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { weekDestination } from "@/lib/myRecordNavigation";
 
 const ROW_CLASSES =
   "flex w-full flex-wrap items-center gap-x-3.5 gap-y-2 rounded-[24px] border border-ink bg-white px-5 py-3.5";
@@ -10,16 +11,6 @@ function getRecapLabel({ cardCount, isProjectRecap }) {
 }
 
 // 항상 그 주차 카드만 걸러서 보여 준다. 카드가 1장이면 그 카드 팝업도 함께 연다(card 값).
-function getCardLink({ week, cardIds, cardCount }) {
-  const href = `/my-record?tab=cards&week=${week}`;
-
-  if (cardCount === 1) {
-    return { href: `${href}&card=${cardIds[0]}`, label: "카드 보기 →" };
-  }
-
-  return { href, label: `카드 ${cardCount}장 보기 →` };
-}
-
 function WeekName({ week }) {
   return <span className="text-label text-accent-strong">{week}주차</span>;
 }
@@ -32,7 +23,7 @@ function WeekState({ children }) {
   return <span className="text-label leading-[19.5px] text-ink-subtle">{children}</span>;
 }
 
-export default function WeekDetailRow({ week }) {
+export default function WeekDetailRow({ week, searchParams }) {
   if (!week) return null;
   const { status, title, cardCount } = week;
 
@@ -58,7 +49,8 @@ export default function WeekDetailRow({ week }) {
   }
 
   if (status === "done" && cardCount > 0) {
-    const { href, label } = getCardLink(week);
+    const href = weekDestination(week, searchParams);
+    const label = cardCount === 1 ? "카드 보기 →" : `카드 ${cardCount}장 보기 →`;
 
     return (
       <Link href={href} className={ROW_CLASSES}>
