@@ -4,59 +4,37 @@ import { useState } from "react";
 import PortfolioGapFill from "./PortfolioGapFill";
 import PortfolioRecordSelect from "./PortfolioRecordSelect";
 import PortfolioReview from "./PortfolioReview";
+import useProjectAction from "./useProjectAction";
+import { getFinishQuestions, getPortfolioDraft } from "@/lib/projectApi";
 
-export default function ProjectPortfolio({
-  project,
-  records,
-  onCancel,
-  onSave,
-}) {
+export default function ProjectPortfolio({ project, records, onCancel, onSave }) {
   const [step, setStep] = useState("records");
   const [selectedIds, setSelectedIds] = useState();
-  const [filled, setFilled] = useState({});
-  const [gapsStartAtLast, setGapsStartAtLast] = useState(false);
-  // 고를 때와 같이 진행 순서(오래된 기록부터)로 글을 쓴다.
-  const selectedRecords = records.toReversed().filter(({ id }) => selectedIds?.includes(id));
-
-  if (step === "records") {
-    return (
-      <PortfolioRecordSelect
-        records={records}
-        initialSelectedIds={selectedIds}
-        onCancel={onCancel}
-        onNext={(nextSelectedIds) => {
-          setSelectedIds(nextSelectedIds);
-          setGapsStartAtLast(false);
-          setStep("gaps");
-        }}
-      />
-    );
+  const [questions, setQuestions] = useState({ questions: [], inputs: {}, attachments: {}, index: 0 });
+  const [draft, setDraft] = useState(null);
+  const { run, busy, error } = useProjectAction();
+  function startQuestions(ids) {
+    run(async (signal) => {
+      const result = await getFinishQuestions(project.id, ids.map(Number), { signal });
+      signal.throwIfAborted();
+      setSelectedIds(ids);
+      setQuestions((current) => ({ ...current, questions: result.questions, index: Math.min(current.index, Math.max(0, result.questions.length - 1)) }));
+      setStep("gaps");
+    });
   }
-
-  if (step === "gaps") {
-    return (
-      <PortfolioGapFill
-        initialFilled={filled}
-        startAtLast={gapsStartAtLast}
-        onBackToRecords={() => setStep("records")}
-        onComplete={(nextFilled) => {
-          setFilled(nextFilled);
-          setStep("review");
-        }}
-      />
-    );
+  function makeDraft() {
+    run(async (signal) => {
+      const result = await getPortfolioDraft(project.id, selectedIds.map(Number), { signal });
+      signal.throwIfAborted(); setDraft(result); setStep("review");
+    });
   }
-
-  return (
-    <PortfolioReview
-      project={project}
-      records={selectedRecords}
-      filled={filled}
-      onBack={() => {
-        setGapsStartAtLast(true);
-        setStep("gaps");
-      }}
-      onSave={onSave}
-    />
-  );
+  return <fieldset disabled={busy} className="min-w-0" aria-busy={busy}>
+    {step === "records" && <PortfolioRecordSelect records={records} initialSelectedIds={selectedIds} onCancel={onCancel} onNext={startQuestions} />}
+    {step === "gaps" && <PortfolioGapFill state={questions} onChange={setQuestions} onBackToRecords={() => setStep("records")} onComplete={makeDraft} />}
+    {step === "review" && <PortfolioReview project={project} initialMarkdown={draft.markdown} blanks={draft.blanks} onSave={onSave} onBack={() => {
+      setQuestions((current) => ({ ...current, index: Math.max(0, current.questions.length - 1) })); setStep("gaps");
+    }} />}
+    {busy && <p role="status">AI 응답을 기다리고 있어요. 최대 50초 걸릴 수 있어요…</p>}
+    {error && <div role="alert">{error}{step === "gaps" && <button onClick={makeDraft}>초안 다시 만들기</button>}</div>}
+  </fieldset>;
 }

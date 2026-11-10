@@ -11,13 +11,17 @@ import DeleteConfirm from "./DeleteConfirm";
 import ProjectRecordAddForm from "./ProjectRecordAddForm";
 import ProjectRecordForm from "./ProjectRecordForm";
 import { RECORD_FIELDS } from "./recordFields";
+import useProjectAction from "./useProjectAction";
+import TextField from "@/components/ui/TextField";
 
 // 완료한 프로젝트에는 별도 안내 문구가 없다(H-21, 12-a).
 const ADD_RECORD_HINT = "회의록·시안·링크를 올리면 AI가 정리를 도와요";
 
-function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
+function RecordItem({ record, isLast, onViewCard, onEdit, onDelete, onResult }) {
   const { date, weekday, tags, organizedByAi, attachments } = record;
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const { run, busy, error } = useProjectAction();
+  const [result, setResult] = useState("");
 
   return (
     <li className="relative pb-5 pl-7">
@@ -26,8 +30,8 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
         aria-hidden="true"
         className="absolute top-1 left-0 size-4 rounded-full bg-shape-yellow shadow-[0_0_0_3px_var(--color-canvas)]"
       />
-      <article className="flex flex-col gap-2.5 rounded-[18px] bg-white px-[18px] py-4">
-        <div className="flex items-center justify-between">
+      <fieldset disabled={busy} className="flex min-w-0 flex-col gap-2.5 rounded-[18px] bg-white px-[18px] py-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="flex items-center gap-1 text-label text-ink-muted">
             {date}({weekday})
             {organizedByAi && <Badge>AI와 정리</Badge>}
@@ -42,11 +46,17 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
           {RECORD_FIELDS.filter(({ key }) => record[key]).map(({ key, label }) => (
             <div key={key} className="col-span-2 grid grid-cols-subgrid">
               <dt className="text-label leading-[20.15px] text-ink-subtle">{label}</dt>
-              <dd className="text-body-sm leading-[21.7px] text-ink">{record[key]}</dd>
+              <dd className="whitespace-pre-wrap break-words text-body-sm leading-[21.7px] text-ink">{record[key]}</dd>
             </div>
           ))}
         </dl>
         {tags.length > 0 && <CompetencyTags tags={tags} />}
+        {!record.result && <details className="rounded-xl bg-tint-yellow p-3">
+          <summary className="cursor-pointer text-body-sm">AI 제안 · 결과를 더 남겨 볼까요?</summary>
+          <p className="pt-2 text-label">직접 확인한 결과나 받은 반응이 있나요? 모르면 비워 두어도 괜찮아요.</p>
+          <TextField label="추가할 결과" multiline value={result} onChange={(e) => setResult(e.target.value)} />
+          <Button size="sm" disabled={!result.trim()} onClick={() => run(() => onResult(record.id, result.trim()))}>결과 추가</Button>
+        </details>}
         {attachments.length > 0 && (
           <ul aria-label="첨부 자료" className="flex flex-wrap gap-2">
             {attachments.map((attachment) => (
@@ -59,10 +69,11 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
             title="이 기록을 지울까요?"
             message="나의 사자록의 카드도 함께 지워져요. 지운 기록은 되돌릴 수 없어요."
             onCancel={() => setIsConfirmingDelete(false)}
-            onConfirm={() => onDelete(record.id)}
+            onConfirm={() => run(() => onDelete(record.id))}
           />
         )}
-      </article>
+        {error && <p role="alert">{error}</p>}
+      </fieldset>
     </li>
   );
 }
@@ -70,7 +81,8 @@ function RecordItem({ record, isLast, onViewCard, onEdit, onDelete }) {
 export default function ProjectRecords({
   project,
   records,
-  initialIsAdding,
+  isAdding,
+  onChangeAdding,
   onAddRecord,
   onSaveRecord,
   onDeleteRecord,
@@ -78,17 +90,9 @@ export default function ProjectRecords({
 }) {
   const { status } = project;
   const [editingRecordId, setEditingRecordId] = useState();
-  const [isAdding, setIsAdding] = useState(initialIsAdding);
 
   function closeAddForm() {
-    setIsAdding(false);
-
-    // 주소로 연 폼이 새로고침할 때 다시 열리지 않도록 record 값을 지운다.
-    const url = new URL(window.location.href);
-    if (url.searchParams.has("record")) {
-      url.searchParams.delete("record");
-      window.history.replaceState(null, "", url);
-    }
+    onChangeAdding(false);
   }
 
   function startEditing(recordId) {
@@ -104,22 +108,23 @@ export default function ProjectRecords({
           key={editingRecord.id}
           record={editingRecord}
           onCancel={() => setEditingRecordId(undefined)}
-          onSave={(changes) => {
-            onSaveRecord(editingRecord.id, changes);
+          onSave={async (changes, signal) => {
+            await onSaveRecord(editingRecord.id, changes, signal);
             setEditingRecordId(undefined);
           }}
         />
       ) : isAdding ? (
         <ProjectRecordAddForm
+          projectId={project.id}
           onCancel={closeAddForm}
-          onSave={(record) => {
-            onAddRecord(record);
+          onSave={async (record) => {
+            await onAddRecord(record);
             closeAddForm();
           }}
         />
       ) : (
         <div className="flex items-center gap-2">
-          <Button onClick={() => setIsAdding(true)}>+ 기록 추가</Button>
+          <Button onClick={() => onChangeAdding(true)}>+ 기록 추가</Button>
           {status === "active" && (
             <p className="text-label leading-[19.5px] text-ink-subtle">{ADD_RECORD_HINT}</p>
           )}
@@ -134,8 +139,9 @@ export default function ProjectRecords({
               isLast={index === records.length - 1}
               onViewCard={onViewCard}
               onEdit={startEditing}
-              onDelete={(recordId) => {
-                onDeleteRecord(recordId);
+              onResult={(recordId, result) => onSaveRecord(recordId, { result })}
+              onDelete={async (recordId) => {
+                await onDeleteRecord(recordId);
                 setEditingRecordId((current) => (current === recordId ? undefined : current));
               }}
             />

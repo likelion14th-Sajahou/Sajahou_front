@@ -3,13 +3,13 @@
 import { createContext, use, useState } from "react";
 import { getCompetencyNames } from "@/lib/mock/competencies";
 import { FOOTPRINT_WEEKS } from "@/lib/mock/myRecord";
-import { addMissingRecordCards, buildRecordCard } from "@/lib/mock/projectRecordCards";
 import { MOCK_PROJECTS } from "@/lib/mock/projects";
 import { MOCK_STORY_CARDS } from "@/lib/mock/storyCards";
 import { MOCK_USER } from "@/lib/mock/user";
 import { MOCK_WEEK } from "@/lib/mock/week";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { useAuth } from "./AuthProvider";
+import useProjectData from "@/components/project/useProjectData";
 
 const MockDataContext = createContext(null);
 
@@ -46,23 +46,21 @@ function getFootprintWeeks(weekStatus, projects, keptRecaps) {
   });
 }
 
-// 카드가 없는 목업 기록에도 카드를 만들어, 모든 프로젝트 기록이 카드 1장씩을 갖게 한다(H-22).
-const INITIAL_STORY_CARDS = addMissingRecordCards(MOCK_STORY_CARDS, MOCK_PROJECTS);
+// 회고의 기존 시안 데이터는 유지하고, 프로젝트 카드는 API 응답만 사용한다.
+const INITIAL_STORY_CARDS = MOCK_STORY_CARDS.filter((card) => card.type !== "project");
 
-// API가 없는 동안 화면끼리 공유하는 목업 데이터다. 페이지를 옮겨 다녀도 유지되고, 새로고침하면 처음 값으로 돌아간다.
-// API를 연결할 때 이 안쪽을 실제 요청으로 바꾸면 화면 코드는 그대로 쓸 수 있다.
+// 회고 시안 상태와 프로젝트 API 데이터를 기존 context에서 함께 제공한다.
 export default function MockDataProvider({ children }) {
   const { user } = useAuth();
   return <MockDataState key={user?.id ?? "anonymous"} authenticatedUser={user}>{children}</MockDataState>;
 }
 
 function MockDataState({ authenticatedUser, children }) {
+  const projectData = useProjectData(authenticatedUser);
   const [previewPart, setPreviewPart] = useState(null);
   const user = authenticatedUser
     ? { ...authenticatedUser, part: previewPart ?? AUTH_PART_LABELS[authenticatedUser.part] }
     : MOCK_USER;
-  const [projects, setProjects] = useState(MOCK_PROJECTS);
-  const [keptRecaps, setKeptRecaps] = useState([]);
   // 다른 화면으로 옮겨 가서 띄울 토스트다. 예: 프로젝트를 지우고 목록에서 안내(H-25).
   const [flashToast, setFlashToast] = useState(null);
   const [storyCards, setStoryCards] = useState(INITIAL_STORY_CARDS);
@@ -74,81 +72,14 @@ function MockDataState({ authenticatedUser, children }) {
     setPreviewPart(part);
   }
 
-  function addProject(project) {
-    setProjects((current) => [...current, project]);
-  }
-
-  function updateProject(projectId, update) {
-    setProjects((current) =>
-      current.map((project) => (project.id === projectId ? update(project) : project)),
-    );
-  }
-
   function updateStoryCard(cardId, changes) {
-    setStoryCards((current) =>
-      current.map((card) => (card.id === cardId ? { ...card, ...changes } : card)),
-    );
+    setStoryCards((current) => current.map((card) => card.id === cardId ? { ...card, ...changes } : card));
   }
-
-  // 프로젝트의 기록·카드·포트폴리오를 함께 지운다. 이미 받은 프로젝트 스티커는 남긴다(H-25).
-  function deleteProject(projectId) {
-    const project = projects.find(({ id }) => id === projectId);
-
-    if (project?.status === "done" && project.recap) {
-      setKeptRecaps((current) => [...current, project.recap]);
-    }
-
-    setProjects((current) => current.filter(({ id }) => id !== projectId));
-    setStoryCards((current) => current.filter((card) => card.projectId !== projectId));
+  function deleteStoryCard(cardId) {
+    setStoryCards((current) => current.filter((card) => card.id !== cardId));
   }
-
   function showFlashToast(message) {
     setFlashToast({ id: crypto.randomUUID(), message });
-  }
-
-  function changeRecords(projectId, update) {
-    setProjects((current) =>
-      current.map((project) =>
-        project.id === projectId ? { ...project, records: update(project.records) } : project,
-      ),
-    );
-  }
-
-  // 기록과 카드는 함께 생기고, 함께 바뀌고, 함께 지워진다(H-22, H-15).
-  function addProjectRecord(projectId, record) {
-    const project = projects.find(({ id }) => id === projectId);
-
-    changeRecords(projectId, (records) => [record, ...records]);
-    setStoryCards((current) => [...current, buildRecordCard(project, record)]);
-  }
-
-  function updateProjectRecord(projectId, recordId, changes) {
-    const project = projects.find(({ id }) => id === projectId);
-    const record = { ...project.records.find(({ id }) => id === recordId), ...changes };
-
-    changeRecords(projectId, (records) =>
-      records.map((item) => (item.id === recordId ? record : item)),
-    );
-    setStoryCards((current) =>
-      current.map((card) =>
-        card.recordId === recordId ? buildRecordCard(project, record, card) : card,
-      ),
-    );
-  }
-
-  function deleteProjectRecord(projectId, recordId) {
-    changeRecords(projectId, (records) => records.filter(({ id }) => id !== recordId));
-    setStoryCards((current) => current.filter((card) => card.recordId !== recordId));
-  }
-
-  // 카드를 고치면 카드만 바뀌지만(updateStoryCard), 프로젝트 카드를 지우면 그 기록도 함께 지운다(H-22).
-  function deleteStoryCard(cardId) {
-    const card = storyCards.find(({ id }) => id === cardId);
-
-    setStoryCards((current) => current.filter(({ id }) => id !== cardId));
-    if (card?.recordId) {
-      changeRecords(card.projectId, (records) => records.filter(({ id }) => id !== card.recordId));
-    }
   }
 
   // 고쳐서 다시 저장해도 카드가 늘어나지 않도록 같은 카드는 바꿔 넣는다.
@@ -170,20 +101,16 @@ function MockDataState({ authenticatedUser, children }) {
         user,
         setUserPart,
         competencies: getCompetencyNames(user.part),
-        projects,
-        addProject,
-        updateProject,
-        storyCards,
+        projects: projectData.projects,
+        addProject: projectData.create,
+        projectData,
+        storyCards: [...storyCards.filter((card) => card.type !== "project"), ...projectData.cards],
         updateStoryCard,
         deleteStoryCard,
-        addProjectRecord,
-        updateProjectRecord,
-        deleteProjectRecord,
-        deleteProject,
         flashToast,
         showFlashToast,
         hideFlashToast: () => setFlashToast(null),
-        footprintWeeks: getFootprintWeeks(weekStatus, projects, keptRecaps),
+        footprintWeeks: getFootprintWeeks(weekStatus, MOCK_PROJECTS, []),
         weekStatus,
         setWeekStatus,
         completeWeek,

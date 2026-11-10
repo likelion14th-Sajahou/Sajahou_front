@@ -17,6 +17,7 @@ export default function PortfolioArtifactRequest({
   onSkip,
 }) {
   const [attachments, setAttachments] = useState(initialAttachments);
+  const [attachmentBusy, setAttachmentBusy] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">
@@ -24,18 +25,20 @@ export default function PortfolioArtifactRequest({
       <h3 className="text-title leading-[29px] tracking-[-0.2px] text-ink">{question}</h3>
       <div className="pt-4">
         <RecordAttachmentsField
+          category="OUTPUT"
+          onBusyChange={setAttachmentBusy}
           attachments={attachments}
           linkPlaceholder="시연·피그마·GitHub 링크"
           onChange={setAttachments}
         />
       </div>
       <div className="flex items-center gap-3">
-        <TextLink onClick={onBack}>{backLabel}</TextLink>
+        <TextLink disabled={attachmentBusy} onClick={onBack}>{backLabel}</TextLink>
         <span aria-hidden="true" className="h-4 w-px bg-line" />
-        <TextLink onClick={onSkip}>아직 없어요</TextLink>
+        <TextLink disabled={attachmentBusy} onClick={onSkip}>아직 없어요</TextLink>
         <Button
           className="ml-auto"
-          disabled={attachments.length === 0}
+          disabled={attachmentBusy || attachments.length === 0 || attachments.some((a) => a.extractStatus === "PENDING")}
           onClick={() => onSubmit(attachments)}
         >
           첨부하고 다음 →
