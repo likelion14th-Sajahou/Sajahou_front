@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { MOCK_MATERIALS_CHANGED_PREVIEW } from "@/lib/mock/retrospective";
 import { getRetrospective } from "@/lib/retrospectiveApi";
 import MaterialsForm from "./MaterialsForm";
 import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
@@ -27,13 +26,12 @@ function toFormMaterials(materials = {}) {
 }
 
 // 2단계 자료. 저장된 자료(API 13)를 불러와 폼에 채운다. 처음 시작했거나 처음부터를 눌렀으면 빈 폼이다.
-// 과제 회고(회고 완료·과제 회고 분기에서 연결)와 화면 확인용 주소(?preview=materials-changed)는 API를 부르지 않는다.
-export default function MaterialsStep({ preview }) {
+// 과제 회고는 회고 완료·과제 회고 분기(FE-24)에서 연결해서 아직 API를 부르지 않는다.
+export default function MaterialsStep() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
   const { session, isAssignment, setAssignmentStatus } = useRetrospectivePreview();
-  const changePreview = preview === "materials-changed" ? MOCK_MATERIALS_CHANGED_PREVIEW : null;
-  const usesApi = !isAssignment && !changePreview;
+  const usesApi = !isAssignment;
   const [loaded, setLoaded] = useState(null);
   const [error, setError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
@@ -60,12 +58,7 @@ export default function MaterialsStep({ preview }) {
 
   if (!usesApi) {
     return (
-      <MaterialsForm
-        key={changePreview ? "materials-changed" : "materials"}
-        initialMaterials={changePreview?.materials ?? toFormMaterials()}
-        changePreview={changePreview}
-        canSave={false}
-      />
+      <MaterialsForm initialMaterials={toFormMaterials()} canSave={false} />
     );
   }
 

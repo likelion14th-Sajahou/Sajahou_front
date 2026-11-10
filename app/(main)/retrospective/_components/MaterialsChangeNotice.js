@@ -8,6 +8,7 @@ export default function MaterialsChangeNotice({
   onCancel,
   onContinue,
   onRegenerate,
+  busy = false,
 }) {
   if (!open) return null;
 
@@ -25,10 +26,10 @@ export default function MaterialsChangeNotice({
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-x-3.5 gap-y-2.5 pt-1">
-        <TextLink onClick={onCancel}>취소</TextLink>
+        <TextLink onClick={onCancel} disabled={busy}>취소</TextLink>
         <div className="flex w-full min-w-0 flex-col gap-2 sm:ml-auto sm:w-auto sm:flex-row">
-          <Button variant="secondary" onClick={onContinue}>이전 질문 이어 쓰기</Button>
-          <Button onClick={onRegenerate}>질문 새로 만들기</Button>
+          <Button variant="secondary" onClick={onContinue} disabled={busy}>이전 질문 이어 쓰기</Button>
+          <Button onClick={onRegenerate} disabled={busy}>질문 새로 만들기</Button>
         </div>
       </div>
     </section>

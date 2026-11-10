@@ -16,7 +16,7 @@ export default async function RetrospectiveContent({ searchParams }) {
   const { preview, step, type } = await searchParams;
   const isAssignment = type === "assignment";
   const pausedContent = <PausedRetrospective />;
-  if (step === "materials") return <MaterialsContent preview={preview} />;
+  if (step === "materials") return <MaterialsContent />;
   if (step === "questions") return <AiQuestionsContent key={preview} initialComplete={preview === "questions-complete"} />;
   if (step === "review") return <ReviewContent initialDraft={MOCK_REVIEW_DRAFT} />;
   const completeContent = <CompleteContent initialDraft={MOCK_REVIEW_DRAFT} />;

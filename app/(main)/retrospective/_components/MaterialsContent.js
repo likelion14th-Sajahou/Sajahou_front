@@ -11,12 +11,12 @@ const UPLOAD_TIPS = [
   "화면 → 캡처 이미지",
 ];
 
-export default function MaterialsContent({ preview }) {
+export default function MaterialsContent() {
   return (
     <>
       <RetrospectiveSteps currentStep={1} />
       <div className="mt-7 grid grid-cols-1 items-start gap-5 min-[901px]:grid-cols-[minmax(0,1fr)_320px]">
-        <MaterialsStep preview={preview} />
+        <MaterialsStep />
         <Card as="aside" size="md" aria-labelledby="upload-guide-title">
           <CardTitle id="upload-guide-title" action={<ShapeCharacter shape="circle" color="blue" size={16} face="none" cropped />}>
             이렇게 올리면 잘 읽어요

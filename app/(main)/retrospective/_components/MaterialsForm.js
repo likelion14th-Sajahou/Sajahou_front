@@ -13,6 +13,7 @@ import MaterialAttachments from "./MaterialAttachments";
 import MaterialsChangeNotice from "./MaterialsChangeNotice";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
+import { useQuestionRequest } from "./useQuestionRequest";
 import ActionFooter from "@/components/ui/ActionFooter";
 
 const ACCEPTED_FILES = {
@@ -42,6 +43,8 @@ function toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment,
   };
 }
 
+const GENERATING_NOTICE = "AI가 자료를 읽고 질문을 만들고 있어요. 1분 정도 걸릴 수 있어요.";
+
 // 노션에서 내보낸 ZIP·MD는 '노션 MD' 칩으로 보여 준다.
 function getFileKind(fileName) {
   if (fileName.endsWith(".pdf")) return "pdf";
@@ -61,7 +64,7 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
   );
 }
 
-export default function MaterialsForm({ initialMaterials, changePreview = null, canSave = true }) {
+export default function MaterialsForm({ initialMaterials, canSave = true }) {
   const router = useRouter();
   const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref, deadlineLabels } = useRetrospectivePreview();
   const assignmentStatus = isAssignment ? "record" : sessionAssignmentStatus;
@@ -71,10 +74,11 @@ export default function MaterialsForm({ initialMaterials, changePreview = null, 
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
   const [notice, setNotice] = useState("");
-  const [isChangeNoticeOpen, setIsChangeNoticeOpen] = useState(Boolean(changePreview));
   const { save, isSaving, savedLabel } = useSaveLater({ canSave });
   // 어느 버튼으로 저장 중인지. 누른 버튼에만 '저장하는 중…'을 보여 준다.
   const [savingAction, setSavingAction] = useState(null);
+  const questions = useQuestionRequest();
+  const isBusy = isSaving || questions.isRequesting;
 
   async function saveMaterials(action, currentStep) {
     setSavingAction(action);
@@ -88,23 +92,22 @@ export default function MaterialsForm({ initialMaterials, changePreview = null, 
     if (message !== null) setNotice(message);
   }
 
-  // 질문을 받으러 가기 전에 지금 자료를 저장한다(R-14). '자료 고치기'로 돌아와도 쓴 내용이 남고,
-  // 나중에 '이어 쓰기'는 AI 질문 단계(3)부터 다시 연다(R-03). 저장에 실패하면 넘어가지 않아 쓴 내용을 잃지 않는다.
-  // 질문 만들기(API 17)를 연결하면 이 저장 다음에 부른다.
-  async function requestQuestions() {
-    if (changePreview) {
-      setNotice("");
-      setIsChangeNoticeOpen(true);
+  // 질문을 받기 전에 지금 자료를 저장한다(R-14). '자료 고치기'로 돌아와도 쓴 내용이 남는다.
+  // 단계는 보내지 않는다. 질문을 받으면 서버가 AI 질문 단계(3)로 바꾸고, 실패하면 지금 단계로 남는다.
+  // 저장에 실패하면 질문을 받지 않아 쓴 내용을 잃지 않는다.
+  async function requestQuestions(mode = "AUTO") {
+    // 과제 회고는 회고 완료·과제 회고 분기(FE-24)에서 연결한다. 지금은 화면만 넘긴다.
+    if (!canSave) {
+      router.push(getStepHref("questions"));
       return;
     }
-    if (canSave) {
-      const message = await saveMaterials("questions", 3);
-      if (message !== "") {
-        if (message) setNotice(message);
-        return;
-      }
+    const message = await saveMaterials("questions");
+    if (message !== "") {
+      if (message) setNotice(message);
+      return;
     }
-    router.push(getStepHref("questions"));
+    setNotice(GENERATING_NOTICE);
+    setNotice(await questions.request(mode));
   }
 
   function updateField(field, value) {
@@ -252,19 +255,20 @@ export default function MaterialsForm({ initialMaterials, changePreview = null, 
         <TextField label="고민 메모 · 선택" multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
       )}
       <MaterialsChangeNotice
-        open={isChangeNoticeOpen}
-        answerCount={changePreview?.answerCount ?? 0}
-        onCancel={() => { setIsChangeNoticeOpen(false); setNotice(""); }}
-        onContinue={() => setNotice("이전 질문 이어 쓰기는 준비 중이에요.")}
-        onRegenerate={() => setNotice("질문 새로 만들기는 준비 중이에요. 기존 답변은 삭제하지 않았어요.")}
+        open={questions.changedAnswerCount !== null}
+        answerCount={questions.changedAnswerCount ?? 0}
+        busy={isBusy}
+        onCancel={() => { questions.closeChangeNotice(); setNotice(""); }}
+        onContinue={() => requestQuestions("CONTINUE")}
+        onRegenerate={() => requestQuestions("REGENERATE")}
       />
       <ActionFooter className="flex-wrap justify-between gap-x-3.5 gap-y-2.5">
         <TextLink href={getStepHref()}>← 이전</TextLink>
         {/* 저장 시각이 버튼을 오른쪽으로 밀어 준다. 좁은 화면에서는 버튼이 다음 줄로 내려간다. */}
         <SavedTime label={savedLabel} className="ml-auto" />
         <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-          <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={saveLater} disabled={isSaving} aria-busy={savingAction === "later"}>{savingAction === "later" ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
-          <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={requestQuestions} disabled={isSaving} aria-busy={savingAction === "questions"}>{savingAction === "questions" ? "저장하는 중…" : "AI 질문 받기 →"}</Button>
+          <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={saveLater} disabled={isBusy} aria-busy={savingAction === "later"}>{savingAction === "later" ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
+          <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => requestQuestions()} disabled={isBusy} aria-busy={savingAction === "questions" || questions.isRequesting}>{savingAction === "questions" ? "저장하는 중…" : questions.isRequesting ? "질문을 만드는 중…" : "AI 질문 받기 →"}</Button>
         </div>
       </ActionFooter>
       <p role="status" className={notice ? "-mt-1 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
