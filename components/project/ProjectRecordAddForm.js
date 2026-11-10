@@ -84,9 +84,9 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
 
     const controller = new AbortController(); request.current = controller; setBusy(true); setNotice("");
     try {
-      const body = recordBody({ ...getTrimmedFields(), attachments, tags, organizedByAi: isOrganizedByAi }, projectData.competencyItems);
+      const body = recordBody({ ...getTrimmedFields(), attachments, tags, organizedByAi: isOrganizedByAi }, projectData.competencyItems, { isUpdate: Boolean(draftId) });
       const saved = draftId
-        ? await updateProjectRecord(draftId, { ...body, memo: memo.trim() || null }, { signal: controller.signal })
+        ? await updateProjectRecord(draftId, { ...body, memo: memo.trim() }, { signal: controller.signal })
         : await createProjectRecord(projectId, { ...body, memo: memo.trim() || null, aiOrganize: false }, { signal: controller.signal });
       controller.signal.throwIfAborted();
       setDraftId(saved.recordId);
@@ -120,7 +120,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
         controller.signal.throwIfAborted();
         recordId = draft.recordId;
         setDraftId(draft.recordId);
-      } else await updateProjectRecord(draftId, { memo: memo.trim() || null, attachmentIds: attachments.map((a) => a.attachmentId) }, options);
+      } else await updateProjectRecord(draftId, { memo: memo.trim(), attachmentIds: attachments.map((a) => a.attachmentId) }, options);
       const result = await getRecordQuestions(recordId, { ...options, regenerate });
       controller.signal.throwIfAborted();
       setQuestionState((current) => ({ questions: result.questions, inputs: regenerate ? {} : current.inputs,

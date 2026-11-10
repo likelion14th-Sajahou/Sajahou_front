@@ -62,7 +62,7 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
   // 기록을 고치거나 지우면 카드도 함께 바뀌고, 따로 안내하지 않는다(H-21).
   async function saveRecord(recordId, changes, signal) {
     const record = projectRecords.find((r) => r.id === recordId);
-    const body = Object.keys(changes).length === 1 && "result" in changes ? { result: changes.result } : recordBody({ ...record, ...changes }, projectData.competencyItems);
+    const body = Object.keys(changes).length === 1 && "result" in changes ? { result: changes.result } : recordBody({ ...record, ...changes }, projectData.competencyItems, { isUpdate: true });
     await api.updateProjectRecord(recordId, body, { signal });
     await projectData.sync(project.id);
   }
