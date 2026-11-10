@@ -5,12 +5,14 @@ import { useMockData } from "@/components/layout/MockDataProvider";
 import FootprintsPanel from "./FootprintsPanel";
 import MyRecordTabs from "./MyRecordTabs";
 import StoryCardsPanel from "./StoryCardsPanel";
-import { getFootprints } from "@/lib/myRecordApi";
+import { getFootprints, getStoryCards } from "@/lib/myRecordApi";
+import { cardView } from "@/lib/projectViewModel";
 import { footprintView, footprintSections } from "@/lib/myRecordViewModel";
 import useRecordResource from "./useRecordResource";
 import RecordRequestStatus from "./RecordRequestStatus";
 
 const loadFootprints = async (signal) => footprintView(await getFootprints({ signal }));
+const loadCards = (signal) => getStoryCards({}, { signal });
 
 export default function MyRecordView({
   requestedTab,
@@ -19,15 +21,14 @@ export default function MyRecordView({
   requestedHighlightId,
   requestedCompetency,
 }) {
-  const { user, competencies, storyCards, updateStoryCard, deleteStoryCard } = useMockData();
+  const { user, projectData, updateStoryCard, deleteStoryCard } = useMockData();
   const footprints = useRecordResource(loadFootprints, String(user.id));
-  // 파트를 바꿔 보면 지금 파트 목록에 없는 태그를 단 카드가 생길 수 있어, 걸러 보기에는 그 태그도 목록 뒤에 붙인다.
-  const filterCompetencies = [
-    ...new Set([...competencies, ...storyCards.flatMap(({ tags }) => tags)]),
-  ];
-  const initialCompetency = filterCompetencies.find((name) => name === requestedCompetency);
-  // 프로젝트에서 새로 만든 카드도 주차 순서에 맞게 보여 준다.
-  const cards = storyCards.toSorted((a, b) => b.week - a.week);
+  const cardList = useRecordResource(loadCards, String(user.id));
+  // 역량 API는 기존 프로젝트 데이터 로더가 이미 조회하므로 그 결과를 공유한다.
+  const competencyItems = projectData.competencyItems;
+  const competencies = competencyItems.map((item) => item.name);
+  const initialCompetency = competencies.find((name) => name === requestedCompetency);
+  const cards = cardList.data?.cards.map(cardView) ?? [];
   const initialCardId = cards.find(({ id }) => id === requestedCardId)?.id;
   const initialHighlightedCardId = cards.find(({ id }) => id === requestedHighlightId)?.id;
   // 다른 화면에서 카드로 이동해 오면 스토리 카드 탭으로 연다.
@@ -42,7 +43,7 @@ export default function MyRecordView({
 
   return (
     <>
-      <MyRecordTabs activeTab={activeTab} storyCardCount={cards.length} />
+      <MyRecordTabs activeTab={activeTab} storyCardCount={cardList.data?.totalCount ?? "…"} />
       {activeTab === "footprints" && !footprints.data && <RecordRequestStatus resource={footprints} />}
       {activeTab === "footprints" && footprints.data && (
         <FootprintsPanel
@@ -52,12 +53,14 @@ export default function MyRecordView({
           initialWeek={week ?? footprints.data.currentWeek}
         />
       )}
-      {activeTab === "cards" && (
+      {activeTab === "cards" && !cardList.data && <RecordRequestStatus resource={cardList} />}
+      {activeTab === "cards" && cardList.data && (
         <StoryCardsPanel
           key={initialCardId || initialHighlightedCardId || initialCompetency ? bfcacheId : "story-cards"}
           cards={cards}
           competencies={competencies}
-          filterCompetencies={filterCompetencies}
+          competencyItems={competencyItems}
+          userId={user.id}
           week={week}
           initialCardId={initialCardId}
           initialHighlightedCardId={initialHighlightedCardId}

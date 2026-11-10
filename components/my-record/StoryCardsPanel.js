@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
 import EmptyState from "@/components/ui/EmptyState";
@@ -8,6 +8,10 @@ import Modal from "@/components/ui/Modal";
 import StoryCardDetail from "./StoryCardDetail";
 import StoryCardList from "./StoryCardList";
 import RemoteProjectCard from "@/components/project/RemoteProjectCard";
+import { getStoryCards } from "@/lib/myRecordApi";
+import { cardView } from "@/lib/projectViewModel";
+import useRecordResource from "./useRecordResource";
+import RecordRequestStatus from "./RecordRequestStatus";
 
 const ALL = "all";
 
@@ -23,16 +27,11 @@ const HIGHLIGHT_DURATION_MS = 3000;
 const FIELD_CLASSES =
   "h-[38px] rounded-[14px] border border-transparent bg-canvas text-body-sm text-ink";
 
-function matchesSearch({ title, tags, evidence }, search) {
-  const target = `${title} ${tags.map((tag) => `#${tag}`).join(" ")} ${evidence}`;
-
-  return target.toLowerCase().includes(search);
-}
-
 export default function StoryCardsPanel({
   cards,
   competencies,
-  filterCompetencies,
+  competencyItems,
+  userId,
   week,
   initialCardId,
   initialHighlightedCardId,
@@ -79,23 +78,16 @@ export default function StoryCardsPanel({
     closeCard();
   }
 
-  const normalizedSearch = search.trim().toLowerCase();
-  // 역량을 뺀 나머지 필터의 결과다. 드롭다운의 카드 수도 이 목록에서 세어 고른 뒤의 결과와 맞춘다.
-  const candidateCards = cards.filter(
-    (card) =>
-      (type === ALL || card.type === type) &&
-      (week === undefined || card.week === week) &&
-      matchesSearch(card, normalizedSearch),
-  );
-  const visibleCards =
-    competency === ALL
-      ? candidateCards
-      : candidateCards.filter(({ tags }) => tags.includes(competency));
+  const competencyId = competencyItems.find((item) => item.name === competency)?.id;
+  const query = JSON.stringify({ type: type === ALL ? undefined : type.toUpperCase(), competencyId, weekNumber: week, q: search.trim() || undefined });
+  const load = useCallback((signal) => getStoryCards(JSON.parse(query), { signal }), [query]);
+  const filtered = useRecordResource(load, query === "{}" ? null : `${userId}:${query}`, search ? 250 : 0);
+  const visibleCards = query === "{}" ? cards : filtered.data?.cards.map(cardView) ?? [];
 
   return (
     <section aria-label="스토리 카드" className="flex flex-col gap-4 pt-5">
       <div className="flex flex-wrap items-center gap-2">
-        <div role="group" aria-label="카드 유형" className="flex shrink-0 gap-2">
+        <div role="group" aria-label="카드 유형" className="flex flex-wrap gap-2">
           {TYPE_FILTERS.map(({ id, label }) => (
             <Chip key={id} selected={id === type} onClick={() => setType(id)}>
               {label}
@@ -109,11 +101,10 @@ export default function StoryCardsPanel({
           className={`w-[163px] shrink-0 cursor-pointer appearance-none bg-[url(/images/common/chevron-down.svg)] bg-[position:right_6px_center] bg-no-repeat pr-7 pl-4 ${FIELD_CLASSES}`}
         >
           <option value={ALL}>역량 전체</option>
-          {filterCompetencies.map((name) => {
-            const count = candidateCards.filter(({ tags }) => tags.includes(name)).length;
+          {competencyItems.map(({ id, name, cardCount: count }) => {
 
             return (
-              <option key={name} value={name} disabled={count === 0}>
+              <option key={id} value={name} disabled={count === 0}>
                 #{name} ({count})
               </option>
             );
@@ -124,7 +115,7 @@ export default function StoryCardsPanel({
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="검색"
-          className={`min-w-0 flex-1 px-3.5 placeholder:text-placeholder ${FIELD_CLASSES}`}
+          className={`min-w-[120px] flex-1 px-3.5 placeholder:text-placeholder ${FIELD_CLASSES}`}
         />
       </div>
 
@@ -139,7 +130,7 @@ export default function StoryCardsPanel({
         </Link>
       )}
 
-      {visibleCards.length > 0 ? (
+      {filtered.loading || filtered.error ? <RecordRequestStatus resource={filtered}>조건에 맞는 카드를 불러오는 중이에요.</RecordRequestStatus> : visibleCards.length > 0 ? (
         <StoryCardList
           cards={visibleCards}
           highlightedCardId={highlightedCardId}

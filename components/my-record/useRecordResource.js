@@ -7,6 +7,7 @@ export default function useRecordResource(load, key, delayMs = 0) {
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState(null);
   useEffect(() => {
+    if (key === null) return;
     const controller = new AbortController();
     const timer = setTimeout(() => {
       load(controller.signal).then((data) => {
@@ -18,6 +19,6 @@ export default function useRecordResource(load, key, delayMs = 0) {
     return () => { clearTimeout(timer); controller.abort(); };
   }, [load, key, attempt, delayMs]);
   const current = result?.key === key && result.attempt === attempt ? result : null;
-  return { data: current?.data, error: current?.error, loading: !current,
+  return { data: current?.data, error: current?.error, loading: key !== null && !current,
     refresh: () => setAttempt((value) => value + 1) };
 }
