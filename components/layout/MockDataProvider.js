@@ -1,12 +1,13 @@
 "use client";
 
-import { createContext, use, useState } from "react";
+import { createContext, use, useEffect, useState } from "react";
 import { getCompetencyNames } from "@/lib/mock/competencies";
 import { FOOTPRINT_WEEKS } from "@/lib/mock/myRecord";
 import { MOCK_PROJECTS } from "@/lib/mock/projects";
 import { MOCK_STORY_CARDS } from "@/lib/mock/storyCards";
 import { MOCK_USER } from "@/lib/mock/user";
 import { MOCK_WEEK } from "@/lib/mock/week";
+import { setMockDemoPart } from "@/lib/mock/demoPart";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { useAuth } from "./AuthProvider";
 import useProjectData from "@/components/project/useProjectData";
@@ -68,9 +69,13 @@ function MockDataState({ authenticatedUser, children }) {
   const [storyCards, setStoryCards] = useState(INITIAL_STORY_CARDS);
   const [weekStatus, setWeekStatus] = useState(MOCK_WEEK.status);
 
+  // 사용자가 바뀌면(로그아웃·다른 계정) 데모 파트도 처음 값으로 돌린다.
+  useEffect(() => () => setMockDemoPart(null), []);
+
   // 회고의 '데모 · 파트 바꿔 보기'(시연용)로 바뀐다. 상단 메뉴, 역량 태그 목록, 회고 화면이 모두 이 파트를 따른다.
-  // 실제 서비스에서는 가입 때 고른 파트로 고정된다(S-04).
+  // 회고 mock API도 이 파트의 마감일로 응답한다. 실제 서비스에서는 가입 때 고른 파트로 고정된다(S-04).
   function setUserPart(part) {
+    setMockDemoPart(Object.keys(AUTH_PART_LABELS).find((code) => AUTH_PART_LABELS[code] === part) ?? null);
     setPreviewPart(part);
   }
 

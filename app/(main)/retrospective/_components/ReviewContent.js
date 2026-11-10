@@ -12,6 +12,7 @@ import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/
 import { buildWeekStoryCard } from "@/lib/mock/retrospective";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { SavedTime, useSaveLater } from "./useSaveLater";
 import { copyText } from "@/lib/clipboard";
 import CardTitle from "@/components/ui/CardTitle";
 import ActionFooter from "@/components/ui/ActionFooter";
@@ -28,6 +29,13 @@ export default function ReviewContent({ initialDraft }) {
   const { competencies, completeWeek } = useMockData();
   const [draft, setDraft] = useState(initialDraft);
   const [notice, setNotice] = useState("");
+  const { save, isSaving, savedLabel } = useSaveLater();
+
+  // 회고록·카드 초안은 회고록 만들기·저장 API(19·20번)에서 다룬다. 여기서는 지금 단계만 저장한다.
+  async function saveLater() {
+    const message = await save({ currentStep: 4 });
+    if (message !== null) setNotice(message);
+  }
   const { toast, showToast, hideToast } = useToast();
 
   function updateStory(name, value) {
@@ -94,9 +102,10 @@ export default function ReviewContent({ initialDraft }) {
             </ul>
           </div>
           <ActionFooter>
-            <TextLink href={`${getStepHref("questions")}&preview=questions-complete`}>← 질문으로</TextLink>
+            {/* 모든 질문에 답했으면 질문 화면이 질문 끝(고치기 목록)으로 열린다(R-17). */}
+            <TextLink href={getStepHref("questions")}>← 질문으로</TextLink>
             <div className="flex gap-2">
-              <Button variant="secondary" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 수정한 내용이 사라져요.")}>나중에 이어쓰기</Button>
+              <Button variant="secondary" onClick={saveLater} disabled={isSaving} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
               <Button variant="accent" href={getStepHref("complete")} onClick={(event) => {
                 if (!draft.selectedTags.length) {
                   event.preventDefault();
@@ -108,6 +117,8 @@ export default function ReviewContent({ initialDraft }) {
               }}>저장하고 사자록에 추가</Button>
             </div>
           </ActionFooter>
+          {/* 버튼 줄에 자리가 없어 바로 아래 오른쪽에 둔다. 저장 전에는 자리를 차지하지 않는다. */}
+          <SavedTime label={savedLabel} className="-mt-2 self-end empty:hidden" />
         </Card>
       </div>
       <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>

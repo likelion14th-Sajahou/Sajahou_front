@@ -1,10 +1,10 @@
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import TextLink from "@/components/ui/TextLink";
+import AnsweredQuestionList from "./AnsweredQuestionList";
 
 // 질문 끝(R-17, 04-a). 질문마다 '고치기'로 그 질문으로 돌아가 답을 고칠 수 있다.
-export default function AiQuestionsComplete({ questions, responses, onEdit, reviewHref }) {
+export default function AiQuestionsComplete({ questions, onEdit, reviewHref }) {
   return (
     <>
       <Card as="section" size="md" className="rounded-[28px]" aria-labelledby="questions-complete-title">
@@ -24,22 +24,7 @@ export default function AiQuestionsComplete({ questions, responses, onEdit, revi
           </div>
         </div>
       </Card>
-      <ol aria-label="질문과 답변 목록" className="flex flex-col gap-2">
-        {questions.map((question, index) => (
-          <li key={question.id} className="flex flex-col gap-1 rounded-2xl bg-white px-4 py-3">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-label leading-[1.5] text-ink-subtle">질문 {index + 1} · {question.category}</p>
-              <TextLink size="sm" aria-label={`질문 ${index + 1} 답 고치기`} onClick={() => onEdit(index)}>
-                고치기
-              </TextLink>
-            </div>
-            <h3 className="text-body-sm">{question.question}</h3>
-            <p className="whitespace-pre-wrap break-words text-body-sm text-ink-muted">
-              {responses[question.id].status === "skipped" ? "건너뛴 질문이에요." : responses[question.id].answer}
-            </p>
-          </li>
-        ))}
-      </ol>
+      <AnsweredQuestionList questions={questions} label="질문과 답변 목록" onEdit={onEdit} />
     </>
   );
 }

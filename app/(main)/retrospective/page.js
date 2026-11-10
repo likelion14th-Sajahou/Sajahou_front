@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { MOCK_RETROSPECTIVE } from "@/lib/mock/retrospective";
 import RetrospectiveContent from "./_components/RetrospectiveContent";
 import RetrospectivePreview, { RetrospectiveHeading } from "./_components/RetrospectivePreview";
 import RequireAuth from "@/components/layout/RequireAuth";
@@ -20,11 +19,8 @@ export default function RetrospectivePage({ searchParams }) {
               </p>
             }
           >
-            <RetrospectiveHeading week={MOCK_RETROSPECTIVE.week} />
-            <RetrospectiveContent
-              searchParams={searchParams}
-              retrospective={MOCK_RETROSPECTIVE}
-            />
+            <RetrospectiveHeading />
+            <RetrospectiveContent searchParams={searchParams} />
           </Suspense>
         </RetrospectivePreview>
       </RequireAuth>

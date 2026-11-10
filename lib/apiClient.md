@@ -187,11 +187,12 @@ HTTP 실패 또는 `success:false`는 `ApiError`로 전달된다. 잘못된 환�
 
 1. 담당 API의 메서드, 경로, query/body, 인증, 성공·실패 구조를 명세에서 확인한 뒤 담당 함수를 작성한다. 파일 배치는 기존 구조와 팀 합의를 따른다.
 2. 담당 함수에서 이 Client를 호출한다. 공통 헤더·JSON 직렬화·응답 파싱을 중복 구현하지 않는다.
-3. live 모드는 세션 쿠키 인증을 사용한다. 요청마다 accessToken을 전달하거나 스토리지 조회·토큰 자동 갱신을 추가하지 않는다. mock 데이터의 localStorage 처리는 `lib/mock/auth.js`에서만 수행한다.
+3. live 모드는 세션 쿠키 인증을 사용한다. 요청마다 accessToken을 전달하거나 스토리지 조회·토큰 자동 갱신을 추가하지 않는다. mock 데이터의 localStorage 처리는 `lib/mock/`의 도메인 mock(`auth.js`, `retrospectiveApi.js` 등)에서만 수행한다.
 4. 로딩·빈 데이터·오류 알림·화면 이동은 호출부에서 처리한다. 공통 Client에 화면별 로직을 넣지 않는다.
 5. 캐싱 정책은 요청별로 검토한다. Client가 일괄 강제하지 않으며, 필요하면 `cache: "no-store"`를 전달한다. 서버의 `next` 캐시 옵션은 브라우저에서 같은 기능을 제공하지 않는다. `cache: "no-store"`와 양수 `next.revalidate`처럼 충돌하는 옵션을 함께 주지 않는다.
 6. Mock 전환 시 실제 data 구조·상태·빈 값과 UI 요구를 비교한다. Client를 Mock 데이터 모양에 맞추거나 변환 어댑터를 넣지 않는다.
 7. 백엔드 준비 후 실제 주소, CORS·HTTPS, 인증, 업로드, 오류 응답, AI 지연을 확인한다. 현재 테스트는 실제 연동을 검증한 것이 아니다.
+8. 아직 mock이 없는 API는 명세를 보고 `lib/mock/`에 도메인 mock을 먼저 만든다. 명세와 같은 요청·응답을 만들고 `lib/mock/api.js`의 `DOMAIN_MOCKS`에 경로를 더하면, `authRequest`(mock 모드)가 그 경로를 해당 mock으로 보낸다. 로그인 확인은 `lib/mock/auth.js`의 `readMockSessionUser`를 쓰고, 응답은 `lib/mock/mockResponse.js`로 만든다. 호출 함수는 `lib/retrospectiveApi.js`처럼 `request` 옵션을 받아 화면에서 `authenticatedRequest`를 넘길 수 있게 한다. 백엔드와 연결할 때는 `NEXT_PUBLIC_AUTH_MODE=live`로만 바꾸고 호출 코드는 그대로 둔다.
 
 ## 6. 내 정보 수정·탈퇴
 
@@ -203,7 +204,7 @@ HTTP 실패 또는 `success:false`는 `ApiError`로 전달된다. 잘못된 환�
 
 ### 브라우저 mock의 범위
 
-- mock 모드에서만 `lib/mock/auth.js`를 동적으로 불러와 `localStorage`의 `sajarok_mock_auth` 한 항목에 mock 회원·로그인·가입 진행 정보를 보관한다. 서버 Route Handler·암호화 키·외부 저장소는 필요하지 않다.
+- mock 모드에서만 `lib/mock/api.js`를 동적으로 불러온다. 인증 경로는 `lib/mock/auth.js`가 처리하며 `localStorage`의 `sajarok_mock_auth` 한 항목에 mock 회원·로그인·가입 진행 정보를 보관한다. 서버 Route Handler·암호화 키·외부 저장소는 필요하지 않다.
 - 로그인·가입·조회·수정·로그아웃·탈퇴는 네트워크 없이 처리한다. mock은 API와 같은 상태 코드·`success/data/error` 형식의 Response를 만들고 기존 공통 Client가 파싱하므로 화면의 응답·오류 처리를 재사용한다.
 - 회원 정보는 같은 Preview 주소의 브라우저에서 새로고침·재로그인 후에도 유지된다. 다른 주소·브라우저·시크릿 창과 공유하지 않는다. 로그인 모의 상태는 7일, 가입 진행은 10분간 유효하다.
 - Google 인증 UI는 로그인과 탈퇴 모두 `NEXT_PUBLIC_GOOGLE_AUTH_MODE=google|mock`을 따른다. 실제 Google 인증과 localStorage mock도 함께 사용할 수 있다. mock은 Google payload의 계정 식별값으로 동일 계정 여부를 모의 비교하며 서명 검증은 하지 않는다. 실제 Google ID 토큰·백엔드 인증 정보는 localStorage에 저장하지 않는다.

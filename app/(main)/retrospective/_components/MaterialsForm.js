@@ -12,6 +12,8 @@ import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
 import MaterialsChangeNotice from "./MaterialsChangeNotice";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { SavedTime, useSaveLater } from "./useSaveLater";
+import { useQuestionRequest } from "./useQuestionRequest";
 import ActionFooter from "@/components/ui/ActionFooter";
 
 const ACCEPTED_FILES = {
@@ -20,6 +22,28 @@ const ACCEPTED_FILES = {
   // 노션 ZIP·MD·PDF·이미지(R-11)
   assignmentFiles: ".zip,.md,.pdf,.png,.jpg,.jpeg,.webp,.gif",
 };
+
+const ASSIGNMENT_MODES = { record: "RECORD", later: "LATER", none: "NONE" };
+
+// 폼 값을 임시저장(API 14) 요청으로 바꾼다. API는 보낸 필드만 바꾸고, null이면 비운다.
+// - 비운 칸은 null로 보내 서버 값도 비운다.
+// - 이 화면에 없는 칸(과제 회고의 과제 방식, 프론트엔드가 아닌 파트의 코드리뷰)은 보내지 않아 서버 값을 그대로 둔다.
+// 첨부는 첨부 API(7~10번)를 연결할 때 attachmentIds로 보낸다.
+function toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment, isFrontend }) {
+  const text = (value) => value.trim() ? value : null;
+  return {
+    currentStep,
+    hasPractice: materials.hasPractice,
+    practiceContent: text(materials.practice),
+    ...(isAssignment ? {} : { assignmentMode: ASSIGNMENT_MODES[assignmentStatus] }),
+    assignmentContent: text(materials.assignment),
+    // 받은 코드리뷰는 프론트엔드 파트만 있다(R-11). 다른 파트는 보내지 않는다.
+    ...(isFrontend ? { codeReview: text(materials.codeReview) } : {}),
+    memo: text(materials.memo),
+  };
+}
+
+const GENERATING_NOTICE = "AI가 자료를 읽고 질문을 만들고 있어요. 1분 정도 걸릴 수 있어요.";
 
 // 노션에서 내보낸 ZIP·MD는 '노션 MD' 칩으로 보여 준다.
 function getFileKind(fileName) {
@@ -40,30 +64,50 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
   );
 }
 
-export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLabel, changePreview = null }) {
+export default function MaterialsForm({ initialMaterials, canSave = true }) {
   const router = useRouter();
-  const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref } = useRetrospectivePreview();
+  const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref, deadlineLabels } = useRetrospectivePreview();
   const assignmentStatus = isAssignment ? "record" : sessionAssignmentStatus;
-  const [drafts, setDrafts] = useState(initialMaterialsByPart);
-  const materials = drafts[part];
-  const [hasPractice, setHasPractice] = useState(true);
+  // 입력 영역을 숨겨도(실습 없음, 과제 나중에) 작성한 내용은 유지한다.
+  const [materials, setMaterials] = useState(initialMaterials);
+  const { hasPractice } = materials;
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
   const [notice, setNotice] = useState("");
-  const [isChangeNoticeOpen, setIsChangeNoticeOpen] = useState(Boolean(changePreview));
+  const { save, isSaving, savedLabel } = useSaveLater({ canSave });
+  // 어느 버튼으로 저장 중인지. 누른 버튼에만 '저장하는 중…'을 보여 준다.
+  const [savingAction, setSavingAction] = useState(null);
+  const questions = useQuestionRequest();
+  const isBusy = isSaving || questions.isRequesting;
 
-  function requestQuestions() {
-    if (changePreview) {
-      setNotice("");
-      setIsChangeNoticeOpen(true);
-      return;
-    }
-    router.push(getStepHref("questions"));
+  async function saveMaterials(action, currentStep) {
+    setSavingAction(action);
+    const message = await save(toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment, isFrontend: part === "프론트엔드" }));
+    setSavingAction(null);
+    return message;
   }
 
-  // 파트를 바꾸거나 입력 영역을 숨겨도 각 파트에서 작성한 내용은 유지한다.
-  function setMaterials(update) {
-    setDrafts((previous) => ({ ...previous, [part]: update(previous[part]) }));
+  async function saveLater() {
+    const message = await saveMaterials("later", 2);
+    if (message !== null) setNotice(message);
+  }
+
+  // 질문을 받기 전에 지금 자료를 저장한다(R-14). '자료 고치기'로 돌아와도 쓴 내용이 남는다.
+  // 단계는 보내지 않는다. 질문을 받으면 서버가 AI 질문 단계(3)로 바꾸고, 실패하면 지금 단계로 남는다.
+  // 저장에 실패하면 질문을 받지 않아 쓴 내용을 잃지 않는다.
+  async function requestQuestions(mode = "AUTO") {
+    // 과제 회고는 회고 완료·과제 회고 분기(FE-24)에서 연결한다. 지금은 화면만 넘긴다.
+    if (!canSave) {
+      router.push(getStepHref("questions"));
+      return;
+    }
+    const message = await saveMaterials("questions");
+    if (message !== "") {
+      if (message) setNotice(message);
+      return;
+    }
+    setNotice(GENERATING_NOTICE);
+    setNotice(await questions.request(mode));
   }
 
   function updateField(field, value) {
@@ -136,7 +180,7 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
           <MaterialSection title="세션 중 실습이 있었나요?" titleId="practice-title" inactive={!hasPractice} controls={
             <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="practice-title">
               {["있었어요", "없었어요"].map((label, index) => (
-                <Chip key={label} size="sm" selected={hasPractice === (index === 0)} onClick={() => setHasPractice(index === 0)}>{label}</Chip>
+                <Chip key={label} size="sm" selected={hasPractice === (index === 0)} onClick={() => updateField("hasPractice", index === 0)}>{label}</Chip>
               ))}
             </div>
           }>
@@ -201,27 +245,30 @@ export default function MaterialsForm({ initialMaterialsByPart, assignmentDueLab
         ) : (
           <p className="text-body-sm break-keep text-ink-subtle">
             {assignmentStatus === "later"
-              ? `과제는 ${assignmentDueLabel}까지 따로 써요. 세션 회고만 먼저 끝내요.`
+              ? `과제는 ${deadlineLabels.assignment}까지 따로 써요. 세션 회고만 먼저 끝내요.`
               : "이번 주 과제는 없어요."}
           </p>
         )}
       </MaterialSection>
 
       {!isAssignment && (
-        <TextField label="고민 메모 · 선택" multiline name="memo" placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
+        <TextField label="고민 메모 · 선택" multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
       )}
       <MaterialsChangeNotice
-        open={isChangeNoticeOpen}
-        answerCount={changePreview?.answerCount ?? 0}
-        onCancel={() => { setIsChangeNoticeOpen(false); setNotice(""); }}
-        onContinue={() => setNotice("이전 질문 이어 쓰기는 준비 중이에요.")}
-        onRegenerate={() => setNotice("질문 새로 만들기는 준비 중이에요. 기존 답변은 삭제하지 않았어요.")}
+        open={questions.changedAnswerCount !== null}
+        answerCount={questions.changedAnswerCount ?? 0}
+        busy={isBusy}
+        onCancel={() => { questions.closeChangeNotice(); setNotice(""); }}
+        onContinue={() => requestQuestions("CONTINUE")}
+        onRegenerate={() => requestQuestions("REGENERATE")}
       />
       <ActionFooter className="flex-wrap justify-between gap-x-3.5 gap-y-2.5">
         <TextLink href={getStepHref()}>← 이전</TextLink>
-        <div className="ml-auto grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-          <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => setNotice("임시 저장은 준비 중이에요. 화면을 벗어나면 입력한 내용이 사라져요.")}>나중에 이어쓰기</Button>
-          <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={requestQuestions}>AI 질문 받기 →</Button>
+        {/* 저장 시각이 버튼을 오른쪽으로 밀어 준다. 좁은 화면에서는 버튼이 다음 줄로 내려간다. */}
+        <SavedTime label={savedLabel} className="ml-auto" />
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+          <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={saveLater} disabled={isBusy} aria-busy={savingAction === "later"}>{savingAction === "later" ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
+          <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => requestQuestions()} disabled={isBusy} aria-busy={savingAction === "questions" || questions.isRequesting}>{savingAction === "questions" ? "저장하는 중…" : questions.isRequesting ? "질문을 만드는 중…" : "AI 질문 받기 →"}</Button>
         </div>
       </ActionFooter>
       <p role="status" className={notice ? "-mt-1 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
