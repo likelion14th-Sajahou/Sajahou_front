@@ -13,12 +13,15 @@ export default function useRecordResource(load, key, delayMs = 0) {
       load(controller.signal).then((data) => {
         if (!controller.signal.aborted) setResult({ key, attempt, data });
       }).catch((error) => {
-        if (!controller.signal.aborted) setResult({ key, attempt, error });
+        if (!controller.signal.aborted) setResult((previous) => ({ key, attempt, error,
+          data: previous?.key === key ? previous.data : undefined }));
       });
     }, delayMs);
     return () => { clearTimeout(timer); controller.abort(); };
   }, [load, key, attempt, delayMs]);
   const current = result?.key === key && result.attempt === attempt ? result : null;
-  return { data: current?.data, error: current?.error, loading: key !== null && !current,
-    refresh: () => setAttempt((value) => value + 1) };
+  return { data: result?.key === key ? result.data : undefined, error: current?.error, loading: key !== null && !current,
+    refresh: () => setAttempt((value) => value + 1),
+    updateData: (update) => setResult((previous) => previous?.key === key && previous.data
+      ? { ...previous, data: update(previous.data) } : previous) };
 }

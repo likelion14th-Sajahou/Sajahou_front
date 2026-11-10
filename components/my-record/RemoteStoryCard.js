@@ -21,11 +21,18 @@ export default function RemoteStoryCard({ cardId, titleId, competencyItems, onCl
     <Button variant="secondary" onClick={onClose}>닫기</Button>
   </div>;
   return <StoryCardDetail card={card} titleId={titleId} competencies={competencyItems.map((item) => item.name)} onClose={onClose}
-    onUpdate={async (changes) => {
+    onUpdate={async (changes, signal) => {
       const data = await updateStoryCard(cardId, { title: changes.title, fullMarkdown: changes.document,
-        ...changes.summary, competencyIds: changes.tags.map((name) => competencyItems.find((item) => item.name === name)?.id) });
+        ...changes.summary, competencyIds: changes.tags.map((name) => competencyItems.find((item) => item.name === name)?.id) }, { signal });
+      if (signal?.aborted) return;
       setSaved(cardView(data));
       await onChanged?.(data, card);
     }}
-    onDelete={async () => { await deleteStoryCard(cardId); await onChanged?.(null, card); onClose(); }} />;
+    onDelete={async (signal) => {
+      await deleteStoryCard(cardId, { signal });
+      if (signal?.aborted) return;
+      const changed = onChanged?.(null, card);
+      onClose();
+      await changed;
+    }} />;
 }

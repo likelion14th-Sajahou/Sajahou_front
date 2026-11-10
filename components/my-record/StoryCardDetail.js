@@ -105,7 +105,10 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
   }
 
   function handleSave(changes) {
-    return run(async () => { await onUpdate(changes); setCopyNotice(""); setIsEditing(false); });
+    return run(async (signal) => {
+      await onUpdate(changes, signal);
+      if (!signal.aborted) { setCopyNotice(""); setIsEditing(false); }
+    });
   }
 
   return (
@@ -178,7 +181,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
                 <TextLink autoFocus onClick={() => setIsConfirmingDelete(false)}>
                   취소
                 </TextLink>
-                <Button variant="danger" onClick={() => run(() => onDelete())}>지우기</Button>
+                <Button variant="danger" onClick={() => run((signal) => onDelete(signal))}>지우기</Button>
               </div>
             </div>
           ) : (

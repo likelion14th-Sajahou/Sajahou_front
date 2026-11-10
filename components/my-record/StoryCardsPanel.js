@@ -35,6 +35,7 @@ export default function StoryCardsPanel({
   searchParams,
   onNavigate,
   onChanged,
+  revision,
 }) {
   const { type, week, q: search, card: openCardId } = location;
   const [expiredHighlight, setExpiredHighlight] = useState(null);
@@ -48,7 +49,7 @@ export default function StoryCardsPanel({
   const competencyId = location.competencyId ?? competencyItems.find((item) => item.name === location.tag)?.id;
   const query = JSON.stringify({ type: type === ALL ? undefined : type.toUpperCase(), competencyId, weekNumber: week, q: search.trim() || undefined });
   const load = useCallback((signal) => getStoryCards(JSON.parse(query), { signal }), [query]);
-  const filtered = useRecordResource(load, query === "{}" ? null : `${userId}:${query}`, search ? 250 : 0);
+  const filtered = useRecordResource(load, query === "{}" ? null : `${userId}:${revision}:${query}`, search ? 250 : 0);
   const visibleCards = query === "{}" ? cards : filtered.data?.cards.map(cardView) ?? [];
   const visibleIds = visibleCards.map((card) => card.id).join(",");
   useEffect(() => {
