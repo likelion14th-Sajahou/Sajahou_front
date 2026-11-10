@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { createReviewDraft } from "@/lib/retrospectiveApi";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
-import { getAiErrorMessage } from "./useQuestionRequest";
+import { getAiErrorMessage } from "@/lib/requestErrorMessage";
+
 
 // '초안 확인하기'·'이대로 정리하기'. 지금 답으로 회고록과 카드 초안을 만든 뒤(API 19) 검토 단계로 간다.
 // 검토에서 '← 질문으로' 가서 답을 고친 뒤 다시 누르면 고친 답으로 다시 만든다(R-17).

@@ -15,12 +15,12 @@ import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/
 import { getCompetencies, updateStoryCard } from "@/lib/myRecordApi";
 import { completeRetrospective, createReviewDraft, getRetrospective } from "@/lib/retrospectiveApi";
 import RetrospectiveSteps from "./RetrospectiveSteps";
-import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
-import { getAiErrorMessage } from "./useQuestionRequest";
+import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { copyText } from "@/lib/clipboard";
 import CardTitle from "@/components/ui/CardTitle";
 import ActionFooter from "@/components/ui/ActionFooter";
+import { getAiErrorMessage, getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 // 카드 초안에서 보여 주고 고치는 칸이다(R-20). 이유·배운 점은 카드에 있지만 이 화면에서는 고치지 않는다.
 const STORY_FIELDS = [

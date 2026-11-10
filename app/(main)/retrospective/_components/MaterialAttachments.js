@@ -4,7 +4,7 @@ import FileUploadButton from "@/components/ui/FileUploadButton";
 // 읽기 상태(API 9) 중 사용자가 알아야 할 것만 칩에 붙인다. 읽음(DONE)·읽지 않음(SKIPPED, 피그마)은 표시하지 않는다.
 function readStatus(extractStatus) {
   if (extractStatus === "PENDING") return <ChipStatus>읽는 중</ChipStatus>;
-  if (extractStatus === "FAILED") return <ChipStatus warning>읽지 못함</ChipStatus>;
+  if (extractStatus === "FAILED") return <ChipStatus tone="warning">읽지 못함</ChipStatus>;
   return null;
 }
 

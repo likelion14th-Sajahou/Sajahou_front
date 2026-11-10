@@ -2,73 +2,79 @@ import { useState } from "react";
 import AttachmentChip, { ChipStatus } from "@/components/ui/AttachmentChip";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import LinkInputRow from "@/components/ui/LinkInputRow";
+import TextLink from "@/components/ui/TextLink";
+import { JOB_POSTING_ACCEPT } from "./useJobPostingAttachments";
 
-const PUBLIC_FILE = /\.(pdf|png|jpe?g)$/i;
+// 본문 읽기 상태(API 9)를 칩에 붙인다. 링크·파일 모두 같은 표시다(M-02). 피그마처럼 읽지 않는 첨부(SKIPPED)는 표시하지 않는다.
+const READ_STATUS = {
+  PENDING: { tone: "neutral", label: "읽는 중" },
+  DONE: { tone: "success", label: "본문 읽음" },
+  FAILED: { tone: "warning", label: "읽지 못함" },
+};
 
-// 고른 파일(file)과 예시 파일(name, kind)을 칩에 쓸 이름과 종류로 맞춘다.
-function toFileChip(item) {
-  const name = item.name ?? item.file.name;
-  const isPdf = item.kind ? item.kind === "PDF" : name.toLowerCase().endsWith(".pdf");
+export const UNREADABLE_LINK_MESSAGE = "이 링크는 본문을 못 읽었어요. 공고 내용을 붙여 넣거나 PDF·캡처로 올려 주세요.";
 
-  return { id: item.id, name, kind: isPdf ? "pdf" : "image" };
+// 입력한 링크를 전체 URL로 바꾼다. 'www.…'처럼 주소만 넣으면 https://를 붙인다. 올바르지 않으면 null이다.
+function toLinkUrl(value) {
+  try {
+    const url = new URL(/^[a-z][a-z\d+.-]*:/i.test(value) ? value : `https://${value}`);
+    if (!["https:", "http:"].includes(url.protocol) || !url.hostname.includes(".") || url.username || url.password) return null;
+    return url.href;
+  } catch {
+    return null;
+  }
 }
 
-export default function MatchingAttachments({ files, links, onFilesChange, onLinksChange }) {
+// 채용 공고 첨부(M-02): PDF·캡처 파일과 공고 링크. attachments는 useJobPostingAttachments의 반환값이다.
+export default function MatchingAttachments({ attachments }) {
   const [link, setLink] = useState("");
   const [error, setError] = useState("");
+  const { items, isBusy } = attachments;
+  const hasUnreadableLink = items.some(({ type, extractStatus }) => type === "LINK" && extractStatus === "FAILED");
 
-  function addLink() {
-    try {
-      const value = link.trim();
-      if (!value) throw new Error();
-      const url = new URL(/^[a-z][a-z\d+.-]*:/i.test(value) ? value : `https://${value}`);
-      if (!["https:", "http:"].includes(url.protocol) || !url.hostname.includes(".") || url.username || url.password) throw new Error();
-      if (links.some((item) => item.url === url.href)) {
-        setError("이미 추가한 링크예요.");
-        return;
-      }
-      onLinksChange([...links, { id: crypto.randomUUID(), url: url.href }]);
-      setLink("");
-      setError("");
-    } catch {
+  async function addLink() {
+    const url = toLinkUrl(link.trim());
+    if (!url) {
       setError("올바른 http 또는 https 공고 링크를 입력해 주세요.");
+      return;
     }
+    const message = await attachments.addLink(url);
+    setError(message);
+    if (!message) setLink("");
   }
 
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
       <p className="text-label text-ink-muted">채용 공고 <span className="text-ink-subtle">· 붙여넣기, PDF·캡처, 링크 중 편한 것</span></p>
+      {items.length > 0 && (
         <ul aria-label="첨부 공고" className="flex flex-wrap gap-2">
-          {files.map(toFileChip).map(({ id, name, kind }) => (
-            <AttachmentChip key={id} kind={kind} name={name} onRemove={() => onFilesChange(files.filter((item) => item.id !== id))} />
-          ))}
-          {links.map((item) => (
-            <AttachmentChip
-              key={item.id}
-              kind="link"
-              name={item.url.replace(/^https?:\/\//, "")}
-              warning={item.unreadable}
-              status={item.unreadable && <ChipStatus warning>읽지 못함</ChipStatus>}
-              onRemove={() => onLinksChange(links.filter(({ id }) => id !== item.id))}
-            />
-          ))}
+          {items.map(({ attachmentId, kind, name, extractStatus }) => {
+            const status = READ_STATUS[extractStatus];
+            return (
+              <AttachmentChip
+                key={attachmentId}
+                kind={kind}
+                name={kind === "link" ? name.replace(/^https?:\/\//, "") : name}
+                warning={extractStatus === "FAILED"}
+                status={status && <ChipStatus tone={status.tone}>{status.label}</ChipStatus>}
+                onRemove={isBusy ? undefined : async () => setError(await attachments.remove(attachmentId))}
+              />
+            );
+          })}
         </ul>
-      {links.some(({ unreadable }) => unreadable) && (
+      )}
+      {hasUnreadableLink && (
         <p role="status" className="flex items-start gap-2 rounded-xl bg-tint-yellow px-3 py-2.5 text-label text-tint-yellow-ink">
           <span aria-hidden="true">⚑</span>
           <span>이 링크는 본문을 못 읽었어요. 로그인이 필요하거나 접근이 막힌 사이트예요. 공고 내용을 아래에 붙여 넣거나 PDF·캡처로 올려 주세요.</span>
         </p>
       )}
-      <div className="flex items-center gap-2">
+      <fieldset disabled={isBusy} aria-busy={isBusy} className="flex min-w-0 items-center gap-2">
         <FileUploadButton
-          label="+ 공고 파일"
+          label={isBusy ? "올리는 중…" : "+ 공고 파일"}
           ariaLabel="공고 파일"
-          accept=".pdf,.png,.jpg,.jpeg"
-          onSelect={(selected) => {
-            const valid = selected.filter((file) => PUBLIC_FILE.test(file.name));
-            onFilesChange([...files, ...valid.map((file) => ({ id: crypto.randomUUID(), file }))]);
-            setError(valid.length !== selected.length ? "PDF, PNG, JPG 파일을 선택해 주세요." : "");
-          }}
+          accept={JOB_POSTING_ACCEPT}
+          onSelect={async (selected) => setError(await attachments.upload(selected))}
         />
         <LinkInputRow
           aria-label="공고 링크"
@@ -79,11 +85,16 @@ export default function MatchingAttachments({ files, links, onFilesChange, onLin
           onChange={(value) => { setLink(value); setError(""); }}
           onAdd={addLink}
         />
-      </div>
-      {/* 파일 형식·링크 오류를 회고·프로젝트처럼 칸 아래 빨간 글자로 보여 준다. */}
+      </fieldset>
+      {/* 파일 형식·링크·업로드 오류를 회고·프로젝트처럼 칸 아래 빨간 글자로 보여 준다. */}
       {error && (
         <p id="matching-attachment-error" role="alert" className="text-label text-tint-red-ink">
           {error}
+        </p>
+      )}
+      {attachments.pollingError && (
+        <p role="alert" className="text-label text-tint-red-ink">
+          {attachments.pollingError} <TextLink size="sm" onClick={attachments.retryPolling}>상태 다시 확인</TextLink>
         </p>
       )}
     </div>

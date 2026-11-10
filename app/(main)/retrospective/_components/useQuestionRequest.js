@@ -4,20 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { requestQuestions } from "@/lib/retrospectiveApi";
-import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
-
-const ERROR_MESSAGES = {
-  AI_TIMEOUT: "AI 응답이 너무 오래 걸렸어요. 다시 시도해 주세요.",
-  AI_FAILED: "AI가 응답하지 못했어요. 다시 시도해 주세요.",
-  AI_IN_PROGRESS: "AI가 만들고 있어요. 잠시 후 다시 시도해 주세요.",
-  ATTACHMENT_PENDING: "첨부를 아직 읽고 있어요. 잠시 후 다시 시도해 주세요.",
-};
-
-// AI를 부르는 요청(질문 받기, 초안 만들기)의 실패 안내다.
-export function getAiErrorMessage(failure, fallback) {
-  if (failure.kind === "timeout") return ERROR_MESSAGES.AI_TIMEOUT;
-  return ERROR_MESSAGES[failure.code] ?? getRequestErrorMessage(failure, fallback);
-}
+import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 
 // 'AI 질문 받기'(R-14, API 17). 질문을 받으면 질문 단계로 넘어간다.
 // 답을 쓴 뒤 자료가 바뀌었으면 서버가 409 MATERIAL_CHANGED를 주고, 확인 문구에서 이어 쓰기·새로 만들기를 고른다.

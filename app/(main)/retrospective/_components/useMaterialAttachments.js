@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import useAttachmentPolling from "@/components/ui/useAttachmentPolling";
 import { createFileAttachment, createLinkAttachment, deleteAttachment, isSupportedAttachmentFile } from "@/lib/attachmentApi";
-import { getRequestErrorMessage } from "./RetrospectivePreview";
+import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 // 자료 칸마다 첨부 종류(category)와 고를 수 있는 파일이다. 첨부 API가 받는 형식 안에서 명세의 자료 종류만 고른다.
 // 세션 PDF(R-08), 실습 노션 ZIP·캡처(R-09), 과제 노션 ZIP·MD·PDF·이미지(R-11)
