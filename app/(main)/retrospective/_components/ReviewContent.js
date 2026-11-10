@@ -102,7 +102,8 @@ export default function ReviewContent({ initialDraft }) {
             </ul>
           </div>
           <ActionFooter>
-            <TextLink href={`${getStepHref("questions")}&preview=questions-complete`}>← 질문으로</TextLink>
+            {/* 모든 질문에 답했으면 질문 화면이 질문 끝(고치기 목록)으로 열린다(R-17). */}
+            <TextLink href={getStepHref("questions")}>← 질문으로</TextLink>
             <div className="flex gap-2">
               <Button variant="secondary" onClick={saveLater} disabled={isSaving} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
               <Button variant="accent" href={getStepHref("complete")} onClick={(event) => {

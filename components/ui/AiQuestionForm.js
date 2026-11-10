@@ -61,7 +61,8 @@ export default function AiQuestionForm({
   return (
     <div className="flex flex-col gap-4">
       <AiPromptHeader category={category} progress={progress} progressLabel={progressLabel} />
-      <p className="rounded-xl bg-canvas px-3.5 py-2.5 text-body-sm text-ink-muted">{source}</p>
+      {/* 근거 문장이 없는 질문(회고 API의 quote가 null)은 인용 칸을 그리지 않는다. */}
+      {source && <p className="rounded-xl bg-canvas px-3.5 py-2.5 text-body-sm text-ink-muted">{source}</p>}
       <QuestionHeading id={questionId} className={questionClassName}>{question}</QuestionHeading>
       <TextField
         label="내 답변"

@@ -13,11 +13,11 @@ import { MOCK_REVIEW_DRAFT } from "@/lib/mock/retrospective";
 import CardTitle from "@/components/ui/CardTitle";
 
 export default async function RetrospectiveContent({ searchParams }) {
-  const { preview, step, type } = await searchParams;
+  const { step, type } = await searchParams;
   const isAssignment = type === "assignment";
   const pausedContent = <PausedRetrospective />;
   if (step === "materials") return <MaterialsContent />;
-  if (step === "questions") return <AiQuestionsContent key={preview} initialComplete={preview === "questions-complete"} />;
+  if (step === "questions") return <AiQuestionsContent />;
   if (step === "review") return <ReviewContent initialDraft={MOCK_REVIEW_DRAFT} />;
   const completeContent = <CompleteContent initialDraft={MOCK_REVIEW_DRAFT} />;
   if (step === "complete") return completeContent;
