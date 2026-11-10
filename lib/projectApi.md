@@ -20,7 +20,7 @@
 
 ## 저장 및 한계
 
-- 기존 인증 mock으로 로그인 후 사용한다. 사용자별 `sajarok_mock_projects_v1:<id>`에 JSON을 보관한다. 처음에는 빈 프로젝트 목록이다.
+- 기존 인증 mock으로 로그인 후 사용한다. 사용자별 `sajarok_mock_v1:<id>` 한 항목에 회고·프로젝트·스토리 카드·첨부·질문을 함께 보관한다(`lib/mock/server.js`). 처음에는 빈 프로젝트 목록이다.
 - 새로고침·재로그인 후 유지하고 다른 사용자 데이터에 접근할 수 없다. 회원 탈퇴 시 해당 저장소를 삭제한다.
 - 파일 본문·실제 인증 토큰은 저장하지 않는다. 파일 크기·확장자·메타데이터만 검증하며 링크를 실제로 수집하지 않는다.
 - AI는 고정 질문과 사용자가 입력한 문장으로 모의 정리한다. 실 AI 품질·파일 추출·CORS·쿠키는 실제 서버에서 별도 검증한다.
@@ -30,7 +30,7 @@
 
 테스트의 `createMockServerFetch({ storage, now, scenario })`(`lib/mock/server.js`)로 지연과 오류를 주입한다. `scenario({path, method, user})`는 `{delayMs, error, status, extractStatus}`를 반환한다. AI 호출 중 같은 대상의 중복 호출은 409다. 취소·타임아웃 후 mutation은 반영하지 않는다.
 
-브라우저 개발자 도구에서 `sajarok_mock_project_scenario` localStorage 키에 JSON을 설정해 오류를 재현할 수 있다. 예: `{"delayMs":800,"error":"AI_FAILED","status":502}`. 테스트 후 키를 삭제한다. 실제 50초 대기는 `delayMs:50000`, 클라이언트 시간 초과는 65000ms보다 길게 설정한다. 이 설정은 mock에서만 읽고 API 요청 본문에는 넣지 않는다.
+브라우저 개발자 도구에서 `sajarok_mock_scenario` localStorage 키에 JSON을 설정해 오류를 재현할 수 있다. 예: `{"delayMs":800,"error":"AI_FAILED","status":502}`. 테스트 후 키를 삭제한다. 실제 50초 대기는 `delayMs:50000`, 클라이언트 시간 초과는 65000ms보다 길게 설정한다. 이 설정은 mock에서만 읽고 API 요청 본문에는 넣지 않는다.
 
 검증: `node --test lib/projectApi.test.js lib/profileApi.test.js lib/mock/auth.test.js`
 
