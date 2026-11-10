@@ -5,7 +5,7 @@ import { useAuth } from "@/components/layout/AuthProvider";
 import AttachmentChip from "@/components/ui/AttachmentChip";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import LinkInputRow from "@/components/ui/LinkInputRow";
-import * as api from "@/lib/projectApi";
+import * as api from "@/lib/attachmentApi";
 import { attachmentView } from "@/lib/projectViewModel";
 
 // PM 확인 전 임시 UI. category가 지정된 산출물 요청에서는 지정값을 사용한다.
@@ -57,8 +57,8 @@ export default function RecordAttachmentsField({ label, attachments, category, l
     finally { mutation.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
   function addFiles(files) {
-    if (files.some((file) => file.size > 20 * 1024 * 1024 || !/\.(pdf|png|jpe?g|zip|md|txt)$/i.test(file.name))) {
-      setError("PDF·PNG·JPG·ZIP·MD·TXT 파일을 20MB 이하로 올려 주세요."); return;
+    if (!files.every(api.isSupportedAttachmentFile)) {
+      setError(api.UNSUPPORTED_FILE_MESSAGE); return;
     }
     const fileCategory = category ?? selectedCategory;
     if (!fileCategory) { setError("자료 종류를 먼저 선택해 주세요."); return; }
