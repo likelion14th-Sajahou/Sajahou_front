@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Chip from "@/components/ui/Chip";
 import FootprintLegend from "./FootprintLegend";
 import FootprintTimeline from "./FootprintTimeline";
@@ -8,11 +7,8 @@ import WeekDetailRow from "./WeekDetailRow";
 
 const ALL_SECTIONS = "all";
 
-export default function FootprintsPanel({ sections, weeks, initialWeek }) {
-  const [selectedSectionId, setSelectedSectionId] = useState(ALL_SECTIONS);
-  const [selectedWeek, setSelectedWeek] = useState(initialWeek);
-
-  const selectedSection = sections.find(({ id }) => id === selectedSectionId);
+export default function FootprintsPanel({ sections, weeks, selectedWeek, sectionId, onChange, searchParams }) {
+  const selectedSection = sections.find(({ id }) => id === sectionId);
   const visibleWeeks = selectedSection
     ? weeks.filter(
         ({ week }) => week >= selectedSection.startWeek && week <= selectedSection.endWeek,
@@ -27,8 +23,15 @@ export default function FootprintsPanel({ sections, weeks, initialWeek }) {
           <Chip
             key={id}
             size="sm"
-            selected={id === selectedSectionId}
-            onClick={() => setSelectedSectionId(id)}
+            selected={id === sectionId}
+            onClick={() => {
+              const changes = { section: id };
+              if (id !== ALL_SECTIONS) {
+                const section = sections.find((section) => section.id === id);
+                if (selectedWeek < section.startWeek || selectedWeek > section.endWeek) changes.week = section.startWeek;
+              }
+              onChange(changes);
+            }}
           >
             {label}
           </Chip>
@@ -39,10 +42,10 @@ export default function FootprintsPanel({ sections, weeks, initialWeek }) {
         weeks={visibleWeeks}
         showSectionNames={!selectedSection}
         selectedWeek={selectedWeek}
-        onSelectWeek={setSelectedWeek}
+        onSelectWeek={(week) => onChange({ week })}
       />
       <FootprintLegend />
-      <WeekDetailRow week={weeks.find(({ week }) => week === selectedWeek)} />
+      <WeekDetailRow week={weeks.find(({ week }) => week === selectedWeek)} searchParams={searchParams} />
     </section>
   );
 }
