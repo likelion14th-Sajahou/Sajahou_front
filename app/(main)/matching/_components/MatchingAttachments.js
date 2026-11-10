@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AttachmentChip from "@/components/ui/AttachmentChip";
+import AttachmentChip, { ChipStatus } from "@/components/ui/AttachmentChip";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import LinkInputRow from "@/components/ui/LinkInputRow";
 
@@ -48,7 +48,7 @@ export default function MatchingAttachments({ files, links, onFilesChange, onLin
               kind="link"
               name={item.url.replace(/^https?:\/\//, "")}
               warning={item.unreadable}
-              status={item.unreadable && <span className="shrink-0 rounded-full bg-[#ffe0d1] px-2 py-0.5 text-badge text-[#b03a00]">읽지 못함</span>}
+              status={item.unreadable && <ChipStatus warning>읽지 못함</ChipStatus>}
               onRemove={() => onLinksChange(links.filter(({ id }) => id !== item.id))}
             />
           ))}

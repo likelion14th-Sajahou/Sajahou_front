@@ -14,22 +14,16 @@ import MaterialsChangeNotice from "./MaterialsChangeNotice";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { useQuestionRequest } from "./useQuestionRequest";
+import useMaterialAttachments, { ATTACHMENT_FIELDS } from "./useMaterialAttachments";
 import ActionFooter from "@/components/ui/ActionFooter";
-
-const ACCEPTED_FILES = {
-  sessionFiles: ".pdf",
-  practiceFiles: ".zip,.png,.jpg,.jpeg,.webp,.gif",
-  // 노션 ZIP·MD·PDF·이미지(R-11)
-  assignmentFiles: ".zip,.md,.pdf,.png,.jpg,.jpeg,.webp,.gif",
-};
 
 const ASSIGNMENT_MODES = { record: "RECORD", later: "LATER", none: "NONE" };
 
 // 폼 값을 임시저장(API 14) 요청으로 바꾼다. API는 보낸 필드만 바꾸고, null이면 비운다.
 // - 비운 칸은 null로 보내 서버 값도 비운다.
 // - 이 화면에 없는 칸(과제 회고의 과제 방식, 프론트엔드가 아닌 파트의 코드리뷰)은 보내지 않아 서버 값을 그대로 둔다.
-// 첨부는 첨부 API(7~10번)를 연결할 때 attachmentIds로 보낸다.
-function toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment, isFrontend }) {
+// - 올린 첨부는 attachmentIds로 회고에 연결한다. 칩에서 뺀 첨부는 목록에서 빠져 연결이 풀린다.
+function toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment, isFrontend, attachmentIds }) {
   const text = (value) => value.trim() ? value : null;
   return {
     currentStep,
@@ -40,17 +34,11 @@ function toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment,
     // 받은 코드리뷰는 프론트엔드 파트만 있다(R-11). 다른 파트는 보내지 않는다.
     ...(isFrontend ? { codeReview: text(materials.codeReview) } : {}),
     memo: text(materials.memo),
+    attachmentIds,
   };
 }
 
 const GENERATING_NOTICE = "AI가 자료를 읽고 질문을 만들고 있어요. 1분 정도 걸릴 수 있어요.";
-
-// 노션에서 내보낸 ZIP·MD는 '노션 MD' 칩으로 보여 준다.
-function getFileKind(fileName) {
-  if (fileName.endsWith(".pdf")) return "pdf";
-  if (fileName.endsWith(".zip") || fileName.endsWith(".md")) return "notion";
-  return "image";
-}
 
 function MaterialSection({ title, titleId, controls, inactive = false, children }) {
   return (
@@ -78,11 +66,15 @@ export default function MaterialsForm({ initialMaterials, canSave = true }) {
   // 어느 버튼으로 저장 중인지. 누른 버튼에만 '저장하는 중…'을 보여 준다.
   const [savingAction, setSavingAction] = useState(null);
   const questions = useQuestionRequest();
-  const isBusy = isSaving || questions.isRequesting;
+  const files = useMaterialAttachments({ materials, setMaterials, canSave });
+  // 파일을 올리는 동안 저장하면 막 올린 첨부가 빠질 수 있어 함께 막는다.
+  const isBusy = isSaving || questions.isRequesting || files.isUploading;
 
   async function saveMaterials(action, currentStep) {
     setSavingAction(action);
-    const message = await save(toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment, isFrontend: part === "프론트엔드" }));
+    const message = await save(toSaveRequest(materials, {
+      currentStep, assignmentStatus, isAssignment, isFrontend: part === "프론트엔드", attachmentIds: files.attachmentIds,
+    }));
     setSavingAction(null);
     return message;
   }
@@ -114,47 +106,36 @@ export default function MaterialsForm({ initialMaterials, canSave = true }) {
     setMaterials((previous) => ({ ...previous, [field]: value }));
   }
 
-  function removeFile(field, id) {
-    setMaterials((previous) => ({
-      ...previous,
-      [field]: previous[field].filter((file) => file.id !== id),
-    }));
+  async function removeFile(field, id) {
+    setNotice(await files.remove(field, id));
   }
 
-  function selectFiles(field, files) {
-    const extensions = ACCEPTED_FILES[field].split(",");
-    const validFiles = files.filter((file) => extensions.some((extension) => file.name.toLowerCase().endsWith(extension)));
-    const additions = validFiles.map((file) => ({
-      id: crypto.randomUUID(),
-      name: file.name,
-      kind: getFileKind(file.name.toLowerCase()),
-    }));
-    setMaterials((previous) => ({ ...previous, [field]: [...previous[field], ...additions] }));
-    setNotice(validFiles.length !== files.length
-      ? "지원하지 않는 파일 형식은 제외했어요. 업로드 버튼에 표시된 형식을 선택해주세요."
-      : "파일을 선택했어요. 현재 화면에서만 유지되며 아직 업로드되지 않았어요.");
+  async function selectFiles(field, selected) {
+    setNotice("파일을 올리고 있어요…");
+    setNotice(await files.upload(field, selected));
   }
 
-  function addLink() {
+  async function addLink() {
+    let url;
     try {
-      const url = new URL(link.trim());
+      url = new URL(link.trim());
       if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("Invalid protocol");
-      setMaterials((previous) => ({
-        ...previous,
-        assignmentFiles: [...previous.assignmentFiles, { id: crypto.randomUUID(), name: url.href, kind: "link" }],
-      }));
-      setLink("");
-      setLinkError("");
     } catch {
       setLinkError("http:// 또는 https://로 시작하는 올바른 링크를 입력해주세요.");
+      return;
     }
+    setLinkError("");
+    const message = await files.addLink(url.href);
+    if (!message) setLink("");
+    setNotice(message);
   }
 
   function attachments(field, uploadLabel, extra = {}) {
     return (
       <MaterialAttachments
         files={materials[field]}
-        accept={ACCEPTED_FILES[field]}
+        accept={ATTACHMENT_FIELDS[field].accept}
+        disabled={files.isUploading}
         uploadLabel={uploadLabel}
         onRemove={(id) => removeFile(field, id)}
         onSelect={(files) => selectFiles(field, files)}
@@ -272,6 +253,11 @@ export default function MaterialsForm({ initialMaterials, canSave = true }) {
         </div>
       </ActionFooter>
       <p role="status" className={notice ? "-mt-1 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
+      {files.pollingError && (
+        <p role="alert" className="-mt-1 text-body-sm text-tint-red-ink">
+          {files.pollingError} <TextLink size="sm" onClick={files.retryPolling}>상태 다시 확인</TextLink>
+        </p>
+      )}
     </Card>
   );
 }

@@ -8,20 +8,19 @@ import Card from "@/components/ui/Card";
 import { getRetrospective } from "@/lib/retrospectiveApi";
 import MaterialsForm from "./MaterialsForm";
 import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
+import { splitAttachments } from "./useMaterialAttachments";
 
 const ASSIGNMENT_STATUS = { RECORD: "record", LATER: "later", NONE: "none" };
 
-// 파일 칩은 첨부 API(7~10번)를 연결할 때 attachments로 채운다. 지금은 화면에서만 유지한다.
-function toFormMaterials(materials = {}) {
+// 저장된 자료와 첨부(13번)를 폼 값으로 바꾼다. 첨부는 종류(category)에 따라 세션·실습·과제 칸으로 나눈다.
+function toFormMaterials(materials = {}, attachments = []) {
   return {
     hasPractice: materials.hasPractice ?? true,
     practice: materials.practiceContent ?? "",
     assignment: materials.assignmentContent ?? "",
     codeReview: materials.codeReview ?? "",
     memo: materials.memo ?? "",
-    sessionFiles: [],
-    practiceFiles: [],
-    assignmentFiles: [],
+    ...splitAttachments(attachments),
   };
 }
 
@@ -47,7 +46,7 @@ export default function MaterialsStep() {
     getRetrospective(session.id, { signal: controller.signal, request: authenticatedRequest })
       .then((detail) => {
         setAssignmentStatus(ASSIGNMENT_STATUS[detail.materials.assignmentMode] ?? "record");
-        setLoaded({ id: detail.id, materials: toFormMaterials(detail.materials) });
+        setLoaded({ id: detail.id, materials: toFormMaterials(detail.materials, detail.attachments) });
       })
       .catch((failure) => {
         if (controller.signal.aborted || failure.name === "AbortError" || failure.status === 401) return;
