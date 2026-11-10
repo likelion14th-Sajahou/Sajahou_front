@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import MyRecordContent from "@/components/my-record/MyRecordContent";
-import { MOCK_MY_RECORD } from "@/lib/mock/myRecord";
 import RequireAuth from "@/components/layout/RequireAuth";
 
 export const metadata = {
@@ -21,10 +20,7 @@ export default function MyRecordPage({ searchParams }) {
             </p>
           }
         >
-          <MyRecordContent
-            searchParams={searchParams}
-            record={MOCK_MY_RECORD}
-          />
+          <MyRecordContent searchParams={searchParams} />
         </Suspense>
       </RequireAuth>
     </main>

@@ -28,7 +28,13 @@ export default function FootprintsPanel({ sections, weeks, initialWeek }) {
             key={id}
             size="sm"
             selected={id === selectedSectionId}
-            onClick={() => setSelectedSectionId(id)}
+            onClick={() => {
+              setSelectedSectionId(id);
+              if (id !== ALL_SECTIONS) {
+                const section = sections.find((section) => section.id === id);
+                if (selectedWeek < section.startWeek || selectedWeek > section.endWeek) setSelectedWeek(section.startWeek);
+              }
+            }}
           >
             {label}
           </Chip>

@@ -5,17 +5,22 @@ import { useMockData } from "@/components/layout/MockDataProvider";
 import FootprintsPanel from "./FootprintsPanel";
 import MyRecordTabs from "./MyRecordTabs";
 import StoryCardsPanel from "./StoryCardsPanel";
+import { getFootprints } from "@/lib/myRecordApi";
+import { footprintView, footprintSections } from "@/lib/myRecordViewModel";
+import useRecordResource from "./useRecordResource";
+import RecordRequestStatus from "./RecordRequestStatus";
+
+const loadFootprints = async (signal) => footprintView(await getFootprints({ signal }));
 
 export default function MyRecordView({
-  record,
   requestedTab,
   week,
   requestedCardId,
   requestedHighlightId,
   requestedCompetency,
 }) {
-  const { currentWeek, footprintSections } = record;
-  const { competencies, footprintWeeks, storyCards, updateStoryCard, deleteStoryCard } = useMockData();
+  const { user, competencies, storyCards, updateStoryCard, deleteStoryCard } = useMockData();
+  const footprints = useRecordResource(loadFootprints, String(user.id));
   // 파트를 바꿔 보면 지금 파트 목록에 없는 태그를 단 카드가 생길 수 있어, 걸러 보기에는 그 태그도 목록 뒤에 붙인다.
   const filterCompetencies = [
     ...new Set([...competencies, ...storyCards.flatMap(({ tags }) => tags)]),
@@ -35,21 +40,16 @@ export default function MyRecordView({
   // 뒤로 가기로 돌아온 경우에는 bfcacheId가 그대로라 보던 상태가 유지된다.
   const { bfcacheId } = useRouter();
 
-  const weeksWithCards = footprintWeeks.map((item) => {
-    const cardIds = cards.filter((card) => card.week === item.week).map(({ id }) => id);
-
-    return { ...item, cardIds, cardCount: cardIds.length };
-  });
-
   return (
     <>
       <MyRecordTabs activeTab={activeTab} storyCardCount={cards.length} />
-      {activeTab === "footprints" && (
+      {activeTab === "footprints" && !footprints.data && <RecordRequestStatus resource={footprints} />}
+      {activeTab === "footprints" && footprints.data && (
         <FootprintsPanel
           key={bfcacheId}
           sections={footprintSections}
-          weeks={weeksWithCards}
-          initialWeek={week ?? currentWeek}
+          weeks={footprints.data.weeks}
+          initialWeek={week ?? footprints.data.currentWeek}
         />
       )}
       {activeTab === "cards" && (

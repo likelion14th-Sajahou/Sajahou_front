@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const ROW_CLASSES =
-  "flex w-full items-center gap-3.5 rounded-[24px] border border-ink bg-white px-5 py-3.5";
+  "flex w-full flex-wrap items-center gap-x-3.5 gap-y-2 rounded-[24px] border border-ink bg-white px-5 py-3.5";
 
 function getRecapLabel({ cardCount, isProjectRecap }) {
   const recap = isProjectRecap ? "프로젝트 회고 완료" : "회고 완료";
@@ -33,6 +33,7 @@ function WeekState({ children }) {
 }
 
 export default function WeekDetailRow({ week }) {
+  if (!week) return null;
   const { status, title, cardCount } = week;
 
   if (status === "upcoming") {
