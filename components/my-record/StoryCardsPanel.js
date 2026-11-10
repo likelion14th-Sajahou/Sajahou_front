@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/components/layout/AuthProvider";
 import Link from "next/link";
 import Chip from "@/components/ui/Chip";
 import EmptyState from "@/components/ui/EmptyState";
@@ -37,6 +38,7 @@ export default function StoryCardsPanel({
   onChanged,
   revision,
 }) {
+  const { authenticatedRequest } = useAuth();
   const { type, week, q: search, card: openCardId } = location;
   const [expiredHighlight, setExpiredHighlight] = useState(null);
   const highlightToken = `${userId}:${searchParams.toString()}`;
@@ -48,7 +50,7 @@ export default function StoryCardsPanel({
 
   const { id: competencyId, invalid: invalidCompetency } = resolveRecordCompetency(location, competencyItems);
   const query = JSON.stringify({ type: type === ALL ? undefined : type.toUpperCase(), competencyId, weekNumber: week, q: search.trim() || undefined });
-  const load = useCallback((signal) => getStoryCards(JSON.parse(query), { signal }), [query]);
+  const load = useCallback((signal) => getStoryCards(JSON.parse(query), { signal, request: authenticatedRequest }), [query, authenticatedRequest]);
   const filtered = useRecordResource(load, invalidCompetency || query === "{}" ? null : `${userId}:${revision}:${query}`, search ? 250 : 0);
   const visibleCards = invalidCompetency ? [] : query === "{}" ? cards : filtered.data?.cards.map(cardView) ?? [];
   const visibleIds = visibleCards.map((card) => card.id).join(",");

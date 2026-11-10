@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useAuth } from "@/components/layout/AuthProvider";
 import * as api from "@/lib/projectApi";
 import { projectView, roleCodes, cardView } from "@/lib/projectViewModel";
 
 export default function useProjectData(user) {
+  const { authenticatedRequest } = useAuth();
   const [projects, setProjects] = useState([]);
   const [competencyItems, setCompetencyItems] = useState([]);
   const [home, setHome] = useState(null);
@@ -18,13 +20,13 @@ export default function useProjectData(user) {
   const refresh = useCallback(async ({ signal } = {}) => {
     if (!user) return;
     const version = ++current.current;
-    const [list, competencies, home, cardList] = await Promise.all([api.listProjects({ signal }), api.getProjectCompetencies({ signal }), api.getProjectHome({ signal }), api.listProjectCards({ signal })]);
+    const [list, competencies, home, cardList] = await Promise.all([api.listProjects({ signal, request: authenticatedRequest }), api.getProjectCompetencies({ signal, request: authenticatedRequest }), api.getProjectHome({ signal, request: authenticatedRequest }), api.listProjectCards({ signal, request: authenticatedRequest })]);
     if (signal?.aborted || version !== current.current) return;
     setProjects([...list.inProgressProjects.map((p) => projectView(p, "IN_PROGRESS")), ...list.doneProjects.map((p) => projectView(p, "DONE"))]
       .map((p) => loaded.current.has(p.id) ? { ...loaded.current.get(p.id), ...p, startedAt: loaded.current.get(p.id).startedAt, records: loaded.current.get(p.id).records } : p));
     setCompetencyItems(competencies); setHome(home); setStatus("ready"); setError("");
     setCards(cardList.cards.map(cardView));
-  }, [user]);
+  }, [user, authenticatedRequest]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -35,15 +37,15 @@ export default function useProjectData(user) {
   }, [refresh]);
 
   const loadProject = useCallback(async (id, { signal } = {}) => {
-    const result = projectView(await api.getProject(id, { signal }));
+    const result = projectView(await api.getProject(id, { signal, request: authenticatedRequest }));
     if (signal?.aborted) return;
     loaded.current.set(result.id, result);
     setProjects((previous) => previous.some((p) => p.id === result.id) ? previous.map((p) => p.id === result.id ? result : p) : [...previous, result]);
     return result;
-  }, []);
+  }, [authenticatedRequest]);
 
   async function create(values) {
-    const result = await api.createProject({ name: values.name, subtitle: values.subtitle ?? null, roles: roleCodes(values.roles) });
+    const result = await api.createProject({ name: values.name, subtitle: values.subtitle ?? null, roles: roleCodes(values.roles) }, { request: authenticatedRequest });
     setProjects((previous) => [...previous, projectView({ ...result, recordCount: 0, lastRecordDate: null })]);
     try { await refresh(); } catch { setSyncWarning("프로젝트는 생성됐지만 목록 갱신에 실패했어요. 새로고침해 주세요."); }
     return result;

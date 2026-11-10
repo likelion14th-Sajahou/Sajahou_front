@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/components/layout/AuthProvider";
 import AttachmentChip from "@/components/ui/AttachmentChip";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import LinkInputRow from "@/components/ui/LinkInputRow";
@@ -19,6 +20,7 @@ export default function RecordAttachmentsField({ label, attachments, category, l
   const [retry, setRetry] = useState(0);
   const latest = useRef({ attachments, onChange, onBusyChange });
   const mutation = useRef(null);
+  const { authenticatedRequest } = useAuth();
   useEffect(() => { latest.current = { attachments, onChange, onBusyChange }; });
   useEffect(() => () => mutation.current?.abort(), []);
   useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
@@ -31,7 +33,7 @@ export default function RecordAttachmentsField({ label, attachments, category, l
     let attempts = 0;
     async function poll() {
       try {
-        const results = await Promise.all(pending.map((a) => api.getAttachment(a.attachmentId, { signal: controller.signal })));
+        const results = await Promise.all(pending.map((a) => api.getAttachment(a.attachmentId, { signal: controller.signal, request: authenticatedRequest })));
         if (controller.signal.aborted) return;
         if (results.some((item) => item.extractStatus !== "PENDING")) {
           latest.current.onChange(latest.current.attachments.map((a) => {
@@ -44,7 +46,7 @@ export default function RecordAttachmentsField({ label, attachments, category, l
     }
     timer = setTimeout(poll, 1500);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [attachments, retry]);
+  }, [attachments, retry, authenticatedRequest]);
 
   async function run(action) {
     if (mutation.current) return;
@@ -62,7 +64,7 @@ export default function RecordAttachmentsField({ label, attachments, category, l
     if (!fileCategory) { setError("자료 종류를 먼저 선택해 주세요."); return; }
     run(async (signal) => {
       for (const file of files) {
-        const item = attachmentView(await api.createFileAttachment(file, fileCategory, { signal }));
+        const item = attachmentView(await api.createFileAttachment(file, fileCategory, { signal, request: authenticatedRequest }));
         signal.throwIfAborted();
         const next = [...latest.current.attachments, item];
         latest.current.attachments = next;
@@ -77,7 +79,7 @@ export default function RecordAttachmentsField({ label, attachments, category, l
       if (!["http:", "https:"].includes(url.protocol) || !url.hostname.includes(".")) throw new Error("HTTP(S) 링크를 입력해 주세요.");
       const linkCategory = category ?? selectedCategory;
       if (!linkCategory) throw new Error("자료 종류를 먼저 선택해 주세요.");
-      const item = attachmentView(await api.createLinkAttachment(url.href, linkCategory, { signal }));
+      const item = attachmentView(await api.createLinkAttachment(url.href, linkCategory, { signal, request: authenticatedRequest }));
       if (!signal.aborted) { latest.current.onChange([...latest.current.attachments, item]); setLink(""); }
     });
   }
@@ -87,7 +89,7 @@ export default function RecordAttachmentsField({ label, attachments, category, l
       <ul aria-label="첨부 자료" className="flex flex-wrap gap-2">
         {attachments.map((a) => <li key={a.id} className="min-w-0 max-w-full">
           <AttachmentChip as="div" kind={a.kind} name={a.name} onRemove={() => run(async (signal) => {
-            await api.deleteAttachment(a.attachmentId, { signal });
+            await api.deleteAttachment(a.attachmentId, { signal, request: authenticatedRequest });
             if (!signal.aborted) latest.current.onChange(latest.current.attachments.filter((item) => item.id !== a.id));
           })} />
           <p role="status" className="text-caption text-ink-muted">

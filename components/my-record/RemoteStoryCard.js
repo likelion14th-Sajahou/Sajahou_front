@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useAuth } from "@/components/layout/AuthProvider";
 import { getStoryCard, updateStoryCard, deleteStoryCard } from "@/lib/myRecordApi";
 import { cardView } from "@/lib/projectViewModel";
 import StoryCardDetail from "./StoryCardDetail";
@@ -10,7 +11,8 @@ import Button from "@/components/ui/Button";
 
 // 프로젝트 화면과 사자록이 동일한 카드 상세·편집 UI와 API를 사용한다.
 export default function RemoteStoryCard({ cardId, titleId, competencyItems, onClose, onChanged }) {
-  const load = useCallback(async (signal) => cardView(await getStoryCard(cardId, { signal })), [cardId]);
+  const { authenticatedRequest } = useAuth();
+  const load = useCallback(async (signal) => cardView(await getStoryCard(cardId, { signal, request: authenticatedRequest })), [cardId, authenticatedRequest]);
   const resource = useRecordResource(load, String(cardId));
   const [saved, setSaved] = useState(null);
   const card = saved ?? resource.data;
@@ -23,13 +25,13 @@ export default function RemoteStoryCard({ cardId, titleId, competencyItems, onCl
   return <StoryCardDetail card={card} titleId={titleId} competencies={competencyItems.map((item) => item.name)} onClose={onClose}
     onUpdate={async (changes, signal) => {
       const data = await updateStoryCard(cardId, { title: changes.title, fullMarkdown: changes.document,
-        ...changes.summary, competencyIds: changes.tags.map((name) => competencyItems.find((item) => item.name === name)?.id) }, { signal });
+        ...changes.summary, competencyIds: changes.tags.map((name) => competencyItems.find((item) => item.name === name)?.id) }, { signal, request: authenticatedRequest });
       if (signal?.aborted) return;
       setSaved(cardView(data));
       await onChanged?.(data, card);
     }}
     onDelete={async (signal) => {
-      await deleteStoryCard(cardId, { signal });
+      await deleteStoryCard(cardId, { signal, request: authenticatedRequest });
       if (signal?.aborted) return;
       const changed = onChanged?.(null, card);
       onClose();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "@/components/layout/AuthProvider";
 import AiQuestionForm from "@/components/ui/AiQuestionForm";
 import Button from "@/components/ui/Button";
 import { saveQuestionAnswer } from "@/lib/projectApi";
@@ -14,6 +15,7 @@ export default function ProjectRecordQuestions({ state, onChange, onBackToMateri
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const active = useRef(null);
+  const { authenticatedRequest } = useAuth();
   useEffect(() => () => active.current?.abort(), []);
   const question = questions[index];
 
@@ -21,7 +23,7 @@ export default function ProjectRecordQuestions({ state, onChange, onBackToMateri
     if (active.current) return;
     const controller = new AbortController(); active.current = controller; setBusy(true); setError("");
     try {
-      const saved = await saveQuestionAnswer(question.questionId, { status, ...(status === "ANSWERED" ? { answer } : {}) }, { signal: controller.signal });
+      const saved = await saveQuestionAnswer(question.questionId, { status, ...(status === "ANSWERED" ? { answer } : {}) }, { signal: controller.signal, request: authenticatedRequest });
       controller.signal.throwIfAborted();
       const next = { ...state, questions: questions.map((q) => q.questionId === saved.questionId ? { ...q, ...saved } : q),
         inputs: { ...inputs, [question.questionId]: saved.answer ?? "" }, index: Math.min(index + 1, questions.length - 1) };

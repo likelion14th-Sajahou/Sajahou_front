@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/components/layout/AuthProvider";
 import PortfolioGapFill from "./PortfolioGapFill";
 import PortfolioRecordSelect from "./PortfolioRecordSelect";
 import PortfolioReview from "./PortfolioReview";
@@ -13,9 +14,10 @@ export default function ProjectPortfolio({ project, records, onCancel, onSave })
   const [questions, setQuestions] = useState({ questions: [], inputs: {}, attachments: {}, index: 0 });
   const [draft, setDraft] = useState(null);
   const { run, busy, error } = useProjectAction();
+  const { authenticatedRequest } = useAuth();
   function startQuestions(ids) {
     run(async (signal) => {
-      const result = await getFinishQuestions(project.id, ids.map(Number), { signal });
+      const result = await getFinishQuestions(project.id, ids.map(Number), { signal, request: authenticatedRequest });
       signal.throwIfAborted();
       setSelectedIds(ids);
       setQuestions((current) => ({ ...current, questions: result.questions, index: Math.min(current.index, Math.max(0, result.questions.length - 1)) }));
@@ -24,7 +26,7 @@ export default function ProjectPortfolio({ project, records, onCancel, onSave })
   }
   function makeDraft() {
     run(async (signal) => {
-      const result = await getPortfolioDraft(project.id, selectedIds.map(Number), { signal });
+      const result = await getPortfolioDraft(project.id, selectedIds.map(Number), { signal, request: authenticatedRequest });
       signal.throwIfAborted(); setDraft(result); setStep("review");
     });
   }

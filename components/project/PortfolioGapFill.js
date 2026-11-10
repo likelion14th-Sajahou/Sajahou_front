@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/components/layout/AuthProvider";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -14,6 +15,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
   const { questions, inputs, index } = state;
   const question = questions[index];
   const { run, busy, error } = useProjectAction();
+  const { authenticatedRequest } = useAuth();
   const [attachmentBusy, setAttachmentBusy] = useState(false);
   if (!question) return <div><p>추가 질문이 없어요.</p><Button onClick={onBackToRecords}>← 기록 고르기</Button><Button onClick={onComplete}>포트폴리오 초안 만들기</Button></div>;
   const attachments = state.attachments[question.questionId] ?? [];
@@ -22,7 +24,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
   function submit(status, answer) {
     run(async (signal) => {
       const result = await saveQuestionAnswer(question.questionId, { status,
-        ...(status === "ANSWERED" ? isArtifact ? { attachmentIds: attachments.map((a) => a.attachmentId) } : { answer } : {}) }, { signal });
+        ...(status === "ANSWERED" ? isArtifact ? { attachmentIds: attachments.map((a) => a.attachmentId) } : { answer } : {}) }, { signal, request: authenticatedRequest });
       signal.throwIfAborted();
       onChange({ ...state, questions: questions.map((q) => q.questionId === result.questionId ? { ...q, ...result } : q),
         inputs: { ...inputs, [question.questionId]: result.answer ?? "" }, index: Math.min(index + 1, questions.length - 1) });
