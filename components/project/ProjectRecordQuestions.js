@@ -5,7 +5,7 @@ import { useAuth } from "@/components/layout/AuthProvider";
 import AiQuestionForm from "@/components/ui/AiQuestionForm";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
-import ActionFooter from "@/components/ui/ActionFooter";
+import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
 import { saveQuestionAnswer } from "@/lib/projectApi";
 
 // 질문 ID별 입력은 상위 폼에 둔다. 자료·검토 화면으로 이동해도 미전송 답이 유지된다.
@@ -37,12 +37,12 @@ export default function ProjectRecordQuestions({ state, insufficientMaterial = f
 
   if (insufficientMaterial || !question) return (
     <section aria-labelledby="record-insufficient-title" className="flex min-w-0 flex-col gap-4">
-      <h3 id="record-insufficient-title" className="text-title">자료가 부족해요</h3>
-      <p className="text-body-sm text-ink-muted">⚑ 읽을 수 있는 자료가 없어서 질문을 만들지 못했어요. 5칸을 직접 채워 바로 기록하거나, 자료로 돌아가 메모를 적거나 PDF·TXT로 다시 올려 주세요.</p>
-      <ActionFooter>
+      <h3 id="record-insufficient-title" className="text-title tracking-[-0.02em]">자료가 부족해요</h3>
+      <BlankFieldsNotice>읽을 수 있는 자료가 없어서 질문을 만들지 못했어요. 5칸을 직접 채워 바로 기록하거나, 자료로 돌아가 메모를 적거나 PDF·TXT로 다시 올려 주세요.</BlankFieldsNotice>
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <TextLink onClick={onBackToMaterials}>← 자료로</TextLink>
-        <Button className="ml-auto" onClick={onWriteDirectly}>5칸 직접 채우기 →</Button>
-      </ActionFooter>
+        <Button onClick={onWriteDirectly}>5칸 직접 채우기 →</Button>
+      </div>
     </section>
   );
   return <fieldset disabled={busy} className="min-w-0">
