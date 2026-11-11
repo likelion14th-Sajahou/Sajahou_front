@@ -22,7 +22,6 @@ import { recordBody } from "@/lib/projectViewModel";
 export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const { projectData } = useMockData();
   const { authenticatedRequest } = useAuth();
-  const competencies = projectData.competencyItems.map((item) => item.name);
   const [attachments, setAttachments] = useState([]);
   const [memo, setMemo] = useState("");
   const [fields, setFields] = useState({});
@@ -197,7 +196,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
             attachments={attachments}
             fields={fields}
             isOrganizedByAi={isOrganizedByAi}
-            competencies={competencies}
+            competencies={projectData.competencyItems}
             tags={tags}
             getFieldValueProps={getFieldValueProps}
             onChangeTags={setTags}

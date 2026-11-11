@@ -8,10 +8,12 @@ import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "./CompetencyTagPicker";
 import { RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTypes";
 
+// competencies는 역량 목록 조회(API 6) 응답이다.
 export default function StoryCardEditForm({ card, competencies, onCancel, onSave }) {
+  const names = competencies.map(({ name }) => name);
   // 지금 파트 목록에 없는 태그(데모에서 파트를 바꿔 본 경우)는 빼고 시작한다.
   const [selectedTags, setSelectedTags] = useState(() =>
-    card.tags.filter((tag) => competencies.includes(tag)),
+    card.tags.filter((tag) => names.includes(tag)),
   );
   const { toast, showToast, hideToast } = useToast();
 
@@ -31,7 +33,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
 
     onSave({
       title,
-      tags: competencies.filter((tag) => selectedTags.includes(tag)),
+      tags: names.filter((tag) => selectedTags.includes(tag)),
       summary: Object.fromEntries(
         SUMMARY_FIELDS.map(({ key }) => [key, formData.get(key).trim()]),
       ),

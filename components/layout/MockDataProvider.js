@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, use, useEffect, useState } from "react";
-import { getCompetencyNames } from "@/lib/mock/competencies";
 import { FOOTPRINT_WEEKS } from "@/lib/mock/myRecord";
 import { MOCK_PROJECTS } from "@/lib/mock/projects";
 import { MOCK_STORY_CARDS } from "@/lib/mock/storyCards";
@@ -92,7 +91,6 @@ function MockDataState({ authenticatedUser, children }) {
       value={{
         user,
         setUserPart,
-        competencies: getCompetencyNames(user.part),
         projects: projectData.projects,
         addProject: projectData.create,
         projectData,
