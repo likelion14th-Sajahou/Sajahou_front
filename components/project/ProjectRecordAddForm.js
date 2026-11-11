@@ -38,7 +38,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const [aiTask, setAiTask] = useState(null);
   const [attachmentBusy, setAttachmentBusy] = useState(false);
   const [waitingForAttachments, setWaitingForAttachments] = useState(false);
-  const pendingRegenerate = useRef(null);
+  const pendingQuestionMode = useRef(null);
   const [questionState, setQuestionState] = useState({ questions: [], inputs: {}, index: 0, sourceAttachments: [] });
   const [questionMaterials, setQuestionMaterials] = useState(null);
   const [confirmRegenerate, setConfirmRegenerate] = useState(false);
@@ -48,14 +48,14 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const hasPendingAttachments = attachments.some((a) => a.extractStatus === "PENDING");
   // 폴링이 끝난 시점의 최신 메모·첨부를 사용하며, 요청 잠금으로 중복 진행을 막는다.
   const resumeAi = useEffectEvent(() => {
-    if (pendingRegenerate.current !== null) continueAi(pendingRegenerate.current);
+    if (pendingQuestionMode.current !== null) continueAi(pendingQuestionMode.current);
   });
   useEffect(() => {
     if (waitingForAttachments && !hasPendingAttachments && !attachmentBusy && step === "materials") resumeAi();
   }, [waitingForAttachments, hasPendingAttachments, attachmentBusy, step]);
 
   function cancelAttachmentWait() {
-    pendingRegenerate.current = null;
+    pendingQuestionMode.current = null;
     setWaitingForAttachments(false);
   }
 
@@ -125,13 +125,14 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
 
     const snapshot = JSON.stringify({ memo: memo.trim(), ids: attachments.map((a) => a.attachmentId).sort() });
     if (questionMaterials && snapshot !== questionMaterials) { setConfirmRegenerate(true); return; }
-    continueAi(false);
+    continueAi("AUTO");
   }
 
-  async function continueAi(regenerate) {
+  async function continueAi(mode) {
+    const regenerate = mode === "REGENERATE";
     if (request.current || attachmentBusy) return;
     if (hasPendingAttachments) {
-      pendingRegenerate.current = regenerate;
+      pendingQuestionMode.current = mode;
       setWaitingForAttachments(true); setNotice(""); return;
     }
     cancelAttachmentWait();
@@ -146,7 +147,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
         recordId = draft.recordId;
         setDraftId(draft.recordId);
       } else await updateProjectRecord(draftId, { memo: memo.trim(), attachmentIds: attachments.map((a) => a.attachmentId) }, options);
-      const result = await getRecordQuestions(recordId, { ...options, regenerate });
+      const result = await getRecordQuestions(recordId, { ...options, mode });
       controller.signal.throwIfAborted();
       setQuestionState((current) => ({ questions: result.questions, inputs: regenerate ? {} : current.inputs,
         index: regenerate ? 0 : Math.min(current.index, Math.max(0, result.questions.length - 1)),
@@ -262,8 +263,8 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
             {confirmRegenerate && <div role="group" aria-label="자료 변경 확인" className="flex flex-wrap gap-2 rounded-xl bg-tint-yellow p-3">
               <p className="w-full text-body-sm">자료가 바뀌었어요. 질문을 새로 만들면 이전 답은 지워져요.</p>
               <Button size="sm" disabled={busy} onClick={() => { setConfirmRegenerate(false); cancelAttachmentWait(); }}>취소</Button>
-              <Button size="sm" disabled={busy} onClick={() => continueAi(false)}>이전 질문 이어 쓰기</Button>
-              <Button size="sm" disabled={busy} onClick={() => continueAi(true)}>질문 새로 만들기</Button>
+              <Button size="sm" disabled={busy} onClick={() => continueAi("CONTINUE")}>이전 질문 이어 쓰기</Button>
+              <Button size="sm" disabled={busy} onClick={() => continueAi("REGENERATE")}>질문 새로 만들기</Button>
             </div>}
             {waitingForAttachments && <div role="status" className="flex flex-wrap items-center gap-2 text-label text-ink-muted">
               <p>자료를 읽고 있어요. 잠시 후 질문을 시작해요.</p>
