@@ -7,8 +7,9 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { getRetrospective } from "@/lib/retrospectiveApi";
 import MaterialsForm from "./MaterialsForm";
-import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { splitAttachments } from "./useMaterialAttachments";
+import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 const ASSIGNMENT_STATUS = { RECORD: "record", LATER: "later", NONE: "none" };
 

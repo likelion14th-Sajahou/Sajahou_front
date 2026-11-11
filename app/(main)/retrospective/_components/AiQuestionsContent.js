@@ -9,8 +9,9 @@ import TextLink from "@/components/ui/TextLink";
 import { answerQuestion, getRetrospective, requestQuestions } from "@/lib/retrospectiveApi";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import AiQuestionsSession from "./AiQuestionsSession";
-import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { useReviewDraftRequest } from "./useReviewDraftRequest";
+import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 // 자료가 부족해 질문을 만들지 못했을 때(R-15).
 function InsufficientMaterial() {

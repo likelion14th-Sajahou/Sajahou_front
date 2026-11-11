@@ -6,7 +6,8 @@ import { useMockData } from "@/components/layout/MockDataProvider";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import Button from "@/components/ui/Button";
 import { setRetrospectiveRest } from "@/lib/retrospectiveApi";
-import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 // 홈 화면은 아직 목업 상태를 보므로 휴회 해제 뒤 상태를 맞춘다. 홈 API(4번)를 연결하면 뺀다.
 const HOME_WEEK_STATUS = { NOT_STARTED: "idle", IN_PROGRESS: "writing" };

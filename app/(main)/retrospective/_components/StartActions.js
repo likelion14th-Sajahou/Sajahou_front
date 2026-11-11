@@ -8,7 +8,8 @@ import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import { resetRetrospective, setRetrospectiveRest, startRetrospective } from "@/lib/retrospectiveApi";
 import ResetRetrospectiveModal from "./ResetRetrospectiveModal";
-import { getRequestErrorMessage, getStepPath, useRetrospectivePreview } from "./RetrospectivePreview";
+import { getStepPath, useRetrospectivePreview } from "./RetrospectivePreview";
+import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 // 시작 전: '시작하기 →', 작성 중: '이어 쓰기 →' + '처음부터'(R-05).
 // 이어 쓰기는 마지막으로 저장한 단계(currentStep)로 간다(R-03). 과제 회고(R-23)도 같고, 휴회는 세션 회고에만 있다.

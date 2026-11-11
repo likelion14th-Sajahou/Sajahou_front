@@ -10,8 +10,9 @@ import CardTitle from "@/components/ui/CardTitle";
 import ActionFooter from "@/components/ui/ActionFooter";
 import AiQuestionsComplete from "./AiQuestionsComplete";
 import AnsweredQuestionList from "./AnsweredQuestionList";
-import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
+import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 // 질문 성격 태그(R-15)의 색이다. 목록에 없는 태그는 회색으로 보여 준다.
 const TAG_TONES = { "근거와 숫자": "yellow", "빠진 칸": "red", "세션과 연결": "blue", "역량 신호": "green" };

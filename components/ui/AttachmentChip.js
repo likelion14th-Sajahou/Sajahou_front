@@ -10,10 +10,16 @@ const ATTACHMENT_BADGES = {
   link: { label: "링크", tone: "purple" },
 };
 
-// 칩 안 이름 뒤에 붙는 작은 상태 표시다(예: '읽는 중', '읽지 못함'). warning이면 주황이다.
-export function ChipStatus({ warning = false, children }) {
+const STATUS_TONES = {
+  neutral: "bg-canvas text-ink-subtle",
+  warning: "bg-[#ffe0d1] text-[#b03a00]",
+  success: "bg-tint-green text-tint-green-ink",
+};
+
+// 칩 안 이름 뒤에 붙는 작은 상태 표시다(예: '읽는 중', '본문 읽음', '읽지 못함'). warning은 주황, success는 초록이다.
+export function ChipStatus({ tone = "neutral", children }) {
   return (
-    <span className={`shrink-0 rounded-full px-2 py-0.5 text-badge ${warning ? "bg-[#ffe0d1] text-[#b03a00]" : "bg-canvas text-ink-subtle"}`}>
+    <span className={`shrink-0 rounded-full px-2 py-0.5 text-badge ${STATUS_TONES[tone]}`}>
       {children}
     </span>
   );

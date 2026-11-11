@@ -25,13 +25,6 @@ export function getStepPath(currentStep) {
   return STEP_PATHS[currentStep] ?? STEP_PATHS[2];
 }
 
-// 요청 실패 안내 문구다. 연결 문제와 그 밖의 실패만 나눈다.
-export function getRequestErrorMessage(failure, fallback) {
-  return failure?.kind === "timeout" || failure?.kind === "network"
-    ? "연결이 원활하지 않아요. 잠시 후 다시 시도해 주세요."
-    : fallback;
-}
-
 // 이번 주 회고(API 11)를 불러온다. 과제를 '나중에 쓸게요'로 고른 주면 과제 회고(R-23)도 함께 갖춘다.
 // - 시작한 과제 회고: 13번 상세로 단계·저장 시각을 채운다.
 // - 아직 시작 전: id 없이 '시작 전'.

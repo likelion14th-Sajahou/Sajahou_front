@@ -4,7 +4,8 @@ import { useRef, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { formatTime } from "@/lib/formatDate";
 import { saveRetrospective } from "@/lib/retrospectiveApi";
-import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 // 2~4단계의 '나중에 이어쓰기'(R-03). 지금 단계와 보낸 자료를 저장하고, 저장 시각을 'HH:MM 저장됨'으로 보여 준다.
 // 지금 보는 회고(세션 또는 과제)를 저장한다.
