@@ -84,7 +84,20 @@ function Sticker({ sticker }) {
   );
 }
 
+function StickerList({ stickers, label }) {
+  if (!stickers.length) return null;
+  return (
+    <ul aria-label={label} className="flex w-full flex-wrap content-center justify-center gap-x-2 gap-y-5">
+      {stickers.map((sticker) => (
+        <li key={`${sticker.kind}:${sticker.week}`}><Sticker sticker={sticker} /></li>
+      ))}
+    </ul>
+  );
+}
+
 export default function StickerBoard({ count, stickers }) {
+  const weekStickers = stickers.filter((item) => item.kind !== "milestone" && item.kind !== "upcoming");
+  const projectStickers = stickers.filter((item) => item.kind === "milestone" || item.kind === "upcoming");
   const board = useRef(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -108,13 +121,10 @@ export default function StickerBoard({ count, stickers }) {
           </TextLink>
         }
       />
-      <ul ref={board} className={`flex w-full max-w-[620px] flex-1 flex-wrap content-center justify-center gap-x-2 gap-y-5 ${visible ? "home-stickers-enter" : ""}`}>
-        {stickers.map((sticker) => (
-          <li key={`${sticker.kind}:${sticker.week}`}>
-            <Sticker sticker={sticker} />
-          </li>
-        ))}
-      </ul>
+      <div ref={board} className={`flex w-full max-w-[620px] flex-1 flex-col items-center justify-center gap-5 ${visible ? "home-stickers-enter" : ""}`}>
+        <StickerList stickers={weekStickers} label="주차 스티커" />
+        <StickerList stickers={projectStickers} label="프로젝트 스티커" />
+      </div>
     </Card>
   );
 }
