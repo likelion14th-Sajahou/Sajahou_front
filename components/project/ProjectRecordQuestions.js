@@ -33,7 +33,7 @@ export default function ProjectRecordQuestions({ state, onChange, onBackToMateri
     finally { active.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
 
-  if (!question) return <div><p>질문이 없어요. 자료를 보완하거나 이대로 정리할 수 있어요.</p><Button onClick={onBackToMaterials}>← 자료로</Button><Button onClick={onComplete}>정리 결과 확인</Button></div>;
+  if (!question) return <div><p>자료가 부족해요. 자료나 메모를 보완하거나 5칸을 직접 채워 주세요.</p><Button onClick={onBackToMaterials}>← 자료로</Button></div>;
   return <fieldset disabled={busy} className="min-w-0">
     <AiQuestionForm category={question.tag} progress={`${index + 1} / ${questions.length}`} source={sourceLabel ? <>
       첨부한 <mark className="rounded bg-shape-yellow/60 px-[3px] break-all text-ink">{sourceLabel}</mark>을(를) 바탕으로 물어볼게요

@@ -41,6 +41,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const pendingQuestionMode = useRef(null);
   const [questionState, setQuestionState] = useState({ questions: [], inputs: {}, index: 0, sourceAttachments: [] });
   const [confirmRegenerate, setConfirmRegenerate] = useState(null);
+  const [insufficientMaterial, setInsufficientMaterial] = useState(false);
   const request = useRef(null);
   useEffect(() => () => request.current?.abort(), []);
   const { toast, showToast, hideToast } = useToast();
@@ -80,6 +81,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   // 5칸을 직접 채운 경우에도 정리 결과 확인에서 역량 태그를 고른 뒤 저장한다(H-12).
   function organizeDirectly() {
     cancelAttachmentWait();
+    setConfirmRegenerate(null);
     if (attachmentBusy) { setNotice("선택한 파일을 첨부하거나 선택을 취소한 뒤 진행해 주세요."); return; }
     if (!hasRecordContent()) {
       showToast(EMPTY_RECORD_MESSAGE);
@@ -116,12 +118,6 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   }
 
   function startAiSummary() {
-    // 첨부와 메모가 모두 비어 있으면 AI 정리로 넘어가지 않는다(H-12).
-    if (attachments.length === 0 && !memo.trim()) {
-      setNotice("자료를 업로드하거나 메모를 남겨 주세요.");
-      return;
-    }
-
     continueAi("AUTO");
   }
 
@@ -148,6 +144,13 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       controller.signal.throwIfAborted();
       setQuestionState((current) => recordQuestionState(current, result.questions, attachments, { regenerate }));
       setConfirmRegenerate(null);
+      const insufficient = result.insufficientMaterial || result.questions.length === 0;
+      setInsufficientMaterial(insufficient);
+      if (insufficient) {
+        setIsWritingFields(true);
+        setStep("materials");
+        return;
+      }
       setStep("questions");
     } catch (error) {
       if (!controller.signal.aborted) {
@@ -246,6 +249,9 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
                 setNotice("");
               }}
             />
+            {insufficientMaterial && (
+              <p role="status" className="text-body-sm text-ink-muted">자료가 부족해요. 자료나 메모를 보완하거나 아래 5칸을 직접 채워 주세요.</p>
+            )}
             <TextLink onClick={() => setIsWritingFields((current) => !current)}>
               {isWritingFields ? "직접 쓰기 접기" : "5칸 직접 채우기"}
             </TextLink>
