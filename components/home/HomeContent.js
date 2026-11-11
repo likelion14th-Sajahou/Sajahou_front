@@ -16,12 +16,15 @@ import RecentRetrospectives from "./RecentRetrospectives";
 import StickerBoard from "./StickerBoard";
 import { useAuth } from "@/components/layout/AuthProvider";
 import Toast from "@/components/ui/Toast";
+import useHomeData from "./useHomeData";
+import RecordRequestStatus from "@/components/my-record/RecordRequestStatus";
 
 // 이번 주 회고를 완료했거나 휴회한 주에는 스티커 보드의 + 자리를 숨긴다.
 const STATUSES_WITHOUT_CURRENT_SLOT = ["done", "rest"];
 
 export default function HomeContent() {
   const { signupWelcome, clearSignupWelcome } = useAuth();
+  const home = useHomeData();
   const { user, footprintWeeks, storyCards, weekStatus } = useMockData();
   const homeStatus = HOME_WEEK_STATUS[weekStatus];
   const earnedStickers = getEarnedStickers(footprintWeeks);
@@ -31,6 +34,8 @@ export default function HomeContent() {
       !earnedStickers.some((sticker) => sticker.week === week) &&
       (kind !== "current" || !STATUSES_WITHOUT_CURRENT_SLOT.includes(homeStatus)),
   );
+
+  if (!home.data) return <main className="mx-auto max-w-[1120px] px-4 py-8"><RecordRequestStatus resource={home}>홈을 불러오는 중이에요.</RecordRequestStatus></main>;
 
   return (
     <>

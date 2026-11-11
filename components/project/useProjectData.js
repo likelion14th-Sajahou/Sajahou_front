@@ -9,7 +9,6 @@ export default function useProjectData(user) {
   const { authenticatedRequest } = useAuth();
   const [projects, setProjects] = useState([]);
   const [competencyItems, setCompetencyItems] = useState([]);
-  const [home, setHome] = useState(null);
   const [cards, setCards] = useState([]);
   const [syncWarning, setSyncWarning] = useState("");
   const [status, setStatus] = useState("loading");
@@ -20,11 +19,11 @@ export default function useProjectData(user) {
   const refresh = useCallback(async ({ signal } = {}) => {
     if (!user) return;
     const version = ++current.current;
-    const [list, competencies, home, cardList] = await Promise.all([api.listProjects({ signal, request: authenticatedRequest }), api.getProjectCompetencies({ signal, request: authenticatedRequest }), api.getProjectHome({ signal, request: authenticatedRequest }), api.listProjectCards({ signal, request: authenticatedRequest })]);
+    const [list, competencies, cardList] = await Promise.all([api.listProjects({ signal, request: authenticatedRequest }), api.getProjectCompetencies({ signal, request: authenticatedRequest }), api.listProjectCards({ signal, request: authenticatedRequest })]);
     if (signal?.aborted || version !== current.current) return;
     setProjects([...list.inProgressProjects.map((p) => projectView(p, "IN_PROGRESS")), ...list.doneProjects.map((p) => projectView(p, "DONE"))]
       .map((p) => loaded.current.has(p.id) ? { ...loaded.current.get(p.id), ...p, startedAt: loaded.current.get(p.id).startedAt, records: loaded.current.get(p.id).records } : p));
-    setCompetencyItems(competencies); setHome(home); setStatus("ready"); setError("");
+    setCompetencyItems(competencies); setStatus("ready"); setError("");
     setCards(cardList.cards.map(cardView));
   }, [user, authenticatedRequest]);
 
@@ -60,5 +59,5 @@ export default function useProjectData(user) {
     setProjects((previous) => previous.filter((p) => p.id !== id));
     setCards((previous) => previous.filter((c) => c.projectId !== id));
   }
-  return { projects, competencyItems, home, cards, status, error, syncWarning, refresh, loadProject, create, sync, forget };
+  return { projects, competencyItems, cards, status, error, syncWarning, refresh, loadProject, create, sync, forget };
 }
