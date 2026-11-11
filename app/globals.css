@@ -67,3 +67,12 @@ body {
   font-family: var(--font-sans);
   line-height: 1.6;
 }
+
+@keyframes home-hero-float {
+  50% { translate: 0 -12px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-hero-float { animation: home-hero-float 7s ease-in-out infinite; }
+  .home-hero-float:nth-child(even) { animation-delay: -3.5s; }
+}

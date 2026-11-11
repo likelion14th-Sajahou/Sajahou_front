@@ -3,13 +3,7 @@ import Link from "next/link";
 import HeroDecoration from "./HeroDecoration";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import { HERO_LAYOUTS } from "./heroDecorations";
-
-const HERO_CONTENT = {
-  default: { title: "이번 주 이야기를\n남겨 볼까요", cta: "회고 쓰기" },
-  draft: { title: "이번 주 이야기를\n남겨 볼까요", cta: "이어 쓰기" },
-  done: { title: "이번 주 이야기를\n남겨 볼까요", cta: "다시 보기" },
-  rest: { title: "이번 주는\n쉬어 가는 주예요", cta: "이번 주 보기" },
-};
+import { HOME_HERO_CONTENT } from "@/lib/homeViewModel";
 
 function HeroDecorations({ className, decorations, dots }) {
   return (
@@ -17,7 +11,7 @@ function HeroDecorations({ className, decorations, dots }) {
       {decorations.map(({ kind, left, right, top, frame, image, rotate, blur }) => (
         <div
           key={kind}
-          className="absolute"
+          className="home-hero-float absolute"
           style={{
             left,
             right,
@@ -47,7 +41,7 @@ function HeroDecorations({ className, decorations, dots }) {
 }
 
 export default function HomeHero({ userName, week, weekStatus }) {
-  const { title, cta } = HERO_CONTENT[weekStatus];
+  const { title, cta } = HOME_HERO_CONTENT[weekStatus];
 
   return (
     // 첫 화면에 히어로만 보이도록 헤더 높이(768px 미만 2줄 110px, 이상 1줄 68px)를 뺀 값을 쓴다.
@@ -60,7 +54,7 @@ export default function HomeHero({ userName, week, weekStatus }) {
           <p className="text-body text-ink-soft">
             {userName} 님, 오늘은 {week}주차예요
           </p>
-          <h1 className="break-keep whitespace-pre-line text-[56px] leading-[68.32px] tracking-[-1.68px] text-ink">
+          <h1 className="break-keep whitespace-pre-line text-[40px] leading-[1.22] tracking-[-1.68px] text-ink sm:text-[56px]">
             {title}
           </h1>
         </div>
