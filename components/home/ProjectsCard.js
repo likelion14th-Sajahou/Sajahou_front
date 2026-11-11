@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useMockData } from "@/components/layout/MockDataProvider";
 import Card from "@/components/ui/Card";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
@@ -11,20 +11,21 @@ import SectionHeader from "./SectionHeader";
 
 // 진행 중과 완료 프로젝트가 같은 모양이고, 완료 프로젝트는 스티커를 회색으로 보여 준다(H-08, 01 시안).
 // 완료한 프로젝트도 + 로 기록을 더할 수 있다(H-09, H-21).
-function ProjectRow({ project, summary }) {
-  const { id, name, status, shape, color } = project;
+function ProjectRow({ project, summary, done = false }) {
+  const { id, name } = project;
+  const href = `/projects/${encodeURIComponent(id)}`;
 
   return (
     <li className="flex items-center gap-3 rounded-2xl bg-canvas px-3 py-2.5">
-      <ShapeCharacter shape={shape} color={status === "done" ? "muted" : color} size={34} />
-      <Link href={`/projects/${id}`} className="flex min-w-0 flex-1 flex-col">
+      <ShapeCharacter shape="pentagon" color={done ? "muted" : "blue"} size={34} />
+      <Link href={href} className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-body text-ink">{name}</span>
         <span className="text-[12.5px] text-ink-subtle">{summary}</span>
       </Link>
       <Link
-        href={`/projects/${id}?record=new`}
+        href={`${href}?record=new`}
         aria-label={`${name} 기록 추가`}
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-title text-white"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-title text-white motion-safe:transition-transform motion-safe:hover:rotate-90"
       >
         +
       </Link>
@@ -32,18 +33,16 @@ function ProjectRow({ project, summary }) {
   );
 }
 
-export default function ProjectsCard() {
-  const { projects } = useMockData();
+export default function ProjectsCard({ inProgressProjects, doneProjects }) {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const activeProjects = projects.filter(({ status }) => status === "active");
-  const doneProjects = projects.filter(({ status }) => status === "done");
 
   return (
     <Card as="section" className="flex flex-col items-start gap-3.5">
       <SectionHeader title="프로젝트" />
-      {activeProjects.length > 0 ? (
+      {inProgressProjects.length > 0 ? (
         <ul className="flex w-full flex-col gap-2">
-          {activeProjects.map((project) => (
+          {inProgressProjects.map((project) => (
             <ProjectRow
               key={project.id}
               project={project}
@@ -63,6 +62,7 @@ export default function ProjectsCard() {
               <ProjectRow
                 key={project.id}
                 project={project}
+                done
                 summary={`기록 ${project.recordCount}`}
               />
             ))}
@@ -70,7 +70,8 @@ export default function ProjectsCard() {
         </>
       )}
       <TextLink onClick={() => setIsModalOpen(true)}>+ 새 프로젝트</TextLink>
-      <NewProjectModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {isModalOpen && <NewProjectModal open onClose={() => setIsModalOpen(false)}
+        onCreated={({ projectId }) => router.push(`/projects/${encodeURIComponent(projectId)}`)} />}
     </Card>
   );
 }

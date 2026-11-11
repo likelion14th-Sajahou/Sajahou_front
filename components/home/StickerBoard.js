@@ -1,9 +1,13 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
 import SectionHeader from "./SectionHeader";
+import { homeStickerHref } from "@/lib/homeViewModel";
 
 const LABEL_CLASSES = {
   earned: "text-ink-muted",
@@ -25,7 +29,7 @@ function getStickerLink({ kind, week, title }) {
     return null;
   }
 
-  return { href: `/my-record?week=${week}`, label: `${week}주차 ${title} 스티커` };
+  return { href: homeStickerHref({ kind, week }), label: `${week}주차 ${title} 스티커` };
 }
 
 function StickerIcon({ sticker }) {
@@ -81,6 +85,15 @@ function Sticker({ sticker }) {
 }
 
 export default function StickerBoard({ count, stickers }) {
+  const board = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); observer.disconnect(); }
+    });
+    observer.observe(board.current);
+    return () => observer.disconnect();
+  }, []);
   return (
     <Card as="section" className="flex flex-col items-center gap-3.5">
       <SectionHeader
@@ -90,14 +103,14 @@ export default function StickerBoard({ count, stickers }) {
           </>
         }
         action={
-          <TextLink variant="border" size="sm" href="/my-record">
+          <TextLink variant="border" size="sm" href="/my-record?tab=footprints">
             사자 발자국 →
           </TextLink>
         }
       />
-      <ul className="flex w-full max-w-[620px] flex-1 flex-wrap content-center justify-center gap-x-2 gap-y-5">
+      <ul ref={board} className={`flex w-full max-w-[620px] flex-1 flex-wrap content-center justify-center gap-x-2 gap-y-5 ${visible ? "home-stickers-enter" : ""}`}>
         {stickers.map((sticker) => (
-          <li key={sticker.label}>
+          <li key={`${sticker.kind}:${sticker.week}`}>
             <Sticker sticker={sticker} />
           </li>
         ))}

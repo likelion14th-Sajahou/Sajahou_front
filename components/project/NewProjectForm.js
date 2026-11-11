@@ -10,7 +10,7 @@ import { PROJECT_ROLES } from "@/components/project/projectRoles";
 
 const DEFAULT_ROLES = ["기획"];
 
-export default function NewProjectForm({ titleId, onCancel, onCreate }) {
+export default function NewProjectForm({ titleId, onCancel, onCreate, busy = false }) {
   const [roles, setRoles] = useState(DEFAULT_ROLES);
   const [nameError, setNameError] = useState("");
   const [roleError, setRoleError] = useState("");
@@ -81,7 +81,7 @@ export default function NewProjectForm({ titleId, onCancel, onCreate }) {
       </div>
       <div className="flex items-center justify-between gap-3.5 pt-1">
         <TextLink onClick={onCancel}>취소</TextLink>
-        <Button type="submit">만들기</Button>
+        <Button type="submit">{busy ? "만드는 중…" : "만들기"}</Button>
       </div>
     </form>
   );
