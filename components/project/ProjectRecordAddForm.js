@@ -17,8 +17,9 @@ import RecordFormTitle from "./RecordFormTitle";
 import { EMPTY_RECORD_MESSAGE } from "./recordFields";
 import ActionFooter from "@/components/ui/ActionFooter";
 import { createProjectRecord, updateProjectRecord, getRecordQuestions, organizeProjectRecord } from "@/lib/projectApi";
-import { recordBody } from "@/lib/projectViewModel";
+import { recordBody, recordQuestionState } from "@/lib/projectViewModel";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
+import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
 import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 
 export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
@@ -38,24 +39,32 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const [aiTask, setAiTask] = useState(null);
   const [attachmentBusy, setAttachmentBusy] = useState(false);
   const [waitingForAttachments, setWaitingForAttachments] = useState(false);
-  const pendingRegenerate = useRef(null);
+  const pendingQuestionMode = useRef(null);
   const [questionState, setQuestionState] = useState({ questions: [], inputs: {}, index: 0, sourceAttachments: [] });
-  const [questionMaterials, setQuestionMaterials] = useState(null);
-  const [confirmRegenerate, setConfirmRegenerate] = useState(false);
+  const [confirmRegenerate, setConfirmRegenerate] = useState(null);
+  const [insufficientMaterial, setInsufficientMaterial] = useState(false);
+  const firstDirectField = useRef(null);
+  const focusDirectField = useRef(false);
   const request = useRef(null);
   useEffect(() => () => request.current?.abort(), []);
+  useEffect(() => {
+    if (!busy && step === "materials" && isWritingFields && focusDirectField.current) {
+      firstDirectField.current?.focus();
+      focusDirectField.current = false;
+    }
+  }, [busy, step, isWritingFields]);
   const { toast, showToast, hideToast } = useToast();
   const hasPendingAttachments = attachments.some((a) => a.extractStatus === "PENDING");
   // 폴링이 끝난 시점의 최신 메모·첨부를 사용하며, 요청 잠금으로 중복 진행을 막는다.
   const resumeAi = useEffectEvent(() => {
-    if (pendingRegenerate.current !== null) continueAi(pendingRegenerate.current);
+    if (pendingQuestionMode.current !== null) continueAi(pendingQuestionMode.current);
   });
   useEffect(() => {
     if (waitingForAttachments && !hasPendingAttachments && !attachmentBusy && step === "materials") resumeAi();
   }, [waitingForAttachments, hasPendingAttachments, attachmentBusy, step]);
 
   function cancelAttachmentWait() {
-    pendingRegenerate.current = null;
+    pendingQuestionMode.current = null;
     setWaitingForAttachments(false);
   }
 
@@ -81,6 +90,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   // 5칸을 직접 채운 경우에도 정리 결과 확인에서 역량 태그를 고른 뒤 저장한다(H-12).
   function organizeDirectly() {
     cancelAttachmentWait();
+    setConfirmRegenerate(null);
     if (attachmentBusy) { setNotice("선택한 파일을 첨부하거나 선택을 취소한 뒤 진행해 주세요."); return; }
     if (!hasRecordContent()) {
       showToast(EMPTY_RECORD_MESSAGE);
@@ -117,21 +127,14 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   }
 
   function startAiSummary() {
-    // 첨부와 메모가 모두 비어 있으면 AI 정리로 넘어가지 않는다(H-12).
-    if (attachments.length === 0 && !memo.trim()) {
-      setNotice("자료를 업로드하거나 메모를 남겨 주세요.");
-      return;
-    }
-
-    const snapshot = JSON.stringify({ memo: memo.trim(), ids: attachments.map((a) => a.attachmentId).sort() });
-    if (questionMaterials && snapshot !== questionMaterials) { setConfirmRegenerate(true); return; }
-    continueAi(false);
+    continueAi("AUTO");
   }
 
-  async function continueAi(regenerate) {
+  async function continueAi(mode) {
+    const regenerate = mode === "REGENERATE";
     if (request.current || attachmentBusy) return;
     if (hasPendingAttachments) {
-      pendingRegenerate.current = regenerate;
+      pendingQuestionMode.current = mode;
       setWaitingForAttachments(true); setNotice(""); return;
     }
     cancelAttachmentWait();
@@ -146,15 +149,25 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
         recordId = draft.recordId;
         setDraftId(draft.recordId);
       } else await updateProjectRecord(draftId, { memo: memo.trim(), attachmentIds: attachments.map((a) => a.attachmentId) }, options);
-      const result = await getRecordQuestions(recordId, { ...options, regenerate });
+      const result = await getRecordQuestions(recordId, { ...options, mode });
       controller.signal.throwIfAborted();
-      setQuestionState((current) => ({ questions: result.questions, inputs: regenerate ? {} : current.inputs,
-        index: regenerate ? 0 : Math.min(current.index, Math.max(0, result.questions.length - 1)),
-        sourceAttachments: !questionMaterials || regenerate ? attachments.map((a) => ({ ...a })) : current.sourceAttachments }));
-      if (!questionMaterials || regenerate) setQuestionMaterials(JSON.stringify({ memo: memo.trim(), ids: attachments.map((a) => a.attachmentId).sort() }));
-      setConfirmRegenerate(false);
-      setStep("questions");
-    } catch (error) { if (!controller.signal.aborted) setNotice(getAiErrorMessage(error, error.message)); }
+      setQuestionState((current) => recordQuestionState(current, result.questions, attachments, { regenerate }));
+      setConfirmRegenerate(null);
+      const insufficient = result.insufficientMaterial || result.questions.length === 0;
+      setInsufficientMaterial(insufficient);
+      // 자료가 부족하면 기존처럼 직접 쓰기를 펼친다. 요청 잠금이 풀린 뒤 첫 칸에 포커스한다.
+      if (insufficient) {
+        focusDirectField.current = true;
+        setIsWritingFields(true);
+      }
+      setStep(insufficient ? "materials" : "questions");
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        if (error.status === 409 && error.code === "MATERIAL_CHANGED") {
+          setConfirmRegenerate({ answerCount: error.detail?.answeredCount ?? null });
+        } else setNotice(getAiErrorMessage(error, error.message));
+      }
+    }
     finally { request.current = null; setAiTask(null); if (!controller.signal.aborted) setBusy(false); }
   }
 
@@ -181,6 +194,12 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     setIsWritingFields((current) => current || Object.values(fields).some((value) => value.trim()));
     setNotice("");
     setStep("materials");
+  }
+
+  function writeDirectly() {
+    focusDirectField.current = true;
+    setIsWritingFields(true);
+    returnToMaterials();
   }
 
   return (
@@ -223,6 +242,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
                 onChange={(next) => {
                   if (next.map((a) => a.attachmentId).join() !== attachments.map((a) => a.attachmentId).join()) cancelAttachmentWait();
                   setAttachments(next);
+                  setConfirmRegenerate(null);
                   setNotice("");
                 }}
               />
@@ -239,16 +259,18 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
               value={memo}
               onChange={(event) => {
                 setMemo(event.target.value);
+                setConfirmRegenerate(null);
                 cancelAttachmentWait();
                 setNotice("");
               }}
             />
-            <TextLink onClick={() => setIsWritingFields((current) => !current)}>
+            <TextLink onClick={() => isWritingFields ? setIsWritingFields(false) : writeDirectly()}>
               {isWritingFields ? "직접 쓰기 접기" : "5칸 직접 채우기"}
             </TextLink>
             {isWritingFields && (
               <RecordFieldsGrid
-                getFieldProps={({ key, formLabel, placeholder }) => ({
+                getFieldProps={({ key, formLabel, placeholder }, index) => ({
+                  ...(index === 0 ? { ref: firstDirectField } : {}),
                   label: (
                     <>
                       {formLabel} <span className="text-ink-subtle">· 선택</span>
@@ -260,10 +282,10 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
               />
             )}
             {confirmRegenerate && <div role="group" aria-label="자료 변경 확인" className="flex flex-wrap gap-2 rounded-xl bg-tint-yellow p-3">
-              <p className="w-full text-body-sm">자료가 바뀌었어요. 질문을 새로 만들면 이전 답은 지워져요.</p>
-              <Button size="sm" disabled={busy} onClick={() => { setConfirmRegenerate(false); cancelAttachmentWait(); }}>취소</Button>
-              <Button size="sm" disabled={busy} onClick={() => continueAi(false)}>이전 질문 이어 쓰기</Button>
-              <Button size="sm" disabled={busy} onClick={() => continueAi(true)}>질문 새로 만들기</Button>
+              <p className="w-full text-body-sm">자료가 바뀌었어요. 질문을 새로 만들면 {confirmRegenerate.answerCount === null ? "이전 답은 지워져요." : `지금까지 쓴 답 ${confirmRegenerate.answerCount}개가 사라져요.`}</p>
+              <Button size="sm" disabled={busy} onClick={() => { setConfirmRegenerate(null); cancelAttachmentWait(); }}>취소</Button>
+              <Button size="sm" disabled={busy} onClick={() => continueAi("CONTINUE")}>이전 질문 이어 쓰기</Button>
+              <Button size="sm" disabled={busy} onClick={() => continueAi("REGENERATE")}>질문 새로 만들기</Button>
             </div>}
             {waitingForAttachments && <div role="status" className="flex flex-wrap items-center gap-2 text-label text-ink-muted">
               <p>자료를 읽고 있어요. 잠시 후 질문을 시작해요.</p>
@@ -278,6 +300,9 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
                 <Button disabled={busy || attachmentBusy} onClick={startAiSummary}>{busy ? "기록 준비 중…" : "AI와 정리하기 →"}</Button>
               </div>
             </ActionFooter>
+            {insufficientMaterial && (
+              <BlankFieldsNotice>자료가 부족해요. 읽을 수 있는 자료가 없어서 질문을 만들지 못했어요. 5칸을 직접 채워 바로 기록하거나, 메모를 적거나 PDF·TXT로 다시 올려 주세요.</BlankFieldsNotice>
+            )}
           </div>
         )}
         <AiWaitingNotice active={aiTask !== null} doing={aiTask === "organize" ? "답을 바탕으로 기록을 정리하고 있어요" : "자료를 읽고 질문을 만들고 있어요"} />
