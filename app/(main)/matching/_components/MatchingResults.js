@@ -1,10 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/components/layout/AuthProvider";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { copyText } from "@/lib/clipboard";
+import { saveEditedAnswer } from "@/lib/matchingApi";
+import { getStoryCards } from "@/lib/myRecordApi";
+import { recordHref } from "@/lib/myRecordNavigation";
+import { cardView } from "@/lib/projectViewModel";
+import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 import MatchingAnswerCard from "./MatchingAnswerCard";
-import { answerText } from "./matchingAnswer";
+import { SOURCE_MARKS, answerText, cardSourceLabel } from "./matchingAnswer";
 
 // 내 카드 수에 따라 색을 나눈다: 2장 이상 초록, 1장 노랑, 없음 빨강(M-06).
 function getCountTone(cardCount) {
@@ -13,11 +19,15 @@ function getCountTone(cardCount) {
 }
 
 // 매칭 결과. posting은 공고 저장·역량 찾기(36번) 응답, drafts는 문항별 답 초안(37번) 상태다.
-// 직접 고친 답은 이 화면에만 둔다. 공고를 새로 찾으면 이 화면을 새로 그려 비운다.
+// 공고를 새로 찾으면 이 화면을 새로 그리므로, 직접 고친 답도 그 공고의 것만 남는다.
 export default function MatchingResults({ posting, drafts, onRetry }) {
+  const { authenticatedRequest } = useAuth();
   const headingRef = useRef(null);
   const [notice, setNotice] = useState("");
-  const [editedTexts, setEditedTexts] = useState({});
+  // 직접 고친 답(M-11): { [questionId]: { text, charCount } }. charCount는 저장(38번) 응답의 글자 수이고, 저장 뒤 다시 고치면 null이다.
+  const [edits, setEdits] = useState({});
+  // '이 답에 쓴 기록'의 카드 모양(M-12). 나의 사자록과 같은 카드 목록(21번)과 표시 규칙(cardView)을 쓴다.
+  const [cardViews, setCardViews] = useState({});
   const companyLabel = posting.company ?? "지원";
 
   // 결과가 새로 나오면(공고마다 새로 그린다) 결과 제목으로 스크롤하고 포커스를 옮긴다.
@@ -28,20 +38,57 @@ export default function MatchingResults({ posting, drafts, onRetry }) {
     heading?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    getStoryCards({}, { signal: controller.signal, request: authenticatedRequest })
+      .then(({ cards }) => setCardViews(Object.fromEntries(cards.map((card) => [String(card.cardId), cardView(card)]))))
+      // 모양은 꾸밈이라 불러오지 못하면 모양 없이 보여 준다.
+      .catch(() => {});
+    return () => controller.abort();
+  }, [authenticatedRequest]);
+
   async function copy(text, message) {
     setNotice((await copyText(text)) ? message : "복사가 막혀 있어요. 직접 고치기를 눌러 내용을 선택한 뒤 복사해 주세요.");
   }
 
-  function questionText({ questionId }) {
+  // '다 고쳤어요'(M-11): 고친 답을 저장한다(38번). AI 초안과 같아지면 null을 보내 초안으로 되돌린다.
+  // 성공하면 "", 실패하면 안내 문구를 돌려준다.
+  async function saveEdit(questionId, answer) {
+    const edit = edits[questionId];
+    // 고치지 않았거나 이미 저장했으면 보내지 않는다.
+    if (!edit || edit.charCount !== null) return "";
+    if (!edit.text.trim()) return "답을 입력해 주세요.";
+    const editedAnswer = edit.text === answerText(answer) ? null : edit.text;
+    try {
+      const saved = await saveEditedAnswer(questionId, editedAnswer, { request: authenticatedRequest });
+      setEdits((previous) => {
+        const next = { ...previous };
+        if (saved.editedAnswer === null) delete next[questionId];
+        else next[questionId] = { text: saved.editedAnswer, charCount: saved.charCount };
+        return next;
+      });
+      return "";
+    } catch (failure) {
+      return failure.status === 401 ? "" : getRequestErrorMessage(failure, "고친 답을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
+    }
+  }
+
+  // 전체 답 복사(M-14): 모든 문항의 답과 근거 카드 목록을 Markdown으로. 직접 고친 답은 고친 내용으로 복사한다.
+  function questionMarkdown({ questionId, seq, content }) {
     const draft = drafts[questionId];
-    if (editedTexts[questionId] !== undefined) return editedTexts[questionId];
-    if (draft?.status !== "done") return "(아직 초안이 없어요)";
-    return draft.answer.noMatchingCard ? "(이 문항에 맞는 카드가 아직 없어요)" : answerText(draft.answer);
+    const heading = `## ${seq}. ${content}`;
+    if (draft?.status !== "done") return `${heading}\n\n(아직 초안이 없어요)`;
+    const { answer } = draft;
+    if (answer.noMatchingCard) return `${heading}\n\n(이 문항에 맞는 카드가 아직 없어요)`;
+    const sources = [
+      ...answer.cards.map((card) => `- ${SOURCE_MARKS[card.no]} ${card.title} · ${cardSourceLabel(card)}`),
+      ...(answer.usesJobPosting ? [`- ${SOURCE_MARKS[3]} ${companyLabel} 공고 · 주요 업무·우대사항`] : []),
+    ];
+    return `${heading}\n\n${edits[questionId]?.text ?? answerText(answer)}\n\n**이 답에 쓴 기록**\n${sources.join("\n")}`;
   }
 
   function copyAll() {
-    const text = posting.questions.map((question) => `## ${question.seq}. ${question.content}\n\n${questionText(question)}`).join("\n\n");
-    copy(`# ${companyLabel} 자소서 초안\n\n${text}`, "전체 답을 복사했어요.");
+    copy(`# ${companyLabel} 자소서 초안\n\n${posting.questions.map(questionMarkdown).join("\n\n")}`, "전체 답을 복사했어요.");
   }
 
   return (
@@ -61,8 +108,9 @@ export default function MatchingResults({ posting, drafts, onRetry }) {
               <li key={competencyId} className="border-b border-line px-0.5 py-3.5">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-[16px]">#{name}</h3>
+                  {/* N장 보기(M-07): 나의 사자록 스토리 카드에서 이 역량 카드만 보여 준다. '없음'은 누를 수 없다. */}
                   {cardCount > 0 ? (
-                    <Link href={`/my-record?tag=${encodeURIComponent(name)}`} className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${name} 카드 ${cardCount}장 보기`}>
+                    <Link href={recordHref(new URLSearchParams(), { tab: "cards", competencyId })} className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${name} 카드 ${cardCount}장 보기`}>
                       <Badge tone={getCountTone(cardCount)} size="count">{cardCount}장 보기 →</Badge>
                     </Link>
                   ) : <Badge tone={getCountTone(cardCount)} size="count">없음</Badge>}
@@ -84,9 +132,11 @@ export default function MatchingResults({ posting, drafts, onRetry }) {
             key={question.questionId}
             question={question}
             draft={drafts[question.questionId]}
-            editedText={editedTexts[question.questionId]}
+            edit={edits[question.questionId]}
+            cardViews={cardViews}
             companyLabel={companyLabel}
-            onEdit={(value) => { setEditedTexts((previous) => ({ ...previous, [question.questionId]: value })); setNotice(""); }}
+            onEdit={(text) => { setEdits((previous) => ({ ...previous, [question.questionId]: { text, charCount: null } })); setNotice(""); }}
+            onSaveEdit={(answer) => saveEdit(question.questionId, answer)}
             onRetry={() => onRetry(question.questionId)}
             onCopy={copy}
           />
