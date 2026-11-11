@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
@@ -115,6 +118,3 @@ export default function StickerBoard({ count, stickers }) {
     </Card>
   );
 }
-"use client";
-
-import { useEffect, useRef, useState } from "react";

@@ -1,8 +1,6 @@
 "use client";
 
-import { useMockData } from "@/components/layout/MockDataProvider";
-import { getRecentRetrospectives } from "@/lib/mock/home";
-import { homeStickers } from "@/lib/homeViewModel";
+import { homeRecentCards, homeStickers } from "@/lib/homeViewModel";
 import HomeHero from "./HomeHero";
 import MatchingPromoCard from "./MatchingPromoCard";
 import ProjectsCard from "./ProjectsCard";
@@ -16,7 +14,6 @@ import RecordRequestStatus from "@/components/my-record/RecordRequestStatus";
 export default function HomeContent() {
   const { signupWelcome, clearSignupWelcome } = useAuth();
   const home = useHomeData();
-  const { storyCards } = useMockData();
   const homeStatus = home.data?.sessionRetrospective.state;
 
   if (!home.data) return <main className="mx-auto max-w-[1120px] px-4 py-8"><RecordRequestStatus resource={home}>홈을 불러오는 중이에요.</RecordRequestStatus></main>;
@@ -35,7 +32,7 @@ export default function HomeContent() {
             <MatchingPromoCard />
           </div>
         </div>
-        <RecentRetrospectives items={getRecentRetrospectives(storyCards)} />
+        <RecentRetrospectives items={homeRecentCards(home.data.recentCards)} />
       </main>
       <Toast toast={signupWelcome} onDismiss={clearSignupWelcome} />
     </>
