@@ -14,5 +14,5 @@ export default function useProjectAction() {
     catch (error) { if (!controller.signal.aborted) setError(error.message); return false; }
     finally { active.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
-  return { run, busy, error };
+  return { run, busy, error, clearError: () => setError("") };
 }
