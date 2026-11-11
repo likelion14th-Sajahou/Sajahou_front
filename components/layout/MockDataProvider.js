@@ -11,8 +11,6 @@ import { setMockDemoPart } from "@/lib/mock/demoPart";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { useAuth } from "./AuthProvider";
 import useProjectData from "@/components/project/useProjectData";
-import { getAuthMode } from "@/lib/authConfig";
-import { saveMockWeek } from "@/lib/mock/myRecordModel";
 
 const MockDataContext = createContext(null);
 
@@ -89,21 +87,6 @@ function MockDataState({ authenticatedUser, children }) {
     setFlashToast({ id: crypto.randomUUID(), message });
   }
 
-  // 고쳐서 다시 저장해도 카드가 늘어나지 않도록 같은 카드는 바꿔 넣는다.
-  function completeWeek(card) {
-    if (getAuthMode() === "mock" && authenticatedUser) saveMockWeek(window.localStorage, authenticatedUser, card);
-    setStoryCards((current) => [...current.filter(({ id }) => id !== card.id), card]);
-    setWeekStatus("done");
-  }
-
-  function resetWeek() {
-    if (getAuthMode() === "mock" && authenticatedUser) saveMockWeek(window.localStorage, authenticatedUser, null, MOCK_WEEK.week);
-    setStoryCards((current) =>
-      current.filter(({ week, type }) => week !== MOCK_WEEK.week || type === "project"),
-    );
-    setWeekStatus("idle");
-  }
-
   return (
     <MockDataContext
       value={{
@@ -122,8 +105,6 @@ function MockDataState({ authenticatedUser, children }) {
         footprintWeeks: getFootprintWeeks(weekStatus, MOCK_PROJECTS, []),
         weekStatus,
         setWeekStatus,
-        completeWeek,
-        resetWeek,
       }}
     >
       {children}

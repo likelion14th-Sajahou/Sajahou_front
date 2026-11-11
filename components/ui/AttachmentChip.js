@@ -10,7 +10,16 @@ const ATTACHMENT_BADGES = {
   link: { label: "링크", tone: "purple" },
 };
 
-// status: 칩 안 이름 뒤에 붙는 표시(예: 매칭의 '읽지 못함'). warning이면 칩 배경을 주황으로 바꾼다.
+// 칩 안 이름 뒤에 붙는 작은 상태 표시다(예: '읽는 중', '읽지 못함'). warning이면 주황이다.
+export function ChipStatus({ warning = false, children }) {
+  return (
+    <span className={`shrink-0 rounded-full px-2 py-0.5 text-badge ${warning ? "bg-[#ffe0d1] text-[#b03a00]" : "bg-canvas text-ink-subtle"}`}>
+      {children}
+    </span>
+  );
+}
+
+// status: 칩 안 이름 뒤에 붙는 표시(ChipStatus). warning이면 칩 배경을 주황으로 바꾼다.
 export default function AttachmentChip({ as: Tag = "li", kind, name, status, warning = false, onRemove }) {
   const { label, tone } = ATTACHMENT_BADGES[kind];
 

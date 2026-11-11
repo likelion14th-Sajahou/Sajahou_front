@@ -5,6 +5,7 @@ import { useAuth } from "@/components/layout/AuthProvider";
 import AttachmentChip from "@/components/ui/AttachmentChip";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import LinkInputRow from "@/components/ui/LinkInputRow";
+import useAttachmentPolling from "@/components/ui/useAttachmentPolling";
 import * as api from "@/lib/attachmentApi";
 import { attachmentView } from "@/lib/projectViewModel";
 
@@ -17,7 +18,6 @@ export default function RecordAttachmentsField({ label, attachments, category, l
   const [selectedCategory, setSelectedCategory] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [retry, setRetry] = useState(0);
   const latest = useRef({ attachments, onChange, onBusyChange });
   const mutation = useRef(null);
   const { authenticatedRequest } = useAuth();
@@ -25,28 +25,14 @@ export default function RecordAttachmentsField({ label, attachments, category, l
   useEffect(() => () => mutation.current?.abort(), []);
   useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
 
-  useEffect(() => {
-    const pending = attachments.filter((a) => a.extractStatus === "PENDING");
-    if (!pending.length) return;
-    const controller = new AbortController();
-    let timer;
-    let attempts = 0;
-    async function poll() {
-      try {
-        const results = await Promise.all(pending.map((a) => api.getAttachment(a.attachmentId, { signal: controller.signal, request: authenticatedRequest })));
-        if (controller.signal.aborted) return;
-        if (results.some((item) => item.extractStatus !== "PENDING")) {
-          latest.current.onChange(latest.current.attachments.map((a) => {
-            const item = results.find((r) => r.attachmentId === a.attachmentId);
-            return item ? attachmentView({ ...a, ...item }) : a;
-          }));
-        } else if (++attempts < 80) timer = setTimeout(poll, 1500);
-        else setError("첨부 상태 확인이 오래 걸리고 있어요. 다시 확인해 주세요.");
-      } catch (error) { if (!controller.signal.aborted) setError(error.message); }
-    }
-    timer = setTimeout(poll, 1500);
-    return () => { clearTimeout(timer); controller.abort(); };
-  }, [attachments, retry, authenticatedRequest]);
+  // 읽는 중인 첨부의 상태를 확인해 칩에 반영한다(공통 훅).
+  const polling = useAttachmentPolling(attachments, (results) => {
+    latest.current.onChange(latest.current.attachments.map((a) => {
+      const item = results.find((r) => r.attachmentId === a.attachmentId);
+      return item ? attachmentView({ ...a, ...item }) : a;
+    }));
+  }, { request: authenticatedRequest });
+  const shownError = error || polling.error;
 
   async function run(action) {
     if (mutation.current) return;
@@ -110,7 +96,7 @@ export default function RecordAttachmentsField({ label, attachments, category, l
         <LinkInputRow aria-label="링크" placeholder={linkPlaceholder} value={link} onChange={setLink} onAdd={addLink} />
       </div>
       {busy && <p role="status">첨부 자료를 처리하고 있어요…</p>}
-      {error && <p role="alert" className="text-label text-tint-red-ink">{error} <button type="button" onClick={() => { setError(""); setRetry((n) => n + 1); }}>상태 다시 확인</button></p>}
+      {shownError && <p role="alert" className="text-label text-tint-red-ink">{shownError} <button type="button" onClick={() => { setError(""); polling.retry(); }}>상태 다시 확인</button></p>}
     </fieldset>
   );
 }

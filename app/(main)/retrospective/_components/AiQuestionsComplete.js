@@ -2,9 +2,12 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import AnsweredQuestionList from "./AnsweredQuestionList";
+import { useReviewDraftRequest } from "./useReviewDraftRequest";
 
 // 질문 끝(R-17, 04-a). 질문마다 '고치기'로 그 질문으로 돌아가 답을 고칠 수 있다.
-export default function AiQuestionsComplete({ questions, onEdit, reviewHref }) {
+export default function AiQuestionsComplete({ questions, onEdit }) {
+  const review = useReviewDraftRequest();
+
   return (
     <>
       <Card as="section" size="md" className="rounded-[28px]" aria-labelledby="questions-complete-title">
@@ -20,8 +23,14 @@ export default function AiQuestionsComplete({ questions, onEdit, reviewHref }) {
             답을 바꾸고 싶으면 아래 질문에서 “고치기”를 눌러요.
           </p>
           <div className="flex justify-end">
-            <Button variant="accent" href={reviewHref}>초안 확인하기 →</Button>
+            <Button variant="accent" onClick={review.openReview} disabled={review.isCreating} aria-busy={review.isCreating}>
+              {review.isCreating ? "초안을 만드는 중…" : "초안 확인하기 →"}
+            </Button>
           </div>
+          <p role="status" className={review.isCreating ? "text-label text-ink-subtle" : "sr-only"}>
+            {review.isCreating && "AI가 답을 바탕으로 회고록과 스토리 카드 초안을 만들고 있어요. 1분 정도 걸릴 수 있어요."}
+          </p>
+          {review.error && <p role="alert" className="text-body-sm text-error">{review.error}</p>}
         </div>
       </Card>
       <AnsweredQuestionList questions={questions} label="질문과 답변 목록" onEdit={onEdit} />

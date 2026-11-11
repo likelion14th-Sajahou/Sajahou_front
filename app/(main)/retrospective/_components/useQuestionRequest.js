@@ -7,15 +7,16 @@ import { requestQuestions } from "@/lib/retrospectiveApi";
 import { getRequestErrorMessage, useRetrospectivePreview } from "./RetrospectivePreview";
 
 const ERROR_MESSAGES = {
-  AI_TIMEOUT: "질문을 만드는 데 시간이 너무 오래 걸렸어요. 다시 시도해 주세요.",
-  AI_FAILED: "질문을 만들지 못했어요. 다시 시도해 주세요.",
-  AI_IN_PROGRESS: "질문을 만들고 있어요. 잠시 후 다시 시도해 주세요.",
+  AI_TIMEOUT: "AI 응답이 너무 오래 걸렸어요. 다시 시도해 주세요.",
+  AI_FAILED: "AI가 응답하지 못했어요. 다시 시도해 주세요.",
+  AI_IN_PROGRESS: "AI가 만들고 있어요. 잠시 후 다시 시도해 주세요.",
   ATTACHMENT_PENDING: "첨부를 아직 읽고 있어요. 잠시 후 다시 시도해 주세요.",
 };
 
-function getQuestionErrorMessage(failure) {
+// AI를 부르는 요청(질문 받기, 초안 만들기)의 실패 안내다.
+export function getAiErrorMessage(failure, fallback) {
   if (failure.kind === "timeout") return ERROR_MESSAGES.AI_TIMEOUT;
-  return ERROR_MESSAGES[failure.code] ?? getRequestErrorMessage(failure, "질문을 받지 못했어요. 잠시 후 다시 시도해 주세요.");
+  return ERROR_MESSAGES[failure.code] ?? getRequestErrorMessage(failure, fallback);
 }
 
 // 'AI 질문 받기'(R-14, API 17). 질문을 받으면 질문 단계로 넘어간다.
@@ -23,7 +24,7 @@ function getQuestionErrorMessage(failure) {
 export function useQuestionRequest() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { session, getStepHref, refreshCurrent } = useRetrospectivePreview();
+  const { retrospective, getStepHref, refreshCurrent } = useRetrospectivePreview();
   const [isRequesting, setIsRequesting] = useState(false);
   // 자료가 바뀌었을 때 사라질 답 개수. null이면 확인 문구를 닫은 상태다.
   const [changedAnswerCount, setChangedAnswerCount] = useState(null);
@@ -38,7 +39,7 @@ export function useQuestionRequest() {
     controllerRef.current = controller;
     setIsRequesting(true);
     try {
-      await requestQuestions(session.id, mode, { signal: controller.signal, request: authenticatedRequest });
+      await requestQuestions(retrospective.id, mode, { signal: controller.signal, request: authenticatedRequest });
       setChangedAnswerCount(null);
       await refreshCurrent();
       router.push(getStepHref("questions"));
@@ -49,7 +50,7 @@ export function useQuestionRequest() {
         setChangedAnswerCount(failure.detail?.answeredCount ?? 0);
         return "";
       }
-      return getQuestionErrorMessage(failure);
+      return getAiErrorMessage(failure, "질문을 받지 못했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       setIsRequesting(false);
     }

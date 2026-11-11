@@ -10,9 +10,11 @@ import Chip from "@/components/ui/Chip";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { formatDeadline } from "@/lib/formatDate";
 import { PARTS } from "@/lib/mock/user";
-import { getCurrentRetrospective } from "@/lib/retrospectiveApi";
+import { getCurrentRetrospective, getRetrospective } from "@/lib/retrospectiveApi";
 
 const RetrospectivePreviewContext = createContext(null);
+
+const STATE_LABELS = { NOT_STARTED: "시작 전", IN_PROGRESS: "작성 중", COMPLETED: "완료", RESTED: "휴회" };
 
 const LOAD_ERROR = "회고 상태를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.";
 
@@ -30,7 +32,26 @@ export function getRequestErrorMessage(failure, fallback) {
     : fallback;
 }
 
-// 이번 주 회고(API 11)를 불러와 제목·시작 화면·자료 단계가 함께 쓴다.
+// 이번 주 회고(API 11)를 불러온다. 과제를 '나중에 쓸게요'로 고른 주면 과제 회고(R-23)도 함께 갖춘다.
+// - 시작한 과제 회고: 13번 상세로 단계·저장 시각을 채운다.
+// - 아직 시작 전: id 없이 '시작 전'.
+// - 이미 끝냄: 11번의 openAssignments에서 빠지므로 '완료'로 본다. id는 없고, 완료 화면은 스토리 카드 API로 카드를 찾는다.
+async function loadCurrent({ signal, request }) {
+  const current = await getCurrentRetrospective({ signal, request });
+  const open = current.openAssignments[0];
+  let assignment = null;
+  if (open?.id) {
+    const detail = await getRetrospective(open.id, { signal, request });
+    assignment = { id: detail.id, state: detail.state, currentStep: detail.currentStep, lastSavedAt: detail.lastSavedAt, deadline: open.deadline };
+  } else if (open) {
+    assignment = { id: null, state: "NOT_STARTED", currentStep: 1, lastSavedAt: null, deadline: open.deadline };
+  } else if (current.session.assignmentMode === "LATER") {
+    assignment = { id: null, state: "COMPLETED", currentStep: 5, lastSavedAt: null, deadline: current.week.assignmentDeadline };
+  }
+  return { ...current, assignment };
+}
+
+// 제목·시작 화면·단계 화면이 함께 쓴다.
 // 데모 파트와 과제 선택도 제목 영역과 자료 폼에서 함께 사용한다.
 // 데모 파트는 목업 사용자의 파트라서, 바꾸면 상단 메뉴와 다른 화면의 역량 태그 목록도 함께 바뀐다.
 // 실제 서비스에는 없는 시연용 기능이고, mock 응답의 마감일만 바뀐다. 실제 백엔드는 가입 파트를 쓴다.
@@ -38,7 +59,6 @@ export default function RetrospectivePreview({ children }) {
   const { user, setUserPart } = useMockData();
   const { authenticatedRequest } = useAuth();
   const [assignmentStatus, setAssignmentStatus] = useState("record");
-  const [completedDraft, setCompletedDraft] = useState(null);
   const [{ current, error }, setLoadState] = useState({ current: null, error: "" });
   const [reloadKey, setReloadKey] = useState(0);
   // 시작 화면이 휴회 화면으로 바뀌어도 토스트가 남도록 여기에 둔다(C-02).
@@ -47,7 +67,7 @@ export default function RetrospectivePreview({ children }) {
   // 파트를 바꾸면 그 파트의 마감일로 다시 불러온다.
   useEffect(() => {
     const controller = new AbortController();
-    getCurrentRetrospective({ signal: controller.signal, request: authenticatedRequest })
+    loadCurrent({ signal: controller.signal, request: authenticatedRequest })
       .then((result) => setLoadState({ current: result, error: "" }))
       .catch((failure) => {
         if (controller.signal.aborted || failure.name === "AbortError") return;
@@ -58,17 +78,17 @@ export default function RetrospectivePreview({ children }) {
 
   // 시작·처음부터처럼 상태를 바꾼 뒤에 부른다. 새 상태를 받은 다음 화면을 옮겨야 다음 단계가 옛 값을 보지 않는다.
   async function refreshCurrent() {
-    const result = await getCurrentRetrospective({ request: authenticatedRequest });
+    const result = await loadCurrent({ request: authenticatedRequest });
     setLoadState({ current: result, error: "" });
     return result;
   }
 
   // 임시 저장(API 14) 응답으로 단계·저장 시각을 바로 반영한다. 시작 화면의 '이어 쓰기'가 이 단계로 간다.
-  function applySaved({ state, currentStep, lastSavedAt }) {
-    setLoadState((previous) => ({
-      ...previous,
-      current: { ...previous.current, session: { ...previous.current.session, state, currentStep, lastSavedAt } },
-    }));
+  function applySaved({ id, state, currentStep, lastSavedAt }) {
+    setLoadState((previous) => {
+      const key = previous.current.assignment?.id === id ? "assignment" : "session";
+      return { ...previous, current: { ...previous.current, [key]: { ...previous.current[key], state, currentStep, lastSavedAt } } };
+    });
   }
 
   if (!current) {
@@ -87,10 +107,9 @@ export default function RetrospectivePreview({ children }) {
     setPart: setUserPart,
     assignmentStatus,
     setAssignmentStatus,
-    completedDraft,
-    setCompletedDraft,
     week: current.week,
     session: current.session,
+    assignment: current.assignment,
     deadlineLabels: {
       session: formatDeadline(current.week.sessionDeadline),
       assignment: formatDeadline(current.week.assignmentDeadline),
@@ -125,20 +144,16 @@ export function useRetrospectivePreview() {
   return {
     ...context,
     isAssignment,
+    // 지금 보는 회고: 과제 회고 주소(?type=assignment)면 과제 회고, 아니면 세션 회고다.
+    retrospective: isAssignment ? context.assignment : context.session,
     getStepHref,
-    isStarted: Boolean(searchParams.get("step")),
-    isComplete: searchParams.get("step") === "complete",
-    assignmentPending: context.assignmentStatus === "later" || searchParams.get("preview") === "assignment-pending",
+    // 과제를 '나중에 쓸게요'로 골랐으면(화면에서 막 골랐거나 저장된 값) 세션·과제 전환 탭을 보여 준다(R-01).
+    assignmentPending: context.assignmentStatus === "later" || context.session.assignmentMode === "LATER",
   };
 }
 
 export function RetrospectiveHeading() {
-  const { week, part, setPart, assignmentPending, isAssignment, isComplete, isStarted, completedDraft } = useRetrospectivePreview();
-  const searchParams = useSearchParams();
-  // 화면 확인용 주소(?preview=assignment-pending)로 들어왔으면 세션 탭으로 돌아가도 탭이 보이도록 유지한다.
-  const sessionHref = searchParams.get("preview") === "assignment-pending" ? "/retrospective?preview=assignment-pending" : "/retrospective";
-  const sessionStatusLabel = (!isAssignment && isComplete) || completedDraft ? "완료" : "작성 중";
-  const assignmentStatusLabel = !isAssignment || !isStarted ? "시작 전" : isComplete ? "완료" : "작성 중";
+  const { week, session, assignment, part, setPart, assignmentPending, isAssignment } = useRetrospectivePreview();
 
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3.5">
@@ -148,11 +163,12 @@ export function RetrospectiveHeading() {
         <h1 className="text-[38px] leading-[1.2] tracking-[-0.02em]">
           {week.weekNumber}주차 {isAssignment ? "과제" : "세션"} 회고
         </h1>
-        {(assignmentPending || isAssignment) && (
+        {/* 과제 회고가 따로 없는 주(기록하기·없음)에는 탭을 보이지 않는다. */}
+        {(assignmentPending || (isAssignment && assignment)) && (
           <nav aria-label="회고 작성 상태" className="flex max-w-full flex-wrap gap-1.5 pt-2">
             {/* 세션 회고와 과제 회고를 오가는 전환 탭이다(R-01). */}
-            <Chip selected={!isAssignment} href={sessionHref}>세션 회고 · {sessionStatusLabel}</Chip>
-            <Chip selected={isAssignment} href="/retrospective?type=assignment">과제 회고 · {assignmentStatusLabel}</Chip>
+            <Chip selected={!isAssignment} href="/retrospective">세션 회고 · {STATE_LABELS[session.state]}</Chip>
+            <Chip selected={isAssignment} href="/retrospective?type=assignment">과제 회고 · {STATE_LABELS[assignment?.state ?? "NOT_STARTED"]}</Chip>
           </nav>
         )}
       </div>
