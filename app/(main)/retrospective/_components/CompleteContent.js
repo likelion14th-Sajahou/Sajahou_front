@@ -19,12 +19,13 @@ import { copyText } from "@/lib/clipboard";
 // 과제를 '나중에 쓸게요'로 고른 주에 아직 과제 회고가 남았으면 마감과 '과제 회고 쓰기'를 보여 준다.
 export default function CompleteContent() {
   const router = useRouter();
-  const { authenticatedRequest } = useAuth();
+  const { authenticatedRequest, isDemo } = useAuth();
   const { user, setWeekStatus } = useMockData();
   const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent } = useRetrospectivePreview();
   const [card, setCard] = useState(null);
   const [notice, setNotice] = useState("");
   const retrospectiveId = retrospective?.id;
+  const canRestartDemo = isDemo && getAuthMode() === "mock";
   // 세션 회고를 끝냈고 과제 회고가 아직 남았을 때만 보여 준다.
   const pendingAssignment = !isAssignment && assignment && assignment.state !== "COMPLETED" ? assignment : null;
 
@@ -45,8 +46,9 @@ export default function CompleteContent() {
     setNotice(copied ? "회고록을 복사했어요. 노션에 붙여 넣어 주세요." : "복사하지 못했어요. 브라우저의 클립보드 권한을 확인한 뒤 다시 시도해 주세요.");
   }
 
-  // 시연용으로 이번 주를 처음 상태로 돌린다. 실제 서비스에는 없는 동작이라 mock 모드에서만 보인다.
+  // mock 데이터를 지우는 개발용 동작이다. mock 모드의 데모 세션에서만 제공한다.
   async function restartDemo() {
+    if (!canRestartDemo) return;
     const { resetMockWeek } = await import("@/lib/mock/demoReset");
     resetMockWeek(window.localStorage, user.id);
     setAssignmentStatus("record");
@@ -83,7 +85,7 @@ export default function CompleteContent() {
               </div>
             </div>
           )}
-          {getAuthMode() === "mock" && <TextLink onClick={restartDemo}>데모 처음부터 다시 보기</TextLink>}
+          {canRestartDemo && <TextLink onClick={restartDemo}>데모 처음부터 다시 보기</TextLink>}
         </Card>
         <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
       </div>

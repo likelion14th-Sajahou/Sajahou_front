@@ -49,7 +49,7 @@ export default function AuthProvider({ children }) {
     request.then((result) => {
       if (!active || generation.current !== currentGeneration) return;
       const user = validateUser(result);
-      setSession({ user });
+      setSession({ user, isDemo: user.isDemo === true });
       setRestoreStatus("ready");
     }).catch((error) => {
       if (!active || generation.current !== currentGeneration) return;
@@ -118,7 +118,7 @@ export default function AuthProvider({ children }) {
     const currentGeneration = ++generation.current;
     const user = validateUser(await getCurrentUser({ signal }));
     if (generation.current !== currentGeneration || signal?.aborted) return false;
-    setSession({ user });
+    setSession({ user, isDemo: user.isDemo === true });
     if (welcomePending.current) {
       setSignupWelcome({ id: crypto.randomUUID(), message: `환영해요, ${user.name} 님! ${AUTH_PART_LABELS[user.part]} 파트로 시작해요` });
       welcomePending.current = false;
@@ -217,7 +217,7 @@ export default function AuthProvider({ children }) {
   }, [session, clearSession]);
 
   return (
-    <AuthContext value={{ user: session?.user ?? null, isAuthenticated: Boolean(session), signup,
+    <AuthContext value={{ user: session?.user ?? null, isAuthenticated: Boolean(session), isDemo: session?.isDemo === true, signup,
       notice, clearNotice, clearSignup, cancelSignup, markSignupSubmitted, acceptGoogleLogin, completeLogin,
       signupWelcome, clearSignupWelcome,
       authenticatedRequest, saveProfile, withdraw, isSavingProfile, isWithdrawing,

@@ -51,15 +51,15 @@ const INITIAL_STORY_CARDS = MOCK_STORY_CARDS.filter((card) => card.type !== "pro
 
 // 회고 시안 상태와 프로젝트 API 데이터를 기존 context에서 함께 제공한다.
 export default function MockDataProvider({ children }) {
-  const { user } = useAuth();
-  return <MockDataState key={user?.id ?? "anonymous"} authenticatedUser={user}>{children}</MockDataState>;
+  const { user, isDemo } = useAuth();
+  return <MockDataState key={`${user?.id ?? "anonymous"}:${isDemo}`} authenticatedUser={user} isDemo={isDemo}>{children}</MockDataState>;
 }
 
-function MockDataState({ authenticatedUser, children }) {
+function MockDataState({ authenticatedUser, isDemo, children }) {
   const projectData = useProjectData(authenticatedUser);
   const [previewPart, setPreviewPart] = useState(null);
   const user = authenticatedUser
-    ? { ...authenticatedUser, part: previewPart ?? AUTH_PART_LABELS[authenticatedUser.part] }
+    ? { ...authenticatedUser, part: (isDemo ? previewPart : null) ?? AUTH_PART_LABELS[authenticatedUser.part] }
     : MOCK_USER;
   // 다른 화면으로 옮겨 가서 띄울 토스트다. 예: 프로젝트를 지우고 목록에서 안내(H-25).
   const [flashToast, setFlashToast] = useState(null);
@@ -72,7 +72,10 @@ function MockDataState({ authenticatedUser, children }) {
   // 회고의 '데모 · 파트 바꿔 보기'(시연용)로 바뀐다. 상단 메뉴, 역량 태그 목록, 회고 화면이 모두 이 파트를 따른다.
   // 회고 mock API도 이 파트의 마감일로 응답한다. 실제 서비스에서는 가입 때 고른 파트로 고정된다(S-04).
   function setUserPart(part) {
-    setMockDemoPart(Object.keys(AUTH_PART_LABELS).find((code) => AUTH_PART_LABELS[code] === part) ?? null);
+    if (!isDemo) return;
+    const code = Object.keys(AUTH_PART_LABELS).find((code) => AUTH_PART_LABELS[code] === part);
+    if (!code) return;
+    setMockDemoPart(code);
     setPreviewPart(part);
   }
 

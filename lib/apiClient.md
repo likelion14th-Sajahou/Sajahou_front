@@ -243,3 +243,25 @@ NEXT_PUBLIC_GOOGLE_AUTH_MODE=mock
 처음부터 다시 테스트하려면 해당 사이트에서 브라우저 개발자 도구로 `localStorage`의 `sajarok_mock_auth`를 삭제하고 새로고침한다. Preview 주소가 바뀌면 새 주소에는 저장 데이터가 없어 신규 상태로 시작한다.
 
 실제 백엔드 연결 시 `NEXT_PUBLIC_AUTH_MODE=live`, `NEXT_PUBLIC_GOOGLE_AUTH_MODE=google`, 실제 `NEXT_PUBLIC_API_BASE_URL`과 Google Client ID를 설정하고 재빌드한다. live 모드는 mock 모듈이나 localStorage를 사용하지 않고 기존 `apiRequest`의 실제 fetch·`credentials: include`·HttpOnly 세션 쿠키 흐름을 그대로 따른다. 실제 연동 검증은 별도로 필요하다.
+
+## 8. 데모 로그인과 일반 로그인 구분
+
+`mock/live`는 API 응답 출처이고, 데모 여부는 서버 세션의 속성이다. Google 인증 우회 설정과 데모 로그인은 별개다. `POST /auth/demo`는 Google Client ID나 Google 인증 결과 없이 호출한다. 본문·Bearer 토큰 없이 기존 CSRF 헤더와 세션 쿠키를 사용하며, 성공 후 `GET /users/me`로 사용자를 확인한 다음 홈으로 이동한다.
+
+백엔드와 합의한 `GET /users/me`의 `data.isDemo` boolean을 `AuthProvider`가 로그인 완료·새로고침 시 읽어 `useAuth().isDemo`로 제공한다. `true`일 때만 시연용 UI를 표시한다. 필드 누락이나 문자열 `"true"`는 데모로 취급하지 않는다. 이름·사용자 ID·환경변수·로그인 버튼 이력으로 추측하지 않으며, live 모드에서는 로그인 유형을 브라우저 저장소에 따로 기록하지 않는다. 프로필 저장 응답에 이 필드가 없어도 현재 세션의 구분은 유지한다. 로그아웃·세션 만료 후에는 해제한다. 이 값은 UI 표시용이며 API 접근 권한은 서버가 검증한다.
+
+- 회고의 **데모 · 파트 바꿔 보기**: mock/live 모두 데모 세션에서만 표시한다. 일반 계정은 가입 파트를 유지한다. 미리보기는 화면 이동 중 유지되고, 로그아웃 후 다시 데모로 로그인하면 김사자 · 기획·디자인으로 시작한다(S-01). 계정 또는 세션 유형이 바뀌면 미리보기 상태도 초기화한다.
+- mock 데모의 파트 미리보기는 기존처럼 마감일·질문·역량 목록에 반영한다. **live 데모는 기존 화면 미리보기만 유지**하며 서버의 파트·질문·마감일·역량은 바꾸지 않는다. 서버 파트 전환은 별도 API 합의·작업 대상이다.
+- 회고 완료의 **데모 처음부터 다시 보기**: 브라우저 mock 데이터를 초기화하는 개발용 기능이므로 mock 데모 세션에서만 제공한다. 일반 mock 계정과 live 세션에는 표시하지 않는다. live 데이터 초기화 API는 추가하지 않는다.
+- 데모 API의 404는 기능 비활성화 안내로 처리한다. 데모 요청의 401을 Google 인증 만료로 안내하지 않으며, 로그인 성공 후 사용자 조회 실패와 연결 오류도 구분한다. 실패하면 로그인 화면에서 재시도할 수 있다.
+
+### 로컬 재현 방법
+
+1. `.env.local`에 `NEXT_PUBLIC_AUTH_MODE=mock`, `NEXT_PUBLIC_GOOGLE_AUTH_MODE=mock`을 설정하고 `npm run dev`로 실행한다.
+2. `/login`에서 '데모 계정으로 둘러보기'를 눌러 홈의 김사자 · 기획·디자인 표시를 확인한다.
+3. 이번 주 회고에서 파트를 바꾸고 다른 화면으로 이동한다. 새로고침 후에도 데모 전용 UI가 표시되는지 확인한다(미리보기 파트 자체는 메모리 상태이므로 새로고침하면 초기 파트로 돌아간다).
+4. 로그아웃 후 다시 데모 로그인하면 기획·디자인으로 시작하는지 확인한다.
+5. 로그아웃 후 'Google 계정으로 계속하기'로 신규 가입하거나 기존 mock 회원으로 로그인한다. 회고의 파트 변경 UI가 없고, 새로고침 후에도 숨겨지는지 확인한다.
+6. 데모 계정과 일반 계정에서 프로필을 저장한 뒤 로그인 유형에 따른 UI가 유지되는지 확인한다.
+
+자동 검증은 `node --test`와 `node --test lib/mock/auth.test.js lib/mock/retrospectiveApi.test.js`를 실행한다. 실제 백엔드에서는 `data.isDemo`, CSRF 발급·재시도, HttpOnly 세션 쿠키 저장·복원, 로그아웃, 데모 비활성화 404를 별도 확인한다. mock이나 가짜 fetch 테스트만으로 실제 Google 인증·CORS·백엔드 연동 완료를 판단하지 않는다.
