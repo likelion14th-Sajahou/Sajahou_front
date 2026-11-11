@@ -17,7 +17,7 @@ import RecordFormTitle from "./RecordFormTitle";
 import { EMPTY_RECORD_MESSAGE } from "./recordFields";
 import ActionFooter from "@/components/ui/ActionFooter";
 import { createProjectRecord, updateProjectRecord, getRecordQuestions, organizeProjectRecord } from "@/lib/projectApi";
-import { recordBody } from "@/lib/projectViewModel";
+import { recordBody, recordQuestionState } from "@/lib/projectViewModel";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
 import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 
@@ -40,8 +40,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const [waitingForAttachments, setWaitingForAttachments] = useState(false);
   const pendingQuestionMode = useRef(null);
   const [questionState, setQuestionState] = useState({ questions: [], inputs: {}, index: 0, sourceAttachments: [] });
-  const [questionMaterials, setQuestionMaterials] = useState(null);
-  const [confirmRegenerate, setConfirmRegenerate] = useState(false);
+  const [confirmRegenerate, setConfirmRegenerate] = useState(null);
   const request = useRef(null);
   useEffect(() => () => request.current?.abort(), []);
   const { toast, showToast, hideToast } = useToast();
@@ -123,8 +122,6 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       return;
     }
 
-    const snapshot = JSON.stringify({ memo: memo.trim(), ids: attachments.map((a) => a.attachmentId).sort() });
-    if (questionMaterials && snapshot !== questionMaterials) { setConfirmRegenerate(true); return; }
     continueAi("AUTO");
   }
 
@@ -149,13 +146,16 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       } else await updateProjectRecord(draftId, { memo: memo.trim(), attachmentIds: attachments.map((a) => a.attachmentId) }, options);
       const result = await getRecordQuestions(recordId, { ...options, mode });
       controller.signal.throwIfAborted();
-      setQuestionState((current) => ({ questions: result.questions, inputs: regenerate ? {} : current.inputs,
-        index: regenerate ? 0 : Math.min(current.index, Math.max(0, result.questions.length - 1)),
-        sourceAttachments: !questionMaterials || regenerate ? attachments.map((a) => ({ ...a })) : current.sourceAttachments }));
-      if (!questionMaterials || regenerate) setQuestionMaterials(JSON.stringify({ memo: memo.trim(), ids: attachments.map((a) => a.attachmentId).sort() }));
-      setConfirmRegenerate(false);
+      setQuestionState((current) => recordQuestionState(current, result.questions, attachments, { regenerate }));
+      setConfirmRegenerate(null);
       setStep("questions");
-    } catch (error) { if (!controller.signal.aborted) setNotice(getAiErrorMessage(error, error.message)); }
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        if (error.status === 409 && error.code === "MATERIAL_CHANGED") {
+          setConfirmRegenerate({ answerCount: error.detail?.answeredCount ?? null });
+        } else setNotice(getAiErrorMessage(error, error.message));
+      }
+    }
     finally { request.current = null; setAiTask(null); if (!controller.signal.aborted) setBusy(false); }
   }
 
@@ -224,6 +224,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
                 onChange={(next) => {
                   if (next.map((a) => a.attachmentId).join() !== attachments.map((a) => a.attachmentId).join()) cancelAttachmentWait();
                   setAttachments(next);
+                  setConfirmRegenerate(null);
                   setNotice("");
                 }}
               />
@@ -240,6 +241,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
               value={memo}
               onChange={(event) => {
                 setMemo(event.target.value);
+                setConfirmRegenerate(null);
                 cancelAttachmentWait();
                 setNotice("");
               }}
@@ -261,8 +263,8 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
               />
             )}
             {confirmRegenerate && <div role="group" aria-label="자료 변경 확인" className="flex flex-wrap gap-2 rounded-xl bg-tint-yellow p-3">
-              <p className="w-full text-body-sm">자료가 바뀌었어요. 질문을 새로 만들면 이전 답은 지워져요.</p>
-              <Button size="sm" disabled={busy} onClick={() => { setConfirmRegenerate(false); cancelAttachmentWait(); }}>취소</Button>
+              <p className="w-full text-body-sm">자료가 바뀌었어요. 질문을 새로 만들면 {confirmRegenerate.answerCount === null ? "이전 답은 지워져요." : `지금까지 쓴 답 ${confirmRegenerate.answerCount}개가 사라져요.`}</p>
+              <Button size="sm" disabled={busy} onClick={() => { setConfirmRegenerate(null); cancelAttachmentWait(); }}>취소</Button>
               <Button size="sm" disabled={busy} onClick={() => continueAi("CONTINUE")}>이전 질문 이어 쓰기</Button>
               <Button size="sm" disabled={busy} onClick={() => continueAi("REGENERATE")}>질문 새로 만들기</Button>
             </div>}
