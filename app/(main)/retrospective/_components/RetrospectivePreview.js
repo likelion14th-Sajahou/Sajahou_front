@@ -140,6 +140,7 @@ export function useRetrospectivePreview() {
 }
 
 export function RetrospectiveHeading() {
+  const { isDemo } = useAuth();
   const { week, session, assignment, part, setPart, assignmentPending, isAssignment } = useRetrospectivePreview();
 
   return (
@@ -159,14 +160,14 @@ export function RetrospectiveHeading() {
           </nav>
         )}
       </div>
-      <div className="flex min-w-0 max-w-full flex-col items-end gap-1.5">
+      {isDemo && <div className="flex min-w-0 max-w-full flex-col items-end gap-1.5">
         <p className="text-label text-ink-subtle">데모 · 파트 바꿔 보기</p>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="파트 미리보기">
           {PARTS.map((item) => (
             <Chip key={item} selected={item === part} onClick={() => setPart(item)}>{item}</Chip>
           ))}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
