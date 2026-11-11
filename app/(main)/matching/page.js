@@ -1,11 +1,12 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import MatchingForm from "./_components/MatchingForm";
+import MatchingContent from "./_components/MatchingContent";
 import StoryCardCount from "./_components/StoryCardCount";
 import RequireAuth from "@/components/layout/RequireAuth";
 
 export const metadata = { title: "자소서 매칭 | 사자록" };
 
-export default function MatchingPage() {
+export default function MatchingPage({ searchParams }) {
   return (
     <main className="mx-auto w-full max-w-[1120px] px-4 pt-6 pb-20">
       <div className="flex items-end gap-6">
@@ -19,7 +20,12 @@ export default function MatchingPage() {
           <StoryCardCount />
         </div>
       </div>
-      <RequireAuth><MatchingForm /></RequireAuth>
+      <RequireAuth>
+        {/* 주소의 공고 id는 요청마다 달라서 Suspense 안에서 읽는다. */}
+        <Suspense fallback={<p role="status" className="mt-6 text-body-sm text-ink-muted">자소서 매칭을 불러오는 중이에요.</p>}>
+          <MatchingContent searchParams={searchParams} />
+        </Suspense>
+      </RequireAuth>
     </main>
   );
 }

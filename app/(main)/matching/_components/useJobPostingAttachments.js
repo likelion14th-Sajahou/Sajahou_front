@@ -14,7 +14,8 @@ const JOB_POSTING_FILE = /\.(pdf|png|jpe?g)$/i;
 // 첨부 API 응답(7·8번)을 칩 하나로 바꾼다.
 function toChipItem(data) {
   const isLink = data.type === "LINK";
-  const name = isLink ? data.url : data.name;
+  // 매칭 결과 조회(39번) 예시에는 링크만 있어서, 파일 이름이 없을 때를 대비해 기본 이름을 둔다.
+  const name = (isLink ? data.url : data.name) ?? "첨부 파일";
   return {
     attachmentId: data.attachmentId,
     type: data.type,
@@ -94,9 +95,15 @@ export default function useJobPostingAttachments({ onLinkUnreadable } = {}) {
     }, (failure) => getRequestErrorMessage(failure, "첨부를 빼지 못했어요. 잠시 후 다시 시도해 주세요."));
   }
 
+  // 저장된 매칭 결과(39번)의 첨부로 칩을 채운다. 아직 읽는 중(PENDING)인 첨부는 이어서 상태를 확인한다.
+  function restore(attachments) {
+    setItems(attachments.map(toChipItem));
+  }
+
   return {
     items,
     isBusy,
+    restore,
     upload,
     addLink,
     remove,
