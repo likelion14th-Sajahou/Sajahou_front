@@ -10,13 +10,18 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { getFinishQuestions, getPortfolioDraft } from "@/lib/projectApi";
 import { restoreFinishQuestions } from "@/lib/portfolioViewModel";
+import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
+import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 
 export default function ProjectPortfolio({ project, records, onCancel, onSave }) {
   const [step, setStep] = useState("records");
   const [selectedIds, setSelectedIds] = useState();
   const [questions, setQuestions] = useState({ questions: [], inputs: {}, attachments: {}, index: 0 });
   const [draft, setDraft] = useState(null);
-  const { run, busy, error, clearError } = useProjectAction();
+  // AI 실패(시간 초과·AI 오류 등)는 회고·자소서 매칭과 같은 안내로 보여 준다.
+  const { run, busy, error, clearError } = useProjectAction((failure) => getAiErrorMessage(failure, failure.message));
+  // 지금 기다리는 AI 작업: "questions"(마치기 질문, 32번) | "draft"(포트폴리오 초안, 33번)
+  const [aiTask, setAiTask] = useState(null);
   const { authenticatedRequest } = useAuth();
   async function requestDraft(ids, signal) {
     const result = await getPortfolioDraft(project.id, ids.map(Number), { signal, request: authenticatedRequest });
@@ -25,6 +30,7 @@ export default function ProjectPortfolio({ project, records, onCancel, onSave })
   }
   function backToRecords() { clearError(); setStep("records"); }
   function startQuestions(ids) {
+    setAiTask("questions");
     run(async (signal) => {
       const result = await getFinishQuestions(project.id, ids.map(Number), { signal, request: authenticatedRequest });
       signal.throwIfAborted();
@@ -38,6 +44,7 @@ export default function ProjectPortfolio({ project, records, onCancel, onSave })
     });
   }
   function makeDraft() {
+    setAiTask("draft");
     run((signal) => requestDraft(selectedIds, signal));
   }
   return <fieldset disabled={busy} className="min-w-0" aria-busy={busy}>
@@ -53,7 +60,7 @@ export default function ProjectPortfolio({ project, records, onCancel, onSave })
       if (!questions.questions.length) { setStep("records"); return; }
       setQuestions((current) => ({ ...current, index: Math.max(0, current.questions.length - 1) })); setStep("gaps");
     }} />}
-    {busy && <p role="status">AI 응답을 기다리고 있어요. 최대 50초 걸릴 수 있어요…</p>}
+    <AiWaitingNotice active={busy} doing={aiTask === "draft" ? "기록과 답을 바탕으로 포트폴리오 초안을 만들고 있어요" : "기록을 읽고 질문을 만들고 있어요"} />
     {error && <div role="alert" className="flex flex-wrap items-center gap-2 text-label text-tint-red-ink">{error}{["gaps", "draft"].includes(step) && <Button variant="secondary" size="sm" onClick={makeDraft}>초안 다시 만들기</Button>}</div>}
   </fieldset>;
 }

@@ -18,6 +18,8 @@ import { EMPTY_RECORD_MESSAGE } from "./recordFields";
 import ActionFooter from "@/components/ui/ActionFooter";
 import { createProjectRecord, updateProjectRecord, getRecordQuestions, organizeProjectRecord } from "@/lib/projectApi";
 import { recordBody } from "@/lib/projectViewModel";
+import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
+import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 
 export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const { projectData } = useMockData();
@@ -32,6 +34,8 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const [tags, setTags] = useState([]);
   const [draftId, setDraftId] = useState(null);
   const [busy, setBusy] = useState(false);
+  // 지금 기다리는 AI 작업: "questions"(질문 받기, 30번) | "organize"(정리, 31번) | null. 저장 같은 다른 작업은 안내하지 않는다.
+  const [aiTask, setAiTask] = useState(null);
   const [attachmentBusy, setAttachmentBusy] = useState(false);
   const [waitingForAttachments, setWaitingForAttachments] = useState(false);
   const pendingRegenerate = useRef(null);
@@ -131,7 +135,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       setWaitingForAttachments(true); setNotice(""); return;
     }
     cancelAttachmentWait();
-    const controller = new AbortController(); request.current = controller;
+    const controller = new AbortController(); request.current = controller; setAiTask("questions");
     const options = { signal: controller.signal, request: authenticatedRequest };
     setBusy(true); setNotice("");
     try {
@@ -150,8 +154,8 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       if (!questionMaterials || regenerate) setQuestionMaterials(JSON.stringify({ memo: memo.trim(), ids: attachments.map((a) => a.attachmentId).sort() }));
       setConfirmRegenerate(false);
       setStep("questions");
-    } catch (error) { if (!controller.signal.aborted) setNotice(error.message); }
-    finally { request.current = null; if (!controller.signal.aborted) setBusy(false); }
+    } catch (error) { if (!controller.signal.aborted) setNotice(getAiErrorMessage(error, error.message)); }
+    finally { request.current = null; setAiTask(null); if (!controller.signal.aborted) setBusy(false); }
   }
 
   // 정리 결과에서 '← 질문으로'를 누르면 마지막 질문으로 돌아간다(H-14).
@@ -162,14 +166,14 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
 
   async function showReview() {
     if (request.current) return;
-    const controller = new AbortController(); request.current = controller; setBusy(true); setNotice("");
+    const controller = new AbortController(); request.current = controller; setBusy(true); setNotice(""); setAiTask("organize");
     try {
       const result = await organizeProjectRecord(draftId, { signal: controller.signal, request: authenticatedRequest });
       controller.signal.throwIfAborted();
       setFields({ did: result.did ?? "", problem: result.concern ?? "", choice: result.decision ?? "", result: result.result ?? "", next: result.nextStep ?? "" });
       setIsOrganizedByAi(true); setStep("review");
-    } catch (error) { if (!controller.signal.aborted) setNotice(error.message); }
-    finally { request.current = null; if (!controller.signal.aborted) setBusy(false); }
+    } catch (error) { if (!controller.signal.aborted) setNotice(getAiErrorMessage(error, error.message)); }
+    finally { request.current = null; setAiTask(null); if (!controller.signal.aborted) setBusy(false); }
   }
 
   function returnToMaterials() {
@@ -276,7 +280,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
             </ActionFooter>
           </div>
         )}
-        {busy && <p role="status">처리 중이에요. AI 응답은 최대 50초 걸릴 수 있어요…</p>}
+        <AiWaitingNotice active={aiTask !== null} doing={aiTask === "organize" ? "답을 바탕으로 기록을 정리하고 있어요" : "자료를 읽고 질문을 만들고 있어요"} />
         {notice && <p role="alert" className="text-label text-tint-red-ink">{notice} {step === "questions" && <button type="button" onClick={showReview}>정리 다시 시도</button>}</p>}
       </fieldset>
       <Toast toast={toast} onDismiss={hideToast} />
