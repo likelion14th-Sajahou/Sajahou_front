@@ -28,7 +28,7 @@
 
 ## 오류·지연 시나리오
 
-테스트의 `createMockServerFetch({ storage, now, scenario })`(`lib/mock/server.js`)로 지연과 오류를 주입한다. `scenario({path, method, user})`는 `{delayMs, error, status, extractStatus}`를 반환한다. AI 호출 중 같은 대상의 중복 호출은 409다. 취소·타임아웃 후 mutation은 반영하지 않는다.
+테스트의 `createMockServerFetch({ storage, now, scenario })`(`lib/mock/server.js`)로 지연과 오류를 주입한다. `scenario({path, method, user})`는 `{delayMs, error, status, extractStatus, finishQuestions}`를 반환한다. `finishQuestions: []`는 질문이 필요 없는 마치기 응답을 재현하며, 빈 질문 세션도 저장 전까지 재호출 시 유지한다. 브라우저 mock의 `sajarok_mock_scenario`는 공통 설정과 `paths`의 경로별 설정을 합쳐 적용한다(예: 특정 `/projects/{id}/finish/draft`만 504로 실패). AI 호출 중 같은 대상의 중복 호출은 409다. 취소·타임아웃 후 mutation은 반영하지 않는다.
 
 브라우저 개발자 도구에서 `sajarok_mock_scenario` localStorage 키에 JSON을 설정해 오류를 재현할 수 있다. 예: `{"delayMs":800,"error":"AI_FAILED","status":502}`. 테스트 후 키를 삭제한다. 실제 50초 대기는 `delayMs:50000`, 클라이언트 시간 초과는 65000ms보다 길게 설정한다. 이 설정은 mock에서만 읽고 API 요청 본문에는 넣지 않는다.
 
@@ -51,7 +51,15 @@
 - 프로젝트 요청의 401은 AuthProvider의 기존 세션 해제·로그인 이동으로 연결한다. 취소된 요청, 401 이외의 오류, 로그인 상태 변경 전에 시작된 이전 요청의 지연 401은 현재 세션을 해제하지 않는다. 로그인·탈퇴 재인증 요청에는 이 알림을 적용하지 않는다.
 - 기록 추가 폼의 열림 상태는 프로젝트 상세에서 유지한다. 저장·취소·포트폴리오 진입 때 닫고, 포트폴리오 완료 후 재마운트되어도 다시 열지 않는다. 목록에서 새로 들어오는 기록 추가 링크는 계속 폼을 연다.
 - H-16~H-18: 모든 기록 기본 선택 → 선택 기록 기반 질문·초안 → Markdown 수정·복사·저장. 포트폴리오 생성으로 카드를 추가하지 않는다.
+- #36: 마치기 질문의 quote는 일반 질문과 산출물 요청 모두에 표시한다. answer가 null이면 빈 입력이며, 같은 질문의 미저장 입력만 유지하고 서버 답변·상태가 바뀌면 서버 값을 복원한다. 산출물 ANSWERED 상태에서 첨부 목록을 반환하지 않는 계약 때문에 파일 정보를 지어내지 않고 '기존 산출물로 다음'으로 이어 간다. questions가 비면 질문 화면을 생략해 같은 recordIds로 초안을 생성하며, 실패 시 초안 요청만 재시도한다. 질문이 없던 검토 화면의 뒤로가기는 기록 선택으로 돌아간다.
+- #36: 초안은 서버 markdown을 그대로 편집기에 넣고 role·contribution·problem·result·artifact·learned를 각각 내 역할·주요 기여·문제와 해결·결과·산출물·배운 점으로 안내한다. blanks가 비면 안내를 표시하지 않는다. 답변 PATCH 성공 후 초안을 다시 요청하며, 완료/포트폴리오 저장은 34번 API 성공 시에만 반영한다. 인증은 기존 세션 쿠키·CSRF 흐름을 그대로 사용한다.
 - H-25: 프로젝트 삭제는 확인 후 처리하고 목록 이동·토스트를 제공한다. 포트폴리오 단독 삭제는 API 명세에 없어 제공하지 않는다.
+
+## 2026-11-11 #36 검증
+
+- 프로젝트 API·화면 모델·포트폴리오 상태 복원 테스트 27개, 전체 `node --test lib/*.test.js lib/mock/*.test.js` 79개 통과. 201/200, quote·답변·상태 보존, 답 수정 후 재생성, 선택 기록, blanks의 유무와 Markdown 보완 문구 유지, 초안과 저장 분리, 저장 시 질문 삭제, 빈 질문 및 초안 실패·재시도를 검증했다.
+- localhost mock에서 새로고침 후 답변 복원, 산출물 질문의 quote, 기존 산출물로 이어가기, 답변 수정 후 초안 변경, blanks별 항목 안내와 빈 배열 시 안내 숨김, 초안 생성 후 진행 중 유지 및 저장 후 완료 전환을 확인했다. 질문 빈 배열 → 자동 초안 생성·뒤로가기·실패 후 재시도를 임시 QA 시나리오로 검증했다. 임시 화면은 제품 코드에 포함하지 않는다.
+- 최종 `npm run lint`와 `git diff --check` 통과. 390·768·1440px 검토 화면과 모바일 하단 버튼을 시각 확인했고 가로 넘침이 없었다. 브라우저 error 로그는 비어 있었다. 빌드는 #30과 동일한 기존 Turbopack CSS 하위 프로세스 오류로 실패했다. 실제 백엔드·AI·배포는 미검증이다.
 
 ## 2026-11-11 #30 검증
 
