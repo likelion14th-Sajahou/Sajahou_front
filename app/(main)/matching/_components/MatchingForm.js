@@ -10,10 +10,10 @@ import Toast, { useToast } from "@/components/ui/Toast";
 import ActionFooter from "@/components/ui/ActionFooter";
 import { createJobPosting } from "@/lib/matchingApi";
 import { MATCHING_SAMPLE } from "@/lib/mock/matching";
-import { createMockMatchingResult } from "@/lib/mock/matchingResult";
 import { ATTACHMENT_PENDING_MESSAGE, getAiErrorMessage } from "@/lib/requestErrorMessage";
 import MatchingAttachments, { UNREADABLE_LINK_MESSAGE } from "./MatchingAttachments";
 import MatchingResults from "./MatchingResults";
+import useAnswerDrafts from "./useAnswerDrafts";
 import useJobPostingAttachments from "./useJobPostingAttachments";
 
 const EMPTY_FORM = { company: "", role: "", jd: "", preferences: "", companyInfo: "" };
@@ -45,14 +45,15 @@ export default function MatchingForm() {
   const [error, setError] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const { toast, showToast, hideToast } = useToast();
-  const [result, setResult] = useState(null);
-  const resultHeadingRef = useRef(null);
+  // 공고 저장·역량 찾기(36번) 응답과 회사 이름이다. 결과 화면이 이 값으로 그려진다.
+  const [posting, setPosting] = useState(null);
   const formRef = useRef(null);
   const questionRefs = useRef(new Map());
   const controllerRef = useRef(null);
   // 링크 본문을 못 읽었다는 안내가 뜨면 JD 칸으로 커서를 옮긴다(M-02).
   const focusJd = () => formRef.current?.elements.namedItem("jd")?.focus();
   const attachments = useJobPostingAttachments({ onLinkUnreadable: focusJd });
+  const answerDrafts = useAnswerDrafts();
 
   // 역량을 찾는 중에 화면을 떠나면 요청을 취소한다.
   useEffect(() => () => controllerRef.current?.abort(), []);
@@ -106,24 +107,19 @@ export default function MatchingForm() {
     setIsSearching(true);
     try {
       const request = toJobPostingRequest(fields, questionTexts, attachments.items.map(({ attachmentId }) => attachmentId));
-      const posting = await createJobPosting(request, { signal: controller.signal, request: authenticatedRequest });
-      // 결과 화면(역량 목록·문항별 초안)은 아직 화면 안의 예시로 보여 준다. FE-29에서 36번 응답으로 바꾼다.
-      setResult({ ...createMockMatchingResult(fields, questions), id: posting.jobPostingId });
-      setNotice("예시 매칭 결과를 표시했어요.");
+      const created = await createJobPosting(request, { signal: controller.signal, request: authenticatedRequest });
+      setPosting({ ...created, company: request.company });
+      // 역량을 찾으면 바로 모든 문항의 답 초안을 만든다(M-08).
+      answerDrafts.start(created.questions.map(({ questionId }) => questionId));
+      setNotice("공고가 원하는 역량을 찾았어요. 문항별 답 초안을 만들고 있어요.");
     } catch (failure) {
       if (controller.signal.aborted || failure.status === 401) return;
       if (failure.code === "EMPTY_MATERIAL") showEmptyPosting();
       else if (failure.code === "ATTACHMENT_PENDING") showToast(ATTACHMENT_PENDING_MESSAGE);
       else setError(getAiErrorMessage(failure, failure.code === "VALIDATION_ERROR" ? "입력한 내용을 확인해 주세요." : "내 사자록에서 찾지 못했어요. 잠시 후 다시 시도해 주세요."));
-      return;
     } finally {
       setIsSearching(false);
     }
-    requestAnimationFrame(() => {
-      const heading = resultHeadingRef.current;
-      heading?.focus({ preventScroll: true });
-      heading?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
-    });
   }
 
   function field(key, label, placeholder, rows) {
@@ -176,15 +172,13 @@ export default function MatchingForm() {
       <Toast toast={toast} onDismiss={hideToast} />
       <p className="rounded-xl bg-tint-yellow px-3.5 py-2.5 text-label text-ink-muted">사자록에 기록된 내용으로만 초안을 써요. 기록에 없는 건 지어내지 않고 빈칸으로 남겨요.</p>
     </Card>
-    {result && (
+    {/* 새로 찾으면 직접 고친 답도 함께 비우도록 공고마다 새로 그린다. */}
+    {posting && (
       <MatchingResults
-        key={result.id}
-        result={result}
-        headingRef={resultHeadingRef}
-        onEdit={(id, editedText) => setResult((previous) => ({
-          ...previous,
-          answers: previous.answers.map((answer) => answer.id === id ? { ...answer, editedText } : answer),
-        }))}
+        key={posting.jobPostingId}
+        posting={posting}
+        drafts={answerDrafts.drafts}
+        onRetry={answerDrafts.retry}
       />
     )}
     </>
