@@ -42,8 +42,16 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const [questionState, setQuestionState] = useState({ questions: [], inputs: {}, index: 0, sourceAttachments: [] });
   const [confirmRegenerate, setConfirmRegenerate] = useState(null);
   const [insufficientMaterial, setInsufficientMaterial] = useState(false);
+  const firstDirectField = useRef(null);
+  const focusDirectField = useRef(false);
   const request = useRef(null);
   useEffect(() => () => request.current?.abort(), []);
+  useEffect(() => {
+    if (step === "materials" && isWritingFields && focusDirectField.current) {
+      firstDirectField.current?.focus();
+      focusDirectField.current = false;
+    }
+  }, [step, isWritingFields]);
   const { toast, showToast, hideToast } = useToast();
   const hasPendingAttachments = attachments.some((a) => a.extractStatus === "PENDING");
   // 폴링이 끝난 시점의 최신 메모·첨부를 사용하며, 요청 잠금으로 중복 진행을 막는다.
@@ -146,11 +154,6 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       setConfirmRegenerate(null);
       const insufficient = result.insufficientMaterial || result.questions.length === 0;
       setInsufficientMaterial(insufficient);
-      if (insufficient) {
-        setIsWritingFields(true);
-        setStep("materials");
-        return;
-      }
       setStep("questions");
     } catch (error) {
       if (!controller.signal.aborted) {
@@ -187,6 +190,12 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     setStep("materials");
   }
 
+  function writeDirectly() {
+    focusDirectField.current = true;
+    setIsWritingFields(true);
+    returnToMaterials();
+  }
+
   return (
     <Card as="section" size="md" aria-labelledby="record-add-title">
       <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4" aria-busy={busy}>
@@ -194,8 +203,10 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
         {step === "questions" && (
           <ProjectRecordQuestions
             state={questionState}
+            insufficientMaterial={insufficientMaterial}
             onChange={setQuestionState}
             onBackToMaterials={returnToMaterials}
+            onWriteDirectly={writeDirectly}
             onComplete={showReview}
           />
         )}
@@ -249,15 +260,13 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
                 setNotice("");
               }}
             />
-            {insufficientMaterial && (
-              <p role="status" className="text-body-sm text-ink-muted">자료가 부족해요. 자료나 메모를 보완하거나 아래 5칸을 직접 채워 주세요.</p>
-            )}
             <TextLink onClick={() => setIsWritingFields((current) => !current)}>
               {isWritingFields ? "직접 쓰기 접기" : "5칸 직접 채우기"}
             </TextLink>
             {isWritingFields && (
               <RecordFieldsGrid
-                getFieldProps={({ key, formLabel, placeholder }) => ({
+                getFieldProps={({ key, formLabel, placeholder }, index) => ({
+                  ...(index === 0 ? { ref: firstDirectField } : {}),
                   label: (
                     <>
                       {formLabel} <span className="text-ink-subtle">· 선택</span>
