@@ -2,7 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 
 // 저장 실패 시 입력을 유지하고, 이탈 시 늦은 응답이 화면에 반영되지 않게 한다.
-export default function useProjectAction() {
+// toMessage로 실패 안내 문구를 바꿀 수 있다. 기본은 서버가 보낸 문구다. AI 요청은 getAiErrorMessage를 넘긴다.
+export default function useProjectAction(toMessage = (error) => error.message) {
   const active = useRef(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -11,7 +12,7 @@ export default function useProjectAction() {
     if (active.current) return false;
     const controller = new AbortController(); active.current = controller; setBusy(true); setError("");
     try { await action(controller.signal); return !controller.signal.aborted; }
-    catch (error) { if (!controller.signal.aborted) setError(error.message); return false; }
+    catch (error) { if (!controller.signal.aborted) setError(toMessage(error)); return false; }
     finally { active.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
   return { run, busy, error, clearError: () => setError("") };

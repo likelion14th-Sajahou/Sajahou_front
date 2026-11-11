@@ -12,6 +12,7 @@ import AiQuestionsSession from "./AiQuestionsSession";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { useReviewDraftRequest } from "./useReviewDraftRequest";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
+import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
 
 // 자료가 부족해 질문을 만들지 못했을 때(R-15).
 function InsufficientMaterial() {
@@ -27,6 +28,7 @@ function InsufficientMaterial() {
           {review.isCreating ? "정리하는 중…" : "이대로 정리하기"}
         </Button>
       </div>
+      <AiWaitingNotice active={review.isCreating} doing="지금 자료로 회고록과 스토리 카드 초안을 만들고 있어요" />
       {review.error && <p role="alert" className="text-body-sm text-error">{review.error}</p>}
     </Card>
   );

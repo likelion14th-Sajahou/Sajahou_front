@@ -69,7 +69,7 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
         </p>
         <CompetencyTagPicker
           id="record-edit-tags-label"
-          competencies={competencies}
+          competencies={projectData.competencyItems}
           selectedTags={tags}
           onChange={setTags}
           onLimit={showToast}

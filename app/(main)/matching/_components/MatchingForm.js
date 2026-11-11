@@ -15,6 +15,7 @@ import MatchingAttachments, { UNREADABLE_LINK_MESSAGE } from "./MatchingAttachme
 import MatchingResults from "./MatchingResults";
 import useAnswerDrafts from "./useAnswerDrafts";
 import useJobPostingAttachments from "./useJobPostingAttachments";
+import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
 
 const EMPTY_FORM = { company: "", role: "", jd: "", preferences: "", companyInfo: "" };
 const EMPTY_POSTING_MESSAGE = "공고 내용을 붙여 넣거나 파일을 올려 주세요.";
@@ -162,11 +163,12 @@ export default function MatchingForm() {
       </fieldset>
       <ActionFooter className="justify-between gap-3.5">
         <TextLink onClick={loadSample}>예시 공고 넣기</TextLink>
-        {/* 첨부를 올리는 중에는 아직 목록에 없는 첨부가 빠지지 않도록 기다린다. AI가 공고를 읽는 데 최대 50초쯤 걸린다. */}
+        {/* 첨부를 올리는 중에는 아직 목록에 없는 첨부가 빠지지 않도록 기다린다. */}
         <Button type="submit" variant="accent" disabled={isSearching || attachments.isBusy} aria-busy={isSearching}>
           {isSearching ? "내 사자록에서 찾는 중…" : "내 사자록에서 찾기 →"}
         </Button>
       </ActionFooter>
+      <AiWaitingNotice active={isSearching} doing="공고를 읽고 내 사자록에서 맞는 역량을 찾고 있어요" className="-mt-2 text-right" />
       {error && <p role="alert" className="-mt-2 text-right text-body-sm text-error">{error}</p>}
       <p role="status" className="sr-only">{notice}</p>
       <Toast toast={toast} onDismiss={hideToast} />

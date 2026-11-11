@@ -152,7 +152,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
           ))}
           <CompetencyTagPicker
             id="review-tags-label"
-            competencies={competencyItems.map(({ name }) => name)}
+            competencies={competencyItems}
             selectedTags={selectedTags}
             listClassName=""
             onChange={setSelectedTags}

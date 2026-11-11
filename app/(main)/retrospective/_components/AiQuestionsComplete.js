@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import AnsweredQuestionList from "./AnsweredQuestionList";
 import { useReviewDraftRequest } from "./useReviewDraftRequest";
+import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
 
 // 질문 끝(R-17, 04-a). 질문마다 '고치기'로 그 질문으로 돌아가 답을 고칠 수 있다.
 export default function AiQuestionsComplete({ questions, onEdit }) {
@@ -27,9 +28,7 @@ export default function AiQuestionsComplete({ questions, onEdit }) {
               {review.isCreating ? "초안을 만드는 중…" : "초안 확인하기 →"}
             </Button>
           </div>
-          <p role="status" className={review.isCreating ? "text-label text-ink-subtle" : "sr-only"}>
-            {review.isCreating && "AI가 답을 바탕으로 회고록과 스토리 카드 초안을 만들고 있어요. 1분 정도 걸릴 수 있어요."}
-          </p>
+          <AiWaitingNotice active={review.isCreating} doing="답을 바탕으로 회고록과 스토리 카드 초안을 만들고 있어요" />
           {review.error && <p role="alert" className="text-body-sm text-error">{review.error}</p>}
         </div>
       </Card>

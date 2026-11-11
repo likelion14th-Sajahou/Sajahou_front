@@ -7,6 +7,7 @@ import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
 import { recordHref } from "@/lib/myRecordNavigation";
 import { SOURCE_MARKS, answerText, cardSourceLabel, countBlanks, countCharacters, showsSourceMark } from "./matchingAnswer";
+import { aiWaitingMessage } from "@/components/ui/AiWaitingNotice";
 
 const NOTICE_CLASS = "rounded-xl bg-tint-yellow px-3 py-2.5 text-label text-tint-yellow-ink";
 
@@ -123,7 +124,7 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
   const headingId = `answer-heading-${question.questionId}`;
   let body;
   if (!draft || draft.status === "loading") {
-    body = <p role="status" className="text-body-sm text-ink-muted">사자록 카드로 초안을 만드는 중이에요.</p>;
+    body = <p role="status" className="text-body-sm text-ink-muted">{aiWaitingMessage("사자록 카드로 답 초안을 만들고 있어요")}</p>;
   } else if (draft.status === "error") {
     body = (
       <div className="flex flex-wrap items-center gap-3">

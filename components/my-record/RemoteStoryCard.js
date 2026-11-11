@@ -22,7 +22,7 @@ export default function RemoteStoryCard({ cardId, titleId, competencyItems, onCl
       : <RecordRequestStatus resource={resource}>카드를 불러오는 중이에요.</RecordRequestStatus>}
     <Button variant="secondary" onClick={onClose}>닫기</Button>
   </div>;
-  return <StoryCardDetail card={card} titleId={titleId} competencies={competencyItems.map((item) => item.name)} onClose={onClose}
+  return <StoryCardDetail card={card} titleId={titleId} competencies={competencyItems} onClose={onClose}
     onUpdate={async (changes, signal) => {
       const data = await updateStoryCard(cardId, { title: changes.title, fullMarkdown: changes.document,
         ...changes.summary, competencyIds: changes.tags.map((name) => competencyItems.find((item) => item.name === name)?.id) }, { signal, request: authenticatedRequest });

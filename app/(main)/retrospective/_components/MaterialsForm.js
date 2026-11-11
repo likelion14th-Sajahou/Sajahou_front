@@ -15,6 +15,7 @@ import { SavedTime, useSaveLater } from "./useSaveLater";
 import { useQuestionRequest } from "./useQuestionRequest";
 import useMaterialAttachments, { ATTACHMENT_FIELDS } from "./useMaterialAttachments";
 import ActionFooter from "@/components/ui/ActionFooter";
+import { aiWaitingMessage } from "@/components/ui/AiWaitingNotice";
 
 const ASSIGNMENT_MODES = { record: "RECORD", later: "LATER", none: "NONE" };
 
@@ -37,7 +38,7 @@ function toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment,
   };
 }
 
-const GENERATING_NOTICE = "AI가 자료를 읽고 질문을 만들고 있어요. 1분 정도 걸릴 수 있어요.";
+const GENERATING_NOTICE = aiWaitingMessage("자료를 읽고 질문을 만들고 있어요");
 
 function MaterialSection({ title, titleId, controls, inactive = false, children }) {
   return (
