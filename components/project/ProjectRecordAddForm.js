@@ -48,11 +48,11 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const request = useRef(null);
   useEffect(() => () => request.current?.abort(), []);
   useEffect(() => {
-    if (step === "materials" && isWritingFields && focusDirectField.current) {
+    if (!busy && step === "materials" && isWritingFields && focusDirectField.current) {
       firstDirectField.current?.focus();
       focusDirectField.current = false;
     }
-  }, [step, isWritingFields]);
+  }, [busy, step, isWritingFields]);
   const { toast, showToast, hideToast } = useToast();
   const hasPendingAttachments = attachments.some((a) => a.extractStatus === "PENDING");
   // 폴링이 끝난 시점의 최신 메모·첨부를 사용하며, 요청 잠금으로 중복 진행을 막는다.
@@ -155,6 +155,11 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       setConfirmRegenerate(null);
       const insufficient = result.insufficientMaterial || result.questions.length === 0;
       setInsufficientMaterial(insufficient);
+      // 자료가 부족하면 기존처럼 직접 쓰기를 펼친다. 요청 잠금이 풀린 뒤 첫 칸에 포커스한다.
+      if (insufficient) {
+        focusDirectField.current = true;
+        setIsWritingFields(true);
+      }
       setStep(insufficient ? "materials" : "questions");
     } catch (error) {
       if (!controller.signal.aborted) {
