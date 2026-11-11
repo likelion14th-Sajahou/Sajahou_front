@@ -10,7 +10,7 @@ import Chip from "@/components/ui/Chip";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { formatDeadline } from "@/lib/formatDate";
 import { PARTS } from "@/lib/mock/user";
-import { getCurrentRetrospective, getRetrospective } from "@/lib/retrospectiveApi";
+import { getCurrentRetrospective } from "@/lib/retrospectiveApi";
 
 const RetrospectivePreviewContext = createContext(null);
 
@@ -26,21 +26,15 @@ export function getStepPath(currentStep) {
 }
 
 // 이번 주 회고(API 11)를 불러온다. 과제를 '나중에 쓸게요'로 고른 주면 과제 회고(R-23)도 함께 갖춘다.
-// - 시작한 과제 회고: 13번 상세로 단계·저장 시각을 채운다.
-// - 아직 시작 전: id 없이 '시작 전'.
-// - 이미 끝냄: 11번의 openAssignments에서 빠지므로 '완료'로 본다. id는 없고, 완료 화면은 스토리 카드 API로 카드를 찾는다.
+// openAssignments에는 지각 허용 기간(마감 + 7일)이 남은 과제 회고가 주차 오름차순으로 오고, 끝낸 것도 COMPLETED로 남는다.
+// 이 화면은 이번 주차 과제 회고만 다룬다. 지난주 것은 쓰지 않는다.
+// 시작 전이면 id·currentStep·lastSavedAt이 null이라 단계는 1(시작)로 본다.
 async function loadCurrent({ signal, request }) {
   const current = await getCurrentRetrospective({ signal, request });
-  const open = current.openAssignments[0];
-  let assignment = null;
-  if (open?.id) {
-    const detail = await getRetrospective(open.id, { signal, request });
-    assignment = { id: detail.id, state: detail.state, currentStep: detail.currentStep, lastSavedAt: detail.lastSavedAt, deadline: open.deadline };
-  } else if (open) {
-    assignment = { id: null, state: "NOT_STARTED", currentStep: 1, lastSavedAt: null, deadline: open.deadline };
-  } else if (current.session.assignmentMode === "LATER") {
-    assignment = { id: null, state: "COMPLETED", currentStep: 5, lastSavedAt: null, deadline: current.week.assignmentDeadline };
-  }
+  const open = current.openAssignments.find(({ weekNumber }) => weekNumber === current.week.weekNumber);
+  const assignment = open
+    ? { id: open.id, state: open.state, currentStep: open.currentStep ?? 1, lastSavedAt: open.lastSavedAt, deadline: open.deadline }
+    : null;
   return { ...current, assignment };
 }
 

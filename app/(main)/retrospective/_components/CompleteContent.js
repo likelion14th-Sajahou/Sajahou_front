@@ -10,7 +10,6 @@ import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
 import { getAuthMode } from "@/lib/authConfig";
 import { formatDeadline } from "@/lib/formatDate";
-import { getStoryCard, getStoryCards } from "@/lib/myRecordApi";
 import { getRetrospective } from "@/lib/retrospectiveApi";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
@@ -29,25 +28,17 @@ export default function CompleteContent() {
   // 세션 회고를 끝냈고 과제 회고가 아직 남았을 때만 보여 준다.
   const pendingAssignment = !isAssignment && assignment && assignment.state !== "COMPLETED" ? assignment : null;
 
-  // 회고 id를 알면 회고 상세(API 13)의 카드를 쓴다. 끝낸 과제 회고는 이번 주 회고 조회(API 11)에 id가 없으므로
-  // 공개된 이번 주 카드를 스토리 카드 목록(API 21)에서 찾아 상세(API 22)로 회고록을 가져온다.
-  const cardType = isAssignment ? "ASSIGNMENT" : "SESSION";
-  const weekNumber = week.weekNumber;
+  // 저장한 회고의 카드(회고록)를 회고 상세(API 13)에서 가져온다. 끝낸 과제 회고도 이번 주 회고 조회(API 11)에 id가 남는다.
   useEffect(() => {
+    if (!retrospectiveId) return;
     const controller = new AbortController();
-    const options = { signal: controller.signal, request: authenticatedRequest };
-    async function load() {
-      if (retrospectiveId) return (await getRetrospective(retrospectiveId, options)).card;
-      const { cards } = await getStoryCards({ type: cardType, weekNumber }, options);
-      return cards[0] ? getStoryCard(cards[0].cardId, options) : null;
-    }
-    load()
-      .then(setCard)
+    getRetrospective(retrospectiveId, { signal: controller.signal, request: authenticatedRequest })
+      .then(({ card: saved }) => setCard(saved))
       .catch((failure) => {
         if (!controller.signal.aborted && failure.status !== 401) setNotice("저장한 회고록을 불러오지 못했어요. 나의 사자록에서 카드를 확인해 주세요.");
       });
     return () => controller.abort();
-  }, [retrospectiveId, cardType, weekNumber, authenticatedRequest]);
+  }, [retrospectiveId, authenticatedRequest]);
 
   async function copyRetrospective() {
     const copied = await copyText(card.fullMarkdown);
