@@ -31,7 +31,7 @@ export default function HomeContent() {
             stickers={homeStickers(home.data)}
           />
           <div className="grid gap-4 md:grid-cols-2 lg:flex lg:flex-col">
-            <ProjectsCard />
+            <ProjectsCard inProgressProjects={home.data.inProgressProjects} doneProjects={home.data.doneProjects} />
             <MatchingPromoCard />
           </div>
         </div>
