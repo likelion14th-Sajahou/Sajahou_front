@@ -125,10 +125,13 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
   let body;
   if (!draft || draft.status === "loading") {
     body = <p role="status" className="text-body-sm text-ink-muted">{aiWaitingMessage("사자록 카드로 답 초안을 만들고 있어요")}</p>;
-  } else if (draft.status === "error") {
+  } else if (draft.status === "error" || draft.status === "empty") {
+    // empty: 저장된 결과를 불러왔는데 아직 초안이 없는 문항이다. 누를 때만 다시 만든다.
     body = (
       <div className="flex flex-wrap items-center gap-3">
-        <p role="alert" className="text-body-sm text-error">{draft.error}</p>
+        {draft.status === "error"
+          ? <p role="alert" className="text-body-sm text-error">{draft.error}</p>
+          : <p className="text-body-sm text-ink-subtle">아직 답 초안이 없어요.</p>}
         <Button size="sm" variant="secondary" onClick={onRetry}>다시 만들기</Button>
       </div>
     );

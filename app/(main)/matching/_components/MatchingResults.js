@@ -10,7 +10,14 @@ import { recordHref } from "@/lib/myRecordNavigation";
 import { cardView } from "@/lib/projectViewModel";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 import MatchingAnswerCard from "./MatchingAnswerCard";
-import { SOURCE_MARKS, answerText, cardSourceLabel } from "./matchingAnswer";
+import { SOURCE_MARKS, answerText, cardSourceLabel, countCharacters } from "./matchingAnswer";
+
+// 저장된 매칭 결과(39번)를 불러왔으면 문항마다 editedAnswer(직접 고쳐 저장한 답)가 함께 온다.
+// 39번에는 고친 답의 글자 수가 없어서 저장할 때와 같은 규칙(빈칸 제외)으로 센다. 이미 저장된 답이므로 null로 두지 않는다.
+function savedEdits(questions) {
+  return Object.fromEntries(questions.filter(({ editedAnswer }) => editedAnswer)
+    .map(({ questionId, editedAnswer }) => [questionId, { text: editedAnswer, charCount: countCharacters(editedAnswer) }]));
+}
 
 // 내 카드 수에 따라 색을 나눈다: 2장 이상 초록, 1장 노랑, 없음 빨강(M-06).
 function getCountTone(cardCount) {
@@ -18,14 +25,14 @@ function getCountTone(cardCount) {
   return cardCount === 1 ? "yellow" : "red";
 }
 
-// 매칭 결과. posting은 공고 저장·역량 찾기(36번) 응답, drafts는 문항별 답 초안(37번) 상태다.
+// 매칭 결과. posting은 공고 저장·역량 찾기(36번) 응답이나 불러온 매칭 결과(39번), drafts는 문항별 답 초안(37번) 상태다.
 // 공고를 새로 찾으면 이 화면을 새로 그리므로, 직접 고친 답도 그 공고의 것만 남는다.
 export default function MatchingResults({ posting, drafts, onRetry }) {
   const { authenticatedRequest } = useAuth();
   const headingRef = useRef(null);
   const [notice, setNotice] = useState("");
   // 직접 고친 답(M-11): { [questionId]: { text, charCount } }. charCount는 저장(38번) 응답의 글자 수이고, 저장 뒤 다시 고치면 null이다.
-  const [edits, setEdits] = useState({});
+  const [edits, setEdits] = useState(() => savedEdits(posting.questions));
   // '이 답에 쓴 기록'의 카드 모양(M-12). 나의 사자록과 같은 카드 목록(21번)과 표시 규칙(cardView)을 쓴다.
   const [cardViews, setCardViews] = useState({});
   const companyLabel = posting.company ?? "지원";

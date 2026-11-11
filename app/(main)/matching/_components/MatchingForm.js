@@ -15,6 +15,7 @@ import MatchingAttachments, { UNREADABLE_LINK_MESSAGE } from "./MatchingAttachme
 import MatchingResults from "./MatchingResults";
 import useAnswerDrafts from "./useAnswerDrafts";
 import useJobPostingAttachments from "./useJobPostingAttachments";
+import useJobPostingRestore from "./useJobPostingRestore";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
 
 const EMPTY_FORM = { company: "", role: "", jd: "", preferences: "", companyInfo: "" };
@@ -38,7 +39,27 @@ function toJobPostingRequest(fields, questionTexts, attachmentIds) {
   };
 }
 
-export default function MatchingForm() {
+// 저장된 매칭 결과(39번)를 입력칸 값으로 되돌린다. 이 화면은 postingText를 보내지 않아(늘 null) 따로 채우지 않는다.
+function toFormFields(saved) {
+  return {
+    company: saved.company ?? "",
+    role: saved.department ?? "",
+    jd: saved.jd ?? "",
+    preferences: saved.preferredQualification ?? "",
+    companyInfo: saved.companyInfo ?? "",
+  };
+}
+
+// 찾기에 성공하면 주소에 공고 id를 남겨, 새로고침하거나 링크로 들어와도 결과를 다시 불러올 수 있게 한다(이슈 #42).
+// 이 화면의 상태는 그대로 두고 주소만 바꾼다.
+function keepJobPostingIdInAddress(jobPostingId) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("jobPostingId", jobPostingId);
+  window.history.replaceState(null, "", url);
+}
+
+// jobPostingId: 주소에 남은 공고 id다. 있으면 그 매칭 결과(39번)를 불러와 입력칸과 결과를 채운다.
+export default function MatchingForm({ jobPostingId = null }) {
   const { authenticatedRequest } = useAuth();
   const [fields, setFields] = useState(EMPTY_FORM);
   const [questions, setQuestions] = useState([{ id: "initial", text: "" }]);
@@ -55,6 +76,21 @@ export default function MatchingForm() {
   const focusJd = () => formRef.current?.elements.namedItem("jd")?.focus();
   const attachments = useJobPostingAttachments({ onLinkUnreadable: focusJd });
   const answerDrafts = useAnswerDrafts();
+  const restored = useJobPostingRestore(jobPostingId, (saved) => {
+    const savedQuestions = [...saved.questions].sort((a, b) => a.seq - b.seq);
+    setFields(toFormFields(saved));
+    setQuestions(savedQuestions.map(({ questionId, content }) => ({ id: `saved-${questionId}`, text: content })));
+    attachments.restore(saved.attachments);
+    answerDrafts.restore(savedQuestions);
+    setPosting({
+      jobPostingId: saved.jobPostingId,
+      company: saved.company,
+      competencies: saved.competencies,
+      noCompetencyFound: saved.competencies.length === 0,
+      questions: savedQuestions,
+    });
+    setNotice("저장된 매칭 결과를 불러왔어요.");
+  });
 
   // 역량을 찾는 중에 화면을 떠나면 요청을 취소한다.
   useEffect(() => () => controllerRef.current?.abort(), []);
@@ -83,7 +119,8 @@ export default function MatchingForm() {
   // 내 사자록에서 찾기(M-05): 입력을 확인한 뒤 공고 저장·역량 찾기(36번)를 부른다.
   async function submit(event) {
     event.preventDefault();
-    if (isSearching) return;
+    // 저장된 결과를 불러오는 중에는 찾지 않는다. 늦게 온 결과가 새로 찾은 결과를 덮지 않게 한다.
+    if (isSearching || restored.isRestoring) return;
     setError("");
     // 실행하지 못하는 이유는 눈에 보이게 토스트로 안내하고, 고칠 칸으로 커서를 옮긴다(M-05, M-02).
     const questionTexts = questions.map(({ text }) => text.trim()).filter(Boolean);
@@ -110,6 +147,8 @@ export default function MatchingForm() {
       const request = toJobPostingRequest(fields, questionTexts, attachments.items.map(({ attachmentId }) => attachmentId));
       const created = await createJobPosting(request, { signal: controller.signal, request: authenticatedRequest });
       setPosting({ ...created, company: request.company });
+      restored.markHandled(created.jobPostingId);
+      keepJobPostingIdInAddress(created.jobPostingId);
       // 역량을 찾으면 바로 모든 문항의 답 초안을 만든다(M-08).
       answerDrafts.start(created.questions.map(({ questionId }) => questionId));
       setNotice("공고가 원하는 역량을 찾았어요. 문항별 답 초안을 만들고 있어요.");
@@ -164,7 +203,7 @@ export default function MatchingForm() {
       <ActionFooter className="justify-between gap-3.5">
         <TextLink onClick={loadSample}>예시 공고 넣기</TextLink>
         {/* 첨부를 올리는 중에는 아직 목록에 없는 첨부가 빠지지 않도록 기다린다. */}
-        <Button type="submit" variant="accent" disabled={isSearching || attachments.isBusy} aria-busy={isSearching}>
+        <Button type="submit" variant="accent" disabled={isSearching || attachments.isBusy || restored.isRestoring} aria-busy={isSearching}>
           {isSearching ? "내 사자록에서 찾는 중…" : "내 사자록에서 찾기 →"}
         </Button>
       </ActionFooter>
@@ -174,6 +213,14 @@ export default function MatchingForm() {
       <Toast toast={toast} onDismiss={hideToast} />
       <p className="rounded-xl bg-tint-yellow px-3.5 py-2.5 text-label text-ink-muted">사자록에 기록된 내용으로만 초안을 써요. 기록에 없는 건 지어내지 않고 빈칸으로 남겨요.</p>
     </Card>
+    {/* 주소에 남은 공고의 매칭 결과(39번)를 불러오는 중·실패 안내 */}
+    {restored.isRestoring && <p role="status" className="pt-10 text-body-sm text-ink-muted">저장된 매칭 결과를 불러오는 중이에요.</p>}
+    {restored.error && (
+      <div className="flex flex-wrap items-center gap-3 pt-10">
+        <p role="alert" className="text-body-sm text-error">{restored.error}</p>
+        {restored.canRetry && <Button size="sm" variant="secondary" onClick={restored.retry}>다시 불러오기</Button>}
+      </div>
+    )}
     {/* 새로 찾으면 직접 고친 답도 함께 비우도록 공고마다 새로 그린다. */}
     {posting && (
       <MatchingResults
