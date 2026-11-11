@@ -19,6 +19,7 @@ import ActionFooter from "@/components/ui/ActionFooter";
 import { createProjectRecord, updateProjectRecord, getRecordQuestions, organizeProjectRecord } from "@/lib/projectApi";
 import { recordBody, recordQuestionState } from "@/lib/projectViewModel";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
+import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
 import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 
 export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
@@ -154,7 +155,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       setConfirmRegenerate(null);
       const insufficient = result.insufficientMaterial || result.questions.length === 0;
       setInsufficientMaterial(insufficient);
-      setStep("questions");
+      setStep(insufficient ? "materials" : "questions");
     } catch (error) {
       if (!controller.signal.aborted) {
         if (error.status === 409 && error.code === "MATERIAL_CHANGED") {
@@ -203,10 +204,8 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
         {step === "questions" && (
           <ProjectRecordQuestions
             state={questionState}
-            insufficientMaterial={insufficientMaterial}
             onChange={setQuestionState}
             onBackToMaterials={returnToMaterials}
-            onWriteDirectly={writeDirectly}
             onComplete={showReview}
           />
         )}
@@ -260,7 +259,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
                 setNotice("");
               }}
             />
-            <TextLink onClick={() => setIsWritingFields((current) => !current)}>
+            <TextLink onClick={() => isWritingFields ? setIsWritingFields(false) : writeDirectly()}>
               {isWritingFields ? "직접 쓰기 접기" : "5칸 직접 채우기"}
             </TextLink>
             {isWritingFields && (
@@ -296,6 +295,9 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
                 <Button disabled={busy || attachmentBusy} onClick={startAiSummary}>{busy ? "기록 준비 중…" : "AI와 정리하기 →"}</Button>
               </div>
             </ActionFooter>
+            {insufficientMaterial && (
+              <BlankFieldsNotice>자료가 부족해요. 읽을 수 있는 자료가 없어서 질문을 만들지 못했어요. 5칸을 직접 채워 바로 기록하거나, 메모를 적거나 PDF·TXT로 다시 올려 주세요.</BlankFieldsNotice>
+            )}
           </div>
         )}
         <AiWaitingNotice active={aiTask !== null} doing={aiTask === "organize" ? "답을 바탕으로 기록을 정리하고 있어요" : "자료를 읽고 질문을 만들고 있어요"} />
