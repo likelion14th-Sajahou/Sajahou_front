@@ -4,9 +4,11 @@ import Button from "@/components/ui/Button";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 
 // 과제 회고는 '나중에 쓸게요'를 고른 주에만 따로 생긴다(R-23). 그 밖의 주에 과제 회고로 들어오면 이유와 세션 회고로 가는 버튼을 보여 준다.
+// '나중에 쓸게요'를 골랐어도 지각 허용 기간(마감 + 7일)이 지나면 이번 주 회고 조회(API 11)의 openAssignments에서 빠진다.
 const NO_ASSIGNMENT_MESSAGES = {
   RECORD: "과제는 세션 회고에 함께 썼어요",
   NONE: "과제가 없다고 표시했어요",
+  LATER: "과제 회고를 쓸 수 있는 기간(마감 + 7일)이 지났어요",
 };
 
 function NoAssignmentRetrospective({ assignmentMode }) {
