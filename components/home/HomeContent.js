@@ -26,7 +26,7 @@ export default function HomeContent() {
         <ScrollReveal className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,680fr)_minmax(0,392fr)]">
           <StickerBoard
             count={home.data.stickers.totalCount}
-            stickers={homeStickers(home.data)}
+            stickers={homeStickers(home.data.footprints)}
           />
           <div className="grid gap-4 md:grid-cols-2 md:items-start lg:flex lg:flex-col lg:items-stretch">
             <MatchingPromoCard />
