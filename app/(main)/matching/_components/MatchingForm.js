@@ -74,7 +74,7 @@ export default function MatchingForm({ jobPostingId = null }) {
   const controllerRef = useRef(null);
   // 링크 본문을 못 읽었다는 안내가 뜨면 JD 칸으로 커서를 옮긴다(M-02).
   const focusJd = () => formRef.current?.elements.namedItem("jd")?.focus();
-  const attachments = useJobPostingAttachments({ onLinkUnreadable: focusJd });
+  const attachments = useJobPostingAttachments();
   const answerDrafts = useAnswerDrafts();
   const restored = useJobPostingRestore(jobPostingId, (saved) => {
     const savedQuestions = [...saved.questions].sort((a, b) => a.seq - b.seq);
@@ -177,7 +177,7 @@ export default function MatchingForm({ jobPostingId = null }) {
         {field("company", "회사", "예) 모아핀테크")}
         {field("role", "직무·부서", "예) 서비스 기획 인턴")}
       </div>
-      <MatchingAttachments attachments={attachments} />
+      <MatchingAttachments attachments={attachments} onLinkUnreadable={focusJd} />
       {field("jd", "주요 업무·자격 요건 (JD)", "공고 본문을 붙여 넣어요", 4)}
       <div className="grid grid-cols-2 gap-4">
         {field("preferences", <>채용 부서 우대사항 <span className="text-ink-subtle">· 선택</span></>, "예) 데이터로 디자인 결정을 설명할 수 있는 분", 3)}

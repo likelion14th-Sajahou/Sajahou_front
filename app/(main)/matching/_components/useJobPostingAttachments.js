@@ -34,7 +34,7 @@ function uploadErrorMessage(failure) {
 // 채용 공고 첨부(M-02, API 7~10). 고르면 바로 올리고, 서버가 본문을 읽는 동안 상태(API 9)를 확인한다.
 // 링크를 읽지 못했으면 onLinkUnreadable을 부른다. 공고 저장(36번) 때 attachmentIds로 보낸다.
 // upload·addLink·remove는 성공하면 "", 실패하면 안내 문구를 돌려준다.
-export default function useJobPostingAttachments({ onLinkUnreadable } = {}) {
+export default function useJobPostingAttachments() {
   const { authenticatedRequest } = useAuth();
   const [items, setItems] = useState([]);
   const [isBusy, setIsBusy] = useState(false);
@@ -45,7 +45,6 @@ export default function useJobPostingAttachments({ onLinkUnreadable } = {}) {
       const result = results.find(({ attachmentId }) => attachmentId === item.attachmentId);
       return result ? { ...item, extractStatus: result.extractStatus } : item;
     }));
-    if (results.some(({ type, extractStatus }) => type === "LINK" && extractStatus === "FAILED")) onLinkUnreadable?.();
   }, options);
 
   // 요청 하나를 보내는 동안 다른 첨부 조작을 막는다. 로그인이 풀린 경우(401)는 화면이 로그인으로 바뀌므로 안내하지 않는다.
