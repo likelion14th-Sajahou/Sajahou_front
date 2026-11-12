@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMockData } from "@/components/layout/MockDataProvider";
@@ -20,6 +21,7 @@ function isActivePath(pathname, href) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
+// 메뉴 탭(Figma 'Nav Tab'). 선택된 탭은 진한 2px 밑줄. 기본 탭도 투명한 2px 밑줄을 둬서 선택이 바뀌어도 글자가 움직이지 않게 한다.
 function NavLinks({ pathname }) {
   return NAV_ITEMS.map(({ href, label }) => {
     const isActive = pathname ? isActivePath(pathname, href) : false;
@@ -29,10 +31,10 @@ function NavLinks({ pathname }) {
         key={href}
         href={href}
         aria-current={isActive ? "page" : undefined}
-        className={`whitespace-nowrap border-b px-0.5 py-1.5 text-body-sm ${
+        className={`whitespace-nowrap border-b-2 py-1.5 text-body-sm leading-[22.4px] font-bold ${
           isActive
-            ? "border-accent text-ink"
-            : "border-transparent text-ink-soft"
+            ? "border-ink text-ink"
+            : "border-transparent text-ink-subtle"
         }`}
       >
         {label}
@@ -49,34 +51,33 @@ export default function Header() {
   const { user } = useMockData();
   const { isAuthenticated, restoreStatus, logout, isLoggingOut, isAccountBusy, logoutError } = useAuth();
 
-  // 768px 미만은 두 줄: 첫 줄에 로고와 사용자(로그아웃), 둘째 줄에 메뉴. 768px 이상은 한 줄(15 시안).
-  // 홈 히어로가 이 높이(두 줄 110px, 한 줄 68px)를 빼서 첫 화면을 채우므로, 줄 수를 바꾸면 HomeHero도 함께 고친다.
+  // 화면 위에 고정되는 반투명 헤더(Figma 'Header'). 1024px 미만은 두 줄: 첫 줄에 로고와 사용자(로그아웃), 둘째 줄에 메뉴. 1024px 이상은 한 줄.
+  // 홈 히어로가 이 높이를 빼서 첫 화면을 채우고, 스크롤 위치도 이 높이만큼 띄운다(globals.css의 --header-height).
+  // 줄 수나 높이를 바꾸면 --header-height도 함께 고친다.
   return (
-    <header className="w-full border-b border-transparent">
-      <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-x-5 gap-y-2 p-4">
-        <Link
-          href="/"
-          aria-label="사자록 홈"
-          className="shrink-0 text-heading tracking-[-0.66px] text-ink"
-        >
-          사자록
+    <header className="sticky top-0 z-40 w-full border-b border-transparent bg-canvas/80 backdrop-blur-[8px]">
+      <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-x-6 gap-y-2 p-4">
+        <Link href="/" aria-label="사자록 홈" className="shrink-0">
+          <Image src="/images/brand/logo.png" alt="" width={117} height={42} priority />
         </Link>
-        <nav aria-label="주요 메뉴" className="order-last flex w-full flex-wrap items-center gap-x-4 gap-y-0.5 sm:gap-5 md:order-none md:ml-auto md:w-auto">
+        <nav aria-label="주요 메뉴" className="order-last flex w-full flex-wrap items-center gap-x-4 gap-y-0.5 sm:gap-6 lg:order-none lg:ml-auto lg:w-auto">
           {/* 동적 경로에서는 주소를 요청 시점에야 알 수 있어, 메뉴는 먼저 보여 주고 선택 표시만 나중에 채운다. */}
           <Suspense fallback={<NavLinks />}>
             <CurrentNavLinks />
           </Suspense>
         </nav>
+        {/* 메뉴와 사용자 정보 사이 구분선 (한 줄일 때만) */}
+        {isAuthenticated && <span aria-hidden="true" className="hidden h-4 w-px bg-locked lg:block" />}
         {/* 모바일에서는 이름·파트 대신 내 정보 링크를 보여 준다. */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-4">
           {restoreStatus === "checking" && <p role="status" className="text-label text-ink-subtle">로그인 확인 중…</p>}
           {isAuthenticated && user && (
             <>
-              <div className="hidden min-w-0 items-center gap-1 text-label text-ink sm:flex">
+              <div className="hidden min-w-0 items-center gap-1 text-body-sm leading-[20.8px] font-bold text-ink sm:flex">
                 <Link href="/profile" aria-label={`${user.name} 님 내 정보`} className="max-w-[120px] truncate rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink hover:underline">
                   {user.name}
                 </Link>
-                <span className="whitespace-nowrap text-ink-subtle">{user.part}</span>
+                <span className="whitespace-nowrap text-ink-500">{user.part}</span>
               </div>
               <TextLink href="/profile" size="sm" className="sm:hidden">내 정보</TextLink>
             </>
@@ -88,7 +89,7 @@ export default function Header() {
               disabled={isAccountBusy}
               aria-busy={isAccountBusy}
               aria-describedby={logoutError ? "logout-error" : undefined}
-              className="text-ink-subtle disabled:cursor-default disabled:opacity-60"
+              className="leading-5 text-ink-subtle disabled:cursor-default disabled:opacity-60"
             >
               {isLoggingOut ? "로그아웃 중…" : "로그아웃"}
             </TextLink>

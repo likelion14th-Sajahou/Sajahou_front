@@ -111,6 +111,24 @@
   --text-heading: 22px;
 }
 
+/*
+ * 고정 헤더(components/layout/Header.js)의 높이. 1024px 미만은 두 줄, 이상은 한 줄이다.
+ * 홈 히어로가 이 높이를 빼서 첫 화면을 채우고, 스크롤로 옮겨 가는 대상(결과 제목, 강조 카드 등)이 헤더에 가리지 않게 띄운다.
+ */
+:root {
+  --header-height: 120px;
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --header-height: 75px;
+  }
+}
+
+html {
+  scroll-padding-top: var(--header-height);
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
