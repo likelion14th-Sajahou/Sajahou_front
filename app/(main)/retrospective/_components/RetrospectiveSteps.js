@@ -35,9 +35,10 @@ function StepBadge({ index, done }) {
 // 회고 5단계 진행 표시(R-02, Figma '회고 진행 단계').
 // 끝낸 단계: 노란 배지 + 번호, 지금 단계: 구름 캐릭터 + 흔들림 + '지금 여기!', 남은 단계: 회색 배지 + 번호.
 // 지나온 길은 진한 점선, 남은 길은 연한 점선이다.
-export default function RetrospectiveSteps({ currentStep = 0 }) {
+// className으로 위 간격을 바꿀 수 있다(시작 화면은 Figma대로 제목과 38px).
+export default function RetrospectiveSteps({ currentStep = 0, className = "mt-6" }) {
   return (
-    <div className="relative mt-6 pt-8">
+    <div className={`relative pt-8 ${className}`}>
       {/* 첫 단계 가운데(10%)부터 마지막 단계 가운데(90%)까지 연한 점선, 지금 단계까지는 진한 점선을 덧그린다. */}
       <span aria-hidden="true" className="absolute top-[59px] right-[10%] left-[10%] border-t-[3px] border-dashed border-locked" />
       {currentStep > 0 && (

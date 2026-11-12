@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import Button from "@/components/ui/Button";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import { setRetrospectiveRest } from "@/lib/retrospectiveApi";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
@@ -38,29 +39,25 @@ export default function PausedRetrospective() {
     }
   }
 
+  // 휴회 카드(Figma '[디] 02 … 데스크톱 1450'): 제목과 같은 896px, 진한 울퉁불퉁한 테두리, 밤하늘 구름 캐릭터.
   return (
     <section
       aria-labelledby="paused-title"
-      className="mx-auto mt-6 flex w-full max-w-[620px] flex-col items-center gap-3.5 rounded-[24px] bg-white px-6 py-8 text-center sm:rounded-[32px] sm:px-8 sm:py-10"
+      className="relative mx-auto mt-10 flex w-full max-w-[896px] flex-col items-center gap-6 rounded-[32px] bg-white px-6 py-12 text-center sm:px-8 sm:py-14"
     >
-      <div className="relative size-[90px]" aria-hidden="true">
-        <ShapeCharacter
-          shape="semicircle"
-          color="green"
-          size={90}
-          cropped
-          className="absolute top-[34%] left-[6%]"
-        />
+      <DrawnBorder variant="paused-card" />
+      <Image src="/images/characters/cloud-night-sky.png" alt="" width={166} height={111} />
+      <div className="flex flex-col items-center gap-1.5">
+        <h2 id="paused-title" className="font-display text-[24px] leading-[38.4px] tracking-[-0.48px] text-balance break-keep text-ink">
+          {week.weekNumber}주차는 휴회로 표시했어요
+        </h2>
+        <p className="text-body leading-6 text-balance break-keep text-ink-subtle">
+          쉬어 가는 주예요. 회고와 과제를 쓰지 않아도 돼요.
+        </p>
       </div>
-      <h2 id="paused-title" className="text-heading text-balance break-keep tracking-[-0.02em] sm:text-[24px]">
-        {week.weekNumber}주차는 휴회로 표시했어요
-      </h2>
-      <p className="text-body text-balance break-keep text-ink-subtle">
-        쉬어 가는 주예요. 회고와 과제를 쓰지 않아도 돼요.
-      </p>
-      <div className="flex w-full flex-col justify-center gap-2 sm:w-auto sm:flex-row">
-        <Button href="/">홈으로</Button>
-        <Button variant="secondary" onClick={undoRest} disabled={isUndoing} aria-busy={isUndoing}>
+      <div className="flex flex-wrap justify-center gap-3">
+        <Button variant="ink" href="/">홈으로</Button>
+        <Button variant="ink-outline" onClick={undoRest} disabled={isUndoing} aria-busy={isUndoing}>
           {isUndoing ? "해제하는 중…" : "휴회가 아니었어요"}
         </Button>
       </div>
