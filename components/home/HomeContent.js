@@ -22,7 +22,8 @@ export default function HomeContent() {
   return (
     <>
       <HomeHero userName={home.data.user.name} week={home.data.currentWeek.weekNumber} weekStatus={homeStatus} />
-      <main className="mx-auto w-full max-w-[1120px] px-4 pt-2 pb-20">
+      {/* Figma: 검은 배경 아래 여백 43px + 본문 상단 패딩 8px. */}
+      <main className="mx-auto w-full max-w-[1120px] px-4 pt-[51px] pb-20">
         <ScrollReveal className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,680fr)_minmax(0,392fr)]">
           <StickerBoard
             count={home.data.stickers.totalCount}
