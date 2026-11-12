@@ -145,7 +145,14 @@ body {
   to { opacity: 1; translate: 0 0; }
 }
 
+/* 회고 진행 단계의 '지금 단계' 구름 캐릭터가 살짝 흔들린다(R-02). */
+@keyframes step-wobble {
+  0%, 100% { rotate: -6deg; }
+  50% { rotate: 6deg; }
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .step-wobble { animation: step-wobble 1.6s ease-in-out infinite; }
   .home-stickers-enter { animation: home-stickers-enter 500ms ease-out; }
   .home-hero-float { animation: home-hero-float 7s ease-in-out infinite; }
   .home-hero-float:nth-child(even) { animation-delay: -3.5s; }

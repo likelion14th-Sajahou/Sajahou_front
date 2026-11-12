@@ -11,7 +11,7 @@ export default function RetrospectiveDeadlines() {
   ];
 
   return (
-    <dl className="mt-4 flex flex-col gap-2 text-body-sm">
+    <dl className="mt-4 flex flex-col gap-2 font-display text-body-sm leading-[22.4px] text-ink">
       {items.map(({ label, dueLabel }) => (
         <div key={label} className="flex justify-between gap-4">
           <dt>{label}</dt>
