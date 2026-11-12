@@ -136,7 +136,7 @@ body {
   line-height: 1.6;
 }
 
-/* 홈은 정적인 시안으로 구현한다. 장식 배치에만 화면별 좌표를 쓴다. */
+/* 히어로 장식 배치에만 화면별 좌표를 쓴다. */
 .home-hero {
   height: clamp(640px, calc(100svh - var(--header-height)), 920px);
 }
@@ -229,3 +229,36 @@ body {
 }
 .new-project-form input { height: 56px; }
 .new-project-form input::placeholder { color: var(--color-ink-300); }
+
+/* Figma 홈 모션: 별은 회전하지 않고 밝기와 크기만 변한다. */
+@keyframes home-star-twinkle {
+  0%, 100% { opacity: 1; scale: 1; }
+  50% { opacity: 0.45; scale: 0.88; }
+}
+
+@keyframes home-cta-glow {
+  0%, 100% { scale: 1; filter: drop-shadow(0 0 0 rgba(252, 221, 121, 0)); }
+  50% { scale: 1.04; filter: drop-shadow(0 0 14px rgba(252, 221, 121, 0.55)); }
+}
+
+@keyframes home-reveal {
+  from { opacity: 0; translate: 0 40px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-hero-stars img {
+    animation: home-star-twinkle var(--twinkle-duration) ease-in-out var(--twinkle-delay) infinite;
+  }
+  .home-hero-cta { transition: translate 250ms, scale 250ms; }
+  .home-hero-cta:hover,
+  .home-hero-cta:focus-visible { translate: 0 -2px; scale: 1.05; }
+  .home-hero-cta[data-active="true"] .home-hero-cta-content {
+    animation: home-cta-glow 3.2s ease-in-out infinite;
+  }
+  .home-matching-icon { transition: opacity 200ms ease-out; }
+  .home-reveal[data-reveal="hidden"] { opacity: 0; translate: 0 40px; }
+  .home-reveal[data-reveal="visible"] {
+    animation: home-reveal 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}

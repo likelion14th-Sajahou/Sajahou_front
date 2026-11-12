@@ -11,6 +11,7 @@ import TextLink from "@/components/ui/TextLink";
 const NAV_ITEMS = [
   { href: "/", label: "홈" },
   { href: "/retrospective", label: "이번 주 회고" },
+  { href: "/projects", label: "프로젝트" },
   { href: "/my-record", label: "나의 사자록" },
   { href: "/matching", label: "자소서 매칭" },
 ];
