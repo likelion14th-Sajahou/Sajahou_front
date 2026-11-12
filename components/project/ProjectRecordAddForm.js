@@ -15,7 +15,7 @@ import RecordAttachmentsField from "./RecordAttachmentsField";
 import RecordFormTitle from "./RecordFormTitle";
 import { EMPTY_RECORD_MESSAGE } from "./recordFields";
 import ActionFooter from "@/components/ui/ActionFooter";
-import { createProjectRecord, updateProjectRecord, getRecordQuestions, organizeProjectRecord } from "@/lib/projectApi";
+import { createProjectRecord, updateProjectRecord, getRecordQuestionsWithRetry, organizeProjectRecord } from "@/lib/projectApi";
 import { recordBody, recordQuestionState } from "@/lib/projectViewModel";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
 import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
@@ -130,7 +130,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
         recordId = draft.recordId;
         setDraftId(draft.recordId);
       } else await updateProjectRecord(draftId, materialBody, options);
-      const result = await getRecordQuestions(recordId, { ...options, mode });
+      const result = await getRecordQuestionsWithRetry(recordId, { ...options, mode });
       controller.signal.throwIfAborted();
       setQuestionState((current) => recordQuestionState(current, result.questions, attachments, { regenerate }));
       setConfirmRegenerate(null);
@@ -141,6 +141,8 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       if (!controller.signal.aborted) {
         if (error.status === 409 && error.code === "MATERIAL_CHANGED") {
           setConfirmRegenerate({ answerCount: error.detail?.answeredCount ?? null });
+        } else if (error.status === 409 && error.code === "ATTACHMENT_PENDING") {
+          setNotice("자료를 아직 읽고 있어요. 잠시 후 AI와 정리하기를 다시 눌러 주세요.");
         } else setNotice(getAiErrorMessage(error, error.message));
       }
     }
