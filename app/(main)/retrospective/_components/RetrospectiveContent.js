@@ -1,4 +1,5 @@
 import Image from "next/image";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import StartActions from "./StartActions";
 import PausedRetrospective from "./PausedRetrospective";
@@ -41,15 +42,17 @@ export default async function RetrospectiveContent({ searchParams }) {
       {/* Figma: 진행 단계는 본문 전체 폭, 카드 줄은 제목과 같은 896px(시작 카드 560 + 16 + 마감일 카드 320)로 가운데에 둔다. */}
       <div className={`mx-auto mt-10 grid max-w-[896px] items-start gap-4 ${isAssignment ? "grid-cols-[minmax(0,1fr)_320px]" : "grid-cols-1 min-[901px]:grid-cols-[minmax(0,1fr)_320px]"}`}>
         {/* 회고 시작 카드(Figma '세션 회고 시작 카드'): 진한 바탕, 별 장식, 구름 캐릭터 말풍선. 과제 회고도 같은 모양이다.
-            테두리는 바탕과 같은 색의 울퉁불퉁한 선(Figma에서 내보낸 이미지)이라 가장자리가 손그림처럼 보인다. 선이 카드 밖으로 반쯤 나가므로 overflow를 자르지 않는다. */}
-        <section aria-labelledby="start-title" className="relative flex flex-col items-center gap-4 rounded-[24px] bg-ink-900 p-6 text-center rough-start-card">
+            테두리는 바탕과 같은 색의 울퉁불퉁한 선(DrawnBorder)이라 가장자리가 손그림처럼 보인다. 선이 카드 밖으로 반쯤 나가므로 overflow를 자르지 않는다. */}
+        <section aria-labelledby="start-title" className="relative flex flex-col items-center gap-4 rounded-[24px] bg-ink-900 p-6 text-center">
+          <DrawnBorder variant="start-card" />
           <StartCardStars />
           <h2 id="start-title" className="relative font-display text-[22px] leading-[35.2px] tracking-[-0.44px] text-balance text-white">
             {isAssignment ? "과제 회고를 시작해요" : "이번 주 세션 회고를 시작해요"}
           </h2>
           <div className="relative flex items-end gap-3">
             <Image src="/images/characters/cloud-small.png" alt="" width={56} height={47} className="shrink-0" />
-            <div className="relative min-w-0 rounded-[22px] rounded-bl-[6px] bg-canvas px-4 py-3 text-left text-[16px] leading-[27.55px] tracking-[-0.19px] text-ink rough-bubble sm:px-6 sm:py-4">
+            <div className="relative min-w-0 rounded-[22px] rounded-bl-[6px] bg-canvas px-4 py-3 text-left text-[16px] leading-[27.55px] tracking-[-0.19px] text-ink sm:px-6 sm:py-4">
+              <DrawnBorder variant="bubble" />
               <p>{isAssignment ? "막혔던 그 순간이" : "지금은 조금 귀찮아도,"}</p>
               <p>{isAssignment ? "면접에서 제일 할 말 많은 이야기가 돼요." : "쌓이면 나만의 큰 자산이 돼요!"}</p>
             </div>
@@ -58,7 +61,8 @@ export default async function RetrospectiveContent({ searchParams }) {
         </section>
 
         {/* 마감일 카드(Figma '마감일 카드'): 노란 굵은 테두리, 별 장식 */}
-        <aside aria-labelledby="deadline-title" className="relative rounded-[24px] bg-white p-6 rough-deadline-card">
+        <aside aria-labelledby="deadline-title" className="relative rounded-[24px] bg-white p-6">
+          <DrawnBorder variant="deadline-card" />
           <div className="relative flex items-center justify-between border-b border-ink pb-3">
             <h2 id="deadline-title" className="font-display text-[18px] leading-[28.8px] tracking-[-0.18px] text-ink">마감일</h2>
             <span aria-hidden="true" className="relative mr-1 size-5">
