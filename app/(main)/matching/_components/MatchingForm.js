@@ -23,6 +23,15 @@ const EMPTY_POSTING_MESSAGE = "공고 내용을 붙여 넣거나 파일을 올�
 
 const optionalText = (value) => value.trim() || null;
 
+// 문항의 화면용 id와 첨부 읽기 상태는 제외하고, 사용자가 수정하는 자료만 비교한다.
+function formSnapshot(fields, questions, attachments) {
+  return JSON.stringify({
+    fields,
+    questions: questions.map(({ text }) => text),
+    attachmentIds: attachments.map(({ attachmentId }) => attachmentId).sort(),
+  });
+}
+
 // 공고 저장·역량 찾기(36번) 요청을 만든다.
 // 시안에는 공고 본문을 붙여 넣는 칸이 JD 칸 하나라 postingText는 null로 보낸다.
 // 문항 글자 수 제한 입력(P1)은 시안에 없어 charLimit도 null로 보낸다.
@@ -69,6 +78,7 @@ export default function MatchingForm({ jobPostingId = null }) {
   const { toast, showToast, hideToast } = useToast();
   // 공고 저장·역량 찾기(36번) 응답과 회사 이름이다. 결과 화면이 이 값으로 그려진다.
   const [posting, setPosting] = useState(null);
+  const [matchedSnapshot, setMatchedSnapshot] = useState(null);
   const formRef = useRef(null);
   const questionRefs = useRef(new Map());
   const controllerRef = useRef(null);
@@ -78,8 +88,11 @@ export default function MatchingForm({ jobPostingId = null }) {
   const answerDrafts = useAnswerDrafts();
   const restored = useJobPostingRestore(jobPostingId, (saved) => {
     const savedQuestions = [...saved.questions].sort((a, b) => a.seq - b.seq);
-    setFields(toFormFields(saved));
-    setQuestions(savedQuestions.map(({ questionId, content }) => ({ id: `saved-${questionId}`, text: content })));
+    const savedFields = toFormFields(saved);
+    const restoredQuestions = savedQuestions.map(({ questionId, content }) => ({ id: `saved-${questionId}`, text: content }));
+    setFields(savedFields);
+    setQuestions(restoredQuestions);
+    setMatchedSnapshot(formSnapshot(savedFields, restoredQuestions, saved.attachments));
     attachments.restore(saved.attachments);
     answerDrafts.restore(savedQuestions);
     setPosting({
@@ -91,6 +104,8 @@ export default function MatchingForm({ jobPostingId = null }) {
     });
     setNotice("저장된 매칭 결과를 불러왔어요.");
   });
+  const currentSnapshot = formSnapshot(fields, questions, attachments.items);
+  const canSearch = matchedSnapshot === null || currentSnapshot !== matchedSnapshot;
 
   // 역량을 찾는 중에 화면을 떠나면 요청을 취소한다.
   useEffect(() => () => controllerRef.current?.abort(), []);
@@ -120,7 +135,7 @@ export default function MatchingForm({ jobPostingId = null }) {
   async function submit(event) {
     event.preventDefault();
     // 저장된 결과를 불러오는 중에는 찾지 않는다. 늦게 온 결과가 새로 찾은 결과를 덮지 않게 한다.
-    if (isSearching || restored.isRestoring) return;
+    if (isSearching || attachments.isBusy || restored.isRestoring || !canSearch) return;
     setError("");
     // 실행하지 못하는 이유는 눈에 보이게 토스트로 안내하고, 고칠 칸으로 커서를 옮긴다(M-05, M-02).
     const questionTexts = questions.map(({ text }) => text.trim()).filter(Boolean);
@@ -147,6 +162,8 @@ export default function MatchingForm({ jobPostingId = null }) {
       const request = toJobPostingRequest(fields, questionTexts, attachments.items.map(({ attachmentId }) => attachmentId));
       const created = await createJobPosting(request, { signal: controller.signal, request: authenticatedRequest });
       setPosting({ ...created, company: request.company });
+      // 요청을 보낸 시점의 자료를 남겨, 응답을 기다리며 고친 내용도 다시 찾을 수 있게 한다.
+      setMatchedSnapshot(currentSnapshot);
       restored.markHandled(created.jobPostingId);
       keepJobPostingIdInAddress(created.jobPostingId);
       // 역량을 찾으면 바로 모든 문항의 답 초안을 만든다(M-08).
@@ -203,9 +220,11 @@ export default function MatchingForm({ jobPostingId = null }) {
       <ActionFooter className="justify-between gap-3.5">
         <TextLink onClick={loadSample}>예시 공고 넣기</TextLink>
         {/* 첨부를 올리는 중에는 아직 목록에 없는 첨부가 빠지지 않도록 기다린다. */}
-        <Button type="submit" variant="accent" disabled={isSearching || attachments.isBusy || restored.isRestoring} aria-busy={isSearching}>
-          {isSearching ? "내 사자록에서 찾는 중…" : "내 사자록에서 찾기 →"}
-        </Button>
+        {(canSearch || isSearching) && (
+          <Button type="submit" variant="accent" disabled={isSearching || attachments.isBusy || restored.isRestoring} aria-busy={isSearching}>
+            {isSearching ? "내 사자록에서 찾는 중…" : "내 사자록에서 찾기 →"}
+          </Button>
+        )}
       </ActionFooter>
       <AiWaitingNotice active={isSearching} doing="공고를 읽고 내 사자록에서 맞는 역량을 찾고 있어요" className="-mt-2 text-right" />
       {error && <p role="alert" className="-mt-2 text-right text-body-sm text-error">{error}</p>}
