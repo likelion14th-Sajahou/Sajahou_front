@@ -1,16 +1,14 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
 import SectionHeader from "./SectionHeader";
 import { homeStickerHref } from "@/lib/homeViewModel";
 
 // 스티커 한 칸(Figma 'Sticker'): 그림 88px + 아래 이름 12px. 상태는 받음(earned·milestone), 이번 주(current), 빈 자리(upcoming).
-const ITEM_CLASSES = "flex w-[72px] flex-col items-center gap-2 md:w-[104px]";
+const ITEM_CLASSES = "flex w-full flex-col items-center gap-2";
 const ICON_SIZE_CLASSES = "size-[60px] md:size-[88px]";
 
 // 스티커별 이동 경로와 화면 낭독기용 이름이다. 중커톤처럼 아직 받지 않은 스티커는 누를 수 없다.
@@ -61,7 +59,7 @@ function Sticker({ sticker }) {
   const content = (
     <>
       <StickerIcon sticker={sticker} />
-      <span className="text-caption leading-[18px] text-ink-subtle">
+      <span className={`text-caption leading-[18px] ${["milestone", "upcoming"].includes(sticker.kind) ? "text-yellow-700" : "text-ink-subtle"}`}>
         {sticker.label}
       </span>
     </>
@@ -81,21 +79,13 @@ function Sticker({ sticker }) {
 }
 
 export default function StickerBoard({ count, stickers }) {
-  const board = useRef(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); observer.disconnect(); }
-    });
-    observer.observe(board.current);
-    return () => observer.disconnect();
-  }, []);
   return (
-    <Card as="section" className="flex flex-col items-center gap-3.5">
+    <Card as="section" className="relative flex min-w-0 flex-col items-center gap-4 p-6! lg:min-h-[550px]">
+      <DrawnBorder variant="sticker-board" />
       <SectionHeader
         title={
           <>
-            모은 스티커 <span className="text-accent-strong">{count}</span>
+            <span className="text-[24px]">모은 스티커 <span className="text-yellow-700">{count}</span></span>
           </>
         }
         action={
@@ -104,7 +94,7 @@ export default function StickerBoard({ count, stickers }) {
           </TextLink>
         }
       />
-      <ul ref={board} className={`flex w-full max-w-[640px] flex-1 flex-wrap content-center justify-center gap-x-2 gap-y-5 ${visible ? "home-stickers-enter" : ""}`}>
+      <ul className="grid w-full max-w-[618px] flex-1 grid-cols-3 content-center gap-x-2 gap-y-8 py-8 sm:grid-cols-5 sm:gap-x-3 md:gap-y-12">
         {stickers.map((sticker) => (
           <li key={`${sticker.kind}:${sticker.week}`}>
             <Sticker sticker={sticker} />
