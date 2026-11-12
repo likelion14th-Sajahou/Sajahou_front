@@ -4,6 +4,8 @@ import Link from "next/link";
 // Primary: 주요 동작, 노란 바탕 + 삼립호빵체. Secondary: 보조 동작, 회색 바탕 + Noto Sans KR.
 // Secondary는 회색 바탕이라 흰 카드 안에 둔다(회색 페이지 바탕 위에서는 잘 안 보인다).
 // soft·inverse는 진한 카드(회고 시작 카드) 위에 두는 버튼이다. soft: 연노랑 바탕, inverse: 흰 굵은 테두리.
+// ink·ink-outline은 흰 카드(휴회 카드) 위의 진한 버튼과 진한 테두리 버튼이다.
+// 이 네 가지는 Figma에서 테두리가 손그림처럼 울퉁불퉁하다(globals.css의 rough-pill-*).
 const VARIANT_CLASSES = {
   primary: "border border-yellow-400 bg-yellow-400 font-display text-ink",
   secondary: "border border-canvas bg-canvas font-noto font-medium text-ink",
@@ -11,10 +13,12 @@ const VARIANT_CLASSES = {
   accent: "border border-accent bg-accent text-white",
   highlight: "border border-shape-yellow bg-shape-yellow text-ink",
   danger: "border border-ink bg-danger text-white",
-  soft: "border-4 border-yellow-100 bg-yellow-100 font-display text-ink",
+  soft: "rough-pill-cream bg-yellow-100 font-display text-ink",
   // Figma 'Button' Type=Google. 색은 Google 로그인 버튼 안내(테두리 #747775, 글자 #1F1F1F)를 따른다.
   google: "border border-[#747775] bg-white font-noto font-medium text-[#1f1f1f]",
-  inverse: "border-4 border-white bg-transparent font-display text-white",
+  inverse: "rough-pill-white bg-transparent font-display text-white",
+  ink: "rough-pill-ink bg-ink-900 font-display text-white",
+  "ink-outline": "rough-pill-ink bg-white font-display text-ink",
 };
 
 const SIZE_CLASSES = {
@@ -31,7 +35,7 @@ export default function Button({
   children,
   ...rest
 }) {
-  const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center disabled:cursor-default disabled:border-line disabled:bg-line disabled:text-[#6b6358] ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`;
+  const classes = `relative inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center disabled:cursor-default disabled:border-line disabled:bg-line disabled:text-[#6b6358] ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`;
 
   if (href) {
     return (

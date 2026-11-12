@@ -136,6 +136,35 @@ body {
   line-height: 1.6;
 }
 
+/*
+ * 손그림처럼 울퉁불퉁한 테두리(Figma 선의 'Dynamic' 효과). CSS로는 같은 선을 만들 수 없어서
+ * Figma에서 내보낸 선을 2배 PNG(public/images/rough-frames)로 만들어 9분할(border-image)로 붙인다.
+ * 모서리는 Figma 모양 그대로 두고, 가운데 변만 요소 크기에 맞게 늘어난다.
+ * 이미지는 Figma 요소보다 사방 4px 크게 내보냈으므로(선이 상자 밖으로 반쯤 나간다) ::before를 4px 바깥에 둔다.
+ * 요소에는 border를 주지 않고, 위치 기준이 되도록 relative를 준다. 모양·색마다 이미지가 하나씩이다.
+ */
+:where(.rough-start-card, .rough-deadline-card, .rough-bubble, .rough-paused-card, .rough-pill-cream, .rough-pill-white, .rough-pill-ink)::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: var(--rough-slice) solid transparent;
+  border-image: var(--rough-image) var(--rough-slice-image) / var(--rough-slice) stretch;
+  pointer-events: none;
+}
+
+/* 회고 시작 카드(ink-900, 4px) */
+.rough-start-card { --rough-image: url(/images/rough-frames/start-card.png); --rough-slice: 32px; --rough-slice-image: 64; }
+/* 마감일 카드(yellow-400, 4px) */
+.rough-deadline-card { --rough-image: url(/images/rough-frames/deadline-card.png); --rough-slice: 32px; --rough-slice-image: 64; }
+/* 시작 카드의 말풍선(#e4e2dd, 4px, 왼쪽 아래만 덜 둥글다) */
+.rough-bubble { --rough-image: url(/images/rough-frames/bubble.png); --rough-slice: 28px; --rough-slice-image: 56; }
+/* 휴회 카드(ink-900, 2px) */
+.rough-paused-card { --rough-image: url(/images/rough-frames/paused-card.png); --rough-slice: 40px; --rough-slice-image: 80; }
+/* 둥근 버튼: 연노랑(soft), 흰색(inverse) 4px, 진한색(ink·ink-outline) 2px */
+.rough-pill-cream { --rough-image: url(/images/rough-frames/pill-cream.png); --rough-slice: 26px; --rough-slice-image: 52; }
+.rough-pill-white { --rough-image: url(/images/rough-frames/pill-white.png); --rough-slice: 26px; --rough-slice-image: 52; }
+.rough-pill-ink { --rough-image: url(/images/rough-frames/pill-ink.png); --rough-slice: 26px; --rough-slice-image: 52; }
+
 @keyframes home-hero-float {
   50% { translate: 0 -12px; }
 }

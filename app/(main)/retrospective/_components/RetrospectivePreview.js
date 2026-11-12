@@ -142,9 +142,11 @@ export function useRetrospectivePreview() {
 export function RetrospectiveHeading() {
   const { isDemo } = useAuth();
   const { week, session, assignment, part, setPart, assignmentPending, isAssignment } = useRetrospectivePreview();
+  // 시작 화면(시작 전·작성 중·휴회)은 Figma대로 896px 가운데 정렬이다. 다른 단계 화면은 아직 디자인 전이라 본문 폭 그대로 둔다.
+  const isStartScreen = !useSearchParams().get("step");
 
   return (
-    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3.5">
+    <div className={`flex flex-wrap items-end justify-between gap-x-6 gap-y-3.5 ${isStartScreen ? "mx-auto max-w-[896px]" : ""}`}>
       {/* 회고 상단 헤더(Figma '회고 상단 헤더'): 홈 링크, 파트, 제목은 삼립호빵체 */}
       <div className="flex min-w-0 max-w-full flex-col items-start gap-3">
         <Link href="/" className="font-display text-body-sm leading-[22.4px] text-ink-muted">← 홈</Link>
