@@ -6,7 +6,8 @@ const VARIANT_CLASSES = {
   link: "border-b border-ink-500 font-display leading-5 text-ink-500",
   underline:
     "px-0.5 py-1 text-ink-subtle underline decoration-from-font [text-underline-position:from-font]",
-  border: "border-b border-ink text-ink",
+  // 홈의 '사자 발자국 →'(Figma '텍스트 링크'): 진한 Bold 글씨 + 아래 테두리선
+  border: "border-b border-ink font-bold leading-[20.8px] text-ink",
   accent:
     "text-accent-strong underline decoration-from-font [text-underline-position:from-font]",
   danger:

@@ -2,34 +2,44 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
-import TextLink from "@/components/ui/TextLink";
 import NewProjectModal from "@/components/project/NewProjectModal";
 import SectionHeader from "./SectionHeader";
 
-// 진행 중과 완료 프로젝트가 같은 모양이고, 완료 프로젝트는 스티커를 회색으로 보여 준다(H-08, 01 시안).
-// 완료한 프로젝트도 + 로 기록을 더할 수 있다(H-09, H-21).
-function ProjectRow({ project, summary, done = false }) {
+// 프로젝트 한 줄(Figma '프로젝트 목록 아이템'): 별 아이콘, 이름, 요약, 오른쪽 '>'. 줄 전체를 누르면 프로젝트 상세로 간다.
+// 진행 중과 완료 프로젝트가 같은 모양이다(H-08).
+// 디자인 적용(11/12)으로 오른쪽 '+'(기록 추가, H-09)를 '>'(프로젝트로 이동)로 바꿨다. 기록 추가는 상세 화면에서 한다.
+function ProjectRow({ project, summary }) {
   const { id, name } = project;
-  const href = `/projects/${encodeURIComponent(id)}`;
 
   return (
-    <li className="flex items-center gap-3 rounded-2xl bg-canvas px-3 py-2.5">
-      <ShapeCharacter shape="pentagon" color={done ? "muted" : "blue"} size={34} />
-      <Link href={href} className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-body text-ink">{name}</span>
-        <span className="text-[12.5px] text-ink-subtle">{summary}</span>
-      </Link>
+    <li>
       <Link
-        href={`${href}?record=new`}
-        aria-label={`${name} 기록 추가`}
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink text-title text-white motion-safe:transition-transform motion-safe:hover:rotate-90"
+        href={`/projects/${encodeURIComponent(id)}`}
+        className="flex h-16 items-center gap-3 rounded-2xl border-2 border-ink-300 bg-white px-4 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
       >
-        +
+        <Image src="/images/stars/star-01.png" alt="" width={27} height={26} className="shrink-0" />
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-body leading-6 font-bold text-ink">{name}</span>
+          <span className="text-[12.5px] leading-5 text-ink-subtle">{summary}</span>
+        </span>
+        <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-full">
+          <Image src="/images/common/chevron-right-20.svg" alt="" width={20} height={20} />
+        </span>
       </Link>
     </li>
+  );
+}
+
+// 목록 구분 라벨(Figma '그룹 라벨'): 이름 + 오른쪽으로 이어지는 가는 선
+function GroupLabel({ children }) {
+  return (
+    <p className="flex w-full items-center gap-2 text-body-sm leading-5 font-bold text-ink-500">
+      {children}
+      <span aria-hidden="true" className="h-px flex-1 bg-ink-300" />
+    </p>
   );
 }
 
@@ -39,7 +49,7 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
 
   return (
     <Card as="section" className="flex flex-col items-start gap-3.5">
-      <SectionHeader title={<Link href="/projects">프로젝트 &gt;</Link>} />
+      <SectionHeader title="프로젝트" href="/projects" />
       {inProgressProjects.length > 0 ? (
         <ul className="flex w-full flex-col gap-2">
           {inProgressProjects.map((project) => (
@@ -47,7 +57,7 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
               key={project.id}
               project={project}
               // 기록이 없는 새 프로젝트는 마지막 기록 날짜를 빼고 보여 준다.
-              summary={[`기록 ${project.recordCount}`, project.lastRecordDate].filter(Boolean).join(" · ")}
+              summary={[`기록 ${project.recordCount}`, project.lastRecordDate && `마지막 기록 ${project.lastRecordDate}`].filter(Boolean).join(" · ")}
             />
           ))}
         </ul>
@@ -56,20 +66,23 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
       )}
       {doneProjects.length > 0 && (
         <>
-          <p className="h-6 pt-1.5 pl-1 text-[12.5px] leading-5 text-ink-subtle">완료</p>
+          <GroupLabel>완료</GroupLabel>
           <ul className="flex w-full flex-col gap-2">
             {doneProjects.map((project) => (
-              <ProjectRow
-                key={project.id}
-                project={project}
-                done
-                summary={`기록 ${project.recordCount}`}
-              />
+              <ProjectRow key={project.id} project={project} summary={`기록 ${project.recordCount}`} />
             ))}
           </ul>
         </>
       )}
-      <TextLink onClick={() => setIsModalOpen(true)}>+ 새 프로젝트</TextLink>
+      {/* 새 프로젝트 버튼(Figma '새 프로젝트 버튼') */}
+      <button
+        type="button"
+        onClick={() => setIsModalOpen(true)}
+        className="flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full border-2 border-ink-300 bg-yellow-100 px-4 font-display text-body leading-[22px] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      >
+        <Image src="/images/common/plus.svg" alt="" width={10} height={10} />
+        새 프로젝트
+      </button>
       {isModalOpen && <NewProjectModal open onClose={() => setIsModalOpen(false)}
         onCreated={({ projectId }) => router.push(`/projects/${encodeURIComponent(projectId)}`)} />}
     </Card>

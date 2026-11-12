@@ -9,15 +9,9 @@ import TextLink from "@/components/ui/TextLink";
 import SectionHeader from "./SectionHeader";
 import { homeStickerHref } from "@/lib/homeViewModel";
 
-const LABEL_CLASSES = {
-  earned: "text-ink-muted",
-  milestone: "text-tint-yellow-ink",
-  current: "text-accent-strong",
-  upcoming: "text-ink-muted",
-};
-
-const ITEM_CLASSES = "flex w-[72px] flex-col items-center gap-1 md:w-[92px]";
-const ICON_SIZE_CLASSES = "size-[54px] md:size-[70px]";
+// 스티커 한 칸(Figma 'Sticker'): 그림 88px + 아래 이름 12px. 상태는 받음(earned·milestone), 이번 주(current), 빈 자리(upcoming).
+const ITEM_CLASSES = "flex w-[72px] flex-col items-center gap-2 md:w-[104px]";
+const ICON_SIZE_CLASSES = "size-[60px] md:size-[88px]";
 
 // 스티커별 이동 경로와 화면 낭독기용 이름이다. 중커톤처럼 아직 받지 않은 스티커는 누를 수 없다.
 function getStickerLink({ kind, week, title }) {
@@ -33,12 +27,12 @@ function getStickerLink({ kind, week, title }) {
 }
 
 function StickerIcon({ sticker }) {
-  const { kind, title, shape, color } = sticker;
+  const { kind, title, image, shape, color } = sticker;
 
   if (kind === "current") {
     return (
       <span className={`flex items-center justify-center ${ICON_SIZE_CLASSES}`}>
-        <Image src="/images/home/sticker-add.svg" alt="" width={58.982} height={58.982} className="size-[84.26%]" />
+        <Image src="/images/home/sticker-current.svg" alt="" width={79.3} height={79.3} className="size-[90%]" />
       </span>
     );
   }
@@ -46,26 +40,28 @@ function StickerIcon({ sticker }) {
   if (kind === "upcoming") {
     return (
       <span className={`flex items-center justify-center ${ICON_SIZE_CLASSES}`}>
-        <Image src="/images/home/sticker-upcoming.svg" alt={`${title} 예정`} width={62.892} height={62.892} className="size-[89.85%]" />
+        <Image src="/images/home/sticker-empty.svg" alt={`${title} 예정`} width={79.3} height={79.3} className="size-[90%]" />
       </span>
     );
   }
 
-  return (
-    <ShapeCharacter
-      shape={shape}
-      color={color}
-      sticker
-      className={ICON_SIZE_CLASSES}
-    />
-  );
+  // 받은 스티커는 디자인 시스템 스티커 그림이다. 그림을 정하지 못한 스티커만 도형으로 보여 준다.
+  if (image) {
+    return (
+      <span className={`relative flex items-center justify-center ${ICON_SIZE_CLASSES}`}>
+        <Image src={image} alt="" fill sizes="(min-width: 768px) 82px, 56px" className="object-contain p-[4%]" />
+      </span>
+    );
+  }
+
+  return <ShapeCharacter shape={shape} color={color} sticker className={ICON_SIZE_CLASSES} />;
 }
 
 function Sticker({ sticker }) {
   const content = (
     <>
       <StickerIcon sticker={sticker} />
-      <span className={`text-badge ${LABEL_CLASSES[sticker.kind]}`}>
+      <span className="text-caption leading-[18px] text-ink-subtle">
         {sticker.label}
       </span>
     </>
@@ -108,7 +104,7 @@ export default function StickerBoard({ count, stickers }) {
           </TextLink>
         }
       />
-      <ul ref={board} className={`flex w-full max-w-[620px] flex-1 flex-wrap content-center justify-center gap-x-2 gap-y-5 ${visible ? "home-stickers-enter" : ""}`}>
+      <ul ref={board} className={`flex w-full max-w-[640px] flex-1 flex-wrap content-center justify-center gap-x-2 gap-y-5 ${visible ? "home-stickers-enter" : ""}`}>
         {stickers.map((sticker) => (
           <li key={`${sticker.kind}:${sticker.week}`}>
             <Sticker sticker={sticker} />
