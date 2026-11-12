@@ -17,6 +17,7 @@ import useMaterialAttachments, { ATTACHMENT_FIELDS } from "./useMaterialAttachme
 import ActionFooter from "@/components/ui/ActionFooter";
 import { aiWaitingMessage } from "@/components/ui/AiWaitingNotice";
 import { normalizeAttachmentUrl, INVALID_ATTACHMENT_URL_MESSAGE } from "@/lib/attachmentUrl";
+import { hasRetrospectiveMaterials, EMPTY_RETROSPECTIVE_MATERIALS_MESSAGE } from "@/lib/retrospectiveMaterials";
 
 const ASSIGNMENT_MODES = { record: "RECORD", later: "LATER", none: "NONE" };
 
@@ -54,7 +55,7 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
 }
 
 export default function MaterialsForm({ initialMaterials }) {
-  const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref, deadlineLabels } = useRetrospectivePreview();
+  const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref, deadlineLabels, showToast } = useRetrospectivePreview();
   const assignmentStatus = isAssignment ? "record" : sessionAssignmentStatus;
   // 입력 영역을 숨겨도(실습 없음, 과제 나중에) 작성한 내용은 유지한다.
   const [materials, setMaterials] = useState(initialMaterials);
@@ -88,6 +89,13 @@ export default function MaterialsForm({ initialMaterials }) {
   // 단계는 보내지 않는다. 질문을 받으면 서버가 AI 질문 단계(3)로 바꾸고, 실패하면 지금 단계로 남는다.
   // 저장에 실패하면 질문을 받지 않아 쓴 내용을 잃지 않는다.
   async function requestQuestions(mode = "AUTO") {
+    if (isBusy) return;
+    if (!hasRetrospectiveMaterials(materials, { isAssignment, isFrontend: part === "프론트엔드", assignmentStatus })) {
+      setNotice("");
+      questions.closeChangeNotice();
+      showToast(EMPTY_RETROSPECTIVE_MATERIALS_MESSAGE);
+      return;
+    }
     const message = await saveMaterials("questions");
     if (message !== "") {
       if (message) setNotice(message);
