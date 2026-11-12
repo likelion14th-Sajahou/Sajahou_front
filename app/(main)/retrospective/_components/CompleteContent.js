@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
+import Toast, { useToast } from "@/components/ui/Toast";
 import { getAuthMode } from "@/lib/authConfig";
 import { formatDeadline } from "@/lib/formatDate";
 import { getRetrospective } from "@/lib/retrospectiveApi";
@@ -24,6 +25,7 @@ export default function CompleteContent() {
   const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent } = useRetrospectivePreview();
   const [card, setCard] = useState(null);
   const [notice, setNotice] = useState("");
+  const { toast, showToast, hideToast } = useToast();
   const retrospectiveId = retrospective?.id;
   const canRestartDemo = isDemo && getAuthMode() === "mock";
   // 세션 회고를 끝냈고 과제 회고가 아직 남았을 때만 보여 준다.
@@ -43,7 +45,7 @@ export default function CompleteContent() {
 
   async function copyRetrospective() {
     const copied = await copyText(card.fullMarkdown);
-    setNotice(copied ? "회고록을 복사했어요. 노션에 붙여 넣어 주세요." : "복사하지 못했어요. 브라우저의 클립보드 권한을 확인한 뒤 다시 시도해 주세요.");
+    showToast(copied ? "회고록을 복사했어요. 노션에 붙여 넣어 주세요." : "복사하지 못했어요. 나의 사자록에서 회고록을 열어 직접 선택해서 복사해 주세요.");
   }
 
   // mock 데이터를 지우는 개발용 동작이다. mock 모드의 데모 세션에서만 제공한다.
@@ -89,6 +91,7 @@ export default function CompleteContent() {
         </Card>
         <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
       </div>
+      <Toast toast={toast} onDismiss={hideToast} />
     </>
   );
 }

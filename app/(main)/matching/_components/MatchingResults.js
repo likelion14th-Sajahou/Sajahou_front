@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useAuth } from "@/components/layout/AuthProvider";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import Toast, { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
 import { saveEditedAnswer } from "@/lib/matchingApi";
 import { getStoryCards } from "@/lib/myRecordApi";
@@ -30,7 +31,7 @@ function getCountTone(cardCount) {
 export default function MatchingResults({ posting, drafts, onRetry }) {
   const { authenticatedRequest } = useAuth();
   const headingRef = useRef(null);
-  const [notice, setNotice] = useState("");
+  const { toast, showToast, hideToast } = useToast();
   // 직접 고친 답(M-11): { [questionId]: { text, charCount } }. charCount는 저장(38번) 응답의 글자 수이고, 저장 뒤 다시 고치면 null이다.
   const [edits, setEdits] = useState(() => savedEdits(posting.questions));
   // '이 답에 쓴 기록'의 카드 모양(M-12). 나의 사자록과 같은 카드 목록(21번)과 표시 규칙(cardView)을 쓴다.
@@ -55,7 +56,7 @@ export default function MatchingResults({ posting, drafts, onRetry }) {
   }, [authenticatedRequest]);
 
   async function copy(text, message) {
-    setNotice((await copyText(text)) ? message : "복사가 막혀 있어요. 직접 고치기를 눌러 내용을 선택한 뒤 복사해 주세요.");
+    showToast((await copyText(text)) ? message : "복사가 막혀 있어요. 직접 고치기를 눌러 내용을 선택한 뒤 복사해 주세요.");
   }
 
   // '다 고쳤어요'(M-11): 고친 답을 저장한다(38번). AI 초안과 같아지면 null을 보내 초안으로 되돌린다.
@@ -133,7 +134,6 @@ export default function MatchingResults({ posting, drafts, onRetry }) {
           <h2 id="matching-answers" className="text-[24px] tracking-[-0.48px]">문항별로 쓸 경험</h2>
           <Button size="sm" onClick={copyAll}>전체 답 복사</Button>
         </div>
-        <p role="status" className="sr-only">{notice}</p>
         {posting.questions.map((question) => (
           <MatchingAnswerCard
             key={question.questionId}
@@ -142,13 +142,14 @@ export default function MatchingResults({ posting, drafts, onRetry }) {
             edit={edits[question.questionId]}
             cardViews={cardViews}
             companyLabel={companyLabel}
-            onEdit={(text) => { setEdits((previous) => ({ ...previous, [question.questionId]: { text, charCount: null } })); setNotice(""); }}
+            onEdit={(text) => { setEdits((previous) => ({ ...previous, [question.questionId]: { text, charCount: null } })); hideToast(); }}
             onSaveEdit={(answer) => saveEdit(question.questionId, answer)}
             onRetry={() => onRetry(question.questionId)}
             onCopy={copy}
           />
         ))}
       </section>
+      <Toast toast={toast} onDismiss={hideToast} />
     </div>
   );
 }

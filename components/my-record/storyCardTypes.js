@@ -14,7 +14,7 @@ export const RECORD_TEXT = {
   copied: "기록을 복사했어요. 노션에 붙여 넣어 주세요.",
 };
 
-export const COPY_FAILED_MESSAGE = "복사하지 못했어요. 브라우저의 클립보드 권한을 확인한 뒤 다시 시도해 주세요.";
+export const COPY_FAILED_MESSAGE = "복사하지 못했어요. 내용을 직접 선택해서 복사해 주세요.";
 
 export const SUMMARY_FIELDS = [
   { key: "situation", label: "상황" },

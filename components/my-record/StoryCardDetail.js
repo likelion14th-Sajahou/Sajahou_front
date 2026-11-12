@@ -5,6 +5,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
+import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTags from "./CompetencyTags";
 import StoryCardEditForm from "./StoryCardEditForm";
 import { COPY_FAILED_MESSAGE, RECORD_TEXT, STORY_CARD_TYPES, SUMMARY_FIELDS } from "./storyCardTypes";
@@ -96,18 +97,18 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
   const { label, tone } = STORY_CARD_TYPES[type];
   const isProjectCard = type === "project";
   const documentText = isProjectCard ? RECORD_TEXT : RECAP_TEXT;
-  const [copyNotice, setCopyNotice] = useState("");
+  const { toast, showToast, hideToast } = useToast();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   async function copyDocument() {
-    setCopyNotice((await copyText(document)) ? documentText.copied : COPY_FAILED_MESSAGE);
+    showToast((await copyText(document)) ? documentText.copied : COPY_FAILED_MESSAGE);
   }
 
   function handleSave(changes) {
     return run(async (signal) => {
       await onUpdate(changes, signal);
-      if (!signal.aborted) { setCopyNotice(""); setIsEditing(false); }
+      if (!signal.aborted) { hideToast(); setIsEditing(false); }
     });
   }
 
@@ -150,9 +151,6 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
               <h3 className="text-body font-normal">{documentText.title}</h3>
               <Button size="sm" onClick={copyDocument}>노션에 복사</Button>
             </div>
-            {copyNotice && (
-              <p role="status" className="pt-2 text-label text-ink-subtle">{copyNotice}</p>
-            )}
             <div className="pt-2">
               {document
                 .split("\n")
@@ -195,6 +193,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
           )}
         </>
       )}
+      <Toast toast={toast} onDismiss={hideToast} />
     </fieldset>
   );
 }

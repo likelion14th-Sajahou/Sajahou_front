@@ -97,7 +97,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
 
   async function copyRetrospective() {
     const copied = await copyText(fullMarkdown);
-    setNotice(copied ? "회고록을 복사했어요. 노션에 붙여 넣어 주세요." : "복사하지 못했어요. 회고록의 내용을 직접 선택해서 복사해 주세요.");
+    showToast(copied ? "회고록을 복사했어요. 노션에 붙여 넣어 주세요." : "복사하지 못했어요. 회고록의 내용을 직접 선택해서 복사해 주세요.");
   }
 
   // 저장하고 사자록에 추가(R-21): 고친 카드를 저장한 뒤 회고를 완료한다(API 23 → 20). 카드가 나의 사자록에 쌓이고 이번 주 스티커를 받는다.
