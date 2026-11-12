@@ -34,7 +34,7 @@ export default function SignupSession({ children }) {
   if (!signup) return null;
   return (
     <>
-      <GoogleAccountInfo email={signup.email} />
+      <GoogleAccountInfo email={signup.email} className="my-6 w-full" />
       <div key={signup.signupToken}>{children}</div>
     </>
   );

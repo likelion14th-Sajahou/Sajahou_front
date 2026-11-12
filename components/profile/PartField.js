@@ -4,9 +4,10 @@ const PARTS = ["PLAN_DESIGN", "FRONTEND", "BACKEND"];
 
 export default function PartField({ id, value, onChange, error, readOnly = false }) {
   return (
-    <fieldset disabled={readOnly} className="min-w-0 border-t border-line pt-[18px] pb-5" aria-labelledby={`${id}-title`} aria-describedby={error ? `${id}-error` : undefined} aria-invalid={error ? true : undefined}>
+    // 'Section · 파트': FormSection과 같은 구분선·제목 모양. 라디오 묶음이라 section 대신 fieldset을 쓴다.
+    <fieldset disabled={readOnly} className="min-w-0 border-t border-line py-6" aria-labelledby={`${id}-title`} aria-describedby={error ? `${id}-error` : undefined} aria-invalid={error ? true : undefined}>
       <legend className="sr-only">파트{readOnly ? " (변경 불가)" : ""}</legend>
-      <p id={`${id}-title`} className="mb-[14px] text-body leading-6 tracking-[-0.3px]">파트{readOnly && <span className="sr-only"> (변경 불가)</span>}</p>
+      <p id={`${id}-title`} className="mb-4 font-display text-body leading-[22px] text-ink">파트{readOnly && <span className="sr-only"> (변경 불가)</span>}</p>
       {/* 파트 칩(Figma 'Part Chip'): 고른 파트만 진한 바탕 + 흰 글씨 */}
       <div className="grid grid-cols-3 gap-2">
         {PARTS.map((part) => (
