@@ -39,8 +39,9 @@ export default function HomeHero({ userName, week, weekStatus }) {
     <section className="home-hero relative isolate w-full overflow-hidden bg-ink">
       <div aria-hidden="true" className="home-hero-stars pointer-events-none absolute inset-0">
         {STARS.map(({ image, x, y, width, height }, index) => (
-          <Image key={index} src={`/images/stars/star-${image}.png`} alt="" width={width} height={height}
-            className="absolute" style={{ left: `${x / 14.4}%`, top: `${y / 8.39}%`, "--twinkle-duration": `${[3.6, 4.8, 6][index % 3]}s`, "--twinkle-delay": `${index * 0.8}s` }} />
+          <span key={index} className="absolute" style={{ width, height, left: `${x / 14.4}%`, top: `${y / 8.39}%`, "--twinkle-duration": `${[3.6, 4.8, 6][index % 3]}s`, "--twinkle-delay": `${index * 0.8}s` }}>
+            <Image src={`/images/stars/star-${image}.png`} alt="" fill sizes={`${width}px`} className="object-contain" />
+          </span>
         ))}
       </div>
       <div className="home-hero-copy absolute flex w-full max-w-[720px] flex-col items-center gap-4 px-6 text-center text-white">
