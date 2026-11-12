@@ -54,7 +54,7 @@ export default function Header() {
   // 홈 히어로가 이 높이를 빼서 첫 화면을 채우고, 스크롤 위치도 이 높이만큼 띄운다(globals.css의 --header-height).
   // 줄 수나 높이를 바꾸면 --header-height도 함께 고친다.
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-transparent bg-canvas/80 backdrop-blur-[8px]">
+    <header className="sticky top-0 z-40 min-h-[var(--header-height)] w-full border-b border-transparent bg-canvas/80 backdrop-blur-[8px]">
       <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-x-6 gap-y-2 p-4">
         <Link href="/" aria-label="사자록 홈" className="shrink-0">
           <Image src="/images/brand/logo.png" alt="" width={117} height={42} priority />
