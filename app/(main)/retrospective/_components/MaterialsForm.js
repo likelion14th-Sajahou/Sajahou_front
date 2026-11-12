@@ -16,6 +16,7 @@ import { useQuestionRequest } from "./useQuestionRequest";
 import useMaterialAttachments, { ATTACHMENT_FIELDS } from "./useMaterialAttachments";
 import ActionFooter from "@/components/ui/ActionFooter";
 import { aiWaitingMessage } from "@/components/ui/AiWaitingNotice";
+import { normalizeAttachmentUrl, INVALID_ATTACHMENT_URL_MESSAGE } from "@/lib/attachmentUrl";
 
 const ASSIGNMENT_MODES = { record: "RECORD", later: "LATER", none: "NONE" };
 
@@ -110,16 +111,13 @@ export default function MaterialsForm({ initialMaterials }) {
   }
 
   async function addLink() {
-    let url;
-    try {
-      url = new URL(link.trim());
-      if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("Invalid protocol");
-    } catch {
-      setLinkError("http:// 또는 https://로 시작하는 올바른 링크를 입력해주세요.");
+    const url = normalizeAttachmentUrl(link);
+    if (!url) {
+      setLinkError(INVALID_ATTACHMENT_URL_MESSAGE);
       return;
     }
     setLinkError("");
-    const message = await files.addLink(url.href);
+    const message = await files.addLink(url);
     if (!message) setLink("");
     setNotice(message);
   }
