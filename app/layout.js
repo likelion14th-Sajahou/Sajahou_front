@@ -1,15 +1,9 @@
 import { Suspense } from "react";
-import { Gowun_Dodum } from "next/font/google";
 import MockDataProvider from "@/components/layout/MockDataProvider";
 import AuthProvider from "@/components/layout/AuthProvider";
 import ScrollToTopOnNavigate from "@/components/layout/ScrollToTopOnNavigate";
+import { displayFont, notoSansKr, npsFont } from "./fonts";
 import "./globals.css";
-
-const gowunDodum = Gowun_Dodum({
-  variable: "--font-gowun-dodum",
-  weight: "400",
-  subsets: ["latin"],
-});
 
 export const metadata = {
   title: "사자록",
@@ -19,7 +13,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="ko"
-      className={`${gowunDodum.variable} h-full antialiased`}
+      className={`${npsFont.variable} ${displayFont.variable} ${notoSansKr.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Suspense fallback={null}>
