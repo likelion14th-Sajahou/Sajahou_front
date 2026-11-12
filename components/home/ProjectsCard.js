@@ -39,7 +39,7 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
 
   return (
     <Card as="section" className="flex flex-col items-start gap-3.5">
-      <SectionHeader title="프로젝트" />
+      <SectionHeader title={<Link href="/projects">프로젝트 &gt;</Link>} />
       {inProgressProjects.length > 0 ? (
         <ul className="flex w-full flex-col gap-2">
           {inProgressProjects.map((project) => (

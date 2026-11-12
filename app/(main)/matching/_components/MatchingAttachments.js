@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import AttachmentChip, { ChipStatus } from "@/components/ui/AttachmentChip";
 import FileUploadButton from "@/components/ui/FileUploadButton";
 import LinkInputRow from "@/components/ui/LinkInputRow";
@@ -9,7 +9,7 @@ import { JOB_POSTING_ACCEPT } from "./useJobPostingAttachments";
 const READ_STATUS = {
   PENDING: { tone: "neutral", label: "읽는 중" },
   DONE: { tone: "success", label: "본문 읽음" },
-  FAILED: { tone: "warning", label: "읽지 못함" },
+  FAILED: { tone: "warning", label: "본문 읽지 못함" },
 };
 
 export const UNREADABLE_LINK_MESSAGE = "이 링크는 본문을 못 읽었어요. 공고 내용을 붙여 넣거나 PDF·캡처로 올려 주세요.";
@@ -26,11 +26,20 @@ function toLinkUrl(value) {
 }
 
 // 채용 공고 첨부(M-02): PDF·캡처 파일과 공고 링크. attachments는 useJobPostingAttachments의 반환값이다.
-export default function MatchingAttachments({ attachments }) {
+export default function MatchingAttachments({ attachments, onLinkUnreadable }) {
   const [link, setLink] = useState("");
   const [error, setError] = useState("");
   const { items, isBusy } = attachments;
   const hasUnreadableLink = items.some(({ type, extractStatus }) => type === "LINK" && extractStatus === "FAILED");
+  const failedLinks = items.filter(({ type, extractStatus }) => type === "LINK" && extractStatus === "FAILED").map(({ attachmentId }) => attachmentId).join(",");
+  const previousFailedLinks = useRef(new Set());
+  const notifyUnreadable = useEffectEvent(() => onLinkUnreadable?.());
+  // 안내가 렌더링된 뒤 이동한다. 즉시 실패·폴링·복원 모두 포함하고 같은 실패로 반복 이동하지 않는다.
+  useEffect(() => {
+    const current = new Set(failedLinks ? failedLinks.split(",") : []);
+    if ([...current].some((id) => !previousFailedLinks.current.has(id))) notifyUnreadable();
+    previousFailedLinks.current = current;
+  }, [failedLinks]);
 
   async function addLink() {
     const url = toLinkUrl(link.trim());
@@ -66,7 +75,7 @@ export default function MatchingAttachments({ attachments }) {
       {hasUnreadableLink && (
         <p role="status" className="flex items-start gap-2 rounded-xl bg-tint-yellow px-3 py-2.5 text-label text-tint-yellow-ink">
           <span aria-hidden="true">⚑</span>
-          <span>이 링크는 본문을 못 읽었어요. 로그인이 필요하거나 접근이 막힌 사이트예요. 공고 내용을 아래에 붙여 넣거나 PDF·캡처로 올려 주세요.</span>
+          <span>{UNREADABLE_LINK_MESSAGE}</span>
         </p>
       )}
       <fieldset disabled={isBusy} aria-busy={isBusy} className="flex min-w-0 items-center gap-2">

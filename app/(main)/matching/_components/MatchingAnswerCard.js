@@ -113,7 +113,7 @@ function AnswerDraft({ question, answer, edit, cardViews, companyLabel, onEdit, 
           )}
         </ul>
       </div>
-      {blankCount > 0 && <p className={NOTICE_CLASS}>⚑ 빈칸 {blankCount}곳은 사자록에 기록이 없어 비워 뒀어요. 지어내지 않았어요. 회고에서 이 부분까지 남기면 다음엔 바로 채워져요.</p>}
+      {blankCount > 0 && <p className={NOTICE_CLASS}>⚑ 빈칸 {blankCount}곳은 사자록에 기록이 없어 비워 뒀어요. 회고에서 이 부분까지 남기면 다음엔 바로 채워져요.</p>}
       <MissingCompetencies competencies={answer.missingCompetencies} />
     </>
   );

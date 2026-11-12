@@ -9,6 +9,7 @@ import LinkInputRow from "@/components/ui/LinkInputRow";
 import useAttachmentPolling from "@/components/ui/useAttachmentPolling";
 import * as api from "@/lib/attachmentApi";
 import { attachmentView } from "@/lib/projectViewModel";
+import { normalizeAttachmentUrl, INVALID_ATTACHMENT_URL_MESSAGE } from "@/lib/attachmentUrl";
 
 // 프로젝트 자료 종류는 먼저 선택한다. 산출물 요청에서는 지정된 category를 사용한다.
 const CATEGORY_OPTIONS = [["MEETING_NOTE", "회의록"], ["PRESENTATION", "발표 자료"], ["DESIGN", "디자인"], ["OUTPUT", "산출물"]];
@@ -65,12 +66,11 @@ export default function RecordAttachmentsField({ label, attachments, category, l
   }
   function addLink() {
     run(async (signal) => {
-      let url;
-      try { url = new URL(link.includes("://") ? link.trim() : `https://${link.trim()}`); } catch { throw new Error("올바른 링크를 입력해 주세요."); }
-      if (!["http:", "https:"].includes(url.protocol) || !url.hostname.includes(".")) throw new Error("HTTP(S) 링크를 입력해 주세요.");
+      const url = normalizeAttachmentUrl(link);
+      if (!url) throw new Error(INVALID_ATTACHMENT_URL_MESSAGE);
       const linkCategory = category ?? selectedCategory;
       if (!linkCategory) throw new Error("자료 종류를 먼저 선택해 주세요.");
-      const item = attachmentView(await api.createLinkAttachment(url.href, linkCategory, { signal, request: authenticatedRequest }));
+      const item = attachmentView(await api.createLinkAttachment(url, linkCategory, { signal, request: authenticatedRequest }));
       if (!signal.aborted) { latest.current.onChange([...latest.current.attachments, item]); setLink(""); }
     });
   }

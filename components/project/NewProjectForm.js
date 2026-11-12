@@ -58,7 +58,7 @@ export default function NewProjectForm({ titleId, onCancel, onCreate, busy = fal
         onChange={(event) => { if (event.target.value.trim()) setNameError(""); }}
       />
       <TextField
-        label={<>부제목 <span className="text-ink-subtle">· 선택</span></>}
+        label={<>부제 <span className="text-ink-subtle">· 선택</span></>}
         name="subtitle"
         placeholder="예) 캠퍼스 중고마켓"
       />
