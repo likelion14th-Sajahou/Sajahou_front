@@ -23,7 +23,7 @@ export default function ProjectRecordReview({
     <>
       {isOrganizedByAi && (
         <p className="text-label leading-[19.5px] text-ink-subtle">
-          AI가 {attachments.length > 0 ? "첨부 자료" : "오늘 한 일"}와 답변으로 정리했어요. 확인하고 고쳐서 저장하세요.
+          AI가 {attachments.length > 0 ? "첨부 자료와 답변" : "오늘 한 일과 답변"}을 바탕으로 정리했어요. 확인하고 고쳐서 저장하세요.
         </p>
       )}
       <EmptyFieldsNotice fields={fields} />

@@ -4,7 +4,7 @@
 
 ## 명세 기준
 
-`likelion14-sajahou-docs/API명세서.url` → [API 명세](https://app.notion.com/p/c76acc3e4920826ba82801c5cae31c29)의 **데이터베이스 개별 항목**을 기준으로 한다. 27·30번은 아래의 11/11 백엔드 안내를 우선 적용한다. 하위 과거 통합 문서는 사용하지 않는다.
+`likelion14-sajahou-docs/API명세서.url` → [API 명세](https://app.notion.com/p/c76acc3e4920826ba82801c5cae31c29)의 **데이터베이스 개별 항목**을 기준으로 한다. 27·30번은 아래의 11/12 백엔드 안내를 우선 적용한다. 하위 과거 통합 문서는 사용하지 않는다.
 
 - 4·6·7~10·18·21~34·43·44 중 프로젝트 흐름에 필요한 요청을 제공한다. 35번은 사용하지 않는다.
 - 26·27·28: SAVED 기록 = 카드 1장. DRAFT는 목록·기록 수에서 제외한다.
@@ -81,3 +81,11 @@
 - 별도 mock transport의 실제 50초 지연 요청이 50017ms에 성공했다. 서버 AI_TIMEOUT, Client timeout/취소와 중복 호출은 자동 검사로 검증했다.
 - `npm run build`는 CSS loader 하위 Node process가 연결 전에 exit 0으로 종료되는 Turbopack 내부 오류로 실패했다. sandbox 밖에서도 재현됐다. localhost 개발 서버 실행과 프로덕션 빌드 성공은 구분한다.
 - 실제 백엔드·AI·파일 추출·쿠키/CORS·배포 검증은 수행하지 않았다. memo PATCH와 regenerate 전송 방식은 잠정 계약이다.
+
+
+## 2026-11-12 오늘 한 일 검증
+
+- `node --test lib/projectApi.test.js lib/projectViewModel.test.js`: 31개 통과. 5칸 생성·삭제, 빈 AI 초안 거부, 자료 변경 확인, 질문 상태 보존, 첨부 지연의 동일 요청 재시도·횟수 제한·취소·다른 오류 미재시도를 확인했다.
+- `npm run lint`, `npm run build`, `git diff --check` 통과. 빌드 후 검토 안내 문구의 조사만 수정하고 lint를 다시 통과했다.
+- localhost:3000 Mock에서 빈 입력 차단, 5칸 입력 → AI 질문, 자료 화면 왕복 시 원문 유지, 전체 질문 건너뛰기 → 기존 5칸 유지, 태그 없이 저장 차단, 결과 직접 수정·태그 1개 선택 후 저장, 새로고침 후 기록 유지, 기록 추가 화면의 단일 AI 버튼을 확인했다. 브라우저 error 로그는 비어 있었다.
+- 실제 백엔드·AI·첨부 추출은 미검증이다. 서버의 ATTACHMENT_PENDING 경합 응답은 자동 테스트로 확인했으며, localhost에서 해당 오류를 주입하지는 않았다. 반응형 검증은 요청에 따라 생략했다.
