@@ -6,15 +6,17 @@
 
 ## 1. 환경변수
 
-루트 `.env.example`을 `.env.local`로 복사하고 백엔드 주소를 설정한다.
+새 환경은 루트 `.env.example`을 참고한다. 기존 `.env.local`의 mock 설정은 그대로 사용할 수 있다.
 
 ```dotenv
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+BACKEND_URL=https://13-209-185-170.sslip.io
 ```
 
-origin 또는 `/api/v1`까지 지정할 수 있다. Client가 `/api/v1`을 한 번 연결하므로 호출 경로에는 접두사를 넣지 않는다. 실제 요청에 환경변수나 `baseUrl`이 없으면 `TypeError`가 발생한다. 인증 mock은 현재 브라우저 origin을 지정하며 네트워크를 호출하지 않는다. 모듈을 import하는 것만으로 요청하지는 않는다.
+브라우저의 기본 요청은 현재 프론트 origin의 `/api/v1`을 사용한다. `next.config.mjs`의 rewrite가 같은 경로를 백엔드로 전달하므로 로컬과 Vercel에서 동일하게 동작한다. `BACKEND_URL`은 `/api/v1`을 제외한 백엔드 origin이며, 생략하면 위 개발 서버를 사용한다. 변경 후 로컬 개발 서버를 재시작하고 Vercel에서는 재배포한다.
 
-같은 함수를 서버와 브라우저에서 사용할 수 있다. 단, 서버 호출에서는 `credentials: "include"`만으로 브라우저의 쿠키가 자동 전달되지 않는다. `NEXT_PUBLIC_`에는 공개 가능한 백엔드 주소만 넣는다. 이 값은 Next.js 빌드 시 고정되므로 배포 주소를 바꾸면 다시 빌드한다. 비밀값이나 토큰은 넣지 않는다.
+브라우저에서는 `NEXT_PUBLIC_API_BASE_URL`이 남아 있어도 사용하지 않는다. 명시적인 `baseUrl` 옵션은 기존대로 우선하며, origin 또는 `/api/v1`까지 포함한 절대 URL을 지원한다. 호출 경로에는 `/users/me`처럼 접두사 이후 부분만 전달한다. 인증 mock은 현재 브라우저 origin과 모의 fetch를 지정하므로 백엔드에 요청하지 않는다.
+
+로그인이 필요한 화면의 API는 기존처럼 클라이언트에서 호출한다. 서버에서 공통 Client를 사용해야 한다면 `baseUrl: process.env.BACKEND_URL`처럼 절대 URL을 명시하고, 현재 요청의 사용자 쿠키를 `headers`에 직접 전달해야 한다. 서버의 `credentials: "include"`는 사용자 쿠키를 자동 전달하지 않는다. 호환성을 위해 서버에서는 기존 `NEXT_PUBLIC_API_BASE_URL`도 fallback으로 지원하지만 새 설정에는 필요 없다. 서버에서 URL을 결정할 수 없으면 `TypeError`가 발생한다. `authRequest`는 브라우저 세션용 CSRF 상태를 공유하므로 서버 인증 호출에 그대로 사용하지 않는다.
 
 ## 2. 옵션과 반환값
 
@@ -242,7 +244,17 @@ NEXT_PUBLIC_GOOGLE_AUTH_MODE=mock
 
 처음부터 다시 테스트하려면 해당 사이트에서 브라우저 개발자 도구로 `localStorage`의 `sajarok_mock_auth`를 삭제하고 새로고침한다. Preview 주소가 바뀌면 새 주소에는 저장 데이터가 없어 신규 상태로 시작한다.
 
-실제 백엔드 연결 시 `NEXT_PUBLIC_AUTH_MODE=live`, `NEXT_PUBLIC_GOOGLE_AUTH_MODE=google`, 실제 `NEXT_PUBLIC_API_BASE_URL`과 Google Client ID를 설정하고 재빌드한다. live 모드는 mock 모듈이나 localStorage를 사용하지 않고 기존 `apiRequest`의 실제 fetch·`credentials: include`·HttpOnly 세션 쿠키 흐름을 그대로 따른다. 실제 연동 검증은 별도로 필요하다.
+실제 백엔드 연결 시 `NEXT_PUBLIC_AUTH_MODE=live`, `NEXT_PUBLIC_GOOGLE_AUTH_MODE=google`, `BACKEND_URL`과 Google Client ID를 설정하고 재빌드한다. live 모드는 현재 프론트 origin의 `/api/v1` rewrite를 거치고, mock 모듈이나 localStorage를 사용하지 않는다. 기존 `credentials: include`·HttpOnly 세션 쿠키·CSRF 흐름은 유지한다.
+
+배포 환경에서 확인할 사항:
+
+1. Vercel의 해당 환경(Production/Preview)에 위 환경변수를 설정하고 재배포한다.
+2. Google Cloud의 해당 Client ID에 프론트 origin을 승인된 JavaScript 원본으로 등록한다. 현재 Google 로그인은 popup/callback 방식이다.
+3. `/api/v1/auth/csrf`의 정상 JSON 응답을 확인한다. 이것만으로 로그인 검증이 끝나지는 않는다.
+4. 데모 및 Google 로그인 후 프론트 도메인의 `JSESSIONID` 저장, `/api/v1/users/me`와 `/api/v1/story-cards`의 인증 성공을 확인한다.
+5. 새로고침 후 세션 복원, 변경 요청의 CSRF 통과, 로그아웃을 확인한다. 쿠키가 저장되지 않으면 응답의 `Set-Cookie`와 브라우저의 차단 사유를 확인하고 백엔드 담당자와 Domain·Path·Secure·SameSite 속성을 점검한다.
+
+실제 Vercel·Google 콘솔 설정과 브라우저 세션 검증은 별도로 필요하다. OpenAI 키와 주차·역량 시드 데이터 반영은 백엔드 담당 범위다.
 
 ## 8. 데모 로그인과 일반 로그인 구분
 

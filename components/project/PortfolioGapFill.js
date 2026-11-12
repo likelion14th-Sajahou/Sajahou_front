@@ -50,7 +50,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
             {hasSavedArtifact && <p className="text-label text-ink-muted">이미 산출물을 첨부했어요. 그대로 진행하거나 새 자료를 첨부해 바꿀 수 있어요.</p>}
             {question.answer && <p className="whitespace-pre-wrap text-body-sm text-ink-muted">{question.answer}</p>}
             <RecordAttachmentsField category="OUTPUT" attachments={attachments} onBusyChange={setAttachmentBusy} onChange={(items) => onChange({ ...state, attachments: { ...state.attachments, [question.questionId]: items } })} />
-            <div className="flex flex-wrap gap-3"><TextLink disabled={attachmentBusy} onClick={back}>← 이전 질문</TextLink><TextLink disabled={attachmentBusy} onClick={() => submit("SKIPPED")}>아직 없어요</TextLink>
+            <div className="flex flex-wrap gap-3"><TextLink disabled={attachmentBusy} onClick={back}>{index === 0 ? "← 기록 고르기" : "← 이전 질문"}</TextLink><TextLink disabled={attachmentBusy} onClick={() => submit("SKIPPED")}>아직 없어요</TextLink>
               <Button disabled={attachmentBusy || (!hasSavedArtifact && !attachments.length) || attachments.some((a) => a.extractStatus === "PENDING")}
                 onClick={() => hasSavedArtifact ? next() : submit("ANSWERED")}>{hasSavedArtifact ? "기존 산출물로 다음 →" : "첨부하고 다음 →"}</Button></div>
           </div> : <AiQuestionForm category={question.tag} source={question.quote || "고른 기록에서 빈 곳을 보완해 주세요"} question={question.content}
