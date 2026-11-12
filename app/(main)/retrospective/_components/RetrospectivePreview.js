@@ -145,12 +145,15 @@ export function RetrospectiveHeading() {
 
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3.5">
-      <div className="flex min-w-0 max-w-full flex-col items-start gap-1.5">
-        <Link href="/" className="text-body-sm text-ink-muted">← 홈</Link>
-        <p className="text-label text-accent-strong">{part}</p>
-        <h1 className="text-[38px] leading-[1.2] tracking-[-0.02em]">
-          {week.weekNumber}주차 {isAssignment ? "과제" : "세션"} 회고
-        </h1>
+      {/* 회고 상단 헤더(Figma '회고 상단 헤더'): 홈 링크, 파트, 제목은 삼립호빵체 */}
+      <div className="flex min-w-0 max-w-full flex-col items-start gap-3">
+        <Link href="/" className="font-display text-body-sm leading-[22.4px] text-ink-muted">← 홈</Link>
+        <div className="flex flex-col items-start font-display">
+          <p className="text-label leading-[20.8px] text-accent-strong">{part}</p>
+          <h1 className="text-[32px] leading-[45.6px] tracking-[-0.76px] text-balance">
+            {week.weekNumber}주차 {isAssignment ? "과제" : "세션"} 회고
+          </h1>
+        </div>
         {/* 과제 회고가 따로 없는 주(기록하기·없음)에는 탭을 보이지 않는다. */}
         {(assignmentPending || (isAssignment && assignment)) && (
           <nav aria-label="회고 작성 상태" className="flex max-w-full flex-wrap gap-1.5 pt-2">

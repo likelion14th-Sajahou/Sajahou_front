@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
-import TextLink from "@/components/ui/TextLink";
 import { loginDemo, loginWithGoogle } from "@/lib/auth";
 import { getGoogleAuthMode } from "@/lib/authConfig";
 import { AuthRestoreStatus, useAuth } from "@/components/layout/AuthProvider";
@@ -84,9 +83,10 @@ export default function LoginActions() {
       {submitting && <p role="status" className="text-label text-ink-subtle">{loginType === "demo" ? "데모 계정으로 로그인하고 있어요…" : "로그인 확인 중…"}</p>}
       {error && <p id="login-error" role="alert" className="text-label text-error">{error}</p>}
       {!error && notice && <p role="status" className="text-label text-ink-subtle">{notice}</p>}
-      <TextLink disabled={busy} aria-describedby={error ? "login-error" : undefined} onClick={() => handleLogin(null, true)} className="leading-[21px] disabled:cursor-default disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
+      {/* 데모 로그인은 Figma 시작 화면의 Secondary 버튼이다. */}
+      <Button variant="secondary" disabled={busy} aria-describedby={error ? "login-error" : undefined} onClick={() => handleLogin(null, true)} className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
         {loginType === "demo" ? "데모 로그인 중…" : "데모 계정으로 둘러보기"}
-      </TextLink>
+      </Button>
     </div>
   );
 }

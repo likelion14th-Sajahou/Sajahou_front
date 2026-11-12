@@ -75,39 +75,38 @@ export default function StartActions({ isAssignment = false }) {
     run("reset", (options) => resetRetrospective(retrospective.id, options), "작성한 내용을 지우지 못했어요. 잠시 후 다시 시도해 주세요.");
   }
 
+  // 진한 시작 카드 안에 가운데 정렬로 놓인다(Figma '세션 회고 시작 카드'): 버튼 줄 아래에 휴회 링크.
   return (
-    <div className="mt-5 border-t border-line pt-4">
-      <div className="flex flex-wrap items-center justify-between gap-3.5">
-        {!isAssignment && (
-          <TextLink onClick={markRested} disabled={pending === "rest"} aria-busy={pending === "rest"}>
-            {pending === "rest" ? "휴회로 표시하는 중…" : "이번 주는 휴회했어요"}
-          </TextLink>
-        )}
-        {isWriting ? (
-          <div className="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto">
-            <Button
-              variant="secondary"
-              className="min-w-0 max-sm:px-3"
-              onClick={() => { setError(""); setIsResetOpen(true); }}
-            >
-              처음부터
-            </Button>
-            <Button
-              variant="accent"
-              className="min-w-0 max-sm:px-3"
-              href={getStepHref(getStepPath(retrospective.currentStep))}
-              onClick={() => { if (!isAssignment) setWeekStatus("writing"); }}
-            >
-              이어 쓰기 →
-            </Button>
-          </div>
-        ) : (
-          <Button className="ml-auto" onClick={start} disabled={pending === "start"} aria-busy={pending === "start"}>
-            {pending === "start" ? "시작하는 중…" : "시작하기 →"}
+    <div className="relative flex w-full flex-col items-center gap-4 pt-4">
+      {isWriting ? (
+        <div className="flex flex-wrap justify-center gap-3">
+          <Button
+            variant="inverse"
+            className="min-w-0"
+            onClick={() => { setError(""); setIsResetOpen(true); }}
+          >
+            처음부터
           </Button>
-        )}
-      </div>
-      {error && !isResetOpen && <p role="alert" className="mt-3 text-body-sm text-error">{error}</p>}
+          <Button
+            variant="soft"
+            className="min-w-0"
+            href={getStepHref(getStepPath(retrospective.currentStep))}
+            onClick={() => { if (!isAssignment) setWeekStatus("writing"); }}
+          >
+            이어 쓰기 →
+          </Button>
+        </div>
+      ) : (
+        <Button variant="soft" onClick={start} disabled={pending === "start"} aria-busy={pending === "start"}>
+          {pending === "start" ? "시작하는 중…" : "시작하기 →"}
+        </Button>
+      )}
+      {!isAssignment && (
+        <TextLink variant="inverse" onClick={markRested} disabled={pending === "rest"} aria-busy={pending === "rest"}>
+          {pending === "rest" ? "휴회로 표시하는 중…" : "이번 주는 휴회했어요"}
+        </TextLink>
+      )}
+      {error && !isResetOpen && <p role="alert" className="text-body-sm text-tint-red">{error}</p>}
       <ResetRetrospectiveModal
         open={isResetOpen}
         isResetting={pending === "reset"}
