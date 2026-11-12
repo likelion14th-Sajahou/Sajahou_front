@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { loginDemo, loginWithGoogle } from "@/lib/auth";
@@ -66,17 +67,19 @@ export default function LoginActions() {
   const handleCredential = useCallback((idToken) => handleLogin(idToken), [handleLogin]);
   const handleGoogleError = useCallback((message) => setError(message), []);
 
-  if (isAuthenticated) return <p role="status" className="mt-[22px] text-center text-label text-ink-subtle">홈으로 이동하고 있어요…</p>;
+  if (isAuthenticated) return <p role="status" className="text-center text-label text-ink-subtle">홈으로 이동하고 있어요…</p>;
 
+  // 버튼 묶음(Figma 'Actions'): Google 버튼, 데모 버튼, 그 아래 안내. 실제 서비스의 Google 버튼은 Google이 그린다.
   return (
-    <div className="mt-[22px] flex flex-col items-center gap-[14px]" aria-busy={busy}>
+    <div className="flex w-full flex-col items-center gap-3" aria-busy={busy}>
       {googleMode === "mock" ? <Button
-        variant="outline"
+        variant="google"
         onClick={() => handleLogin("mock-google-id-token")}
         disabled={busy}
         aria-describedby={error ? "login-error" : undefined}
-        className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+        className="w-full gap-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
       >
+        <Image src="/images/common/google-g.svg" alt="" width={20} height={20} />
         {loginType === "google" ? "로그인 확인 중…" : "Google 계정으로 계속하기"}
       </Button> : <GoogleSignInButton disabled={busy} onCredential={handleCredential} onError={handleGoogleError} />}
       <AuthRestoreStatus />

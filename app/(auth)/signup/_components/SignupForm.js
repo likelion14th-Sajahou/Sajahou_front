@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import FormSection from "@/components/profile/FormSection";
 import PartField from "@/components/profile/PartField";
 import Button from "@/components/ui/Button";
 import Checkbox from "@/components/ui/Checkbox";
@@ -116,14 +117,13 @@ export default function SignupForm() {
   }
 
   return (
-    <form ref={formRef} className="mt-1" noValidate onSubmit={handleSubmit} aria-busy={submitting}>
-      {requestError && <p role="alert" className="py-3 text-label text-error">{requestError}</p>}
+    <form ref={formRef} noValidate onSubmit={handleSubmit} aria-busy={submitting}>
+      {requestError && <p role="alert" className="pb-3 text-label text-error">{requestError}</p>}
       <fieldset disabled={submitting || signup?.submitted} className="min-w-0">
         <legend className="sr-only">회원가입 정보</legend>
-        <section aria-labelledby="signup-info-title" className="border-t border-line pt-[18px] pb-5">
-          <h2 id="signup-info-title" className="mb-[14px] text-body leading-6 tracking-[-0.3px]">기본 정보</h2>
+        <FormSection id="signup-info-title" title="기본 정보">
           <ProfileFields values={values} onChange={handleChange} errors={errors} />
-        </section>
+        </FormSection>
 
         <PartField id="signup-part" value={values.part} onChange={handleChange} error={errors.part} />
 
@@ -142,10 +142,10 @@ export default function SignupForm() {
         {errors.privacyAgreed && <p id="privacyAgreed-error" className="pt-2 text-caption leading-5 text-error">{errors.privacyAgreed}</p>}
       </fieldset>
 
-      <Button type="submit" disabled={submitting} className="mt-[18px] w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
+      <Button type="submit" disabled={submitting} className="mt-6 w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
         {submitting ? "로그인 확인 중…" : signup?.submitted ? "로그인 상태 다시 확인" : "가입하고 시작하기"}
       </Button>
-      <p className="mt-3 text-center">
+      <p className="mt-6 text-center">
         <TextLink href="/login" size="sm">다른 Google 계정으로 로그인</TextLink>
       </p>
     </form>

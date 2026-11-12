@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
+import FormSection from "./FormSection";
 import ProfileFields from "./ProfileFields";
 import GoogleAccountInfo from "./GoogleAccountInfo";
 import PartField from "./PartField";
@@ -117,14 +118,13 @@ function ProfileForm({ user }) {
 
   return (
     <>
-      <GoogleAccountInfo email={user.email} />
-      <form ref={formRef} className="mt-1" noValidate onSubmit={handleSubmit} aria-busy={isSavingProfile}>
+      <GoogleAccountInfo email={user.email} className="my-6" />
+      <form ref={formRef} noValidate onSubmit={handleSubmit} aria-busy={isSavingProfile}>
         <fieldset disabled={isAccountBusy} className="min-w-0">
           <legend className="sr-only">내 정보</legend>
-          <section aria-labelledby="profile-info-title" className="border-t border-line pt-[18px] pb-5">
-            <h2 id="profile-info-title" className="mb-[14px] text-body leading-6 tracking-[-0.3px]">기본 정보</h2>
+          <FormSection id="profile-info-title" title="기본 정보">
             <ProfileFields values={values} onChange={handleChange} errors={errors} />
-          </section>
+          </FormSection>
           <PartField id="profile-part" value={user.part} readOnly />
         </fieldset>
         {requestError && <p role="alert" className="pb-4 text-body-sm text-error">{requestError}</p>}
