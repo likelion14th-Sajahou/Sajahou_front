@@ -14,6 +14,7 @@ export default function SignupPage() {
       description="한 번만 입력하면 회고 질문과 역량 태그가 내 파트에 맞춰져요."
       decorationVariant="signup"
       align="start"
+      headerSize="small"
     >
       <SignupSession><SignupForm /></SignupSession>
     </AuthCard>

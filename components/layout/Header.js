@@ -79,17 +79,18 @@ export default function Header() {
                 </Link>
                 <span className="whitespace-nowrap text-ink-500">{user.part}</span>
               </div>
-              <TextLink href="/profile" size="sm" className="sm:hidden">내 정보</TextLink>
+              <TextLink href="/profile" variant="underline" size="sm" className="sm:hidden">내 정보</TextLink>
             </>
           )}
           {isAuthenticated && (
             <TextLink
+              variant="underline"
               size="sm"
               onClick={logout}
               disabled={isAccountBusy}
               aria-busy={isAccountBusy}
               aria-describedby={logoutError ? "logout-error" : undefined}
-              className="leading-5 text-ink-subtle disabled:cursor-default disabled:opacity-60"
+              className="leading-5 disabled:cursor-default disabled:opacity-60"
             >
               {isLoggingOut ? "로그아웃 중…" : "로그아웃"}
             </TextLink>

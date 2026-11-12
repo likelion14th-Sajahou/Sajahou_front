@@ -14,9 +14,10 @@ export default function Chip({
   children,
   ...rest
 }) {
+  // 디자인 시스템(Figma 'Part Chip'): 선택은 진한 바탕 + 흰 글씨, 기본은 흰 바탕 + 회색 테두리.
   const stateClasses = selected
     ? "border-ink bg-ink text-white"
-    : "border-line bg-white text-ink-muted";
+    : "border-line bg-white text-ink";
 
   const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full border text-center ${stateClasses} ${SIZE_CLASSES[size]} ${className}`;
 

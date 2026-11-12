@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import PartField from "@/components/profile/PartField";
 import Button from "@/components/ui/Button";
+import Checkbox from "@/components/ui/Checkbox";
 import ProfileFields from "@/components/profile/ProfileFields";
 import TextLink from "@/components/ui/TextLink";
 import { useAuth } from "@/components/layout/AuthProvider";
@@ -126,25 +127,26 @@ export default function SignupForm() {
 
         <PartField id="signup-part" value={values.part} onChange={handleChange} error={errors.part} />
 
-        <label className="flex cursor-pointer items-start gap-[10px] rounded-[14px] bg-canvas p-[14px]">
-          <span className="flex h-6 w-5 shrink-0 justify-center pt-[3px]">
-            <input type="checkbox" name="privacyAgreed" checked={values.privacyAgreed} onChange={handleChange} aria-invalid={errors.privacyAgreed ? true : undefined} aria-describedby={errors.privacyAgreed ? "privacyAgreed-error" : undefined} className="h-[18px] w-[13px] cursor-pointer accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
+        {/* 개인정보 동의(Figma 'Agreement Box') */}
+        <label className="flex cursor-pointer items-start gap-2 rounded-[14px] bg-canvas p-4">
+          <span className="flex shrink-0 pt-px">
+            <Checkbox name="privacyAgreed" checked={values.privacyAgreed} onChange={handleChange} aria-invalid={errors.privacyAgreed ? true : undefined} aria-describedby={errors.privacyAgreed ? "privacyAgreed-error" : undefined} />
           </span>
-          <span className="min-w-0">
-            <span className="block text-body-sm leading-[22.4px]">[필수] 개인정보 수집·이용에 동의해요</span>
-            <span className="mt-1 block text-label leading-[19.5px] text-ink-subtle">
+          <span className="flex min-w-0 flex-col gap-1">
+            <span className="text-body-sm leading-[22px] text-ink">[필수] 개인정보 수집·이용에 동의해요</span>
+            <span className="text-caption leading-[18px] text-ink-subtle">
               사자록 회원 관리와 회고·자소서 기능 제공을 위해 이름·학번·학과·기수·파트·이메일을 수집하며, 회원 탈퇴 시까지 보관해요.
             </span>
           </span>
         </label>
-        {errors.privacyAgreed && <p id="privacyAgreed-error" className="pt-0.5 text-label leading-[20.8px] text-error">{errors.privacyAgreed}</p>}
+        {errors.privacyAgreed && <p id="privacyAgreed-error" className="pt-2 text-caption leading-5 text-error">{errors.privacyAgreed}</p>}
       </fieldset>
 
-      <Button type="submit" variant="accent" disabled={submitting} className="mt-[18px] w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
+      <Button type="submit" disabled={submitting} className="mt-[18px] w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
         {submitting ? "로그인 확인 중…" : signup?.submitted ? "로그인 상태 다시 확인" : "가입하고 시작하기"}
       </Button>
-      <p className="mt-3 text-center leading-[19.5px]">
-        <TextLink href="/login" variant="accent" size="sm">다른 Google 계정으로 로그인</TextLink>
+      <p className="mt-3 text-center">
+        <TextLink href="/login" size="sm">다른 Google 계정으로 로그인</TextLink>
       </p>
     </form>
   );

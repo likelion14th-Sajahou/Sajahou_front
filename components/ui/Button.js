@@ -1,8 +1,11 @@
 import Link from "next/link";
 
+// primary·secondary는 디자인 시스템(Figma 'Button')의 Primary·Secondary다.
+// Primary: 주요 동작, 노란 바탕 + 삼립호빵체. Secondary: 보조 동작, 회색 바탕 + Noto Sans KR.
+// Secondary는 회색 바탕이라 흰 카드 안에 둔다(회색 페이지 바탕 위에서는 잘 안 보인다).
 const VARIANT_CLASSES = {
-  primary: "border-ink bg-ink text-white",
-  secondary: "border-ink bg-white text-ink",
+  primary: "border-yellow-400 bg-yellow-400 font-display text-ink",
+  secondary: "border-canvas bg-canvas font-noto font-medium text-ink",
   outline: "border-line bg-white text-ink",
   accent: "border-accent bg-accent text-white",
   highlight: "border-shape-yellow bg-shape-yellow text-ink",
@@ -10,7 +13,7 @@ const VARIANT_CLASSES = {
 };
 
 const SIZE_CLASSES = {
-  md: "h-[46px] px-[22px] text-body",
+  md: "h-12 px-[22px] text-body leading-6",
   sm: "h-[38px] px-4 text-body-sm",
 };
 

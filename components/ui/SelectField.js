@@ -8,19 +8,20 @@ export default function SelectField({ label, error, className = "", children, ..
   } : {};
 
   return (
-    <label className="flex min-w-0 flex-col gap-1.5">
-      <span className="text-label text-ink-muted">{label}</span>
+    // 디자인 시스템(Figma 'Input' Type=Select): TextField와 같은 모양 + 오른쪽 20px 화살표.
+    <label className="flex min-w-0 flex-col gap-2">
+      <span className="font-display text-label leading-5 text-ink">{label}</span>
       <span className="relative">
         <select
-          className={`h-[49px] w-full appearance-none rounded-[14px] border ${error ? "border-error-line" : "border-transparent"} bg-canvas pl-5 pr-7 text-body text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${className}`}
+          className={`h-12 w-full appearance-none rounded-[14px] border ${error ? "border-error-line" : "border-transparent"} bg-canvas pl-4 pr-11 text-body text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${className}`}
           {...rest}
           {...accessibilityProps}
         >
           {children}
         </select>
-        <Image src="/images/common/chevron-down.svg" alt="" width={10} height={6} className="pointer-events-none absolute top-1/2 right-[5px] -translate-y-1/2" />
+        <Image src="/images/common/chevron-down-20.svg" alt="" width={20} height={20} className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2" />
       </span>
-      {error && <span id={errorId} className="pt-0.5 text-label leading-[20.8px] text-error">{error}</span>}
+      {error && <span id={errorId} className="text-caption leading-5 text-error">{error}</span>}
     </label>
   );
 }

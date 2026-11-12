@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import Checkbox from "@/components/ui/Checkbox";
 import TextLink from "@/components/ui/TextLink";
 import ActionFooter from "@/components/ui/ActionFooter";
 
@@ -17,12 +18,7 @@ function RecordOption({ record, isSelected, onToggle }) {
     <label
       className={`flex cursor-pointer items-start gap-3 rounded-2xl border bg-white px-4 py-3.5 ${isSelected ? "border-ink" : "border-line"}`}
     >
-      <input
-        type="checkbox"
-        checked={isSelected}
-        onChange={onToggle}
-        className="mt-[3px] mr-[3px] ml-1 size-[18px] shrink-0 cursor-pointer accent-ink"
-      />
+      <Checkbox checked={isSelected} onChange={onToggle} className="mt-0.5 mr-0.5 ml-1" />
       <span className="flex min-w-0 flex-col">
         <span className="flex flex-wrap items-center gap-1 text-body text-ink">
           <span className="leading-6">{title}</span>

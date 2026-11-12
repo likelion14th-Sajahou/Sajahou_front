@@ -3,8 +3,9 @@ const SIZE_CLASSES = {
   sm: "rounded-xl px-3 text-label",
 };
 
+// 디자인 시스템(Figma 'Input'·'Form Field'): 회색 바탕, 높이 48, 오류면 빨간 테두리. 라벨은 삼립호빵체.
 const INPUT_HEIGHT_CLASSES = {
-  md: "h-[50px] py-3",
+  md: "h-12 py-3",
   sm: "h-[38px] py-[7px]",
 };
 
@@ -49,10 +50,10 @@ export default function TextField({
   }
 
   return (
-    <label className="flex w-full flex-col gap-1.5">
-      <span className="text-label text-ink-muted">{label}</span>
+    <label className="flex w-full flex-col gap-2">
+      <span className="font-display text-label leading-5 text-ink">{label}</span>
       {control}
-      {error && <span id={errorId} className="pt-0.5 text-label leading-[20.8px] text-error">{error}</span>}
+      {error && <span id={errorId} className="text-caption leading-5 text-error">{error}</span>}
     </label>
   );
 }
