@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
@@ -22,12 +22,14 @@ import CardTitle from "@/components/ui/CardTitle";
 import ActionFooter from "@/components/ui/ActionFooter";
 import { getAiErrorMessage, getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
-// 카드 초안에서 보여 주고 고치는 칸이다(R-20). 이유·배운 점은 카드에 있지만 이 화면에서는 고치지 않는다.
+// API 19의 초안 값을 편집하고 API 23으로 저장하는 6개 필드다(R-20).
 const STORY_FIELDS = [
   { name: "title", label: "제목" },
   { name: "situation", label: "상황", height: "h-[76px]" },
   { name: "action", label: "행동", height: "h-[172px]" },
+  { name: "reason", label: "이유", height: "h-[76px]", placeholder: "왜 그렇게 했는지 한 줄 남겨 주세요" },
   { name: "result", label: "결과", height: "h-[76px]" },
+  { name: "learned", label: "배운 점", height: "h-[76px]" },
 ];
 
 function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
@@ -41,6 +43,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   const [notice, setNotice] = useState("");
   const { save, isSaving, savedLabel } = useSaveLater();
   const [isSavingCard, setIsSavingCard] = useState(false);
+  const savingCardRef = useRef(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const { toast, showToast, hideToast } = useToast();
   // 비운 칸은 바로 안내에서 빠지거나 생기도록 입력값으로 계산한다.
@@ -54,6 +57,8 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
 
   // 고친 회고록·카드와 고른 역량을 초안 카드에 저장한다(API 23). 실패하면 안내 문구를, 성공하면 ""를 돌려준다.
   async function saveCard() {
+    if (savingCardRef.current) return null;
+    savingCardRef.current = true;
     setIsSavingCard(true);
     try {
       await updateStoryCard(initialCard.cardId, cardChanges(), { request: authenticatedRequest });
@@ -61,8 +66,20 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
     } catch (failure) {
       return failure.status === 401 ? null : getRequestErrorMessage(failure, "초안을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
+      savingCardRef.current = false;
       setIsSavingCard(false);
     }
+  }
+
+  // 미저장 태그도 서버 초안에 남겨, 답 수정 후 API 19가 다시 만들어도 유지한다.
+  async function backToQuestions() {
+    if (isBusy) return;
+    const message = await saveCard();
+    if (message !== "") {
+      if (message) setNotice(message);
+      return;
+    }
+    router.push(getStepHref("questions"));
   }
 
   // 나중에 이어쓰기: 카드를 저장하고 지금 단계(4)와 저장 시각을 남긴다(API 14).
@@ -114,7 +131,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
 
   return (
     <>
-      <div className="mt-7 grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-start gap-5">
+      <fieldset disabled={isBusy} aria-busy={isBusy} className="mt-7 grid min-w-0 grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-start gap-5">
         <Card as="section" size="md" className="flex min-w-0 flex-col gap-3" aria-labelledby="review-retrospective-title">
           <CardTitle id="review-retrospective-title" action={<Button size="sm" onClick={copyRetrospective}>회고록 복사</Button>}>
             노션용 회고록
@@ -139,13 +156,14 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
           </CardTitle>
           {/* 기록에서 찾지 못한 칸은 지어내지 않고 비워 둔다(R-20). */}
           <BlankFieldsNotice labels={blankLabels} />
-          {STORY_FIELDS.map(({ name, label, height }) => (
+          {STORY_FIELDS.map(({ name, label, height, placeholder }) => (
             <TextField
               key={name}
               label={label}
               name={name}
               multiline={name !== "title"}
               value={fields[name]}
+              placeholder={placeholder}
               onChange={(event) => setFields((previous) => ({ ...previous, [name]: event.target.value }))}
               className={height ?? ""}
             />
@@ -168,7 +186,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
           </div>
           <ActionFooter>
             {/* 모든 질문에 답했으면 질문 화면이 질문 끝(고치기 목록)으로 열린다(R-17). */}
-            <TextLink href={getStepHref("questions")}>← 질문으로</TextLink>
+            <TextLink onClick={backToQuestions} disabled={isBusy}>← 질문으로</TextLink>
             <div className="flex gap-2">
               <Button variant="secondary" onClick={saveLater} disabled={isBusy} aria-busy={isBusy && !isCompleting}>{isBusy && !isCompleting ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
               <Button variant="accent" onClick={complete} disabled={isBusy} aria-busy={isCompleting}>{isCompleting ? "저장하는 중…" : "저장하고 사자록에 추가"}</Button>
@@ -177,7 +195,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
           {/* 버튼 줄에 자리가 없어 바로 아래 오른쪽에 둔다. 저장 전에는 자리를 차지하지 않는다. */}
           <SavedTime label={savedLabel} className="-mt-2 self-end empty:hidden" />
         </Card>
-      </div>
+      </fieldset>
       <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
       <Toast toast={toast} onDismiss={hideToast} />
     </>
