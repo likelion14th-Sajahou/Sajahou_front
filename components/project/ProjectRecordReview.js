@@ -6,7 +6,7 @@ import RecordFieldsGrid from "./RecordFieldsGrid";
 import SavedAttachments from "./SavedAttachments";
 import ActionFooter from "@/components/ui/ActionFooter";
 
-// 정리 결과 확인(H-14). AI와 정리했으면 AI 안내를 보여 주고, 5칸을 직접 채웠으면 빈 칸 안내만 보여 준다.
+// AI 정리 결과를 직접 보완하고 역량 태그를 선택해 저장한다.
 export default function ProjectRecordReview({
   attachments,
   fields,
@@ -23,7 +23,7 @@ export default function ProjectRecordReview({
     <>
       {isOrganizedByAi && (
         <p className="text-label leading-[19.5px] text-ink-subtle">
-          AI가 {attachments.length > 0 ? "첨부 자료" : "메모"}와 답변으로 정리했어요. 확인하고 고쳐서 저장하세요.
+          AI가 {attachments.length > 0 ? "첨부 자료" : "오늘 한 일"}와 답변으로 정리했어요. 확인하고 고쳐서 저장하세요.
         </p>
       )}
       <EmptyFieldsNotice fields={fields} />
