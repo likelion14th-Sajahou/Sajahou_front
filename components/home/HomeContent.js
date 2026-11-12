@@ -22,14 +22,14 @@ export default function HomeContent() {
     <>
       <HomeHero userName={home.data.user.name} week={home.data.currentWeek.weekNumber} weekStatus={homeStatus} />
       <main className="mx-auto w-full max-w-[1120px] px-4 pt-2 pb-20">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.75fr_1fr]">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,680fr)_minmax(0,392fr)]">
           <StickerBoard
             count={home.data.stickers.totalCount}
             stickers={homeStickers(home.data)}
           />
-          <div className="grid gap-4 md:grid-cols-2 lg:flex lg:flex-col">
-            <ProjectsCard inProgressProjects={home.data.inProgressProjects} doneProjects={home.data.doneProjects} />
+          <div className="grid gap-4 md:grid-cols-2 md:items-start lg:flex lg:flex-col lg:items-stretch">
             <MatchingPromoCard />
+            <ProjectsCard inProgressProjects={home.data.inProgressProjects} doneProjects={home.data.doneProjects} />
           </div>
         </div>
         <RecentRetrospectives items={homeRecentCards(home.data.recentCards)} />

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { STORY_CARD_TYPES } from "@/components/my-record/storyCardTypes";
 import Badge from "@/components/ui/Badge";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import SectionHeader from "./SectionHeader";
 import { homeCardHref } from "@/lib/homeViewModel";
 
@@ -13,21 +14,24 @@ export default function RecentRetrospectives({ items }) {
   }
 
   return (
-    <section className="flex flex-col gap-4 pt-8">
+    <section className="flex flex-col gap-4 pt-12">
       <SectionHeader title="최근 회고" href="/my-record?tab=cards" />
-      <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {items.map(({ id, title, type }) => (
           <li key={id}>
             <Link
               href={homeCardHref(id)}
-              className="flex h-full min-h-[85px] items-center gap-3 rounded-[18px] border-4 border-ink bg-white p-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              className="relative flex h-full min-h-[85px] items-center gap-3 rounded-[18px] bg-white p-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
             >
-              <Image src="/images/home/recent-retrospective.png" alt="" width={26} height={26} className="shrink-0" />
+              <DrawnBorder variant="recent-card" />
+              <span aria-hidden="true" className="relative size-[26px] shrink-0 overflow-hidden">
+                <Image src="/images/home/recent-retrospective.png" alt="" width={36} height={27} className="absolute top-[2px] -left-[5px] max-w-none" />
+              </span>
               <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
                 <span className="w-full truncate text-body leading-[21px] text-ink">
                   {title}
                 </span>
-                <Badge tone={STORY_CARD_TYPES[type].tone}>{STORY_CARD_TYPES[type].label}</Badge>
+                <Badge tone={type === "session" ? "yellow" : STORY_CARD_TYPES[type].tone}>{STORY_CARD_TYPES[type].label}</Badge>
               </span>
             </Link>
           </li>

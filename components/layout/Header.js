@@ -11,8 +11,6 @@ import TextLink from "@/components/ui/TextLink";
 const NAV_ITEMS = [
   { href: "/", label: "홈" },
   { href: "/retrospective", label: "이번 주 회고" },
-  // 프로젝트 상세(/projects/[id])에서도 선택된 것으로 표시한다(H-01).
-  { href: "/projects", label: "프로젝트" },
   { href: "/my-record", label: "나의 사자록" },
   { href: "/matching", label: "자소서 매칭" },
 ];
@@ -21,7 +19,7 @@ function isActivePath(pathname, href) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-// 메뉴 탭(Figma 'Nav Tab'). 선택된 탭은 진한 2px 밑줄. 기본 탭도 투명한 2px 밑줄을 둬서 선택이 바뀌어도 글자가 움직이지 않게 한다.
+// 메뉴 탭(Figma 'Nav Tab'). 선택된 탭 아래에 노란 마커를 표시한다.
 function NavLinks({ pathname }) {
   return NAV_ITEMS.map(({ href, label }) => {
     const isActive = pathname ? isActivePath(pathname, href) : false;
@@ -31,9 +29,9 @@ function NavLinks({ pathname }) {
         key={href}
         href={href}
         aria-current={isActive ? "page" : undefined}
-        className={`whitespace-nowrap border-b-2 py-1.5 text-body-sm leading-[22.4px] font-bold ${
+        className={`relative isolate whitespace-nowrap border-b-2 py-1.5 text-body-sm leading-[22.4px] font-bold ${
           isActive
-            ? "border-ink text-ink"
+            ? "border-transparent text-ink after:absolute after:-inset-x-[5px] after:bottom-1.5 after:-z-10 after:h-2.5 after:rounded-[5px] after:bg-yellow-400"
             : "border-transparent text-ink-subtle"
         }`}
       >
@@ -98,6 +96,7 @@ export default function Header() {
         </div>
         {logoutError && <p id="logout-error" role="alert" className="w-full text-label text-error">{logoutError}</p>}
       </div>
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-[2px] left-0 h-[4px] w-full bg-[url(/images/home/header-line.svg)] bg-[length:100%_100%] bg-no-repeat" />
     </header>
   );
 }

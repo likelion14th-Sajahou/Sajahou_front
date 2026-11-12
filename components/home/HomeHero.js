@@ -1,76 +1,58 @@
 import Image from "next/image";
 import Link from "next/link";
-import HeroDecoration from "./HeroDecoration";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
-import { HERO_LAYOUTS } from "./heroDecorations";
 import { HOME_HERO_CONTENT } from "@/lib/homeViewModel";
 
-function HeroDecorations({ className, decorations, dots }) {
-  return (
-    <div aria-hidden="true" className={`absolute inset-0 ${className}`}>
-      {decorations.map(({ kind, left, right, top, frame, image, rotate, blur }) => (
-        <div
-          key={kind}
-          className="home-hero-float absolute"
-          style={{
-            left,
-            right,
-            top,
-            width: frame[0],
-            height: frame[1],
-            rotate: rotate ? `${rotate}deg` : undefined,
-            filter: blur ? "blur(3px)" : undefined,
-          }}
-        >
-          <HeroDecoration
-            kind={kind}
-            width={image[2]}
-            height={image[3]}
-            className="absolute max-w-none"
-            style={{ left: image[0], top: image[1] }}
-          />
-        </div>
-      ))}
-      {dots.map(({ left, top, size }) => (
-        <div key={left} className="absolute" style={{ left, top }}>
-          <ShapeCharacter shape="circle" color="yellow" face="none" size={size} />
-        </div>
-      ))}
-    </div>
-  );
-}
+// 1440 × 839 히어로 안의 원본 별 위치. 화면 크기에 따라 위치만 비례한다.
+const STARS = [
+  { image: "03", x: 914, y: 187, width: 33, height: 33 },
+  { image: "03", x: 1329, y: 323, width: 33, height: 33 },
+  { image: "05", x: 1075, y: 120, width: 38, height: 37 },
+  { image: "01", x: 1135, y: 372, width: 37, height: 36 },
+  { image: "04", x: 139, y: 153, width: 35, height: 34 },
+  { image: "06", x: 269, y: 273, width: 45, height: 49 },
+  { image: "07", x: 378, y: 120, width: 25, height: 25 },
+  { image: "07", x: 89, y: 390, width: 25, height: 25 },
+  { image: "13", x: 1235, y: 243, width: 21, height: 21 },
+];
+
+// 눈은 CTA를 보는 원본 위치에 고정한다.
+const EYES = [
+  { name: "white-left", image: "white", x: 193.97, y: 169.28, size: 44.6 },
+  { name: "white-right", image: "white", x: 260.01, y: 169.86, size: 44.6 },
+  { name: "pupil-left", image: "pupil", x: 212.36, y: 181.9, size: 19.6 },
+  { name: "pupil-right", image: "pupil", x: 278.48, y: 182.76, size: 19.6 },
+];
 
 export default function HomeHero({ userName, week, weekStatus }) {
   const { title, cta } = HOME_HERO_CONTENT[weekStatus];
 
   return (
-    // 첫 화면에 히어로만 보이도록 헤더 높이(globals.css의 --header-height)를 뺀 값을 쓴다.
-    // 진한 배경(ink-900) 위에 흰 인사말·제목(Figma 'Hero 인사말'·'Hero 제목'). 배경 장식은 히어로 화면 디자인 때 바꾼다.
-    <section className="relative grid h-[clamp(520px,calc(100svh-var(--header-height)),920px)] w-full grid-rows-[24%_1fr] overflow-hidden bg-ink-900 lg:grid-rows-[30%_1fr]">
-      {HERO_LAYOUTS.map(({ id, className, decorations, dots }) => (
-        <HeroDecorations key={id} className={className} decorations={decorations} dots={dots} />
-      ))}
-      <div className="row-start-2 flex flex-col items-center">
-        <div className="relative flex w-full max-w-[720px] flex-col items-center gap-4 px-6 text-center text-white">
-          <p className="text-[20px] leading-6 sm:text-[24px]">
-            {userName} 님, 오늘은 {week}주차예요
-          </p>
-          <h1 className="font-display break-keep whitespace-pre-line text-balance text-[40px] leading-[1.22] tracking-[-1.68px] sm:text-[56px]">
-            {title}
-          </h1>
-        </div>
-        {/* 회고 CTA(Figma '회고 CTA 버튼'): 꽃 모양 스티커 위에 상태별 문구와 '>' */}
-        <Link
-          href="/retrospective"
-          className="relative mt-1 flex h-[153px] w-[157px] shrink-0 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:absolute lg:top-[60%] lg:left-[66%] lg:mt-0"
-        >
-          <Image src="/images/home/cta-flower.png" alt="" fill sizes="157px" className="object-contain" />
-          <span className="relative flex items-center gap-1 pl-1.5 font-display text-[16px] leading-[25.6px] text-ink">
-            {cta}
-            <Image src="/images/common/chevron-right-16.svg" alt="" width={16} height={16} />
-          </span>
-        </Link>
+    <section className="home-hero relative isolate w-full overflow-hidden bg-canvas">
+      <div aria-hidden="true" className="home-hero-background absolute -z-10" />
+      <div aria-hidden="true" className="home-hero-stars pointer-events-none absolute inset-0">
+        {STARS.map(({ image, x, y, width, height }, index) => (
+          <Image key={index} src={`/images/stars/star-${image}.png`} alt="" width={width} height={height}
+            className="absolute" style={{ left: `${x / 14.4}%`, top: `${y / 8.39}%` }} />
+        ))}
       </div>
+      <div className="home-hero-copy absolute flex w-full max-w-[720px] flex-col items-center gap-4 px-6 text-center text-white">
+        <p className="text-[18px] leading-6 sm:text-[24px]">{userName} 님, 오늘은 {week}주차예요</p>
+        <h1 className="font-display break-keep whitespace-pre-line text-balance text-[40px] leading-[1.22] tracking-[-1.68px] sm:text-[56px]">{title}</h1>
+      </div>
+      <div aria-hidden="true" className="home-hero-character pointer-events-none absolute aspect-[516/392]">
+        <Image src="/images/home/hero-cloud-body.png" alt="" fill sizes="(min-width: 1024px) 516px, 300px" preload />
+        {EYES.map(({ name, image, x, y, size }) => (
+          <span key={name} className="absolute" style={{ left: `${x / 5.16}%`, top: `${y / 3.92}%`, width: `${size / 5.16}%`, aspectRatio: 1 }}>
+            <Image src={`/images/home/hero-eye-${image}.svg`} alt="" width={size} height={size} />
+          </span>
+        ))}
+      </div>
+      <Link href="/retrospective" className="home-hero-cta absolute flex h-[153px] w-[157px] items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+        <Image src="/images/home/cta-flower.png" alt="" fill sizes="157px" className="object-contain" />
+        <span className="relative flex items-center gap-1 pl-1.5 font-display text-[16px] leading-[25.6px] text-ink">
+          {cta}<Image src="/images/common/chevron-right-16.svg" alt="" width={16} height={16} />
+        </span>
+      </Link>
     </section>
   );
 }
