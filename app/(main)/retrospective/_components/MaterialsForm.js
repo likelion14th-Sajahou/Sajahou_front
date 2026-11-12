@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
 import Chip from "@/components/ui/Chip";
+import DrawnBorder from "@/components/ui/DrawnBorder";
+import Image from "next/image";
 import TextField from "@/components/ui/TextField";
 import LinkInputRow from "@/components/ui/LinkInputRow";
 import TextLink from "@/components/ui/TextLink";
@@ -42,11 +43,13 @@ function toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment,
 
 const GENERATING_NOTICE = aiWaitingMessage("자료를 읽고 질문을 만들고 있어요");
 
+// 진한 자료 카드 안의 흰 섹션 카드(Figma). 접힌 상태(inactive: 실습 없음, 과제 나중에·없음)는 짧은 테두리 원본을 쓴다.
 function MaterialSection({ title, titleId, controls, inactive = false, children }) {
   return (
-    <section aria-labelledby={titleId} className={`flex min-w-0 flex-col gap-3 rounded-[20px] border border-line px-5 py-[18px] ${inactive ? "border-dashed bg-canvas" : ""}`}>
+    <section aria-labelledby={titleId} className="relative flex min-w-0 flex-col gap-3 rounded-[20px] bg-white px-5 py-[18px]">
+      <DrawnBorder variant={inactive ? "section-card-short" : "section-card"} />
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h3 id={titleId} className="shrink-0 text-[16px]">{title}</h3>
+        <h3 id={titleId} className="shrink-0 font-display text-[16px] leading-[25.6px] text-ink">{title}</h3>
         {controls}
       </div>
       {children}
@@ -145,23 +148,25 @@ export default function MaterialsForm({ initialMaterials }) {
   }
 
   return (
-    <Card as="section" size="md" aria-labelledby="materials-title" className="flex min-w-0 flex-col gap-4">
-      <div>
-        <h2 id="materials-title" className="text-title tracking-[-0.02em]">자료 올리기</h2>
-        <p className="text-label leading-[1.5] text-ink-subtle">모두 선택이에요. 있는 것만 올려요.</p>
+    // 자료 카드(Figma 'Section'): 진한 바탕 + 손그림 테두리. 안에 흰 섹션 카드가 쌓인다.
+    <section aria-labelledby="materials-title" className="relative flex min-w-0 flex-col gap-4 rounded-[24px] bg-ink-900 px-7 py-6">
+      <DrawnBorder variant="materials-card" />
+      <div className="font-display text-white">
+        <h2 id="materials-title" className="text-title leading-8 tracking-[-0.4px]">자료 올리기</h2>
+        <p className="text-label leading-[19.5px]">모두 선택이에요. 있는 것만 올려요.</p>
       </div>
 
       {/* 과제 회고는 같은 5단계지만 자료 단계에는 과제 칸만 있다(R-23). */}
       {!isAssignment && (
         <>
-          <MaterialSection title="세션 자료" titleId="session-materials-title" controls={<Badge>PDF</Badge>}>
+          <MaterialSection title="세션 자료" titleId="session-materials-title" controls={<Badge tone="plain">PDF</Badge>}>
             {attachments("sessionFiles", "+ 세션 PDF")}
           </MaterialSection>
 
           <MaterialSection title="세션 중 실습이 있었나요?" titleId="practice-title" inactive={!hasPractice} controls={
             <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="practice-title">
               {["있었어요", "없었어요"].map((label, index) => (
-                <Chip key={label} size="sm" selected={hasPractice === (index === 0)} onClick={() => updateField("hasPractice", index === 0)}>{label}</Chip>
+                <Chip key={label} size="sm" drawn selected={hasPractice === (index === 0)} onClick={() => updateField("hasPractice", index === 0)}>{label}</Chip>
               ))}
             </div>
           }>
@@ -171,7 +176,7 @@ export default function MaterialsForm({ initialMaterials }) {
                 {attachments("practiceFiles", "+ 노션 ZIP · 캡처")}
               </>
             ) : (
-              <p className="text-body-sm break-keep text-ink-subtle">실습 질문은 건너뛰고 세션 내용만 물어볼게요.</p>
+              <p className="text-label leading-[22.4px] break-keep text-ink-subtle">실습 질문은 건너뛰고 세션 내용만 물어볼게요.</p>
             )}
           </MaterialSection>
         </>
@@ -184,20 +189,22 @@ export default function MaterialsForm({ initialMaterials }) {
             { value: "later", label: "나중에 쓸게요" },
             { value: "none", label: "과제 없음" },
           ].map(({ value, label }) => (
-            <Chip key={value} size="sm" selected={assignmentStatus === value} onClick={() => setAssignmentStatus(value)}>{label}</Chip>
+            <Chip key={value} size="sm" drawn selected={assignmentStatus === value} onClick={() => setAssignmentStatus(value)}>{label}</Chip>
           ))}
         </div>
       )}>
         {assignmentStatus === "record" ? (
           <>
-            <TextField label="과제 내용 · 코드나 에러 · 붙여넣기" multiline name="assignment" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} className="h-[130px] text-[13px] leading-[1.6]" />
+            <TextField label="과제 내용 · 코드나 에러 · 붙여넣기" multiline name="assignment" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} className="h-[130px] text-label! leading-[20.8px]!" />
             <div className="flex min-w-0 flex-col gap-1.5">
-              <p className="text-label text-ink-muted">과제 노션이나 Git을 올려보세요</p>
+              <p className="font-display text-label leading-[20.8px] text-ink">과제 노션이나 Git을 올려보세요</p>
               {attachments("assignmentFiles", "+ 파일 업로드", {
                 uploadOnNewLine: true,
                 children: (
                   <LinkInputRow
                     className="w-full sm:w-auto"
+                    buttonVariant="ink-outline"
+                    inputClassName="placeholder:text-ink-300!"
                     name="assignmentLink"
                     aria-label="Git 링크"
                     placeholder={part === "기획·디자인" ? "피그마·GitHub 링크" : "GitHub 링크 · github.com/아이디/저장소"}
@@ -224,7 +231,7 @@ export default function MaterialsForm({ initialMaterials }) {
             )}
           </>
         ) : (
-          <p className="text-body-sm break-keep text-ink-subtle">
+          <p className="text-label leading-[22.4px] break-keep text-ink-subtle">
             {assignmentStatus === "later"
               ? `과제는 ${deadlineLabels.assignment}까지 따로 써요. 세션 회고만 먼저 끝내요.`
               : "이번 주 과제는 없어요."}
@@ -233,7 +240,14 @@ export default function MaterialsForm({ initialMaterials }) {
       </MaterialSection>
 
       {!isAssignment && (
-        <TextField label="고민 메모 · 선택" multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="h-[74px]" />
+        // 진한 카드 위라 라벨은 흰 글씨다. 입력칸은 손그림 테두리(Figma 'Text Area').
+        <label className="flex flex-col gap-1.5">
+          <span className="font-display text-label leading-[20.8px] text-white">고민 메모 · 선택</span>
+          <span className="relative block rounded-[14px]">
+            <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="block h-[74px] text-label! placeholder:text-ink-300!" />
+            <DrawnBorder variant="memo-field" />
+          </span>
+        </label>
       )}
       <MaterialsChangeNotice
         open={questions.changedAnswerCount !== null}
@@ -244,20 +258,25 @@ export default function MaterialsForm({ initialMaterials }) {
         onRegenerate={() => requestQuestions("REGENERATE")}
       />
       <ActionFooter className="flex-wrap justify-between gap-x-3.5 gap-y-2.5">
-        <TextLink href={getStepHref()}>← 이전</TextLink>
+        <TextLink variant="inverse-border" href={getStepHref()}>
+          <span className="inline-flex items-center gap-1">
+            <Image src="/images/common/arrow-left-12-white.svg" alt="" width={12} height={12} />
+            이전
+          </span>
+        </TextLink>
         {/* 저장 시각이 버튼을 오른쪽으로 밀어 준다. 좁은 화면에서는 버튼이 다음 줄로 내려간다. */}
-        <SavedTime label={savedLabel} className="ml-auto" />
+        <SavedTime label={savedLabel} className="ml-auto text-ink-300!" />
         <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-          <Button variant="secondary" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={saveLater} disabled={isBusy} aria-busy={savingAction === "later"}>{savingAction === "later" ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
-          <Button className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => requestQuestions()} disabled={isBusy} aria-busy={savingAction === "questions" || questions.isRequesting}>{savingAction === "questions" ? "저장하는 중…" : questions.isRequesting ? "질문을 만드는 중…" : "AI 질문 받기 →"}</Button>
+          <Button variant="inverse-muted" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={saveLater} disabled={isBusy} aria-busy={savingAction === "later"}>{savingAction === "later" ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
+          <Button variant="cta" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => requestQuestions()} disabled={isBusy} aria-busy={savingAction === "questions" || questions.isRequesting}>{savingAction === "questions" ? "저장하는 중…" : questions.isRequesting ? "질문을 만드는 중…" : "AI 질문 받기 →"}</Button>
         </div>
       </ActionFooter>
-      <p role="status" className={notice ? "-mt-1 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
+      <p role="status" className={notice ? "-mt-1 text-body-sm text-locked" : "sr-only"}>{notice}</p>
       {files.pollingError && (
-        <p role="alert" className="-mt-1 text-body-sm text-tint-red-ink">
-          {files.pollingError} <TextLink size="sm" onClick={files.retryPolling}>상태 다시 확인</TextLink>
+        <p role="alert" className="-mt-1 text-body-sm text-tint-red">
+          {files.pollingError} <TextLink variant="inverse" size="sm" onClick={files.retryPolling}>상태 다시 확인</TextLink>
         </p>
       )}
-    </Card>
+    </section>
   );
 }

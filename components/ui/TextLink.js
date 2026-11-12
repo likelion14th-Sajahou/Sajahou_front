@@ -9,6 +9,11 @@ const VARIANT_CLASSES = {
   // 진한 카드(회고 시작 카드) 위의 흰 밑줄 링크
   inverse:
     "py-1 font-display leading-[22.4px] text-white underline decoration-from-font [text-underline-position:from-font]",
+  // 진한 카드 하단의 '← 이전'(회고 자료): 흰 삼립호빵체 + 흰 아래 테두리선
+  "inverse-border": "border-b border-white font-display leading-[22.4px] text-white",
+  // 연한 상자 안의 '취소'(회고 자료 확인 문구): 진한 삼립호빵체 + 밑줄
+  "ink-underline":
+    "py-1 font-display leading-[22.4px] text-ink underline decoration-from-font [text-underline-position:from-font]",
   // 홈의 '사자 발자국 →'(Figma '텍스트 링크'): 진한 Bold 글씨 + 아래 테두리선
   border: "border-b border-ink font-bold leading-[20.8px] text-ink",
   accent:
