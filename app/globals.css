@@ -138,12 +138,8 @@ body {
 
 /* 히어로 장식 배치에만 화면별 좌표를 쓴다. */
 .home-hero {
-  height: clamp(640px, calc(100svh - var(--header-height)), 920px);
-}
-
-.home-hero-background {
-  inset: 0;
-  background: var(--color-ink);
+  min-height: 640px;
+  height: calc(100dvh - var(--header-height));
 }
 
 .home-hero-copy {
@@ -182,14 +178,7 @@ body {
 
 @media (min-width: 64rem) {
   .home-hero {
-    height: clamp(520px, calc(100svh - var(--header-height)), 920px);
-  }
-  .home-hero-background {
-    background: url("/images/home/hero-background.svg") center top / 100% 100% no-repeat;
-    left: -10.3472%;
-    top: -10.0119%;
-    width: 115.2778%;
-    height: 104.8868%;
+    min-height: 520px;
   }
   .home-hero-copy {
     top: 33.6114%;
@@ -220,14 +209,14 @@ body {
 }
 
 /* 새 프로젝트 팝업에만 Figma의 필드 라벨·입력 크기를 적용한다. */
-.new-project-form > label { gap: 6px; }
-.new-project-form > label > span:first-child {
+.new-project-fields > label { gap: 6px; }
+.new-project-fields > label > span:first-child {
   font-family: var(--font-sans);
   font-weight: 700;
   line-height: 21px;
   color: var(--color-ink-subtle);
 }
-.new-project-form input { height: 56px; }
+.new-project-form input { height: 50px; }
 .new-project-form input::placeholder { color: var(--color-ink-300); }
 
 /* Figma 홈 모션: 별은 회전하지 않고 밝기와 크기만 변한다. */

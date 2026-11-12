@@ -52,7 +52,7 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
   return (
     <Card as="section" className="relative flex min-w-0 flex-col items-start gap-4 bg-divider! p-6!">
       <DrawnBorder variant="projects-card" />
-      <SectionHeader title="프로젝트" href="/projects" />
+      <SectionHeader title="프로젝트" href="/projects" chevronSize={32} />
       <div className="flex w-full flex-col gap-3">
         <div className="flex w-full flex-col gap-2.5">
           {inProgressProjects.length > 0 ? (

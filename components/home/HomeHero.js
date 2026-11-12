@@ -36,8 +36,7 @@ export default function HomeHero({ userName, week, weekStatus }) {
   const { title, cta } = HOME_HERO_CONTENT[weekStatus];
 
   return (
-    <section className="home-hero relative isolate w-full overflow-hidden bg-canvas">
-      <div aria-hidden="true" className="home-hero-background absolute -z-10" />
+    <section className="home-hero relative isolate w-full overflow-hidden bg-ink">
       <div aria-hidden="true" className="home-hero-stars pointer-events-none absolute inset-0">
         {STARS.map(({ image, x, y, width, height }, index) => (
           <Image key={index} src={`/images/stars/star-${image}.png`} alt="" width={width} height={height}
