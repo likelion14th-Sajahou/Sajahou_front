@@ -137,7 +137,7 @@ export default function AiQuestionsSession({ initialQuestions, saveAnswer }) {
             );
           })}
         </ol>
-        <p className="mt-3 text-label leading-[1.5] text-ink-subtle">자소서에 쓸 가치가 큰 곳부터 최대 5개만 물어요. 마지막은 느낀 점이에요.</p>
+        <p className="mt-3 text-label leading-[1.5] text-ink-subtle">자소서에 쓸 가치가 큰 곳부터 최대 4개만 물어요. 마지막은 느낀 점이에요.</p>
         <ActionFooter className="flex-wrap gap-x-3.5 gap-y-1">
           <TextLink href={getStepHref("materials")}>← 자료 고치기</TextLink>
           <TextLink onClick={saveLater} disabled={isSaving} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "나중에 이어쓰기"}</TextLink>
