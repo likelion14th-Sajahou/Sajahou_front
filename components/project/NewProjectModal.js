@@ -2,6 +2,7 @@
 
 import { useMockData } from "@/components/layout/MockDataProvider";
 import Modal from "@/components/ui/Modal";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import { useRef, useState } from "react";
 import NewProjectForm from "./NewProjectForm";
 
@@ -27,7 +28,8 @@ export default function NewProjectModal({ open, onClose, onCreated }) {
   }
 
   return (
-    <Modal open={open} onClose={busy ? () => {} : onClose} onCancel={(event) => { if (busy) event.preventDefault(); }} aria-labelledby={TITLE_ID}>
+    <Modal open={open} size="project" className="rounded-[32px]! backdrop:bg-[#1f2433]/40!" contentClassName="px-6 pt-9 pb-8 sm:px-9" onClose={busy ? () => {} : onClose} onCancel={(event) => { if (busy) event.preventDefault(); }} aria-labelledby={TITLE_ID}>
+      <DrawnBorder variant="new-project-dialog" />
       <fieldset disabled={busy} className="min-w-0">
         <NewProjectForm titleId={TITLE_ID} onCancel={onClose} onCreate={createProject} busy={busy} />
         {error && <p role="alert">{error}</p>}

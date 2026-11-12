@@ -136,13 +136,77 @@ body {
   line-height: 1.6;
 }
 
-@keyframes home-hero-float {
-  50% { translate: 0 -12px; }
+/* 히어로 장식 배치에만 화면별 좌표를 쓴다. */
+.home-hero {
+  height: clamp(640px, calc(100svh - var(--header-height)), 920px);
 }
 
-@keyframes home-stickers-enter {
-  from { opacity: 0; translate: 0 16px; }
-  to { opacity: 1; translate: 0 0; }
+.home-hero-background {
+  inset: 0;
+  background: var(--color-ink);
+}
+
+.home-hero-copy {
+  top: 14%;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.home-hero-character {
+  width: min(76vw, 360px);
+  left: -5%;
+  bottom: 7%;
+}
+
+.home-hero-cta {
+  top: 54%;
+  right: 3%;
+}
+
+@media (min-width: 40rem) and (max-width: 63.999rem) {
+  .home-hero-character { left: 5%; }
+  .home-hero-cta { right: 13%; }
+}
+
+@media (max-width: 63.999rem) {
+  .home-hero-stars img:nth-child(1) { left: 83% !important; top: 8% !important; }
+  .home-hero-stars img:nth-child(2) { left: 88% !important; top: 44% !important; }
+  .home-hero-stars img:nth-child(3) { left: 8% !important; top: 6% !important; }
+  .home-hero-stars img:nth-child(4) { left: 82% !important; top: 36% !important; }
+  .home-hero-stars img:nth-child(5) { left: 3% !important; top: 32% !important; }
+  .home-hero-stars img:nth-child(6) { left: 12% !important; top: 43% !important; }
+  .home-hero-stars img:nth-child(7) { left: 20% !important; top: 55% !important; }
+  .home-hero-stars img:nth-child(8) { left: 82% !important; top: 80% !important; }
+  .home-hero-stars img:nth-child(9) { left: 55% !important; top: 89% !important; }
+}
+
+@media (min-width: 64rem) {
+  .home-hero {
+    height: clamp(520px, calc(100svh - var(--header-height)), 920px);
+  }
+  .home-hero-background {
+    background: url("/images/home/hero-background.svg") center top / 100% 100% no-repeat;
+    left: -10.3472%;
+    top: -10.0119%;
+    width: 115.2778%;
+    height: 104.8868%;
+  }
+  .home-hero-copy {
+    top: 33.6114%;
+    left: 49.5833%;
+  }
+  .home-hero-character {
+    width: 35.8333%;
+    max-width: 600px;
+    left: 10.0694%;
+    top: 41.5971%;
+    bottom: auto;
+  }
+  .home-hero-cta {
+    top: 52.6818%;
+    left: 64.6528%;
+    right: auto;
+  }
 }
 
 /* 회고 진행 단계의 '지금 단계' 구름 캐릭터가 살짝 흔들린다(R-02). */
@@ -153,7 +217,48 @@ body {
 
 @media (prefers-reduced-motion: no-preference) {
   .step-wobble { animation: step-wobble 1.6s ease-in-out infinite; }
-  .home-stickers-enter { animation: home-stickers-enter 500ms ease-out; }
-  .home-hero-float { animation: home-hero-float 7s ease-in-out infinite; }
-  .home-hero-float:nth-child(even) { animation-delay: -3.5s; }
+}
+
+/* 새 프로젝트 팝업에만 Figma의 필드 라벨·입력 크기를 적용한다. */
+.new-project-form > label { gap: 6px; }
+.new-project-form > label > span:first-child {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 21px;
+  color: var(--color-ink-subtle);
+}
+.new-project-form input { height: 56px; }
+.new-project-form input::placeholder { color: var(--color-ink-300); }
+
+/* Figma 홈 모션: 별은 회전하지 않고 밝기와 크기만 변한다. */
+@keyframes home-star-twinkle {
+  0%, 100% { opacity: 1; scale: 1; }
+  50% { opacity: 0.45; scale: 0.88; }
+}
+
+@keyframes home-cta-glow {
+  0%, 100% { scale: 1; filter: drop-shadow(0 0 0 rgba(252, 221, 121, 0)); }
+  50% { scale: 1.04; filter: drop-shadow(0 0 14px rgba(252, 221, 121, 0.55)); }
+}
+
+@keyframes home-reveal {
+  from { opacity: 0; translate: 0 40px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-hero-stars img {
+    animation: home-star-twinkle var(--twinkle-duration) ease-in-out var(--twinkle-delay) infinite;
+  }
+  .home-hero-cta { transition: translate 250ms, scale 250ms; }
+  .home-hero-cta:hover,
+  .home-hero-cta:focus-visible { translate: 0 -2px; scale: 1.05; }
+  .home-hero-cta[data-active="true"] .home-hero-cta-content {
+    animation: home-cta-glow 3.2s ease-in-out infinite;
+  }
+  .home-matching-icon { transition: opacity 200ms ease-out; }
+  .home-reveal[data-reveal="hidden"] { opacity: 0; translate: 0 40px; }
+  .home-reveal[data-reveal="visible"] {
+    animation: home-reveal 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
 }

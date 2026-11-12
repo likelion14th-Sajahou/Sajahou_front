@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import NewProjectModal from "@/components/project/NewProjectModal";
 import SectionHeader from "./SectionHeader";
 
@@ -18,12 +19,13 @@ function ProjectRow({ project, summary }) {
     <li>
       <Link
         href={`/projects/${encodeURIComponent(id)}`}
-        className="flex h-16 items-center gap-3 rounded-2xl border-2 border-ink-300 bg-white px-4 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+        className="relative flex h-16 items-center gap-3 rounded-2xl bg-white px-4 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
       >
+        <DrawnBorder variant="project-row" />
         <Image src="/images/stars/star-01.png" alt="" width={27} height={26} className="shrink-0" />
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-body leading-6 font-bold text-ink">{name}</span>
-          <span className="text-[12.5px] leading-5 text-ink-subtle">{summary}</span>
+          <span className="truncate text-[12.5px] leading-5 text-ink-subtle">{summary}</span>
         </span>
         <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-full">
           <Image src="/images/common/chevron-right-20.svg" alt="" width={20} height={20} />
@@ -48,41 +50,47 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <Card as="section" className="flex flex-col items-start gap-3.5">
+    <Card as="section" className="relative flex min-w-0 flex-col items-start gap-4 bg-divider! p-6!">
+      <DrawnBorder variant="projects-card" />
       <SectionHeader title="프로젝트" href="/projects" />
-      {inProgressProjects.length > 0 ? (
-        <ul className="flex w-full flex-col gap-2">
-          {inProgressProjects.map((project) => (
-            <ProjectRow
-              key={project.id}
-              project={project}
-              // 기록이 없는 새 프로젝트는 마지막 기록 날짜를 빼고 보여 준다.
-              summary={[`기록 ${project.recordCount}`, project.lastRecordDate && `마지막 기록 ${project.lastRecordDate}`].filter(Boolean).join(" · ")}
-            />
-          ))}
-        </ul>
-      ) : (
-        <p className="text-body-sm text-ink-subtle">진행 중인 프로젝트가 없어요</p>
-      )}
-      {doneProjects.length > 0 && (
-        <>
-          <GroupLabel>완료</GroupLabel>
-          <ul className="flex w-full flex-col gap-2">
-            {doneProjects.map((project) => (
-              <ProjectRow key={project.id} project={project} summary={`기록 ${project.recordCount}`} />
-            ))}
-          </ul>
-        </>
-      )}
-      {/* 새 프로젝트 버튼(Figma '새 프로젝트 버튼') */}
-      <button
-        type="button"
-        onClick={() => setIsModalOpen(true)}
-        className="flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full border-2 border-ink-300 bg-yellow-100 px-4 font-display text-body leading-[22px] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-      >
-        <Image src="/images/common/plus.svg" alt="" width={10} height={10} />
-        새 프로젝트
-      </button>
+      <div className="flex w-full flex-col gap-3">
+        <div className="flex w-full flex-col gap-2.5">
+          {inProgressProjects.length > 0 ? (
+            <ul className="flex w-full flex-col gap-2">
+              {inProgressProjects.map((project) => (
+                <ProjectRow
+                  key={project.id}
+                  project={project}
+                  // 기록이 없는 새 프로젝트는 마지막 기록 날짜를 빼고 보여 준다.
+                  summary={[`기록 ${project.recordCount}`, project.lastRecordDate && `마지막 기록 ${project.lastRecordDate}`].filter(Boolean).join(" · ")}
+                />
+              ))}
+            </ul>
+          ) : (
+            <p className="text-body-sm text-ink-subtle">진행 중인 프로젝트가 없어요</p>
+          )}
+          {/* 새 프로젝트 버튼(Figma '새 프로젝트 버튼') */}
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="relative flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-yellow-100 px-4 font-display text-body leading-[22px] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            <DrawnBorder variant="new-project-button" />
+            <Image src="/images/common/plus.svg" alt="" width={10} height={10} />
+            새 프로젝트
+          </button>
+        </div>
+        {doneProjects.length > 0 && (
+          <div className="flex w-full flex-col gap-2">
+            <GroupLabel>완료된 프로젝트</GroupLabel>
+            <ul className="flex w-full flex-col gap-2">
+              {doneProjects.map((project) => (
+                <ProjectRow key={project.id} project={project} summary={`기록 ${project.recordCount}`} />
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
       {isModalOpen && <NewProjectModal open onClose={() => setIsModalOpen(false)}
         onCreated={({ projectId }) => router.push(`/projects/${encodeURIComponent(projectId)}`)} />}
     </Card>
