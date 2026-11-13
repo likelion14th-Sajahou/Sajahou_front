@@ -13,6 +13,7 @@ import CardTitle from "@/components/ui/CardTitle";
 import useProjectAction from "./useProjectAction";
 import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
 import { PORTFOLIO_FIELD_LABELS } from "@/lib/portfolioViewModel";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 
 // 3단계 포트폴리오 검토(H-18, 14). 카드는 만들지 않고(카드는 기록마다 이미 있다, H-22) Markdown만 저장한다.
 export default function PortfolioReview({ project, initialMarkdown, blanks = [], backLabel = "← 이전 질문으로", onBack, onSave }) {
@@ -27,12 +28,13 @@ export default function PortfolioReview({ project, initialMarkdown, blanks = [],
 
   return (
     <>
-      <p className="text-label leading-[20.8px] text-accent-strong">3 / 3 · 포트폴리오 검토</p>
+      <p className="font-display text-label leading-[20.8px] text-accent-strong">3 / 3 · 포트폴리오 검토</p>
       <div className="pt-3">
-        <Card as="section" size="md" aria-labelledby="portfolio-title" className="flex min-w-0 flex-col gap-3">
+        <Card as="section" size="md" aria-labelledby="portfolio-title" className="relative flex min-w-0 flex-col gap-3 font-display text-ink-strong">
+          <DrawnBorder variant="section-card" color="var(--color-ink-300)" />
           <fieldset disabled={busy} className="flex min-w-0 flex-col gap-3">
           <BlankFieldsNotice labels={blanks.map((field) => PORTFOLIO_FIELD_LABELS[field]).filter(Boolean)} />
-          <CardTitle id="portfolio-title" action={<Button size="sm" onClick={copyMarkdown}>Markdown 복사</Button>}>
+          <CardTitle id="portfolio-title" action={<Button variant="ink" size="sm" onClick={copyMarkdown}>Markdown 복사</Button>}>
             프로젝트 포트폴리오
           </CardTitle>
           <p className="text-label leading-[19.5px] text-ink-subtle">
@@ -43,11 +45,11 @@ export default function PortfolioReview({ project, initialMarkdown, blanks = [],
             aria-label="포트폴리오"
             value={markdown}
             onChange={(event) => setMarkdown(event.target.value)}
-            className="h-[560px] text-[14.5px]! leading-[25.375px]"
+            className="h-[560px] font-input text-[14.5px]! leading-[25.375px] text-ink-strong!"
           />
           <ActionFooter>
             <TextLink onClick={onBack}>{backLabel}</TextLink>
-            <Button variant="accent" className="ml-auto max-w-full whitespace-normal!" onClick={() => run((signal) => onSave(markdown, signal))}>
+            <Button variant="cta-ink" className="ml-auto h-auto! min-h-[46px] max-w-full whitespace-normal! py-2" onClick={() => run((signal) => onSave(markdown, signal))}>
               {isFirstPortfolio ? "포트폴리오 저장하고 프로젝트 완료로 표시" : "포트폴리오 저장"}
             </Button>
           </ActionFooter>
