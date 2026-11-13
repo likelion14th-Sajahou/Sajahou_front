@@ -3,7 +3,7 @@ import Badge from "@/components/ui/Badge";
 
 // AI가 찾은 더 물어볼 곳(R-15·16)의 진행 목록이다(11/13 디자인).
 // 질문마다 상태 점(답함 ✓, 건너뜀 –, 지금 번호, 남음 번호)과 성격 태그, 근거 문장을 세로 선으로 잇는다.
-// 맨 위 요약은 답함·건너뜀·진행 중·남음 개수다. 건너뛴 질문이 없으면 '건너뜀'은 빼고, 질문을 다 끝냈으면 '진행 중'도 뺀다.
+// 맨 위 요약은 답함·건너뜀·진행 중·남음 개수다. 0개여도 네 칸을 늘 보여 준다(질문을 다 끝냈으면 진행 중은 0).
 // 상태별 회색들은 이 목록에서만 쓰는 값이라 토큰으로 두지 않는다.
 const STATES = {
   now: {
@@ -56,17 +56,21 @@ export default function QuestionProgressList({ questions, currentIndex }) {
   const count = (state) => states.filter((item) => item === state).length;
   const summary = [
     { state: "done", label: "답함", value: count("done") },
-    { state: "skip", label: "건너뜀", value: count("skip"), hidden: !count("skip") },
-    { state: "now", label: "진행 중", value: count("now"), hidden: currentIndex === null },
+    { state: "skip", label: "건너뜀", value: count("skip") },
+    { state: "now", label: "진행 중", value: count("now") },
     { state: "next", label: "남음", value: count("next") },
-  ].filter(({ hidden }) => !hidden);
+  ];
 
   return (
     <>
-      <p className="mt-2.5 flex flex-wrap gap-x-3.5 gap-y-1.5 text-[12.5px] leading-5 text-ink-500">
+      {/* 프로토타입은 삼립호빵체라 폭이 좁다. 본문 글꼴(NPS)로도 네 칸이 한 줄에 들어가도록 칸 사이를 10px로 둔다. */}
+      <p className="mt-2.5 flex flex-wrap gap-x-2.5 gap-y-1.5 text-[12.5px] leading-5 text-ink-500">
         {summary.map(({ state, label, value }) => (
-          <span key={state} className="inline-flex items-center gap-1.5">
-            <i aria-hidden="true" className={`size-2.5 rounded-full ${SUMMARY_DOTS[state]}`} />
+          <span key={state} className="inline-flex items-center gap-1.5 whitespace-nowrap">
+            {/* 건너뜀 점 안의 '–'는 글자 대신 막대로 그려 가운데에 맞춘다(글꼴마다 '–'의 높이가 달라서). */}
+            <i aria-hidden="true" className={`grid size-2.5 place-items-center rounded-full ${SUMMARY_DOTS[state]}`}>
+              {state === "skip" && <span className="h-[1.5px] w-1 rounded-full bg-[#9a9da4]" />}
+            </i>
             {label} <b className="text-ink-strong">{value}</b>
           </span>
         ))}
