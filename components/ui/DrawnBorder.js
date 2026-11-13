@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 // Figma Dynamic stroke 원본을 사용한다. 9분할로 모서리와 선 두께를 유지한다.
 // 이미지는 Figma에서 내보낸 선을 2배 PNG로 만든 것이라, 이미지 픽셀로 자르는 값(borderImageSlice)은 slice의 2배다.
 // outset: 선이 요소 밖으로 나간 거리(이미지 가장자리와 요소 가장자리의 차이), slice: 모서리로 남길 길이(px).
@@ -8,8 +10,9 @@ const BORDERS = {
   "sticker-board": { folder: "home", outset: 3.14, slice: 32 },
   "matching-card": { folder: "home", outset: 3.04, slice: 32 },
   "projects-card": { folder: "home", outset: 3.1, slice: 32 },
-  "recent-card": { folder: "home", outset: 3.08, slice: 24 },
-  "project-row": { folder: "home", outset: 1.56, slice: 20 },
+  // 여러 화면에서 재사용하는 테두리는 시각적 특성으로 구분한다. asset은 기존 원본 파일명이다.
+  "thick-outline": { folder: "home", asset: "recent-card", outset: 3.08, slice: 24 },
+  "thin-outline": { folder: "home", asset: "project-row", outset: 1.56, slice: 20 },
   "new-project-button": { folder: "home", outset: 0, slice: 20 },
   "new-project-dialog": { folder: "home", outset: 0, slice: 36 },
   // 이번 주 회고. 요소보다 사방 4px 크게 내보냈다. 자료 화면의 오른쪽 안내 카드도 deadline-card를 쓴다(같은 모양).
@@ -37,23 +40,40 @@ const BORDERS = {
 };
 
 // 부모 요소에 relative가 있어야 한다. 부모에는 border를 주지 않는다(선이 이 이미지로 대신 그려진다).
-export default function DrawnBorder({ variant }) {
-  const { folder, outset, slice } = BORDERS[variant];
+// repeat="round": 원본보다 긴 박스는 선을 반복하고, 반복 개수에 맞춰 조금씩 조정한다.
+// 기본 stretch는 기존 화면의 모양을 유지한다.
+// color는 원본의 투명도를 그대로 사용해 색만 바꾼다. 선의 두께·굴곡은 변경하지 않는다.
+export default function DrawnBorder({ variant, repeat = "stretch", color }) {
+  const colorFilterId = useId();
+  const { folder, outset, slice, asset = variant } = BORDERS[variant];
 
   return (
-    <span
-      aria-hidden="true"
-      className="pointer-events-none absolute z-10"
-      style={{
-        inset: -outset,
-        borderStyle: "solid",
-        borderColor: "transparent",
-        borderWidth: slice,
-        borderImageSource: `url(/images/${folder}/border-${variant}.png)`,
-        borderImageSlice: slice * IMAGE_SCALE,
-        borderImageWidth: `${slice}px`,
-        borderImageRepeat: "stretch",
-      }}
-    />
+    <>
+      {color && (
+        <svg aria-hidden="true" width="0" height="0" className="pointer-events-none absolute">
+          <defs>
+            <filter id={colorFilterId} colorInterpolationFilters="sRGB">
+              <feFlood floodColor={color} result="color" />
+              <feComposite in="color" in2="SourceAlpha" operator="in" />
+            </filter>
+          </defs>
+        </svg>
+      )}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute z-10"
+        style={{
+          inset: -outset,
+          borderStyle: "solid",
+          borderColor: "transparent",
+          borderWidth: slice,
+          borderImageSource: `url(/images/${folder}/border-${asset}.png)`,
+          borderImageSlice: slice * IMAGE_SCALE,
+          borderImageWidth: `${slice}px`,
+          borderImageRepeat: repeat,
+          filter: color ? `url(#${colorFilterId})` : undefined,
+        }}
+      />
+    </>
   );
 }
