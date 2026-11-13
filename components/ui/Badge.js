@@ -7,8 +7,8 @@ const TONE_CLASSES = {
   green: "bg-tint-green text-tint-green-ink",
   neutral: "bg-canvas text-ink-muted",
   dark: "bg-ink text-white",
-  // 회고 자료 화면의 형식 표시(PDF·노션 MD·이미지): 회색 바탕 + 삼립호빵체
-  plain: "bg-canvas font-display text-ink-subtle",
+  // 회고 자료 화면 섹션 제목 옆의 형식 표시(PDF): 회색 바탕 + 흐린 글자(11/13 디자인)
+  plain: "bg-canvas text-ink-faint",
 };
 
 const SIZE_CLASSES = {

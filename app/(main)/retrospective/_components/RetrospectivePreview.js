@@ -9,7 +9,6 @@ import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { formatDeadline } from "@/lib/formatDate";
-import { PARTS } from "@/lib/mock/user";
 import { getCurrentRetrospective } from "@/lib/retrospectiveApi";
 
 const RetrospectivePreviewContext = createContext(null);
@@ -38,12 +37,11 @@ async function loadCurrent({ signal, request }) {
   return { ...current, assignment };
 }
 
-// 제목·시작 화면·단계 화면이 함께 쓴다.
-// 데모 파트와 과제 선택도 제목 영역과 자료 폼에서 함께 사용한다.
-// 데모 파트는 목업 사용자의 파트라서, 바꾸면 상단 메뉴와 다른 화면의 역량 태그 목록도 함께 바뀐다.
-// 실제 서비스에는 없는 시연용 기능이고, mock 응답의 마감일만 바뀐다. 실제 백엔드는 가입 파트를 쓴다.
+// 제목·시작 화면·단계 화면이 함께 쓴다. 과제 선택도 제목 영역과 자료 폼에서 함께 사용한다.
+// 파트는 목업 사용자의 파트다. 데모 계정의 파트 바꿔 보기는 홈으로 옮길 예정이다(#61).
+// 파트가 바뀌면 mock 응답의 마감일이 달라져 다시 불러온다. 실제 백엔드는 가입 파트를 쓴다.
 export default function RetrospectivePreview({ children }) {
-  const { user, setUserPart } = useMockData();
+  const { user } = useMockData();
   const { authenticatedRequest } = useAuth();
   const [assignmentStatus, setAssignmentStatus] = useState("record");
   const [{ current, error }, setLoadState] = useState({ current: null, error: "" });
@@ -91,7 +89,6 @@ export default function RetrospectivePreview({ children }) {
 
   const value = {
     part: user.part,
-    setPart: setUserPart,
     assignmentStatus,
     setAssignmentStatus,
     week: current.week,
@@ -140,8 +137,7 @@ export function useRetrospectivePreview() {
 }
 
 export function RetrospectiveHeading() {
-  const { isDemo } = useAuth();
-  const { week, session, assignment, part, setPart, assignmentPending, isAssignment } = useRetrospectivePreview();
+  const { week, session, assignment, part, assignmentPending, isAssignment } = useRetrospectivePreview();
   // 시작 화면(시작 전·작성 중·휴회)은 Figma대로 896px 가운데 정렬이다. 다른 단계 화면은 아직 디자인 전이라 본문 폭 그대로 둔다.
   const isStartScreen = !useSearchParams().get("step");
 
@@ -165,14 +161,6 @@ export function RetrospectiveHeading() {
           </nav>
         )}
       </div>
-      {isDemo && <div className="flex min-w-0 max-w-full flex-col items-end gap-1.5">
-        <p className="text-label text-ink-subtle">데모 · 파트 바꿔 보기</p>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="파트 미리보기">
-          {PARTS.map((item) => (
-            <Chip key={item} selected={item === part} onClick={() => setPart(item)}>{item}</Chip>
-          ))}
-        </div>
-      </div>}
     </div>
   );
 }

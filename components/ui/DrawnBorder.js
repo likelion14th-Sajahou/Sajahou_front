@@ -30,7 +30,8 @@ const BORDERS = {
   "section-card": { folder: "retrospective", outset: 4, slice: 28 },
   "section-card-short": { folder: "retrospective", outset: 4, slice: 28 },
   "memo-field": { folder: "retrospective", outset: 4, slice: 22 },
-  "alert-red": { folder: "retrospective", outset: 4, slice: 24 },
+  // 자료가 바뀌었어요 안내(11/13 디자인): 예전 분홍 안내와 같은 손그림 선을 주황(#ffb37a)으로 칠했다.
+  "alert-orange": { folder: "retrospective", outset: 4, slice: 24 },
   // 선택 칩(Chip drawn): 선택됨·기본
   "chip-ink": { folder: "retrospective", outset: 4, slice: 20 },
   "chip-line": { folder: "retrospective", outset: 4, slice: 20 },

@@ -14,8 +14,9 @@ const UPLOAD_TIPS = [
 export default function MaterialsContent() {
   return (
     <>
-      <RetrospectiveSteps currentStep={1} />
-      <div className="mt-6 grid grid-cols-1 items-start gap-5 min-[901px]:grid-cols-[minmax(0,1fr)_320px]">
+      {/* 제목·단계·카드 사이 간격은 시작 화면과 같다(프로토타입 11/13). */}
+      <RetrospectiveSteps currentStep={1} className="mt-[38px]" />
+      <div className="mt-10 grid grid-cols-1 items-start gap-4 min-[901px]:grid-cols-[minmax(0,1fr)_320px]">
         <MaterialsStep />
         {/* 오른쪽 안내 카드(Figma 'Sidebar'): 마감일 카드와 같은 노란 손그림 테두리 */}
         <aside aria-labelledby="upload-guide-title" className="relative rounded-[24px] bg-white p-6">

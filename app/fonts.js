@@ -23,6 +23,16 @@ export const displayFont = localFont({
   display: "swap",
 });
 
+// 사용자가 직접 입력하는 글(입력칸·텍스트 영역): Pretendard Regular.
+// 한글 2,350자(KS X 1001) 묶음 파일이라 가볍다(약 260KB). 입력칸이 있는 화면에서만 쓰여 미리 불러오지 않는다.
+export const pretendardFont = localFont({
+  src: "./fonts/Pretendard-Regular.subset.woff2",
+  variable: "--font-pretendard",
+  weight: "400",
+  display: "swap",
+  preload: false,
+});
+
 // Secondary 버튼('데모 계정으로 둘러보기')에만 쓰인다. 첫 화면에 꼭 필요하지 않아 미리 불러오지 않는다.
 export const notoSansKr = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
