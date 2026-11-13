@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
@@ -21,6 +21,7 @@ export default function StartActions({ isAssignment = false }) {
   const [pending, setPending] = useState(null);
   const [error, setError] = useState("");
   const [isResetOpen, setIsResetOpen] = useState(false);
+  const [isNavigating, startNavigation] = useTransition();
   const inFlight = useRef(false);
   const isWriting = retrospective.state === "IN_PROGRESS";
 
@@ -35,7 +36,7 @@ export default function StartActions({ isAssignment = false }) {
       // 홈 화면은 아직 목업 상태를 보므로 세션 회고면 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
       if (!isAssignment) setWeekStatus("writing");
       setIsResetOpen(false);
-      router.push(getStepHref(getStepPath(result.currentStep)));
+      startNavigation(() => router.push(getStepHref(getStepPath(result.currentStep))));
     } catch (failure) {
       if (failure.status !== 401) setError(getRequestErrorMessage(failure, fallback));
     } finally {
@@ -78,11 +79,14 @@ export default function StartActions({ isAssignment = false }) {
   // 진한 시작 카드 안에 가운데 정렬로 놓인다(Figma '세션 회고 시작 카드'): 버튼 줄 아래에 휴회 링크.
   return (
     <div className="relative flex w-full flex-col items-center gap-4 pt-4">
-      {isWriting ? (
+      {pending === "start" || isNavigating ? (
+        <Button variant="soft" disabled aria-busy="true">시작하는 중…</Button>
+      ) : isWriting ? (
         <div className="flex flex-wrap justify-center gap-3">
           <Button
             variant="inverse"
             className="min-w-0"
+            disabled={pending !== null}
             onClick={() => { setError(""); setIsResetOpen(true); }}
           >
             처음부터
@@ -102,7 +106,7 @@ export default function StartActions({ isAssignment = false }) {
         </Button>
       )}
       {!isAssignment && (
-        <TextLink variant="inverse" onClick={markRested} disabled={pending === "rest"} aria-busy={pending === "rest"}>
+        <TextLink variant="inverse" onClick={markRested} disabled={pending !== null || isNavigating} aria-busy={pending === "rest"}>
           {pending === "rest" ? "휴회로 표시하는 중…" : "이번 주는 휴회했어요"}
         </TextLink>
       )}
