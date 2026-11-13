@@ -1,3 +1,5 @@
+import DrawnFieldFrame from "./DrawnFieldFrame";
+
 const SIZE_CLASSES = {
   md: "rounded-[14px] px-4 text-body",
   sm: "rounded-xl px-3 text-label",
@@ -21,10 +23,13 @@ export default function TextField({
   rows = 3,
   className = "",
   error,
+  drawn = false,
+  wrapperClassName = "",
   ...rest
 }) {
   const errorId = error ? `${rest.id || rest.name}-error` : undefined;
-  const controlClasses = `w-full border ${error ? "border-error-line" : "border-transparent"} bg-canvas text-ink placeholder:text-placeholder ${SIZE_CLASSES[size]} ${className}`;
+  const drawnClasses = drawn ? "rounded-full! border-transparent! bg-white! px-3.5! text-body-sm! text-[#1f2433] placeholder:text-[#8a8f9a]" : "";
+  const controlClasses = `w-full border ${error ? "border-error-line" : "border-transparent"} bg-canvas text-ink placeholder:text-placeholder ${SIZE_CLASSES[size]} ${drawnClasses} ${className}`;
   const accessibilityProps = error ? {
     "aria-invalid": true,
     "aria-describedby": [rest["aria-describedby"], errorId].filter(Boolean).join(" "),
@@ -45,14 +50,20 @@ export default function TextField({
     />
   );
 
+  const framedControl = drawn ? (
+    <DrawnFieldFrame height={size === "sm" ? 38 : 48} className={wrapperClassName} error={Boolean(error)}>
+      {control}
+    </DrawnFieldFrame>
+  ) : control;
+
   if (!label) {
-    return control;
+    return framedControl;
   }
 
   return (
     <label className="flex w-full flex-col gap-2">
       <span className="font-display text-label leading-5 text-ink">{label}</span>
-      {control}
+      {framedControl}
       {error && <span id={errorId} className="text-caption leading-5 text-error">{error}</span>}
     </label>
   );

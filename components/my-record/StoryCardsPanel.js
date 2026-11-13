@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
-import Link from "next/link";
 import Chip from "@/components/ui/Chip";
 import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 import TextField from "@/components/ui/TextField";
+import SelectField from "@/components/ui/SelectField";
 import StoryCardList from "./StoryCardList";
 import RemoteStoryCard from "./RemoteStoryCard";
 import { getStoryCards } from "@/lib/myRecordApi";
@@ -26,9 +26,6 @@ const TYPE_FILTERS = [
 ];
 
 const HIGHLIGHT_DURATION_MS = 3000;
-
-const FIELD_CLASSES =
-  "h-[38px] rounded-full border border-transparent bg-white text-body-sm text-[#1f2433]";
 
 export default function StoryCardsPanel({
   cards,
@@ -78,55 +75,47 @@ export default function StoryCardsPanel({
             </Chip>
           ))}
         </div>
-        <div className="relative w-[159px] shrink-0 [--drawn-border-height:38px]">
-          <DrawnBorder variant="chip-line" repeat="round" color="var(--color-line)" />
-          <select
-            aria-label="역량"
-            value={invalidCompetency ? "invalid" : competencyId == null ? ALL : String(competencyId)}
-            onChange={(event) => onNavigate({ competencyId: event.target.value, tag: null, card: null })}
-            className={`w-full cursor-pointer appearance-none text-transparent! [&_option]:text-ink ${FIELD_CLASSES}`}
-          >
-            <option value={ALL}>역량 전체</option>
-            {invalidCompetency && <option value="invalid" disabled>선택한 역량을 찾을 수 없어요</option>}
-            {competencyItems.map(({ id, name, cardCount: count }) => {
-
-              return (
-                <option key={id} value={String(id)} disabled={count === 0}>
-                  #{name} ({count})
-                </option>
-              );
-            })}
-          </select>
-          <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center px-7 text-body-sm text-[#1f2433]">
-            <span className="relative min-w-0 max-w-full">
-              <span className="absolute top-1/2 right-full mr-1 h-2 w-3 -translate-y-1/2 bg-[url(/images/common/chevron-down.svg)] bg-contain bg-center bg-no-repeat" />
-              <span className="block truncate">{competencyLabel}</span>
-            </span>
-          </span>
-        </div>
-        <div className="relative min-w-[120px] flex-1 [--drawn-border-height:38px]">
-          <DrawnBorder variant="chip-line" repeat="round" color="var(--color-line)" />
-          <TextField
-            size="sm"
-            aria-label="카드 검색"
-            value={search}
-            onChange={(event) => onNavigate({ q: event.target.value, card: null }, true)}
-            placeholder="검색"
-            className="rounded-full! border-transparent! bg-white! px-3.5! text-body-sm! text-[#1f2433] placeholder:text-[#8a8f9a]"
-          />
-        </div>
+        <SelectField
+          drawn
+          centered
+          size="sm"
+          displayValue={competencyLabel}
+          wrapperClassName="w-[159px] shrink-0"
+          aria-label="역량"
+          value={invalidCompetency ? "invalid" : competencyId == null ? ALL : String(competencyId)}
+          onChange={(event) => onNavigate({ competencyId: event.target.value, tag: null, card: null })}
+        >
+          <option value={ALL}>역량 전체</option>
+          {invalidCompetency && <option value="invalid" disabled>선택한 역량을 찾을 수 없어요</option>}
+          {competencyItems.map(({ id, name, cardCount: count }) => (
+            <option key={id} value={String(id)} disabled={count === 0}>
+              #{name} ({count})
+            </option>
+          ))}
+        </SelectField>
+        <TextField
+          drawn
+          size="sm"
+          wrapperClassName="min-w-[120px] flex-1"
+          aria-label="카드 검색"
+          value={search}
+          onChange={(event) => onNavigate({ q: event.target.value, card: null }, true)}
+          placeholder="검색"
+        />
       </div>
 
       {week !== undefined && (
-        <Link
+        <Chip
+          drawn
+          selected
+          aria-current={undefined}
           href={recordHref(searchParams, { week: null })}
           scroll={false}
           aria-label={`${week}주차 필터 해제`}
-          className="relative flex h-9 w-fit items-center rounded-full bg-ink px-3.5 text-body-sm text-white [--drawn-border-height:36px]"
+          className="w-fit"
         >
-          <DrawnBorder variant="chip-ink" />
           {week}주차만 보는 중 ×
-        </Link>
+        </Chip>
       )}
 
       {highlightedCardId && !filtered.loading && !filtered.error && !visibleCards.some((card) => card.id === highlightedCardId) && (
