@@ -7,6 +7,7 @@ const TONE_CLASSES = {
   green: "bg-tint-green text-tint-green-ink",
   neutral: "bg-canvas text-ink-muted",
   dark: "bg-ink text-white",
+  cream: "bg-yellow-200 text-[#6e540e]",
   // 진한 카드 위의 'AI 질문' 표시(11/13 디자인): 브랜드 노랑
   brand: "bg-yellow-400 font-bold text-ink-950",
   // 질문 성격 태그(11/13 디자인): 지금 질문은 노랑(tag), 나머지는 차분한 회색(tag-muted)

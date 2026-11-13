@@ -8,7 +8,7 @@ const TABS = [
 
 export default function MyRecordTabs({ activeTab, storyCardCount, searchParams }) {
   return (
-    <nav aria-label="나의 사자록 메뉴" className="mt-3 flex gap-1 border-b border-line">
+    <nav aria-label="나의 사자록 메뉴" className="mt-3 flex gap-1 border-b border-line font-display">
       {TABS.map(({ id, label }) => {
         const isActive = id === activeTab;
 
@@ -24,7 +24,7 @@ export default function MyRecordTabs({ activeTab, storyCardCount, searchParams }
           >
             {label}
             {id === "cards" && (
-              <span className="text-accent-strong"> {storyCardCount}</span>
+              <span className="text-accent"> {storyCardCount}</span>
             )}
           </Link>
         );

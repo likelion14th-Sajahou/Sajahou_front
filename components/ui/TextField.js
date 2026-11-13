@@ -1,3 +1,5 @@
+import DrawnFieldFrame from "./DrawnFieldFrame";
+
 const SIZE_CLASSES = {
   md: "rounded-[14px] px-4 text-body",
   sm: "rounded-xl px-3 text-label",
@@ -45,11 +47,15 @@ export default function TextField({
   className = "",
   labelClassName = "font-display text-label leading-5 text-ink",
   error,
+  drawn = false,
+  wrapperClassName = "",
   ...rest
 }) {
   const errorId = error ? `${rest.id || rest.name}-error` : undefined;
   const look = appearanceClasses(appearance, size, error);
-  const controlClasses = `w-full text-ink placeholder:text-placeholder ${look.control} ${className}`;
+  // drawn: 손그림 테두리 틀(DrawnFieldFrame) 안에 들어가는 둥근 흰 칸. 기본(filled) 모양 위에 덮어쓴다.
+  const drawnClasses = drawn ? "rounded-full! border-transparent! bg-white! px-3.5! text-body-sm! text-[#1f2433] placeholder:text-[#8a8f9a]" : "";
+  const controlClasses = `w-full text-ink placeholder:text-placeholder ${look.control} ${drawnClasses} ${className}`;
   const accessibilityProps = error ? {
     "aria-invalid": true,
     "aria-describedby": [rest["aria-describedby"], errorId].filter(Boolean).join(" "),
@@ -70,14 +76,20 @@ export default function TextField({
     />
   );
 
+  const framedControl = drawn ? (
+    <DrawnFieldFrame height={size === "sm" ? 38 : 48} className={wrapperClassName} error={Boolean(error)}>
+      {control}
+    </DrawnFieldFrame>
+  ) : control;
+
   if (!label) {
-    return control;
+    return framedControl;
   }
 
   return (
     <label className="flex w-full flex-col gap-2">
       <span className={labelClassName}>{label}</span>
-      {control}
+      {framedControl}
       {error && <span id={errorId} className="text-caption leading-5 text-error">{error}</span>}
     </label>
   );

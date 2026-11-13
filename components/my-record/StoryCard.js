@@ -1,40 +1,37 @@
-import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import CompetencyTags from "./CompetencyTags";
-import { STORY_CARD_TYPES } from "./storyCardTypes";
+import { StoryCardIcon, StoryCardTypeBadge } from "./StoryCardVisuals";
 
 export default function StoryCard({ card, isHighlighted = false, onOpen }) {
-  const { type, whenLabel, shape, color, title, tags, evidence } = card;
-  const { label, tone } = STORY_CARD_TYPES[type];
+  const { type, whenLabel, title, tags, evidence } = card;
 
   return (
     <Card
       as="article"
       size="sm"
-      className={`relative flex h-full flex-col items-start gap-2.5 border border-transparent ${
-        isHighlighted ? "shadow-[0_0_0_3px_var(--color-accent)]" : ""
-      }`}
+      className="relative flex h-full min-h-[203px] flex-col items-start gap-3 rounded-[24px]! font-display text-[#1f2433] tracking-[-0.15px]"
     >
+      <DrawnBorder variant="thin-outline" repeat="round" color={isHighlighted ? "var(--color-shape-yellow)" : "var(--color-ink-300)"} />
       <div className="flex w-full items-center gap-2">
-        <ShapeCharacter shape={shape} color={color} face="none" size={30} />
-        <Badge tone={tone}>{label}</Badge>
-        <span className="ml-auto text-caption text-ink-subtle">{whenLabel}</span>
+        <span className="flex size-10 shrink-0 items-center justify-center"><StoryCardIcon card={card} /></span>
+        <StoryCardTypeBadge type={type} />
+        <span className="ml-auto text-right text-caption text-placeholder">{whenLabel}</span>
       </div>
-      <h3 className="break-keep text-[17px] leading-[23.8px] tracking-[-0.17px] text-ink">
+      <h3 className="break-keep text-[18px] leading-[27px] tracking-[-0.36px]">
         {/* 카드 전체를 눌러도 열리도록 버튼의 영역을 카드 크기로 넓힌다. */}
         <button
           type="button"
           aria-label={`${title} 자세히 보기`}
           onClick={() => onOpen(card.id)}
-          className="cursor-pointer text-left after:absolute after:inset-0 after:rounded-[22px]"
+          className="cursor-pointer text-left after:absolute after:inset-0 after:rounded-[24px]"
         >
           {title}
         </button>
       </h3>
       <CompetencyTags tags={tags} />
-      <p className="mt-auto flex w-full gap-1.5 border-t border-dashed border-line pt-2.5 text-label text-ink-muted">
-        <span className="shrink-0">근거</span>
+      <p className="flex w-full gap-1.5 border-t border-dashed border-line pt-3 text-label leading-[20.8px] text-ink-subtle">
+        <span className="shrink-0 text-yellow-700">근거</span>
         <span>{evidence}</span>
       </p>
     </Card>

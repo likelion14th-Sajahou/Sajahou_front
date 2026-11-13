@@ -1,8 +1,11 @@
 import Link from "next/link";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import { weekDestination } from "@/lib/myRecordNavigation";
 
 const ROW_CLASSES =
-  "flex w-full flex-wrap items-center gap-x-3.5 gap-y-2 rounded-[24px] border border-ink bg-white px-5 py-3.5";
+  "relative flex w-full flex-wrap items-center gap-x-3.5 gap-y-2 rounded-[20px] px-[22px] py-[18px]";
+const ACTIVE_ROW_CLASSES = `${ROW_CLASSES} border-2 border-transparent bg-white`;
+const MUTED_ROW_CLASSES = `${ROW_CLASSES} border-[1.5px] border-transparent bg-[#fafaf8]`;
 
 function getRecapLabel({ cardCount, isProjectRecap }) {
   const recap = isProjectRecap ? "프로젝트 회고 완료" : "회고 완료";
@@ -10,63 +13,45 @@ function getRecapLabel({ cardCount, isProjectRecap }) {
   return cardCount > 0 ? `${recap} · 카드 ${cardCount}장` : recap;
 }
 
-// 항상 그 주차 카드만 걸러서 보여 준다. 카드가 1장이면 그 카드 팝업도 함께 연다(card 값).
-function WeekName({ week }) {
-  return <span className="text-label text-accent-strong">{week}주차</span>;
+function WeekName({ week, completed = false }) {
+  return <span className={`text-label ${completed ? "text-accent-strong" : ""}`}>{week}주차</span>;
 }
 
-function WeekTitle({ title }) {
-  return <span className="text-[16px] text-ink">{title}</span>;
+function WeekTitle({ title, completed = false }) {
+  return <span className={`text-[16px] ${completed ? "font-normal text-[#1f2433]" : "font-bold"}`}>{title}</span>;
 }
 
-function WeekState({ children }) {
-  return <span className="text-label leading-[19.5px] text-ink-subtle">{children}</span>;
+function WeekState({ children, completed = false }) {
+  return <span className={`text-label leading-[19.5px] ${completed ? "text-[#5a606c]" : ""}`}>{children}</span>;
 }
 
 export default function WeekDetailRow({ week, searchParams }) {
   if (!week) return null;
   const { status, title, cardCount } = week;
-
-  if (status === "upcoming") {
-    return (
-      <div className={ROW_CLASSES}>
-        <WeekName week={week.week} />
-        <WeekState>예정</WeekState>
-      </div>
-    );
-  }
-
-  if (status === "current") {
-    return (
-      <Link href="/retrospective" className={ROW_CLASSES}>
-        <WeekName week={week.week} />
-        <WeekTitle title={title} />
-        <span className="ml-auto flex h-[38px] items-center rounded-full border border-ink bg-ink px-4 text-body-sm text-white">
-          회고 쓰기 →
-        </span>
-      </Link>
-    );
-  }
-
-  if (status === "done" && cardCount > 0) {
-    const href = weekDestination(week, searchParams);
-    const label = cardCount === 1 ? "카드 보기 →" : `카드 ${cardCount}장 보기 →`;
-
-    return (
-      <Link href={href} className={ROW_CLASSES}>
-        <WeekName week={week.week} />
-        <WeekTitle title={title} />
-        <WeekState>{getRecapLabel(week)}</WeekState>
-        <span className="ml-auto text-body-sm text-accent-strong">{label}</span>
-      </Link>
-    );
-  }
+  const completed = status === "done";
+  const current = status === "current";
+  const upcoming = status === "upcoming";
+  const hasCards = completed && cardCount > 0;
+  // 카드 1장은 상세, 여러 장은 해당 주차 목록으로 이동하는 기존 규칙을 사용한다.
+  const href = current ? "/retrospective" : hasCards ? weekDestination(week, searchParams) : null;
+  const Container = href ? Link : "div";
+  const textColorClass = completed ? "text-ink" : "text-[#9a958c]";
+  const stateLabel = upcoming ? "예정" : completed ? getRecapLabel(week) : "기록 없음";
+  const cardLabel = cardCount === 1 ? "카드 보기 →" : `카드 ${cardCount}장 보기 →`;
 
   return (
-    <div className={ROW_CLASSES}>
-      <WeekName week={week.week} />
-      <WeekTitle title={title} />
-      <WeekState>{status === "done" ? getRecapLabel(week) : "기록 없음"}</WeekState>
-    </div>
+    <Container {...(href ? { href } : {})} className={`${href ? ACTIVE_ROW_CLASSES : MUTED_ROW_CLASSES} ${textColorClass}`}>
+      <DrawnBorder variant="thin-outline" repeat="round" color={completed ? "var(--color-ink)" : "var(--color-line)"} />
+      <WeekName week={week.week} completed={completed} />
+      {!upcoming && <WeekTitle title={title} completed={completed} />}
+      {!current && <WeekState completed={completed}>{stateLabel}</WeekState>}
+      {current ? (
+        <span className="ml-auto flex h-[38px] items-center rounded-full bg-shape-yellow px-[18px] text-body-sm">
+          회고 쓰기 →
+        </span>
+      ) : hasCards ? (
+        <span className="ml-auto text-body-sm text-accent">{cardLabel}</span>
+      ) : null}
+    </Container>
   );
 }

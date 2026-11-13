@@ -24,7 +24,7 @@ export default function RecentRetrospectives({ items }) {
               href={homeCardHref(id)}
               className="relative flex h-full min-h-[85px] items-center gap-3 rounded-[18px] bg-white p-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
             >
-              <DrawnBorder variant="recent-card" />
+              <DrawnBorder variant="thick-outline" />
               <Image src="/images/home/recent-retrospective.png" alt="" width={26} height={26} className="size-[26px] shrink-0 object-contain" />
               <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
                 <span className="w-full truncate text-body leading-[21px] text-ink">

@@ -251,6 +251,11 @@ body {
 .new-project-form input { height: 50px; }
 .new-project-form input::placeholder { color: var(--color-ink-300); }
 
+/* 스토리 카드 편집의 공통 TextField는 이 화면에서만 Figma의 라벨 간격을 쓴다. */
+.story-card-edit-form > label { gap: 6px; }
+.story-card-edit-form > label > span:first-child,
+.story-card-edit-form [role="group"] > p { color: #4a5163; }
+
 /* Figma 홈 모션: 별은 회전하지 않고 밝기와 크기만 변한다. */
 @keyframes home-star-twinkle {
   0%, 100% { opacity: 1; scale: 1; }

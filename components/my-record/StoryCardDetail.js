@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTags from "./CompetencyTags";
 import StoryCardEditForm from "./StoryCardEditForm";
-import { COPY_FAILED_MESSAGE, RECORD_TEXT, STORY_CARD_TYPES, SUMMARY_FIELDS } from "./storyCardTypes";
+import { COPY_FAILED_MESSAGE, RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTypes";
+import { StoryCardIcon, StoryCardTypeBadge } from "./StoryCardVisuals";
 import { copyText } from "@/lib/clipboard";
 import useProjectAction from "@/components/project/useProjectAction";
 
@@ -37,7 +36,7 @@ function DocumentLine({ line }) {
   if (numbered) {
     return (
       <p className="relative pl-5 text-[14.5px] leading-[25.375px]">
-        <span className="absolute left-0.5 text-label leading-[22.75px] text-accent-strong">{numbered[1]}</span>
+        <span className="absolute left-0.5 text-label leading-[22.75px] text-yellow-700">{numbered[1]}</span>
         {numbered[2]}
       </p>
     );
@@ -46,7 +45,7 @@ function DocumentLine({ line }) {
   if (line.startsWith("- ")) {
     return (
       <p className="relative pl-3.5 text-[14.5px] leading-[25.375px]">
-        <span className="absolute left-[3px] text-accent-strong">·</span>
+        <span className="absolute left-[3px] text-yellow-700">·</span>
         {line.slice(2)}
       </p>
     );
@@ -59,20 +58,20 @@ function SummaryDetails({ summary }) {
   const emptyCount = SUMMARY_FIELDS.filter(({ key }) => !summary[key]).length;
 
   return (
-    <details className="group w-full rounded-2xl border border-line px-4 py-3">
+    <details className="group w-full rounded-[20px] bg-tint-yellow px-[18px] py-3.5">
       <summary className="flex cursor-pointer list-none gap-1.5 [&::-webkit-details-marker]:hidden">
         <span aria-hidden="true" className="w-[15px] text-body group-open:hidden">▸</span>
         <span aria-hidden="true" className="hidden w-[15px] text-body group-open:inline">▾</span>
         <span className="text-body">
           자소서에 쓰는 요약{" "}
-          <span className="text-label text-ink-subtle">상황 · 행동 · 이유 · 결과 · 배운 점</span>
+          <span className="text-label text-[#5a606c]">상황 · 행동 · 이유 · 결과 · 배운 점</span>
         </span>
       </summary>
-      <dl className="pt-1.5">
+      <dl className="pt-1">
         {SUMMARY_FIELDS.map(({ key, label }) => (
-          <div key={key} className="grid grid-cols-[64px_1fr] gap-3 border-t border-line py-3">
-            <dt className="pt-0.5 text-label text-accent-strong">{label}</dt>
-            <dd className="text-body leading-[25.5px]">
+          <div key={key} className="grid grid-cols-[52px_minmax(0,1fr)] gap-3 border-t-2 border-dashed border-yellow-200 py-3 sm:grid-cols-[64px_minmax(0,1fr)]">
+            <dt className="pt-0.5 text-label text-yellow-700">{label}</dt>
+            <dd className="break-words text-body leading-[25.5px]">
               {summary[key] || (
                 <span className="inline-block rounded-lg border border-dashed border-line-medium px-2.5 text-body-sm text-ink-subtle">
                   아직 기록에 없어요
@@ -83,7 +82,7 @@ function SummaryDetails({ summary }) {
         ))}
       </dl>
       {emptyCount > 0 && (
-        <p className="border-t border-line pt-3 text-label text-ink-subtle">
+        <p className="border-t border-dashed border-yellow-200 pt-3 text-label text-ink-subtle">
           ⚑ 빈칸 {emptyCount}곳은 자소서 초안에서도 빈칸으로 남아요. 수정에서 직접 채울 수 있어요.
         </p>
       )}
@@ -93,8 +92,7 @@ function SummaryDetails({ summary }) {
 
 export default function StoryCardDetail({ card, competencies, titleId, onClose, onDelete, onUpdate }) {
   const { run, busy, error } = useProjectAction();
-  const { type, whenLabel, shape, color, title, tags, evidence, document, summary } = card;
-  const { label, tone } = STORY_CARD_TYPES[type];
+  const { type, whenLabel, title, tags, evidence, document, summary } = card;
   const isProjectCard = type === "project";
   const documentText = isProjectCard ? RECORD_TEXT : RECAP_TEXT;
   const { toast, showToast, hideToast } = useToast();
@@ -113,17 +111,17 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
   }
 
   return (
-    <fieldset disabled={busy} className="flex min-w-0 flex-col items-start gap-3.5">
+    <fieldset disabled={busy} className="flex min-w-0 flex-col items-start gap-3.5 font-display text-[#1f2433] tracking-[-0.15px]">
       {error && <p role="alert">{error}</p>}
       <div className="flex w-full items-center gap-2.5">
-        <ShapeCharacter shape={shape} color={color} size={36} />
-        <Badge tone={tone}>{label}</Badge>
-        <span className="text-label text-ink-subtle">{whenLabel}</span>
+        <span className="flex size-[52px] shrink-0 items-center justify-center"><StoryCardIcon card={card} size={50} /></span>
+        <StoryCardTypeBadge type={type} />
+        <span className="text-label text-placeholder">{whenLabel}</span>
         <button
           type="button"
           aria-label="닫기"
           onClick={onClose}
-          className="ml-auto flex size-9 cursor-pointer items-center justify-center rounded-full bg-canvas text-title"
+          className="ml-auto flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-canvas text-title"
         >
           ×
         </button>
@@ -142,14 +140,14 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
         </>
       ) : (
         <>
-          <h2 id={titleId} className="break-keep text-heading leading-[30.8px] tracking-[-0.44px]">
+          <h2 id={titleId} className="break-keep text-[24px] leading-[34px] text-balance tracking-[-0.48px]">
             {title}
           </h2>
-          <CompetencyTags tags={tags} />
-          <section className="w-full rounded-2xl border border-line px-4 py-3.5">
-            <div className="flex items-center justify-between">
+          <CompetencyTags tags={tags} compact />
+          <section className="w-full rounded-[20px] bg-canvas px-5 py-[18px]">
+            <div className="flex items-center justify-between gap-2">
               <h3 className="text-body font-normal">{documentText.title}</h3>
-              <Button size="sm" onClick={copyDocument}>노션에 복사</Button>
+              <Button size="sm" className="border-[#fef5d2]! bg-[#fef5d2]!" onClick={copyDocument}>노션에 복사</Button>
             </div>
             <div className="pt-2">
               {document
@@ -161,12 +159,12 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
             </div>
           </section>
           <SummaryDetails summary={summary} />
-          <p className="flex w-full gap-2.5 rounded-[14px] bg-canvas px-3.5 py-3 text-[13.5px] leading-[21.6px]">
-            <span className="shrink-0">근거</span>
+          <p className="flex w-full gap-2.5 rounded-2xl border border-line bg-white px-3.5 py-3 text-[13.5px] leading-[21.6px]">
+            <span className="shrink-0 text-yellow-700">근거</span>
             <span>{evidence}</span>
           </p>
           {isConfirmingDelete ? (
-            <div role="alert" className="flex w-full flex-col gap-2.5 rounded-2xl bg-[#fdecea] px-4 py-3.5">
+            <div role="alert" className="flex w-full flex-col gap-2.5 rounded-2xl bg-tint-red px-4 py-3.5">
               <p className="text-body-sm">
                 이 카드를 지울까요?
                 <br />
@@ -176,18 +174,18 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
               </p>
               <div className="flex items-center justify-between gap-3.5 pt-1">
                 {/* 삭제 버튼이 사라져도 포커스를 잃지 않고, 안내가 화면에 보이도록 취소로 옮긴다. */}
-                <TextLink autoFocus onClick={() => setIsConfirmingDelete(false)}>
+                <TextLink variant="underline" className="text-[#4a5163]!" autoFocus onClick={() => setIsConfirmingDelete(false)}>
                   취소
                 </TextLink>
-                <Button variant="danger" onClick={() => run((signal) => onDelete(signal))}>지우기</Button>
+                <Button variant="danger" className="h-[46px]! bg-error! px-6! font-display" onClick={() => run((signal) => onDelete(signal))}>지우기</Button>
               </div>
             </div>
           ) : (
             <div className="flex w-full items-center justify-between gap-3.5 pt-1">
-              <TextLink variant="danger" onClick={() => setIsConfirmingDelete(true)}>삭제</TextLink>
+              <TextLink variant="danger" className="text-error!" onClick={() => setIsConfirmingDelete(true)}>삭제</TextLink>
               <div className="flex gap-2">
-                <Button variant="secondary" onClick={() => setIsEditing(true)}>수정</Button>
-                <Button onClick={onClose}>닫기</Button>
+                <Button variant="ink-outline" className="h-[46px]! px-6!" onClick={() => setIsEditing(true)}>수정</Button>
+                <Button variant="ink" className="h-[46px]! px-6!" onClick={onClose}>닫기</Button>
               </div>
             </div>
           )}
