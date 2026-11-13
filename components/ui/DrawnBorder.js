@@ -19,7 +19,6 @@ const BORDERS = {
   "start-card": { folder: "retrospective", outset: 4, slice: 32 },
   "deadline-card": { folder: "retrospective", outset: 4, slice: 32 },
   bubble: { folder: "retrospective", outset: 4, slice: 28 },
-  "paused-card": { folder: "retrospective", outset: 4, slice: 40 },
   // 둥근 버튼(Button의 soft·inverse·ink·ink-outline·inverse-muted·cta). -sm은 높이 38px(size="sm")용이다.
   "pill-cream": { folder: "retrospective", outset: 4, slice: 26 },
   "pill-white": { folder: "retrospective", outset: 4, slice: 26 },
@@ -33,10 +32,6 @@ const BORDERS = {
   "section-card": { folder: "retrospective", outset: 4, slice: 28 },
   "section-card-short": { folder: "retrospective", outset: 4, slice: 28 },
   "memo-field": { folder: "retrospective", outset: 4, slice: 22 },
-  // 이번 주 회고 검토 화면: 회고록 흰 상자, 스토리 카드 초안 카드(진한 선).
-  // 11/13 Figma의 물결 모양을 그대로 쓰되, 얇아진 선을 예전 두께(약 4px)로 넓혀 만들었다.
-  "notion-box": { folder: "retrospective", outset: 4, slice: 32 },
-  "story-card": { folder: "retrospective", outset: 4, slice: 32 },
   // 자료가 바뀌었어요 안내(11/13 디자인): 예전 분홍 안내와 같은 손그림 선을 주황(#ffb37a)으로 칠했다.
   "alert-orange": { folder: "retrospective", outset: 4, slice: 24 },
   // 선택 칩(Chip drawn): 선택됨·기본

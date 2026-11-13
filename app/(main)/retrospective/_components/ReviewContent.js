@@ -142,9 +142,9 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
             </div>
             <Button variant="cta" className="shrink-0" onClick={copyRetrospective}>회고록 복사</Button>
           </div>
-          {/* 회고록은 손그림 테두리의 흰 상자 안에 둔다. 고칠 수 있는 칸이라 글은 Pretendard다. */}
+          {/* 회고록은 손그림 테두리의 흰 상자 안에 둔다(자료 화면의 흰 섹션과 같은 선). 고칠 수 있는 칸이라 글은 Pretendard다. */}
           <div className="relative rounded-[20px] bg-white p-1">
-            <DrawnBorder variant="notion-box" />
+            <DrawnBorder variant="section-card" />
             <TextField
               multiline
               appearance="plain"
@@ -159,7 +159,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
         </RetroDarkCard>
 
         <section aria-labelledby="review-story-title" className="relative flex min-w-0 flex-col gap-3.5 rounded-[28px] bg-divider p-6">
-          <DrawnBorder variant="story-card" />
+          <DrawnBorder variant="materials-card" />
           <h2 id="review-story-title" className="font-display text-title leading-8 tracking-[-0.4px] text-ink-strong">스토리 카드 초안</h2>
           {/* 기록에서 찾지 못한 칸은 지어내지 않고 비워 둔다(R-20). */}
           <div className="flex flex-col gap-4">
