@@ -28,7 +28,7 @@ function getCountTone(cardCount) {
 
 // 매칭 결과. posting은 공고 저장·역량 찾기(36번) 응답이나 불러온 매칭 결과(39번), drafts는 문항별 답 초안(37번) 상태다.
 // 공고를 새로 찾으면 이 화면을 새로 그리므로, 직접 고친 답도 그 공고의 것만 남는다.
-export default function MatchingResults({ posting, drafts, onRetry }) {
+export default function MatchingResults({ posting, drafts, onRetry, onEditedCountChange }) {
   const { authenticatedRequest } = useAuth();
   const headingRef = useRef(null);
   const { toast, showToast, hideToast } = useToast();
@@ -37,6 +37,15 @@ export default function MatchingResults({ posting, drafts, onRetry }) {
   // '이 답에 쓴 기록'의 카드 모양(M-12). 나의 사자록과 같은 카드 목록(21번)과 표시 규칙(cardView)을 쓴다.
   const [cardViews, setCardViews] = useState({});
   const companyLabel = posting.company ?? "지원";
+  // 저장 전의 수정도 보호한다. 직접 고치기를 열기만 했거나 초안으로 되돌린 답은 세지 않는다.
+  const editedCount = Object.entries(edits).filter(([questionId, edit]) => {
+    const draft = drafts[questionId];
+    return draft?.status !== "done" || edit.text !== answerText(draft.answer);
+  }).length;
+
+  useEffect(() => {
+    onEditedCountChange(editedCount);
+  }, [editedCount, onEditedCountChange]);
 
   // 결과가 새로 나오면(공고마다 새로 그린다) 결과 제목으로 스크롤하고 포커스를 옮긴다.
   // 36번 응답을 기다린 뒤 그려지므로, 그려진 다음에 실행되는 effect에서 옮긴다.
