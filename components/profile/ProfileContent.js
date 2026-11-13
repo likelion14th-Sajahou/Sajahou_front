@@ -118,7 +118,7 @@ function ProfileForm({ user }) {
 
   return (
     <>
-      <GoogleAccountInfo email={user.email} className="my-6" />
+      <GoogleAccountInfo email={user.email} className="my-6 w-full" />
       <form ref={formRef} noValidate onSubmit={handleSubmit} aria-busy={isSavingProfile}>
         <fieldset disabled={isAccountBusy} className="min-w-0">
           <legend className="sr-only">내 정보</legend>
@@ -128,15 +128,16 @@ function ProfileForm({ user }) {
           <PartField id="profile-part" value={user.part} readOnly />
         </fieldset>
         {requestError && <p role="alert" className="pb-4 text-body-sm text-error">{requestError}</p>}
-        <div className="mt-[18px] grid grid-cols-2 gap-3">
-          <Button variant="outline" onClick={handleCancel} disabled={isAccountBusy} className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">취소</Button>
-          <Button type="submit" variant="accent" disabled={isAccountBusy || !hasChanges} className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
+        {/* 회원가입의 '가입하고 시작하기'와 같은 노란 버튼으로 저장하고, 취소는 진한 테두리 버튼이다. */}
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <Button variant="ink-outline" onClick={handleCancel} disabled={isAccountBusy} className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">취소</Button>
+          <Button type="submit" disabled={isAccountBusy || !hasChanges} className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
             {isSavingProfile ? "저장 중…" : "저장"}
           </Button>
         </div>
       </form>
-      <div className="mt-3 text-center leading-[19.5px]">
-        <TextLink variant="accent" size="sm" onClick={logout} disabled={isAccountBusy} aria-busy={isLoggingOut} aria-describedby={logoutError ? "profile-logout-error" : undefined} className="disabled:cursor-default disabled:opacity-60">
+      <div className="mt-6 text-center leading-[19.5px]">
+        <TextLink size="sm" onClick={logout} disabled={isAccountBusy} aria-busy={isLoggingOut} aria-describedby={logoutError ? "profile-logout-error" : undefined} className="disabled:cursor-default disabled:opacity-60">
           {isLoggingOut ? "로그아웃 중…" : "로그아웃"}
         </TextLink>
         {logoutError && <p id="profile-logout-error" role="alert" className="mt-2 text-body-sm text-error">{logoutError}</p>}
