@@ -26,6 +26,7 @@ export default function MaterialAttachments({
       name={name}
       status={readStatus(extractStatus)}
       warning={extractStatus === "FAILED"}
+      badgeTone="plain"
       onRemove={() => onRemove(id)}
     />
   ));

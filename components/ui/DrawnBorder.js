@@ -12,15 +12,28 @@ const BORDERS = {
   "project-row": { folder: "home", outset: 1.56, slice: 20 },
   "new-project-button": { folder: "home", outset: 0, slice: 20 },
   "new-project-dialog": { folder: "home", outset: 0, slice: 36 },
-  // 이번 주 회고 시작 화면. 요소보다 사방 4px 크게 내보냈다.
+  // 이번 주 회고. 요소보다 사방 4px 크게 내보냈다. 자료 화면의 오른쪽 안내 카드도 deadline-card를 쓴다(같은 모양).
   "start-card": { folder: "retrospective", outset: 4, slice: 32 },
   "deadline-card": { folder: "retrospective", outset: 4, slice: 32 },
   bubble: { folder: "retrospective", outset: 4, slice: 28 },
   "paused-card": { folder: "retrospective", outset: 4, slice: 40 },
-  // 둥근 버튼(Button의 soft·inverse·ink·ink-outline)
+  // 둥근 버튼(Button의 soft·inverse·ink·ink-outline·inverse-muted·cta). -sm은 높이 38px(size="sm")용이다.
   "pill-cream": { folder: "retrospective", outset: 4, slice: 26 },
   "pill-white": { folder: "retrospective", outset: 4, slice: 26 },
   "pill-ink": { folder: "retrospective", outset: 4, slice: 26 },
+  "pill-ink-sm": { folder: "retrospective", outset: 4, slice: 23 },
+  "pill-muted": { folder: "retrospective", outset: 4, slice: 26 },
+  "pill-yellow": { folder: "retrospective", outset: 4, slice: 26 },
+  // 이번 주 회고 자료 화면
+  "materials-card": { folder: "retrospective", outset: 4, slice: 32 },
+  // 흰 섹션 카드. 접혀서 짧을 때(실습 없음·과제 나중에 등)는 짧은 원본을 써야 물결 간격이 맞는다.
+  "section-card": { folder: "retrospective", outset: 4, slice: 28 },
+  "section-card-short": { folder: "retrospective", outset: 4, slice: 28 },
+  "memo-field": { folder: "retrospective", outset: 4, slice: 22 },
+  "alert-red": { folder: "retrospective", outset: 4, slice: 24 },
+  // 선택 칩(Chip drawn): 선택됨·기본
+  "chip-ink": { folder: "retrospective", outset: 4, slice: 20 },
+  "chip-line": { folder: "retrospective", outset: 4, slice: 20 },
 };
 
 // 부모 요소에 relative가 있어야 한다. 부모에는 border를 주지 않는다(선이 이 이미지로 대신 그려진다).
