@@ -8,6 +8,7 @@ import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "./CompetencyTagPicker";
 import { RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTypes";
 import { selectedCompetencyNames } from "@/lib/competencySelection";
+import { withoutDocumentTitle } from "@/lib/storyCardDocument";
 
 // competencies는 역량 목록 조회(API 6) 응답이다.
 export default function StoryCardEditForm({ card, competencies, onCancel, onSave }) {
@@ -36,7 +37,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
       summary: Object.fromEntries(
         SUMMARY_FIELDS.map(({ key }) => [key, formData.get(key).trim()]),
       ),
-      document: formData.get("document"),
+      document: card.type === "project" ? withoutDocumentTitle(formData.get("document"), title) : formData.get("document"),
     });
   }
 
@@ -73,7 +74,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         }
         multiline
         name="document"
-        defaultValue={card.document}
+        defaultValue={card.type === "project" ? withoutDocumentTitle(card.document, card.title) : card.document}
         className="h-[234px] font-mono text-label! font-bold leading-[20.8px]"
       />
       <div className="flex items-center justify-between gap-3.5 pt-1">
