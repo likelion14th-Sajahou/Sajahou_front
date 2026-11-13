@@ -7,7 +7,8 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 // soft·inverse는 진한 카드(회고 시작 카드) 위에 두는 버튼이다. soft: 연노랑 바탕, inverse: 흰 굵은 테두리.
 // ink·ink-outline은 흰 카드(휴회 카드) 위의 진한 버튼과 진한 테두리 버튼이다.
 // inverse-muted·cta는 진한 카드(회고 자료 카드) 하단의 '나중에 이어쓰기'(회색 선)와 'AI 질문 받기'(노랑)다.
-// 이 여섯 가지는 Figma에서 테두리가 손그림처럼 울퉁불퉁해서 DrawnBorder로 그린다(VARIANT_BORDERS).
+// cta-ink는 밝은 카드 위의 노란 버튼에 진한 테두리를 두른 것이다.
+// 이 일곱 가지는 Figma에서 테두리가 손그림처럼 울퉁불퉁해서 DrawnBorder로 그린다(VARIANT_BORDERS).
 const VARIANT_CLASSES = {
   primary: "border border-yellow-400 bg-yellow-400 font-display text-ink",
   secondary: "border border-canvas bg-canvas font-noto font-medium text-ink",
@@ -23,6 +24,8 @@ const VARIANT_CLASSES = {
   "ink-outline": "bg-white font-display text-ink",
   "inverse-muted": "bg-transparent font-display text-white",
   cta: "bg-yellow-400 font-display text-ink-950",
+  // 흰·연회색 카드 위의 노란 주요 버튼(회고 검토의 '저장하고 사자록에 추가'): 노랑 + 진한 손그림 테두리
+  "cta-ink": "bg-yellow-400 font-display text-ink",
 };
 
 // 크기별 테두리 이미지. 크기에 맞는 이미지가 없으면 md 것을 쓴다.
@@ -33,6 +36,7 @@ const VARIANT_BORDERS = {
   "ink-outline": { md: "pill-ink", sm: "pill-ink-sm" },
   "inverse-muted": { md: "pill-muted" },
   cta: { md: "pill-yellow" },
+  "cta-ink": { md: "pill-ink" },
 };
 
 const SIZE_CLASSES = {

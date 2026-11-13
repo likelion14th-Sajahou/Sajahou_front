@@ -14,10 +14,33 @@ const TEXTAREA_PADDING_CLASSES = {
   sm: "py-[7px]",
 };
 
+// appearance: 칸의 바탕과 테두리.
+// - filled: 디자인 시스템 기본(회색 바탕, 테두리 없음).
+// - outlined: 흰 바탕 + 2px 회색 테두리, 누르면 진하게(회고 검토의 스토리 카드 초안, 11/13 디자인). md 크기만 쓴다.
+// - plain: 흰 바탕, 테두리 없음(회고 검토의 회고록처럼 손그림 테두리 상자 안에 들어가는 칸).
+function appearanceClasses(appearance, size, error) {
+  if (appearance === "outlined") {
+    return {
+      control: `rounded-2xl border-2 bg-white px-3.5 text-body ${error ? "border-error-line" : "border-ink-300 focus:border-ink"}`,
+      input: "h-12 py-2.5",
+      textarea: "py-2.5",
+    };
+  }
+  if (appearance === "plain") {
+    return { control: "rounded-[14px] bg-white px-[18px] text-body", input: "h-12 py-3", textarea: "py-4" };
+  }
+  return {
+    control: `border ${error ? "border-error-line" : "border-transparent"} bg-canvas ${SIZE_CLASSES[size]}`,
+    input: INPUT_HEIGHT_CLASSES[size],
+    textarea: TEXTAREA_PADDING_CLASSES[size],
+  };
+}
+
 export default function TextField({
   label,
   multiline = false,
   size = "md",
+  appearance = "filled",
   rows = 3,
   className = "",
   labelClassName = "font-display text-label leading-5 text-ink",
@@ -25,7 +48,8 @@ export default function TextField({
   ...rest
 }) {
   const errorId = error ? `${rest.id || rest.name}-error` : undefined;
-  const controlClasses = `w-full border ${error ? "border-error-line" : "border-transparent"} bg-canvas text-ink placeholder:text-placeholder ${SIZE_CLASSES[size]} ${className}`;
+  const look = appearanceClasses(appearance, size, error);
+  const controlClasses = `w-full text-ink placeholder:text-placeholder ${look.control} ${className}`;
   const accessibilityProps = error ? {
     "aria-invalid": true,
     "aria-describedby": [rest["aria-describedby"], errorId].filter(Boolean).join(" "),
@@ -34,13 +58,13 @@ export default function TextField({
   const control = multiline ? (
     <textarea
       rows={rows}
-      className={`resize-none ${TEXTAREA_PADDING_CLASSES[size]} ${controlClasses}`}
+      className={`resize-none ${look.textarea} ${controlClasses}`}
       {...rest}
       {...accessibilityProps}
     />
   ) : (
     <input
-      className={`${INPUT_HEIGHT_CLASSES[size]} ${controlClasses}`}
+      className={`${look.input} ${controlClasses}`}
       {...rest}
       {...accessibilityProps}
     />
