@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import MatchingContent from "./_components/MatchingContent";
 import StoryCardCount from "./_components/StoryCardCount";
 import RequireAuth from "@/components/layout/RequireAuth";
@@ -8,16 +9,19 @@ export const metadata = { title: "자소서 매칭 | 사자록" };
 
 export default function MatchingPage({ searchParams }) {
   return (
-    <main className="mx-auto w-full max-w-[1120px] px-4 pt-6 pb-20">
-      <div className="flex items-end gap-6">
-        <div className="flex flex-1 flex-col gap-1.5">
+    <main className="matching-page mx-auto w-full max-w-[1120px] px-4 pt-10 pb-20 font-display tracking-[-0.15px]">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="flex min-w-0 flex-col gap-1.5">
           <Link href="/my-record" className="w-fit text-body-sm text-ink-muted">← 나의 사자록</Link>
-          <p className="text-label text-accent-strong">자소서 매칭</p>
-          <h1 className="text-[38px] leading-[1.2] tracking-[-0.76px]">공고에 맞는 내 경험 찾기</h1>
+          <p className="text-label text-accent-strong">공고에 맞는 내 경험 찾기</p>
+          <h1 className="text-[32px] leading-[46px] tracking-[-0.64px]">자소서 매칭</h1>
         </div>
-        <div>
-          <p className="text-caption text-ink-subtle">내 스토리 카드</p>
-          <StoryCardCount />
+        <div className="flex shrink-0 items-center gap-3.5 rounded-[24px] bg-shape-yellow p-3.5 pr-[22px]">
+          <Image src="/images/home/matching-eyes.png" alt="" width={104} height={58} className="h-auto w-[104px]" />
+          <div>
+            <p className="text-label text-ink">내 스토리 카드</p>
+            <StoryCardCount />
+          </div>
         </div>
       </div>
       <RequireAuth>

@@ -53,7 +53,7 @@ export default function MatchingAttachments({ attachments, onLinkUnreadable }) {
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
+    <div className="matching-attachments flex min-w-0 flex-col gap-1.5">
       <p className="text-label text-ink-muted">채용 공고 <span className="text-ink-subtle">· 붙여넣기, PDF·캡처, 링크 중 편한 것</span></p>
       {items.length > 0 && (
         <ul aria-label="첨부 공고" className="flex flex-wrap gap-2">
@@ -78,7 +78,7 @@ export default function MatchingAttachments({ attachments, onLinkUnreadable }) {
           <span>{UNREADABLE_LINK_MESSAGE}</span>
         </p>
       )}
-      <fieldset disabled={isBusy} aria-busy={isBusy} className="flex min-w-0 items-center gap-2">
+      <fieldset disabled={isBusy} aria-busy={isBusy} className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
         <FileUploadButton
           label={isBusy ? "올리는 중…" : "+ 공고 파일"}
           ariaLabel="공고 파일"
@@ -86,6 +86,8 @@ export default function MatchingAttachments({ attachments, onLinkUnreadable }) {
           onSelect={async (selected) => setError(await attachments.upload(selected))}
         />
         <LinkInputRow
+          className="w-full basis-full sm:w-auto sm:basis-auto"
+          buttonVariant="ink-outline"
           aria-label="공고 링크"
           placeholder="공고 링크"
           aria-invalid={Boolean(error)}

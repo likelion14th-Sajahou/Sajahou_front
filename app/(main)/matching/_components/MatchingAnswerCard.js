@@ -3,7 +3,8 @@ import { Fragment, useRef, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
+import DrawnBorder from "@/components/ui/DrawnBorder";
+import { StoryCardIcon } from "@/components/my-record/StoryCardVisuals";
 import TextLink from "@/components/ui/TextLink";
 import { recordHref } from "@/lib/myRecordNavigation";
 import { SOURCE_MARKS, answerText, cardSourceLabel, countBlanks, countCharacters, showsSourceMark } from "./matchingAnswer";
@@ -67,19 +68,19 @@ function AnswerDraft({ question, answer, edit, cardViews, companyLabel, onEdit, 
   return (
     <>
       {editing ? (
-        <textarea rows={9} aria-label={`문항 ${question.seq} 초안`} value={text} onChange={(event) => onEdit(event.target.value)} autoFocus className="h-[297px] w-full resize-none rounded-2xl border border-transparent bg-draft px-5 py-[18px] text-[16px] leading-[1.8] focus-visible:outline-2 focus-visible:outline-ink" />
+        <textarea rows={9} aria-label={`문항 ${question.seq} 초안`} value={text} onChange={(event) => onEdit(event.target.value)} autoFocus className="h-[297px] w-full resize-none rounded-2xl border border-transparent bg-canvas px-5 py-[18px] text-[16px] leading-[1.8] focus-visible:outline-2 focus-visible:outline-ink" />
       ) : (
-        <div className="rounded-2xl bg-draft px-[22px] py-5 text-[16px] leading-[1.95] whitespace-pre-wrap break-words">
+        <div className="rounded-[20px] bg-tint-yellow px-4 py-5 text-[16px] leading-[1.95] whitespace-pre-wrap break-words sm:px-[22px]">
           {edit ? text : <DraftSegments segments={answer.segments} />}
         </div>
       )}
-      <div className="flex items-center justify-between gap-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
         <span className="text-label text-ink-subtle tabular-nums">{characterCount}자</span>
         <div className="flex items-center gap-3">
           <TextLink ref={editButtonRef} aria-expanded={editing} disabled={isSaving} aria-busy={isSaving} onClick={toggleEditing}>
             {isSaving ? "저장하는 중…" : editing ? "다 고쳤어요" : "직접 고치기"}
           </TextLink>
-          <Button size="sm" aria-label={`문항 ${question.seq} 답 복사`} onClick={() => onCopy(text, `Q${question.seq} 답을 복사했어요.`)}>이 답 복사</Button>
+          <Button variant="ink" size="sm" aria-label={`문항 ${question.seq} 답 복사`} onClick={() => onCopy(text, `Q${question.seq} 답을 복사했어요.`)}>이 답 복사</Button>
         </div>
       </div>
       {error && <p role="alert" className="-mt-2 text-right text-body-sm text-error">{error}</p>}
@@ -91,22 +92,22 @@ function AnswerDraft({ question, answer, edit, cardViews, companyLabel, onEdit, 
             const view = cardViews[String(card.cardId)];
             return (
               <li key={card.cardId}>
-                <Link href={recordHref(new URLSearchParams(), { tab: "cards", highlight: card.cardId })} className="flex w-full items-center gap-2 rounded-[10px] px-2 py-[7px] text-left">
-                  <span className="w-4 text-label text-accent-strong">{SOURCE_MARKS[card.no]}</span>
+                <Link href={recordHref(new URLSearchParams(), { tab: "cards", highlight: card.cardId })} className="flex w-full flex-wrap items-center gap-2 rounded-[10px] px-2 py-[7px] text-left focus-visible:outline-2 focus-visible:outline-ink">
+                  <span className="w-4 shrink-0 text-label text-yellow-700">{SOURCE_MARKS[card.no]}</span>
                   {/* 모양을 아직 불러오지 못했으면 자리만 둔다. */}
-                  <span aria-hidden="true" className="flex size-[18px] shrink-0 items-center justify-center">
-                    {view && <ShapeCharacter shape={view.shape} color={view.color} face="none" size={18} />}
+                  <span aria-hidden="true" className="flex size-5 shrink-0 items-center justify-center">
+                    {view && <StoryCardIcon card={view} size={20} />}
                   </span>
-                  <span className="text-body-sm">{card.title}</span>
+                  <span className="min-w-0 break-words text-body-sm">{card.title}</span>
                   <span className="text-label text-ink-subtle">{cardSourceLabel(card)}</span>
-                  <span className="ml-auto text-[12.5px] leading-5 text-accent-strong">보기 →</span>
+                  <span className="ml-auto shrink-0 text-[12.5px] leading-5 text-yellow-700">보기 →</span>
                 </Link>
               </li>
             );
           })}
           {answer.usesJobPosting && (
-            <li className="flex items-center gap-2 px-2 py-[7px]">
-              <span className="w-4 text-label text-accent-strong">{SOURCE_MARKS[3]}</span>
+            <li className="flex flex-wrap items-center gap-2 px-2 py-[7px]">
+              <span className="w-4 shrink-0 text-label text-yellow-700">{SOURCE_MARKS[3]}</span>
               <span className="text-body-sm">{companyLabel} 공고</span>
               <span className="text-label text-ink-subtle">주요 업무·우대사항</span>
             </li>
@@ -148,9 +149,10 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
   }
 
   return (
-    <Card as="article" size="md" className="flex flex-col gap-4 py-7" aria-labelledby={headingId} aria-busy={!draft || draft.status === "loading"}>
+    <Card as="article" size="md" className="relative flex min-w-0 flex-col gap-4 rounded-[28px]! px-5! py-7! sm:px-[30px]!" aria-labelledby={headingId} aria-busy={!draft || draft.status === "loading"}>
+      <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />
       <div className="flex items-start gap-3">
-        <Badge tone="dark" size="question" className="mt-0.5">Q{question.seq}</Badge>
+        <Badge tone="yellow" size="question" className="mt-0.5 bg-yellow-400! text-ink-950!">Q{question.seq}</Badge>
         <h3 id={headingId} className="text-[18px] leading-[1.5]">{question.content}</h3>
       </div>
       {body}
