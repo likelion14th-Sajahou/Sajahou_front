@@ -14,7 +14,6 @@ const BORDERS = {
   "thick-outline": { folder: "home", asset: "recent-card", outset: 3.08, slice: 24 },
   "thin-outline": { folder: "home", asset: "project-row", outset: 1.56, slice: 20 },
   "new-project-button": { folder: "home", outset: 0, slice: 20 },
-  "new-project-dialog": { folder: "home", outset: 0, slice: 36 },
   // 이번 주 회고. 요소보다 사방 4px 크게 내보냈다. 자료 화면의 오른쪽 안내 카드도 deadline-card를 쓴다(같은 모양).
   "start-card": { folder: "retrospective", outset: 4, slice: 32 },
   "deadline-card": { folder: "retrospective", outset: 4, slice: 32 },

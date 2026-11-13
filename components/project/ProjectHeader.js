@@ -40,7 +40,7 @@ export default function ProjectHeader({ project, recordCount, lastRecordedAt }) 
         </div>
       </div>
       <dl className="relative flex shrink-0 flex-wrap gap-x-7 gap-y-2 rounded-[20px] bg-white px-6 py-3.5">
-        <DrawnBorder variant="thick-outline" repeat="round" color="var(--color-yellow-400)" />
+        <DrawnBorder variant="start-card" color="var(--color-yellow-400)" />
         {stats.map(({ label, value }) => (
           <div key={label} className="flex flex-col-reverse">
             <dd className="font-display text-[26px] leading-[1.2] text-ink-strong">{value}</dd>

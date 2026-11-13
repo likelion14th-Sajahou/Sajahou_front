@@ -23,7 +23,7 @@ import { recordBadgeImage } from "@/lib/stickerBadges";
 function AddRecordPrompt({ status, onAdd }) {
   return (
     <div className="relative flex flex-wrap items-center gap-3.5 rounded-[24px] bg-ink-900 px-5 py-4 text-white">
-      <DrawnBorder variant="thick-outline" repeat="round" />
+      <DrawnBorder variant="start-card" />
       <Image src="/images/characters/cloud-small.png" alt="" width={56} height={47} className="shrink-0" />
       <p className="min-w-0 flex-1 font-display text-[16px] leading-6">
         {status === "active" ? (
@@ -57,7 +57,7 @@ function RecordItem({ record, order, isLast, onViewCard, onEdit, onDelete, onRes
       {!isLast && <span aria-hidden="true" className="absolute top-[38px] bottom-1 left-[15px] border-l-2 border-dashed border-[#cfcdc6]" />}
       <Image src={recordBadgeImage(order)} alt="" width={30} height={30} className="absolute top-2 left-px size-[30px] object-contain" />
       <fieldset disabled={busy} className="relative flex min-w-0 flex-col gap-3 rounded-[22px] bg-white px-[22px] py-[18px]">
-        <DrawnBorder variant="thick-outline" repeat="round" color="var(--color-ink-300)" />
+        <DrawnBorder variant="start-card" color="var(--color-ink-300)" />
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-[3px] text-label font-bold text-yellow-700">
             {formatMonthDay(date)}({weekday})
