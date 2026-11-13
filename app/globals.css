@@ -279,6 +279,35 @@ body {
 }
 .matching-search:disabled > span[aria-hidden="true"] { opacity: 0.25; }
 
+/* 공용 폼의 기본 스타일은 유지하고 포트폴리오의 진한 카드 안에서만 조정한다. */
+.portfolio-question button { max-width: 100%; }
+.portfolio-question button.bg-yellow-400 {
+  background-color: var(--color-yellow-100);
+  height: 46px;
+}
+.portfolio-question button.bg-yellow-400 > span[aria-hidden="true"] {
+  border-image-source: url(/images/retrospective/border-pill-cream.png);
+}
+.portfolio-question label:has(textarea) { gap: 6px; }
+.portfolio-question label > span:first-child { font-weight: 400; }
+.portfolio-attachments label:has(input[type="file"]) {
+  border-radius: 12px;
+  color: var(--color-locked);
+}
+.portfolio-attachments button {
+  background-color: transparent;
+  border-color: var(--color-ink-300);
+  color: white;
+  font-family: var(--font-display);
+}
+.portfolio-attachments ul:empty { display: none; }
+.portfolio-attachments input:not([type="file"]) { font-family: var(--font-input); }
+.portfolio-attachments p[role="status"] { color: var(--color-locked); }
+@media (max-width: 39.999rem) {
+  .portfolio-question div.flex.items-center.gap-3 { flex-wrap: wrap; }
+  .portfolio-attachments fieldset.items-center { flex-wrap: wrap; }
+}
+
 /* Figma 홈 모션: 별은 회전하지 않고 밝기와 크기만 변한다. */
 @keyframes home-star-twinkle {
   0%, 100% { opacity: 1; scale: 1; }

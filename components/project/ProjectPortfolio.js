@@ -47,8 +47,11 @@ export default function ProjectPortfolio({ project, records, onCancel, onSave })
     setAiTask("draft");
     run((signal) => requestDraft(selectedIds, signal));
   }
+  const waitingNotice = <AiWaitingNotice active={busy}
+    doing={aiTask === "draft" ? "기록과 답을 바탕으로 포트폴리오 초안을 만들고 있어요" : "기록을 읽고 질문을 만들고 있어요"}
+    className={step === "records" ? "text-right" : ""} />;
   return <fieldset disabled={busy} className="min-w-0" aria-busy={busy}>
-    {step === "records" && <PortfolioRecordSelect records={records} initialSelectedIds={selectedIds} onCancel={onCancel} onNext={startQuestions} />}
+    {step === "records" && <PortfolioRecordSelect records={records} initialSelectedIds={selectedIds} onCancel={onCancel} onNext={startQuestions} waitingNotice={waitingNotice} />}
     {step === "gaps" && <PortfolioGapFill state={questions} onChange={setQuestions} onBackToRecords={backToRecords} onComplete={makeDraft} />}
     {step === "draft" && <Card as="section" size="md" className="flex flex-col gap-3">
       <p>추가 질문이 없어 바로 포트폴리오 초안을 만들어요.</p>
@@ -60,7 +63,7 @@ export default function ProjectPortfolio({ project, records, onCancel, onSave })
       if (!questions.questions.length) { setStep("records"); return; }
       setQuestions((current) => ({ ...current, index: Math.max(0, current.questions.length - 1) })); setStep("gaps");
     }} />}
-    <AiWaitingNotice active={busy} doing={aiTask === "draft" ? "기록과 답을 바탕으로 포트폴리오 초안을 만들고 있어요" : "기록을 읽고 질문을 만들고 있어요"} />
+    {step !== "records" && waitingNotice}
     {error && <div role="alert" className="flex flex-wrap items-center gap-2 text-label text-tint-red-ink">{error}{["gaps", "draft"].includes(step) && <Button variant="secondary" size="sm" onClick={makeDraft}>초안 다시 만들기</Button>}</div>}
   </fieldset>;
 }
