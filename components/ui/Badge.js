@@ -7,6 +7,7 @@ const TONE_CLASSES = {
   green: "bg-tint-green text-tint-green-ink",
   neutral: "bg-canvas text-ink-muted",
   dark: "bg-ink text-white",
+  cream: "bg-yellow-200 text-[#6e540e]",
   // 회고 자료 화면의 형식 표시(PDF·노션 MD·이미지): 회색 바탕 + 삼립호빵체
   plain: "bg-canvas font-display text-ink-subtle",
 };

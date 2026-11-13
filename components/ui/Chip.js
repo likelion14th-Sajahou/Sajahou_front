@@ -2,8 +2,8 @@ import Link from "next/link";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 
 const SIZE_CLASSES = {
-  md: "h-9 px-3.5 text-body-sm",
-  sm: "h-8 px-3 text-label",
+  md: "h-9 px-3.5 text-body-sm [--drawn-border-height:36px]",
+  sm: "h-8 px-3 text-label [--drawn-border-height:32px]",
 };
 
 // href를 주면 같은 모양의 링크가 된다(예: 회고의 세션·과제 전환 탭).

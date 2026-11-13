@@ -35,8 +35,9 @@ const BORDERS = {
   "memo-field": { folder: "retrospective", outset: 4, slice: 22 },
   "alert-red": { folder: "retrospective", outset: 4, slice: 24 },
   // 선택 칩(Chip drawn): 선택됨·기본
-  "chip-ink": { folder: "retrospective", outset: 4, slice: 20 },
-  "chip-line": { folder: "retrospective", outset: 4, slice: 20 },
+  // 원본 높이 40px에서 위아래 19px씩 보존해 세로 변으로 반복할 2px을 남긴다.
+  "chip-ink": { folder: "retrospective", outset: 4, slice: 19, pill: true },
+  "chip-line": { folder: "retrospective", outset: 4, slice: 19, pill: true },
 };
 
 // 부모 요소에 relative가 있어야 한다. 부모에는 border를 주지 않는다(선이 이 이미지로 대신 그려진다).
@@ -45,7 +46,9 @@ const BORDERS = {
 // color는 원본의 투명도를 그대로 사용해 색만 바꾼다. 선의 두께·굴곡은 변경하지 않는다.
 export default function DrawnBorder({ variant, repeat = "stretch", color }) {
   const colorFilterId = useId();
-  const { folder, outset, slice, asset = variant } = BORDERS[variant];
+  const { folder, outset, slice, pill, asset = variant } = BORDERS[variant];
+  // 칩의 모서리는 실제 높이와 함께 커져야 배경의 rounded-full과 곡률이 맞는다.
+  const borderWidth = pill ? `calc((var(--drawn-border-height, 32px) + ${outset * 2}px) / 2 - 1px)` : slice;
 
   return (
     <>
@@ -66,10 +69,10 @@ export default function DrawnBorder({ variant, repeat = "stretch", color }) {
           inset: -outset,
           borderStyle: "solid",
           borderColor: "transparent",
-          borderWidth: slice,
+          borderWidth,
           borderImageSource: `url(/images/${folder}/border-${asset}.png)`,
           borderImageSlice: slice * IMAGE_SCALE,
-          borderImageWidth: `${slice}px`,
+          borderImageWidth: pill ? borderWidth : `${slice}px`,
           borderImageRepeat: repeat,
           filter: color ? `url(#${colorFilterId})` : undefined,
         }}

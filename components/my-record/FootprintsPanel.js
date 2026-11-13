@@ -22,6 +22,7 @@ export default function FootprintsPanel({ sections, weeks, selectedWeek, section
         {chips.map(({ id, label }) => (
           <Chip
             key={id}
+            drawn
             size="sm"
             selected={id === sectionId}
             onClick={() => {
