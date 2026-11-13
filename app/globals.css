@@ -256,6 +256,29 @@ body {
 .story-card-edit-form > label > span:first-child,
 .story-card-edit-form [role="group"] > p { color: #4a5163; }
 
+/* 매칭 화면의 공통 필드는 다른 페이지의 입력 크기를 바꾸지 않고 시안에 맞춘다. */
+.matching-form > label,
+.matching-form > .grid > label { gap: 6px; }
+.matching-form > label > span:first-child,
+.matching-form > .grid > label > span:first-child {
+  color: var(--color-ink-subtle);
+  line-height: 20.8px;
+}
+.matching-form input[name="company"],
+.matching-form input[name="role"] { height: 50px; }
+.matching-form textarea { line-height: 24px; }
+.matching-form textarea[name="jd"] { height: 122px; }
+.matching-form textarea[name="preferences"],
+.matching-form textarea[name="companyInfo"] { height: 98px; }
+.matching-form textarea[name^="question-"] { height: 74px; min-width: 0; }
+.matching-form input::placeholder,
+.matching-form textarea::placeholder { color: var(--color-ink-300); }
+.matching-attachments label:has(input[type="file"]) {
+  border-radius: 9999px;
+  border-color: var(--color-ink-300);
+}
+.matching-search:disabled > span[aria-hidden="true"] { opacity: 0.25; }
+
 /* Figma 홈 모션: 별은 회전하지 않고 밝기와 크기만 변한다. */
 @keyframes home-star-twinkle {
   0%, 100% { opacity: 1; scale: 1; }

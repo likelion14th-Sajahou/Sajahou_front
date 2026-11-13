@@ -32,7 +32,7 @@ const VARIANT_CLASSES = {
 const VARIANT_BORDERS = {
   soft: { md: "pill-cream" },
   inverse: { md: "pill-white" },
-  ink: { md: "pill-ink" },
+  ink: { md: "pill-ink", sm: "pill-ink-sm" },
   "ink-outline": { md: "pill-ink", sm: "pill-ink-sm" },
   "inverse-muted": { md: "pill-muted" },
   cta: { md: "pill-yellow" },
@@ -50,6 +50,7 @@ export default function Button({
   href,
   type = "button",
   className = "",
+  borderColor,
   children,
   ...rest
 }) {
@@ -60,7 +61,7 @@ export default function Button({
   const content = (
     <>
       {children}
-      {border && <DrawnBorder variant={border} />}
+      {border && <DrawnBorder variant={border} color={borderColor} />}
     </>
   );
 

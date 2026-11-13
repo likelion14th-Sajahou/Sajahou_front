@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useAuth } from "@/components/layout/AuthProvider";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
 import { saveEditedAnswer } from "@/lib/matchingApi";
@@ -111,7 +112,7 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
   return (
     <div className="pt-10">
       <section aria-labelledby="matching-competencies">
-        <div className="mb-4 flex items-baseline gap-3">
+        <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h2 id="matching-competencies" ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-[24px] tracking-[-0.48px] outline-none">공고가 원하는 역량</h2>
           <p className="text-label text-ink-subtle">공고·우대사항·인재상에서 찾았어요</p>
         </div>
@@ -119,16 +120,17 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
         {posting.noCompetencyFound || !posting.competencies.length ? (
           <p className="text-body-sm text-ink-subtle">주요 업무나 우대사항을 조금 더 넣어 주세요</p>
         ) : (
-          <ul className="grid grid-cols-2 gap-x-10">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {/* 카드 수는 서버가 고정 역량 목록(C-06)으로 센 값이라 나의 사자록의 역량 필터 결과와 같다. */}
             {posting.competencies.map(({ competencyId, name, evidenceQuote, cardCount }) => (
-              <li key={competencyId} className="border-b border-line px-0.5 py-3.5">
+              <li key={competencyId} className="relative min-w-0 rounded-2xl bg-white px-[18px] py-3.5">
+                <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink-300)" />
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-[16px]">#{name}</h3>
+                  <h3 className="text-[17px] leading-[27.2px]">{name}</h3>
                   {/* N장 보기(M-07): 나의 사자록 스토리 카드에서 이 역량 카드만 보여 준다. '없음'은 누를 수 없다. */}
                   {cardCount > 0 ? (
                     <Link href={recordHref(new URLSearchParams(), { tab: "cards", competencyId })} className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${name} 카드 ${cardCount}장 보기`}>
-                      <Badge tone={getCountTone(cardCount)} size="count">{cardCount}장 보기 →</Badge>
+                      <Badge tone={getCountTone(cardCount)} size="count" className="bg-yellow-400! text-ink-950!">{cardCount}장 보기 →</Badge>
                     </Link>
                   ) : <Badge tone={getCountTone(cardCount)} size="count">없음</Badge>}
                 </div>
@@ -138,10 +140,10 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
           </ul>
         )}
       </section>
-      <section aria-labelledby="matching-answers" className="mt-24 flex flex-col gap-7 border-t-2 border-dashed border-[#d9d4ca] pt-12">
+      <section aria-labelledby="matching-answers" className="mt-14 flex flex-col gap-7 border-t-2 border-dashed border-line-medium pt-12">
         <div className="flex items-center justify-between gap-4">
           <h2 id="matching-answers" className="text-[24px] tracking-[-0.48px]">문항별로 쓸 경험</h2>
-          <Button size="sm" onClick={copyAll}>전체 답 복사</Button>
+          <Button variant="ink" size="sm" onClick={copyAll}>전체 답 복사</Button>
         </div>
         {posting.questions.map((question) => (
           <MatchingAnswerCard

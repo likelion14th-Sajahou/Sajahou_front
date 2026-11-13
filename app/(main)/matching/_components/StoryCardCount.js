@@ -20,5 +20,5 @@ export default function StoryCardCount() {
     return () => controller.abort();
   }, [isAuthenticated, authenticatedRequest]);
 
-  return <p className="text-[26px] leading-[1.2]">{isAuthenticated && count !== null ? count : "—"}</p>;
+  return <p className="text-[30px] leading-9">{isAuthenticated && count !== null ? count : "—"}</p>;
 }
