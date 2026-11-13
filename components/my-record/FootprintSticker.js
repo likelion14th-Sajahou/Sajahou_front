@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { projectBadgeImage } from "@/lib/stickerBadges";
+import { projectStickerForWeek } from "@/lib/projectStickers";
 
 // HTML의 8종 순서. 기존 Figma 공용 스티커를 사용하고 없는 두 모양만 보충한다.
 const STICKERS = [
@@ -16,7 +16,7 @@ export function CurrentWeekSticker({ small = false }) {
 
 export default function FootprintSticker({ week, isProjectRecap = false, size }) {
   const src = isProjectRecap
-    ? projectBadgeImage(week <= 13 ? "IDEATHON" : week <= 27 ? "HACKATHON" : "central-hackathon")
+    ? projectStickerForWeek(week).image
     : `/images/stickers/${STICKERS[week % STICKERS.length]}.png`;
   const dimension = size ?? (isProjectRecap ? 34 : 26);
 

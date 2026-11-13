@@ -55,11 +55,11 @@ export default function FootprintTimeline({
     `${startWeek - firstWeek + 1} / span ${endWeek - startWeek + 1}`;
 
   return (
-    <div className="relative w-full rounded-[28px] border-2 border-transparent bg-white">
+    <div className="relative w-full rounded-[28px] border-2 border-transparent bg-white px-5 pt-6 pb-4">
       <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />
       <div
         ref={scrollerRef}
-        className="relative w-full overflow-x-auto rounded-[26px] px-5 pt-6 pb-4"
+        className="relative w-full overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         <div
           className={`grid gap-x-1 gap-y-2.5 ${
@@ -100,7 +100,7 @@ export default function FootprintTimeline({
                 onClick={() => onSelectWeek(week.week)}
                 className={`flex w-[38px] cursor-pointer flex-col items-center gap-1.5 self-end justify-self-center rounded-xl pt-1.5 pb-1 ${
                   week.status === "current" ? "bg-white shadow-[inset_0_0_0_2px_var(--color-ink)]"
-                    : isSelected ? "bg-white shadow-[0_0_0_1.5px_var(--color-ink)]" : ""
+                    : isSelected ? "bg-white shadow-[inset_0_0_0_1.5px_var(--color-ink)]" : ""
                 }`}
                 style={{ gridColumn: week.week - firstWeek + 1,
                   gridRow: showSectionNames ? 3 : sections.some(({ isProject }) => isProject) ? 2 : 1 }}
