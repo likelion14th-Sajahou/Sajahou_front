@@ -9,6 +9,7 @@ import ReviewContent from "./ReviewContent";
 import CompleteContent from "./CompleteContent";
 import RetrospectiveWeekGate from "./RetrospectiveWeekGate";
 import RetrospectiveDeadlines from "./RetrospectiveDeadlines";
+import RetroSideCard from "./RetroSideCard";
 
 // 시작 카드의 별 장식(Figma 위치). 가로 위치는 카드 폭(560)에 대한 비율로 둬서 카드 폭이 달라도 비슷한 자리에 놓인다.
 const START_CARD_STARS = [
@@ -61,17 +62,14 @@ export default async function RetrospectiveContent({ searchParams }) {
         </section>
 
         {/* 마감일 카드(Figma '마감일 카드'): 노란 굵은 테두리, 별 장식 */}
-        <aside aria-labelledby="deadline-title" className="relative rounded-[24px] bg-white p-6">
-          <DrawnBorder variant="deadline-card" />
-          <div className="relative flex items-center justify-between border-b border-ink pb-3">
-            <h2 id="deadline-title" className="font-display text-[18px] leading-[28.8px] tracking-[-0.18px] text-ink">마감일</h2>
-            <span aria-hidden="true" className="relative mr-1 size-5">
-              <Image src="/images/stars/star-03.png" alt="" width={20} height={20} />
-              <Image src="/images/stars/star-03.png" alt="" width={11} height={11} className="absolute -top-[7px] -left-2" />
-            </span>
-          </div>
+        <RetroSideCard titleId="deadline-title" title="마감일" action={
+          <span aria-hidden="true" className="relative mr-1 size-5">
+            <Image src="/images/stars/star-03.png" alt="" width={20} height={20} />
+            <Image src="/images/stars/star-03.png" alt="" width={11} height={11} className="absolute -top-[7px] -left-2" />
+          </span>
+        }>
           <RetrospectiveDeadlines />
-        </aside>
+        </RetroSideCard>
       </div>
     </RetrospectiveWeekGate>
   );

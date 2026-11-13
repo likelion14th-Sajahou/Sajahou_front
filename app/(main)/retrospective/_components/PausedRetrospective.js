@@ -5,8 +5,8 @@ import Image from "next/image";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
-import DrawnBorder from "@/components/ui/DrawnBorder";
 import { setRetrospectiveRest } from "@/lib/retrospectiveApi";
+import RetroResultCard from "./RetroResultCard";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
@@ -41,11 +41,7 @@ export default function PausedRetrospective() {
 
   // 휴회 카드(Figma '[디] 02 … 데스크톱 1450'): 제목과 같은 896px, 진한 울퉁불퉁한 테두리, 밤하늘 구름 캐릭터.
   return (
-    <section
-      aria-labelledby="paused-title"
-      className="relative mx-auto mt-10 flex w-full max-w-[896px] flex-col items-center gap-6 rounded-[32px] bg-white px-6 py-12 text-center sm:px-8 sm:py-14"
-    >
-      <DrawnBorder variant="paused-card" />
+    <RetroResultCard titleId="paused-title" className="mt-10 max-w-[896px] gap-6 px-6 py-12 sm:px-8 sm:py-14">
       <Image src="/images/characters/cloud-night-sky.png" alt="" width={166} height={111} />
       <div className="flex flex-col items-center gap-1.5">
         <h2 id="paused-title" className="font-display text-[24px] leading-[38.4px] tracking-[-0.48px] text-balance break-keep text-ink">
@@ -62,6 +58,6 @@ export default function PausedRetrospective() {
         </Button>
       </div>
       {error && <p role="alert" className="text-body-sm text-error">{error}</p>}
-    </section>
+    </RetroResultCard>
   );
 }

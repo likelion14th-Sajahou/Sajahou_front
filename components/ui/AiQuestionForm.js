@@ -12,9 +12,32 @@ import AiPromptHeader from "./AiPromptHeader";
 // - 답 보관: answer·onAnswerChange를 넘기면 쓰는 화면이 답을 들고 있고, 없으면 폼 안에서 들고 있다.
 //   폼 안에서 들 때는 질문이 바뀌면 입력을 비우도록 쓰는 곳에서 질문별 key를 준다.
 // - size: "md"는 카드 안의 h3(20px), "lg"는 화면의 주 제목인 h2(24px, 회고 04 시안)다.
+// - tone: "dark"는 진한 카드 위(회고 AI 질문, 11/13 디자인)다. 질문은 흰 삼립호빵체, 답 칸은 Pretendard,
+//   링크는 흰 밑줄, 버튼은 노란 버튼이다. 프로젝트 화면은 아직 "light"(기존 모양)를 쓴다.
 const QUESTION_SIZES = {
-  md: { as: "h3", className: "text-title leading-[29px] tracking-[-0.2px] text-ink" },
-  lg: { as: "h2", className: "text-[24px] leading-[1.45] tracking-[-0.24px] text-ink" },
+  md: { as: "h3", className: "text-title leading-[29px] tracking-[-0.2px]" },
+  lg: { as: "h2", className: "text-[24px] leading-[1.45] tracking-[-0.24px]" },
+};
+
+const TONES = {
+  light: {
+    question: "text-ink",
+    source: "bg-canvas text-ink-muted",
+    label: undefined,
+    answer: "h-[98px]",
+    link: "link",
+    separator: "bg-line",
+    button: "primary",
+  },
+  dark: {
+    question: "font-display text-white",
+    source: "bg-white/10 leading-[22.4px] text-locked",
+    label: "text-label leading-[20.8px] font-bold text-white",
+    answer: "h-[98px] font-input leading-6 text-ink-strong!",
+    link: "inverse-border",
+    separator: "bg-ink-600",
+    button: "cta",
+  },
 };
 
 export default function AiQuestionForm({
@@ -25,6 +48,7 @@ export default function AiQuestionForm({
   question,
   questionId,
   size = "md",
+  tone = "light",
   placeholder,
   initialAnswer = "",
   answer: controlledAnswer,
@@ -40,6 +64,7 @@ export default function AiQuestionForm({
   const answer = isControlled ? controlledAnswer : ownAnswer;
   const { toast, showToast, hideToast } = useToast();
   const { as: QuestionHeading, className: questionClassName } = QUESTION_SIZES[size];
+  const styles = TONES[tone];
 
   function changeAnswer(value) {
     if (isControlled) {
@@ -60,29 +85,30 @@ export default function AiQuestionForm({
 
   return (
     <div className="flex flex-col gap-4">
-      <AiPromptHeader category={category} progress={progress} progressLabel={progressLabel} />
+      <AiPromptHeader category={category} progress={progress} progressLabel={progressLabel} tone={tone} />
       {/* 근거 문장이 없는 질문(회고 API의 quote가 null)은 인용 칸을 그리지 않는다. */}
-      {source && <p className="rounded-xl bg-canvas px-3.5 py-2.5 text-body-sm text-ink-muted">{source}</p>}
-      <QuestionHeading id={questionId} className={questionClassName}>{question}</QuestionHeading>
+      {source && <p className={`rounded-xl px-3.5 py-2.5 text-body-sm ${styles.source}`}>{source}</p>}
+      <QuestionHeading id={questionId} className={`${questionClassName} ${styles.question}`}>{question}</QuestionHeading>
       <TextField
         label="내 답변"
+        labelClassName={styles.label}
         multiline
         name="answer"
         placeholder={placeholder}
         value={answer}
         onChange={(event) => changeAnswer(event.target.value)}
-        className="h-[98px]"
+        className={styles.answer}
       />
       <div className="flex items-center gap-3">
         {backLabel && (
           <>
             {/* 다른 단계로 가는 뒤로 가기는 링크(backHref), 같은 화면 안의 이동은 버튼(onBack)이다. */}
-            <TextLink href={backHref} onClick={onBack}>{backLabel}</TextLink>
-            <span aria-hidden="true" className="h-4 w-px bg-line" />
+            <TextLink variant={styles.link} href={backHref} onClick={onBack}>{backLabel}</TextLink>
+            <span aria-hidden="true" className={`h-4 w-px ${styles.separator}`} />
           </>
         )}
-        <TextLink onClick={onSkip}>건너뛰기</TextLink>
-        <Button className="ml-auto" onClick={submitAnswer}>답하고 다음 →</Button>
+        <TextLink variant={styles.link} onClick={onSkip}>건너뛰기</TextLink>
+        <Button variant={styles.button} className="ml-auto" onClick={submitAnswer}>답하고 다음 →</Button>
       </div>
       <Toast toast={toast} onDismiss={hideToast} />
     </div>

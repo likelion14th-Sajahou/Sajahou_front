@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import MockDataProvider from "@/components/layout/MockDataProvider";
 import AuthProvider from "@/components/layout/AuthProvider";
 import ScrollToTopOnNavigate from "@/components/layout/ScrollToTopOnNavigate";
-import { displayFont, notoSansKr, npsFont } from "./fonts";
+import { displayFont, notoSansKr, npsFont, pretendardFont } from "./fonts";
 import "./globals.css";
 
 export const metadata = {
@@ -13,7 +13,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="ko"
-      className={`${npsFont.variable} ${displayFont.variable} ${notoSansKr.variable} h-full antialiased`}
+      className={`${npsFont.variable} ${displayFont.variable} ${notoSansKr.variable} ${pretendardFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Suspense fallback={null}>

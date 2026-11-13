@@ -16,6 +16,10 @@ export default function CompetencyTagPicker({
   competencies,
   selectedTags,
   listClassName = "gap-x-[3px] gap-y-1",
+  // 라벨·칩 모양을 화면 디자인에 맞출 때 준다(회고 검토: 흐린 라벨, 진한 회색 테두리 칩).
+  labelClassName = "text-ink-muted",
+  hintClassName = "text-ink-subtle",
+  chipClassName = "",
   onChange,
   onLimit,
 }) {
@@ -35,8 +39,8 @@ export default function CompetencyTagPicker({
 
   return (
     <div role="group" aria-labelledby={id} className="flex flex-col gap-1.5">
-      <p id={id} className="text-label text-ink-muted">
-        역량 태그 <span className="text-ink-subtle">· 이 경험에 맞는 역량을 직접 골라요 (1~3개)</span>
+      <p id={id} className={`text-label ${labelClassName}`}>
+        역량 태그 <span className={hintClassName}>· 이 경험에 맞는 역량을 직접 골라요 (1~3개)</span>
       </p>
       <div className={`flex flex-wrap ${listClassName}`}>
         {competencies.map(({ name, description }) => (
@@ -45,6 +49,7 @@ export default function CompetencyTagPicker({
             size="sm"
             selected={selectedTags.includes(name)}
             title={description}
+            className={chipClassName}
             onClick={() => toggleTag(name)}
           >
             #{name}

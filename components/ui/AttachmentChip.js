@@ -26,15 +26,15 @@ export function ChipStatus({ tone = "neutral", children }) {
 }
 
 // status: 칩 안 이름 뒤에 붙는 표시(ChipStatus). warning이면 칩 배경을 주황으로 바꾼다.
-// badgeTone: 형식 표시 색을 종류와 상관없이 하나로 맞출 때 준다(회고 자료 화면은 plain).
-export default function AttachmentChip({ as: Tag = "li", kind, name, status, warning = false, badgeTone, onRemove }) {
+// showKind: 형식 표시(PDF·노션 MD 등)를 붙일지. 회고 자료 화면(11/13 디자인)은 이름만 보여 준다.
+export default function AttachmentChip({ as: Tag = "li", kind, name, status, warning = false, showKind = true, onRemove }) {
   const { label, tone } = ATTACHMENT_BADGES[kind];
 
   return (
     <Tag
       className={`inline-flex min-w-0 max-w-full items-center gap-2 rounded-xl border border-line py-1.5 pr-2 pl-2.5 text-label text-ink ${warning ? "bg-[#fff1ea]" : "bg-white"}`}
     >
-      <Badge tone={badgeTone ?? tone} size="xs">{label}</Badge>
+      {showKind && <Badge tone={tone} size="xs">{label}</Badge>}
       {/* 긴 이름은 데스크톱에서 말줄임하고, 좁은 화면에서는 줄을 바꿔 모두 보여 준다. */}
       <span className="min-w-0 truncate max-sm:overflow-visible max-sm:break-all max-sm:whitespace-normal" title={name}>
         {name}

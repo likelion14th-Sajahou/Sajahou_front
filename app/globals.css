@@ -9,9 +9,13 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* 본문 NPS 폰트, 제목·Primary 버튼 산돌 삼립호빵체(font-display), Secondary 버튼 Noto Sans KR(font-noto) */
+  /*
+   * 글꼴 규칙: 제목·버튼은 산돌 삼립호빵체(font-display), 서비스가 주는 본문·설명은 NPS 폰트(font-sans),
+   * 사용자가 직접 입력하는 글은 Pretendard(font-input). Secondary 버튼('데모 계정으로 둘러보기')은 Noto Sans KR(font-noto).
+   */
   --font-sans: var(--font-nps);
   --font-display: var(--font-samliphopang);
+  --font-input: var(--font-pretendard);
   --font-noto: var(--font-noto-sans-kr);
 }
 
@@ -22,6 +26,8 @@
 @theme {
   /* ink-900 (메인 글자색) */
   --color-ink: #3b3c42;
+  /* 회고 자료 화면의 섹션 제목·입력한 글처럼 더 진한 글자 (디자인 팔레트에 없음, 11/13 디자인) */
+  --color-ink-strong: #1f2433;
   /* ink-900 */
   --color-ink-soft: #3b3c42;
   /* ink-800 */
@@ -30,6 +36,10 @@
   --color-ink-subtle: #5e5f66;
   /* ink-500 */
   --color-placeholder: #707178;
+  /* 입력칸 이름, 업로드 칸 보조 문구, 형식 표시처럼 흐린 안내 글자 (디자인 팔레트에 없음, 11/13 디자인) */
+  --color-ink-faint: #8a8f9a;
+  /* 칸 이름 뒤의 보조 설명('· 선택' 등) (디자인 팔레트에 없음, 11/13 디자인) */
+  --color-ink-faintest: #a3a6ad;
   /* bg/locked (디자인의 테두리·구분선 색) */
   --color-line: #e2e2de;
   /* 빈 상태 점선 상자, 카드의 빈칸 표시 (디자인 팔레트에 없음) */
@@ -69,6 +79,8 @@
   /* error-tint */
   --color-tint-red: #fdecec;
   --color-tint-red-ink: #b33a1f;
+  /* 확인이 필요한 안내(자료가 바뀌었어요)의 바탕. 테두리는 shape-peach (11/13 디자인) */
+  --color-tint-peach: #fff4e5;
   /* 지금 답하는 질문 칸의 배경 */
   --color-tint-orange: #fff0e6;
   --color-tint-green: #e5f3e1;
@@ -206,6 +218,26 @@ body {
 
 @media (prefers-reduced-motion: no-preference) {
   .step-wobble { animation: step-wobble 1.6s ease-in-out infinite; }
+}
+
+/* 회고 완료 카드의 구름 캐릭터가 튀어나오듯 나타난다(11/13 디자인). */
+@keyframes done-pop {
+  0% { transform: scale(0) rotate(-30deg); }
+  60% { transform: scale(1.15) rotate(8deg); }
+  100% { transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .done-pop { animation: done-pop 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) both; }
+}
+
+/* AI 질문 진행 목록의 '지금 답하는 중' 점이 천천히 깜빡인다(11/13 디자인). */
+@keyframes question-blink {
+  50% { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .question-blink { animation: question-blink 1.4s ease-in-out infinite; }
 }
 
 /* 새 프로젝트 팝업에만 Figma의 필드 라벨·입력 크기를 적용한다. */

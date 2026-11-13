@@ -7,10 +7,11 @@ import Chip from "@/components/ui/Chip";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 import Image from "next/image";
 import TextField from "@/components/ui/TextField";
-import LinkInputRow from "@/components/ui/LinkInputRow";
+import LinkPasteField from "@/components/ui/LinkPasteField";
 import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
 import MaterialsChangeNotice from "./MaterialsChangeNotice";
+import RetroDarkCard from "./RetroDarkCard";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { useQuestionRequest } from "./useQuestionRequest";
@@ -41,15 +42,37 @@ function toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment,
   };
 }
 
+// 흐린 칸 이름 + 더 흐린 보조 설명('· 무엇을 배웠는지 적어보세요'). 서비스 문구라 본문 글꼴이다.
+function FieldLabel({ htmlFor, label, hint }) {
+  const Tag = htmlFor ? "label" : "p";
+  return (
+    <Tag htmlFor={htmlFor} className="text-label leading-5 text-ink-faint">
+      {label}
+      {hint && <span className="ml-0.5 text-caption text-ink-faintest"> · {hint}</span>}
+    </Tag>
+  );
+}
+
+// 사용자가 쓰는 칸이라 입력한 글은 Pretendard(font-input)다.
+function MaterialTextArea({ id, label, hint, className = "", ...props }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-2">
+      <FieldLabel htmlFor={id} label={label} hint={hint} />
+      <TextField multiline id={id} name={id} className={`font-input leading-6 text-ink-strong! ${className}`} {...props} />
+    </div>
+  );
+}
+
 const GENERATING_NOTICE = aiWaitingMessage("자료를 읽고 질문을 만들고 있어요");
 
-// 진한 자료 카드 안의 흰 섹션 카드(Figma). 접힌 상태(inactive: 실습 없음, 과제 나중에·없음)는 짧은 테두리 원본을 쓴다.
+// 진한 자료 카드 안의 흰 섹션 카드. 접힌 상태(inactive: 실습 없음, 과제 나중에·없음)는 짧은 테두리 원본을 쓴다.
+// 11/13 디자인: 섹션 제목(19px) > 입력한 글(15px) > 칸 이름(13px, 흐림) 순으로 위계를 둔다.
 function MaterialSection({ title, titleId, controls, inactive = false, children }) {
   return (
-    <section aria-labelledby={titleId} className="relative flex min-w-0 flex-col gap-3 rounded-[20px] bg-white px-5 py-[18px]">
+    <section aria-labelledby={titleId} className="relative flex min-w-0 flex-col gap-3.5 rounded-[20px] bg-white px-5 py-[18px]">
       <DrawnBorder variant={inactive ? "section-card-short" : "section-card"} />
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h3 id={titleId} className="shrink-0 font-display text-[16px] leading-[25.6px] text-ink">{title}</h3>
+        <h3 id={titleId} className="shrink-0 font-display text-[19px] leading-7 text-ink-strong">{title}</h3>
         {controls}
       </div>
       {children}
@@ -148,19 +171,15 @@ export default function MaterialsForm({ initialMaterials }) {
   }
 
   return (
-    // 자료 카드(Figma 'Section'): 진한 바탕 + 손그림 테두리. 안에 흰 섹션 카드가 쌓인다.
-    <section aria-labelledby="materials-title" className="relative flex min-w-0 flex-col gap-4 rounded-[24px] bg-ink-900 px-7 py-6">
-      <DrawnBorder variant="materials-card" />
-      <div className="font-display text-white">
-        <h2 id="materials-title" className="text-title leading-8 tracking-[-0.4px]">자료 올리기</h2>
-        <p className="text-label leading-[19.5px]">모두 선택이에요. 있는 것만 올려요.</p>
-      </div>
+    // 자료 카드(Figma 'Section'): 진한 카드 안에 흰 섹션 카드가 쌓인다.
+    <RetroDarkCard border="materials-card" aria-labelledby="materials-title">
+      <h2 id="materials-title" className="font-display text-title leading-8 tracking-[-0.4px] text-white">자료 올리기</h2>
 
       {/* 과제 회고는 같은 5단계지만 자료 단계에는 과제 칸만 있다(R-23). */}
       {!isAssignment && (
         <>
-          <MaterialSection title="세션 자료" titleId="session-materials-title" controls={<Badge tone="plain">PDF</Badge>}>
-            {attachments("sessionFiles", "+ 세션 PDF")}
+          <MaterialSection title="세션 자료" titleId="session-materials-title" controls={<Badge tone="plain" size="xs">PDF</Badge>}>
+            {attachments("sessionFiles", "세션 PDF 올리기")}
           </MaterialSection>
 
           <MaterialSection title="세션 중 실습이 있었나요?" titleId="practice-title" inactive={!hasPractice} controls={
@@ -172,11 +191,11 @@ export default function MaterialsForm({ initialMaterials }) {
           }>
             {hasPractice ? (
               <>
-                <TextField label="실습 내용 · 무엇을 배웠는지 적어보세요" multiline name="practice" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} className="h-[98px]" />
-                {attachments("practiceFiles", "+ 노션 ZIP · 캡처")}
+                <MaterialTextArea id="practice" label="실습 내용" hint="무엇을 배웠는지 적어보세요" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} className="h-[100px]" />
+                {attachments("practiceFiles", "노션 ZIP·캡처 올리기")}
               </>
             ) : (
-              <p className="text-label leading-[22.4px] break-keep text-ink-subtle">실습 질문은 건너뛰고 세션 내용만 물어볼게요.</p>
+              <p className="text-label leading-5 break-keep text-ink-subtle">실습 질문은 건너뛰고 세션 내용만 물어볼게요.</p>
             )}
           </MaterialSection>
         </>
@@ -195,19 +214,15 @@ export default function MaterialsForm({ initialMaterials }) {
       )}>
         {assignmentStatus === "record" ? (
           <>
-            <TextField label="과제 내용 · 코드나 에러 · 붙여넣기" multiline name="assignment" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} className="h-[130px] text-label! leading-[20.8px]!" />
-            <div className="flex min-w-0 flex-col gap-1.5">
-              <p className="font-display text-label leading-[20.8px] text-ink">과제 노션이나 Git을 올려보세요</p>
-              {attachments("assignmentFiles", "+ 파일 업로드", {
-                uploadOnNewLine: true,
+            <MaterialTextArea id="assignment" label="과제 내용 · 코드나 에러" hint="붙여넣기" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} className="h-[148px]" />
+            <div className="flex min-w-0 flex-col gap-2">
+              <FieldLabel label="과제 노션이나 Git을 올려보세요" />
+              {attachments("assignmentFiles", "과제 파일 올리기", {
                 children: (
-                  <LinkInputRow
-                    className="w-full sm:w-auto"
-                    buttonVariant="ink-outline"
-                    inputClassName="placeholder:text-ink-300!"
+                  <LinkPasteField
                     name="assignmentLink"
-                    aria-label="Git 링크"
-                    placeholder={part === "기획·디자인" ? "피그마·GitHub 링크" : "GitHub 링크 · github.com/아이디/저장소"}
+                    aria-label="과제 링크"
+                    placeholder="GitHub 링크 붙여넣기"
                     aria-invalid={Boolean(linkError)}
                     aria-describedby={linkError ? "assignment-link-error" : undefined}
                     value={link}
@@ -219,19 +234,18 @@ export default function MaterialsForm({ initialMaterials }) {
               {linkError && <p id="assignment-link-error" role="alert" className="text-label text-tint-red-ink">{linkError}</p>}
             </div>
             {part === "프론트엔드" && (
-              <TextField
-                label="받은 코드리뷰 · 짝이 남긴 코멘트 3개"
-                multiline
-                rows={7}
-                name="codeReview"
+              <MaterialTextArea
+                id="codeReview"
+                label="받은 코드리뷰"
+                hint="짝이 남긴 코멘트 3개"
                 value={materials.codeReview}
                 onChange={(event) => updateField("codeReview", event.target.value)}
-                className="min-h-[194px] max-[359px]:min-h-[266px] max-sm:resize-y min-[640px]:h-[98px] min-[640px]:min-h-0 min-[901px]:h-[146px] min-[1101px]:h-[98px]"
+                className="h-[100px]"
               />
             )}
           </>
         ) : (
-          <p className="text-label leading-[22.4px] break-keep text-ink-subtle">
+          <p className="text-label leading-5 break-keep text-ink-subtle">
             {assignmentStatus === "later"
               ? `과제는 ${deadlineLabels.assignment}까지 따로 써요. 세션 회고만 먼저 끝내요.`
               : "이번 주 과제는 없어요."}
@@ -240,11 +254,13 @@ export default function MaterialsForm({ initialMaterials }) {
       </MaterialSection>
 
       {!isAssignment && (
-        // 진한 카드 위라 라벨은 흰 글씨다. 입력칸은 손그림 테두리(Figma 'Text Area').
+        // 진한 카드 위라 칸 이름은 흰 글씨(보조 설명은 반투명)다. 입력칸은 손그림 테두리.
         <label className="flex flex-col gap-1.5">
-          <span className="font-display text-label leading-[20.8px] text-white">고민 메모 · 선택</span>
+          <span className="text-label leading-[20.8px] font-bold text-white">
+            고민 메모<span className="ml-0.5 text-caption font-normal text-white/50"> · 선택</span>
+          </span>
           <span className="relative block rounded-[14px]">
-            <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="block h-[74px] text-label! placeholder:text-ink-300!" />
+            <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="block h-[74px] font-input leading-6 text-ink-strong! placeholder:text-ink-300!" />
             <DrawnBorder variant="memo-field" />
           </span>
         </label>
@@ -277,6 +293,6 @@ export default function MaterialsForm({ initialMaterials }) {
           {files.pollingError} <TextLink variant="inverse" size="sm" onClick={files.retryPolling}>상태 다시 확인</TextLink>
         </p>
       )}
-    </section>
+    </RetroDarkCard>
   );
 }

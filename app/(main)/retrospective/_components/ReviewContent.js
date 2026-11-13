@@ -7,7 +7,7 @@ import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
@@ -18,18 +18,19 @@ import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { copyText } from "@/lib/clipboard";
-import CardTitle from "@/components/ui/CardTitle";
-import ActionFooter from "@/components/ui/ActionFooter";
+import RetroDarkCard from "./RetroDarkCard";
 import { getAiErrorMessage, getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
-// API 19의 초안 값을 편집하고 API 23으로 저장하는 6개 필드다(R-20).
+// API 19의 초안 값을 편집하고 API 23으로 저장하는 6개 필드다(R-20). 높이와 안내 문구는 11/13 디자인(프로토타입)을 따른다.
+// blank: 칸이 비어 있을 때 그 칸 바로 아래에 띄우는 안내(⚑). 행동·결과·배운 점은 프로토타입 문구이고,
+// 제목·상황·이유는 같은 말투로 새로 썼다. 칸을 채우면 안내는 바로 사라진다.
 const STORY_FIELDS = [
-  { name: "title", label: "제목" },
-  { name: "situation", label: "상황", height: "h-[76px]" },
-  { name: "action", label: "행동", height: "h-[172px]" },
-  { name: "reason", label: "이유", height: "h-[76px]", placeholder: "왜 그렇게 했는지 한 줄 남겨 주세요" },
-  { name: "result", label: "결과", height: "h-[76px]" },
-  { name: "learned", label: "배운 점", height: "h-[76px]" },
+  { name: "title", label: "제목", blank: "제목이 비어 있어요. 이 경험을 한 줄로 이름 붙여 주세요." },
+  { name: "situation", label: "상황", height: "h-[72px]", blank: "상황은 기록에서 찾지 못해 비워 뒀어요. 어떤 상황이었는지 한 줄 남겨 주세요." },
+  { name: "action", label: "행동", height: "h-[120px]", placeholder: "근거를 더 추가할 수 있어요", blank: "행동이 기록에 부족해요. 근거를 더 추가할 수 있어요." },
+  { name: "reason", label: "이유", height: "h-[72px]", placeholder: "왜 그렇게 했는지 한 줄 남겨 주세요", blank: "이유는 기록에서 찾지 못해 비워 뒀어요. 왜 그렇게 했는지 한 줄 남겨 주세요." },
+  { name: "result", label: "결과", height: "h-[72px]", placeholder: "근거를 더 추가할 수 있어요 · 기록에 없는 수치는 넣지 않았어요", blank: "결과나 수치는 기록에서 찾지 못해 비워 뒀어요. 근거를 더 추가할 수 있어요." },
+  { name: "learned", label: "배운 점", height: "h-[72px]", placeholder: "다음에도 가져갈 한 가지를 남겨 주세요", blank: "느낀 점은 비워 뒀어요. 직접 한 줄 남겨 주세요." },
 ];
 
 function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
@@ -46,8 +47,6 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   const savingCardRef = useRef(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const { toast, showToast, hideToast } = useToast();
-  // 비운 칸은 바로 안내에서 빠지거나 생기도록 입력값으로 계산한다.
-  const blankLabels = STORY_FIELDS.filter(({ name }) => name !== "title" && !fields[name].trim()).map(({ label }) => label);
 
   const cardChanges = () => ({
     ...fields,
@@ -131,70 +130,91 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
 
   return (
     <>
-      <fieldset disabled={isBusy} aria-busy={isBusy} className="mt-7 grid min-w-0 grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-start gap-5">
-        <Card as="section" size="md" className="flex min-w-0 flex-col gap-3" aria-labelledby="review-retrospective-title">
-          <CardTitle id="review-retrospective-title" action={<Button size="sm" onClick={copyRetrospective}>회고록 복사</Button>}>
-            노션용 회고록
-          </CardTitle>
-          <p id="review-retrospective-help" className="text-label leading-[1.5] text-ink-subtle">
-            고칠 곳은 바로 고쳐요. 복사하면 노션에 그대로 붙여 넣을 수 있어요.
-          </p>
-          <TextField
-            multiline
-            aria-label="노션용 회고록"
-            aria-describedby="review-retrospective-help"
-            name="retrospective"
-            value={fullMarkdown}
-            onChange={(event) => setFullMarkdown(event.target.value)}
-            className="h-[560px] text-[14.5px] leading-[1.75]"
-          />
-        </Card>
-
-        <Card as="section" size="md" className="flex min-w-0 flex-col gap-3" aria-labelledby="review-story-title">
-          <CardTitle id="review-story-title" action={<ShapeCharacter shape="square" color="green" size={16} face="none" cropped />}>
-            스토리 카드 초안
-          </CardTitle>
-          {/* 기록에서 찾지 못한 칸은 지어내지 않고 비워 둔다(R-20). */}
-          <BlankFieldsNotice labels={blankLabels} />
-          {STORY_FIELDS.map(({ name, label, height, placeholder }) => (
-            <TextField
-              key={name}
-              label={label}
-              name={name}
-              multiline={name !== "title"}
-              value={fields[name]}
-              placeholder={placeholder}
-              onChange={(event) => setFields((previous) => ({ ...previous, [name]: event.target.value }))}
-              className={height ?? ""}
-            />
-          ))}
-          <CompetencyTagPicker
-            id="review-tags-label"
-            competencies={competencyItems}
-            selectedTags={selectedTags}
-            listClassName=""
-            onChange={setSelectedTags}
-            onLimit={showToast}
-          />
-          <div className="text-label text-ink-muted">
-            <h3 className="mb-1.5">기록에서 확인한 근거</h3>
-            <ul className="flex flex-col gap-1">
-              {(initialCard.evidenceSummary ?? []).map((item) => (
-                <li key={item} className="relative pl-3.5 before:absolute before:top-[8.44px] before:left-0 before:size-1.5 before:rounded-full before:bg-shape-green">{item}</li>
-              ))}
-            </ul>
+      {/* 왼쪽은 진한 '노션용 회고록' 카드, 오른쪽은 연회색 '스토리 카드 초안' 카드다(11/13 디자인, 568:496). */}
+      <fieldset disabled={isBusy} aria-busy={isBusy} className="mt-10 grid min-w-0 grid-cols-[minmax(0,568fr)_minmax(0,496fr)] items-start gap-6">
+        <RetroDarkCard border="materials-card" aria-labelledby="review-retrospective-title">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 id="review-retrospective-title" className="font-display text-title leading-8 tracking-[-0.4px] text-white">노션용 회고록</h2>
+              <p id="review-retrospective-help" className="mt-1 text-label leading-5 text-locked">
+                고칠 곳은 바로 고쳐요. 복사하면 노션에 그대로 붙여 넣을 수 있어요.
+              </p>
+            </div>
+            <Button variant="cta" className="shrink-0" onClick={copyRetrospective}>회고록 복사</Button>
           </div>
-          <ActionFooter>
+          {/* 회고록은 손그림 테두리의 흰 상자 안에 둔다(자료 화면의 흰 섹션과 같은 선). 고칠 수 있는 칸이라 글은 Pretendard다. */}
+          <div className="relative rounded-[20px] bg-white p-1">
+            <DrawnBorder variant="section-card" />
+            <TextField
+              multiline
+              appearance="plain"
+              aria-label="노션용 회고록"
+              aria-describedby="review-retrospective-help"
+              name="retrospective"
+              value={fullMarkdown}
+              onChange={(event) => setFullMarkdown(event.target.value)}
+              className="block h-[900px] font-input leading-6 text-ink-strong!"
+            />
+          </div>
+        </RetroDarkCard>
+
+        <section aria-labelledby="review-story-title" className="relative flex min-w-0 flex-col gap-3.5 rounded-[28px] bg-divider p-6">
+          <DrawnBorder variant="materials-card" />
+          <h2 id="review-story-title" className="font-display text-title leading-8 tracking-[-0.4px] text-ink-strong">스토리 카드 초안</h2>
+          {/* 기록에서 찾지 못한 칸은 지어내지 않고 비워 둔다(R-20). */}
+          <div className="flex flex-col gap-4">
+            {STORY_FIELDS.map(({ name, label, height, placeholder, blank }) => {
+              // 비운 칸은 바로 안내가 생기고, 채우면 사라지도록 입력값으로 정한다.
+              const isBlank = !fields[name].trim();
+              return (
+                <div key={name} className="flex flex-col gap-2">
+                  <TextField
+                    label={label}
+                    labelClassName="text-label leading-5 text-ink-subtle"
+                    appearance="outlined"
+                    name={name}
+                    multiline={name !== "title"}
+                    value={fields[name]}
+                    placeholder={placeholder}
+                    onChange={(event) => setFields((previous) => ({ ...previous, [name]: event.target.value }))}
+                    aria-describedby={isBlank ? `${name}-blank` : undefined}
+                    className={`font-input leading-6 text-ink-strong! ${height ?? ""}`}
+                  />
+                  {isBlank && <BlankFieldsNotice id={`${name}-blank`}>{blank}</BlankFieldsNotice>}
+                </div>
+              );
+            })}
+            <CompetencyTagPicker
+              id="review-tags-label"
+              competencies={competencyItems}
+              selectedTags={selectedTags}
+              listClassName="gap-x-1.5 gap-y-2"
+              labelClassName="text-ink-subtle"
+              hintClassName="text-caption text-ink-faintest"
+              chipClassName="font-display border-ink-300! aria-pressed:border-ink!"
+              onChange={setSelectedTags}
+              onLimit={showToast}
+            />
+            <div className="text-label leading-[20.8px]">
+              <h3 className="mb-1.5 text-ink-subtle">기록에서 확인한 근거</h3>
+              <ul className="flex flex-col gap-1 text-ink">
+                {(initialCard.evidenceSummary ?? []).map((item) => (
+                  <li key={item} className="relative pl-3.5 before:absolute before:top-[8.4px] before:left-0 before:size-1.5 before:rounded-full before:bg-tint-green-ink">{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-2.5 border-t border-[#d9d7d1] pt-4">
             {/* 모든 질문에 답했으면 질문 화면이 질문 끝(고치기 목록)으로 열린다(R-17). */}
             <TextLink onClick={backToQuestions} disabled={isBusy}>← 질문으로</TextLink>
-            <div className="flex gap-2">
-              <Button variant="secondary" onClick={saveLater} disabled={isBusy} aria-busy={isBusy && !isCompleting}>{isBusy && !isCompleting ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
-              <Button variant="accent" onClick={complete} disabled={isBusy} aria-busy={isCompleting}>{isCompleting ? "저장하는 중…" : "저장하고 사자록에 추가"}</Button>
+            <div className="ml-auto flex gap-2">
+              <Button variant="ink-outline" onClick={saveLater} disabled={isBusy} aria-busy={isBusy && !isCompleting}>{isBusy && !isCompleting ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
+              <Button variant="cta-ink" onClick={complete} disabled={isBusy} aria-busy={isCompleting}>{isCompleting ? "저장하는 중…" : "저장하고 사자록에 추가"}</Button>
             </div>
-          </ActionFooter>
+          </div>
           {/* 버튼 줄에 자리가 없어 바로 아래 오른쪽에 둔다. 저장 전에는 자리를 차지하지 않는다. */}
-          <SavedTime label={savedLabel} className="-mt-2 self-end empty:hidden" />
-        </Card>
+          <SavedTime label={savedLabel} className="-mt-1.5 self-end empty:hidden" />
+        </section>
       </fieldset>
       <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
       <Toast toast={toast} onDismiss={hideToast} />
@@ -243,11 +263,12 @@ export default function ReviewContent() {
 
   return (
     <>
-      <RetrospectiveSteps currentStep={3} />
+      {/* 제목·단계·카드 사이 간격은 앞 단계 화면들과 같다(프로토타입 11/13). */}
+      <RetrospectiveSteps currentStep={3} className="mt-[38px]" />
       {loaded ? (
         <ReviewForm key={`${loaded.card.cardId}:${user.part}`} retrospectiveId={retrospectiveId} initialCard={loaded.card} competencyItems={loaded.competencyItems} />
       ) : (
-        <Card as="section" size="md" className="mt-7 flex flex-wrap items-center gap-3">
+        <Card as="section" size="md" className="mt-10 flex flex-wrap items-center gap-3">
           {error ? (
             <>
               <p role="alert" className="text-body-sm text-error">{error}</p>
