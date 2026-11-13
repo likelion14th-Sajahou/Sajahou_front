@@ -18,6 +18,7 @@ import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { copyText } from "@/lib/clipboard";
+import { selectedCompetencyNames } from "@/lib/competencySelection";
 import RetroDarkCard from "./RetroDarkCard";
 import { getAiErrorMessage, getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
@@ -40,7 +41,8 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   const { setWeekStatus } = useMockData();
   const [fields, setFields] = useState(() => Object.fromEntries(STORY_FIELDS.map(({ name }) => [name, initialCard[name] ?? ""])));
   const [fullMarkdown, setFullMarkdown] = useState(initialCard.fullMarkdown ?? "");
-  const [selectedTags, setSelectedTags] = useState(() => initialCard.competencies.map(({ name }) => name));
+  const [tagSelection, setSelectedTags] = useState(() => initialCard.competencies);
+  const selectedTags = selectedCompetencyNames(tagSelection, competencyItems);
   const [notice, setNotice] = useState("");
   const { save, isSaving, savedLabel } = useSaveLater();
   const [isSavingCard, setIsSavingCard] = useState(false);

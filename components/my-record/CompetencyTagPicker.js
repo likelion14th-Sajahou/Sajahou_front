@@ -1,6 +1,7 @@
 "use client";
 
 import Chip from "@/components/ui/Chip";
+import { selectedCompetencyNames } from "@/lib/competencySelection";
 
 const MAX_TAGS = 3;
 export const EMPTY_TAGS_MESSAGE = "역량 태그를 하나 이상 골라 주세요";
@@ -23,18 +24,19 @@ export default function CompetencyTagPicker({
   onChange,
   onLimit,
 }) {
+  const visibleTags = selectedCompetencyNames(selectedTags, competencies);
   function toggleTag(tag) {
-    if (selectedTags.includes(tag)) {
-      onChange(selectedTags.filter((item) => item !== tag));
+    if (visibleTags.includes(tag)) {
+      onChange(visibleTags.filter((item) => item !== tag));
       return;
     }
 
-    if (selectedTags.length >= MAX_TAGS) {
+    if (visibleTags.length >= MAX_TAGS) {
       onLimit(TAG_LIMIT_MESSAGE);
       return;
     }
 
-    onChange([...selectedTags, tag]);
+    onChange([...visibleTags, tag]);
   }
 
   return (
@@ -47,7 +49,7 @@ export default function CompetencyTagPicker({
           <Chip
             key={name}
             size="sm"
-            selected={selectedTags.includes(name)}
+            selected={visibleTags.includes(name)}
             title={description}
             className={chipClassName}
             onClick={() => toggleTag(name)}
