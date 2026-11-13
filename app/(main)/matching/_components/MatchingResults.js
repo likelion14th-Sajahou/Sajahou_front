@@ -112,10 +112,7 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
   return (
     <div className="pt-10">
       <section aria-labelledby="matching-competencies">
-        <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <h2 id="matching-competencies" ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-[24px] tracking-[-0.48px] outline-none">공고가 원하는 역량</h2>
-          <p className="text-label text-ink-subtle">공고·우대사항·인재상에서 찾았어요</p>
-        </div>
+        <h2 id="matching-competencies" ref={headingRef} tabIndex={-1} className="mb-4 scroll-mt-6 text-[24px] tracking-[-0.48px] outline-none">공고가 원하는 역량</h2>
         {/* 공고에서 역량을 하나도 찾지 못하면 공고 내용을 더 넣도록 안내한다(M-06). */}
         {posting.noCompetencyFound || !posting.competencies.length ? (
           <p className="text-body-sm text-ink-subtle">주요 업무나 우대사항을 조금 더 넣어 주세요</p>
