@@ -12,7 +12,7 @@ import TextLink from "@/components/ui/TextLink";
 import DeleteConfirm from "./DeleteConfirm";
 import ProjectRecordAddForm from "./ProjectRecordAddForm";
 import ProjectRecordForm from "./ProjectRecordForm";
-import { RECORD_FIELDS } from "./recordFields";
+import { RECORD_FIELDS, attachmentCategoryName } from "./recordFields";
 import useProjectAction from "./useProjectAction";
 import TextField from "@/components/ui/TextField";
 import { formatMonthDay } from "@/lib/formatDate";
@@ -90,7 +90,7 @@ function RecordItem({ record, order, isLast, onViewCard, onEdit, onDelete, onRes
         {attachments.length > 0 && (
           <ul aria-label="첨부 자료" className="flex flex-wrap gap-2">
             {attachments.map((attachment) => (
-              <AttachmentChip key={attachment.id} kind={attachment.kind} name={attachment.name} />
+              <AttachmentChip key={attachment.id} kind={attachment.kind} name={attachment.name} showKind={!attachmentCategoryName(attachment.category)} prefix={attachmentCategoryName(attachment.category)} />
             ))}
           </ul>
         )}

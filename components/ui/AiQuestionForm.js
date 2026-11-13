@@ -58,6 +58,8 @@ export default function AiQuestionForm({
   onBack,
   onAnswer,
   onSkip,
+  // 마지막 질문에서 '정리 보기 →'처럼 버튼 이름을 바꿀 때 준다.
+  submitLabel = "답하고 다음 →",
 }) {
   const [ownAnswer, setOwnAnswer] = useState(initialAnswer);
   const isControlled = controlledAnswer !== undefined;
@@ -108,7 +110,7 @@ export default function AiQuestionForm({
           </>
         )}
         <TextLink variant={styles.link} onClick={onSkip}>건너뛰기</TextLink>
-        <Button variant={styles.button} className="ml-auto" onClick={submitAnswer}>답하고 다음 →</Button>
+        <Button variant={styles.button} className="ml-auto" onClick={submitAnswer}>{submitLabel}</Button>
       </div>
       <Toast toast={toast} onDismiss={hideToast} />
     </div>
