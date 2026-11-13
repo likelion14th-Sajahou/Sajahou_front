@@ -7,7 +7,7 @@ import Checkbox from "@/components/ui/Checkbox";
 import TextLink from "@/components/ui/TextLink";
 import ActionFooter from "@/components/ui/ActionFooter";
 import DrawnBorder from "@/components/ui/DrawnBorder";
-import { projectDateLabel } from "./projectDateLabel";
+import { formatMonthDay } from "@/lib/formatDate";
 
 function RecordOption({ record, isSelected, onToggle }) {
   const { date, weekday, did, problem, attachments } = record;
@@ -23,7 +23,7 @@ function RecordOption({ record, isSelected, onToggle }) {
       <Checkbox checked={isSelected} onChange={onToggle} className="mt-0.5 mr-0.5 ml-1" />
       <span className="flex min-w-0 flex-col">
         <span className="flex flex-wrap items-center gap-1 text-body text-ink">
-          <span className="leading-6"><strong>{projectDateLabel(date)}({weekday})</strong>{did && ` · ${did}`}</span>
+          <span className="leading-6"><strong>{formatMonthDay(date)}({weekday})</strong>{did && ` · ${did}`}</span>
         </span>
         {summary && <span className="text-label leading-[19.5px] text-ink-subtle">{summary}</span>}
       </span>

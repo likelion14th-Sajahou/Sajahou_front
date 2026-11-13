@@ -12,7 +12,7 @@ import NewProjectModal from "./NewProjectModal";
 import { formatRoles } from "./projectRoles";
 import RequireAuth from "@/components/layout/RequireAuth";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { projectDateLabel } from "./projectDateLabel";
+import { formatMonthDay } from "@/lib/formatDate";
 
 const SECTIONS = [
   { status: "active", title: "진행 중", empty: "진행 중인 프로젝트가 없어요" },
@@ -21,7 +21,7 @@ const SECTIONS = [
 
 // 기록이 없는 새 프로젝트는 마지막 날짜를 빼고 보여 준다.
 function getSummary({ recordCount, lastRecordDate }) {
-  const lastDate = projectDateLabel(lastRecordDate);
+  const lastDate = formatMonthDay(lastRecordDate);
 
   return [`기록 ${recordCount}`, lastDate && `마지막 ${lastDate}`]
     .filter(Boolean)
@@ -47,10 +47,10 @@ function ProjectListCard({ project }) {
           {subtitle && <span className="text-body-sm leading-5 text-ink-600">{subtitle}</span>}
           <span className="flex flex-wrap items-center gap-1.5 text-label leading-5 text-ink-500">
             <Badge tone={isActive ? "yellow" : "neutral"} className={isActive ? "py-px!" : "bg-white! py-px!"}>{formatRoles(roles)}</Badge>
-            {isActive ? `기록 ${recordCount}개${startedAt ? ` · 시작 ${projectDateLabel(startedAt)}` : ""}` : getSummary(project)}
+            {isActive ? `기록 ${recordCount}개${startedAt ? ` · 시작 ${formatMonthDay(startedAt)}` : ""}` : getSummary(project)}
           </span>
           {isActive && <span className="flex flex-wrap items-center gap-3 pt-2">
-            <span className="min-w-0 basis-full rounded-xl bg-canvas px-3 py-2 text-body-sm leading-[22px] text-ink-900 sm:flex-1 sm:basis-0">{lastRecordDate ? `마지막 기록 ${projectDateLabel(lastRecordDate)}` : "아직 남긴 기록이 없어요"} · 기록 {recordCount}개</span>
+            <span className="min-w-0 basis-full rounded-xl bg-canvas px-3 py-2 text-body-sm leading-[22px] text-ink-900 sm:flex-1 sm:basis-0">{lastRecordDate ? `마지막 기록 ${formatMonthDay(lastRecordDate)}` : "아직 남긴 기록이 없어요"} · 기록 {recordCount}개</span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-100 px-[18px] py-[11px] text-body-sm leading-[22px] text-ink-900"><Image src="/images/project/plus-14.svg" width={14} height={14} alt="" />오늘 한 일 남기기</span>
           </span>}
         </span>

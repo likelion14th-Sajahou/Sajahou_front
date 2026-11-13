@@ -290,22 +290,9 @@ body {
 }
 .portfolio-question label:has(textarea) { gap: 6px; }
 .portfolio-question label > span:first-child { font-weight: 400; }
-.portfolio-attachments label:has(input[type="file"]) {
-  border-radius: 12px;
-  color: var(--color-locked);
-}
-.portfolio-attachments button {
-  background-color: transparent;
-  border-color: var(--color-ink-300);
-  color: white;
-  font-family: var(--font-display);
-}
-.portfolio-attachments ul:empty { display: none; }
-.portfolio-attachments input:not([type="file"]) { font-family: var(--font-input); }
 .portfolio-attachments p[role="status"] { color: var(--color-locked); }
 @media (max-width: 39.999rem) {
   .portfolio-question div.flex.items-center.gap-3 { flex-wrap: wrap; }
-  .portfolio-attachments fieldset.items-center { flex-wrap: wrap; }
 }
 
 /* Figma 홈 모션: 별은 회전하지 않고 밝기와 크기만 변한다. */

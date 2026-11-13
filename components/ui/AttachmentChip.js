@@ -27,7 +27,8 @@ export function ChipStatus({ tone = "neutral", children }) {
 
 // status: 칩 안 이름 뒤에 붙는 표시(ChipStatus). warning이면 칩 배경을 주황으로 바꾼다.
 // showKind: 형식 표시(PDF·노션 MD 등)를 붙일지. 회고 자료 화면(11/13 디자인)은 이름만 보여 준다.
-export default function AttachmentChip({ as: Tag = "li", kind, name, status, warning = false, showKind = true, onRemove }) {
+// prefix: 이름 앞의 작은 표시(프로젝트 기록의 자료 종류 '회의록' 등).
+export default function AttachmentChip({ as: Tag = "li", kind, name, prefix, status, warning = false, showKind = true, onRemove }) {
   const { label, tone } = ATTACHMENT_BADGES[kind];
 
   return (
@@ -35,6 +36,7 @@ export default function AttachmentChip({ as: Tag = "li", kind, name, status, war
       className={`inline-flex min-w-0 max-w-full items-center gap-2 rounded-xl border border-line py-1.5 pr-2 pl-2.5 text-label text-ink ${warning ? "bg-[#fff1ea]" : "bg-white"}`}
     >
       {showKind && <Badge tone={tone} size="xs">{label}</Badge>}
+      {prefix && <Badge tone="plain" size="xs" className="text-ink-subtle!">{prefix}</Badge>}
       {/* 긴 이름은 데스크톱에서 말줄임하고, 좁은 화면에서는 줄을 바꿔 모두 보여 준다. */}
       <span className="min-w-0 truncate max-sm:overflow-visible max-sm:break-all max-sm:whitespace-normal" title={name}>
         {name}

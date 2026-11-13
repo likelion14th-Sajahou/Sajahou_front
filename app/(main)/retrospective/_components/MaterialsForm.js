@@ -10,7 +10,7 @@ import TextField from "@/components/ui/TextField";
 import LinkPasteField from "@/components/ui/LinkPasteField";
 import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
-import MaterialsChangeNotice from "./MaterialsChangeNotice";
+import MaterialsChangeNotice from "@/components/ui/MaterialsChangeNotice";
 import RetroDarkCard from "./RetroDarkCard";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";

@@ -5,17 +5,21 @@ import { useMockData } from "@/components/layout/MockDataProvider";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import EmptyFieldsNotice from "./EmptyFieldsNotice";
 import RecordFieldsGrid from "./RecordFieldsGrid";
 import RecordFormTitle from "./RecordFormTitle";
+import { REVIEW_TAG_PICKER_STYLE } from "./ProjectRecordReview";
+import { formatMonthDay } from "@/lib/formatDate";
 import { EMPTY_RECORD_MESSAGE, RECORD_FIELDS } from "./recordFields";
 import SavedAttachments from "./SavedAttachments";
 import ActionFooter from "@/components/ui/ActionFooter";
 import useProjectAction from "./useProjectAction";
 
 // 기록 수정(H-15, 12-b). 저장하면 카드도 함께 바뀐다(카드 제목은 유지).
+// 11/13 디자인: 기록 추가의 정리 결과와 같은 모양에 회색 손그림 테두리 상자.
 export default function ProjectRecordForm({ record, onCancel, onSave }) {
   const { projectData } = useMockData();
   const competencies = projectData.competencyItems.map((item) => item.name);
@@ -49,11 +53,12 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
   }
 
   return (
-    <Card as="section" size="md" aria-labelledby="record-form-title">
+    <Card as="section" size="md" className="relative" aria-labelledby="record-form-title">
+      <DrawnBorder variant="start-card" color="var(--color-ink-300)" />
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4">
-        <RecordFormTitle id="record-form-title" date={record.date}>기록 수정</RecordFormTitle>
-        <p className="text-label leading-[19.5px] text-ink-subtle">고칠 칸을 바꾸고 저장하세요.</p>
+        <RecordFormTitle id="record-form-title" date={`${formatMonthDay(record.date)}(${record.weekday})`}>기록 수정</RecordFormTitle>
+        <p className="text-label leading-5 text-ink-subtle">고칠 칸을 바꾸고 저장하세요.</p>
         <EmptyFieldsNotice fields={fields} />
         <RecordFieldsGrid
           getFieldProps={({ key, formLabel }, index) => ({
@@ -62,9 +67,11 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
             onChange: (event) =>
               setFields((current) => ({ ...current, [key]: event.target.value })),
             autoFocus: index === 0,
+            // 저장된 글이 잘리지 않도록 내용 길이에 맞춰 칸이 늘어난다.
+            className: "min-h-[74px] field-sizing-content",
           })}
         />
-        <p className="text-label leading-[19.5px] text-ink-subtle">
+        <p className="text-label leading-5 text-ink-subtle">
           저장하면 이 기록이 나의 사자록에 프로젝트 카드로 쌓여요.
         </p>
         <CompetencyTagPicker
@@ -73,11 +80,12 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
           selectedTags={tags}
           onChange={setTags}
           onLimit={showToast}
+          {...REVIEW_TAG_PICKER_STYLE}
         />
         <SavedAttachments attachments={attachments} />
         <ActionFooter>
           <TextLink onClick={onCancel}>취소</TextLink>
-          <Button type="submit" className="ml-auto">고친 내용 저장</Button>
+          <Button type="submit" variant="ink" className="ml-auto">고친 내용 저장</Button>
         </ActionFooter>
         {error && <p role="alert">{error}</p>}
         </fieldset>

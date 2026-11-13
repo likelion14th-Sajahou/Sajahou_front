@@ -101,7 +101,6 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
   return (
     <>
       <ProjectHeader
-        portfolio={isMakingPortfolio}
         project={project}
         recordCount={records.length}
         lastRecordedAt={records[0]?.date}

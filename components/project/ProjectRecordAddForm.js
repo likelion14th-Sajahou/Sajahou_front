@@ -6,6 +6,8 @@ import { useMockData } from "@/components/layout/MockDataProvider";
 import { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import DrawnBorder from "@/components/ui/DrawnBorder";
+import MaterialsChangeNotice from "@/components/ui/MaterialsChangeNotice";
 import RecordFieldsGrid from "./RecordFieldsGrid";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
@@ -18,8 +20,16 @@ import ActionFooter from "@/components/ui/ActionFooter";
 import { createProjectRecord, updateProjectRecord, getRecordQuestionsWithRetry, organizeProjectRecord } from "@/lib/projectApi";
 import { recordBody, recordQuestionState } from "@/lib/projectViewModel";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
+import Badge from "@/components/ui/Badge";
 import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
 import { getAiErrorMessage } from "@/lib/requestErrorMessage";
+
+// 기록 상자 제목줄의 날짜다. 새 기록은 오늘 날짜로 쌓인다('오늘 · 11/13(금)').
+function todayLabel() {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", weekday: "short" })
+    .formatToParts(new Date()).map(({ type, value }) => [type, value]));
+  return `오늘 · ${parts.month}/${parts.day}(${parts.weekday})`;
+}
 
 export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const { projectData } = useMockData();
@@ -40,7 +50,6 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
   const pendingQuestionMode = useRef(null);
   const [questionState, setQuestionState] = useState({ questions: [], inputs: {}, index: 0, sourceAttachments: [] });
   const [confirmRegenerate, setConfirmRegenerate] = useState(null);
-  const [insufficientMaterial, setInsufficientMaterial] = useState(false);
   const request = useRef(null);
   useEffect(() => () => request.current?.abort(), []);
   const { toast, showToast, hideToast } = useToast();
@@ -135,8 +144,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
       setQuestionState((current) => recordQuestionState(current, result.questions, attachments, { regenerate }));
       setConfirmRegenerate(null);
       const insufficient = result.insufficientMaterial || result.questions.length === 0;
-      setInsufficientMaterial(insufficient);
-      setStep(insufficient ? "materials" : "questions");
+      setStep(insufficient ? "insufficient" : "questions");
     } catch (error) {
       if (!controller.signal.aborted) {
         if (error.status === 409 && error.code === "MATERIAL_CHANGED") {
@@ -172,10 +180,31 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     setStep("materials");
   }
 
+  // 자료가 부족할 때 '오늘 한 일 쓰러 가기': 자료 단계로 돌아가 첫 칸에 바로 쓸 수 있게 한다(13-g).
+  function writeToday() {
+    returnToMaterials();
+    requestAnimationFrame(() => document.querySelector('[name="did"]')?.focus());
+  }
+
+  // AI 질문·자료 부족 단계는 진한 상자, 나머지는 회색 손그림 테두리의 흰 상자다(11/13 디자인).
+  const isDark = step === "questions" || step === "insufficient";
+
   return (
-    <Card as="section" size="md" aria-labelledby="record-add-title">
+    <Card as="section" size="md" className={`relative ${isDark ? "bg-ink-900! text-white" : ""}`} aria-labelledby="record-add-title">
+      <DrawnBorder variant="start-card" color={isDark ? undefined : "var(--color-ink-300)"} />
       <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4" aria-busy={busy}>
-        <RecordFormTitle id="record-add-title">기록 추가</RecordFormTitle>
+        <RecordFormTitle id="record-add-title" date={todayLabel()} tone={isDark ? "dark" : "light"}>기록 추가</RecordFormTitle>
+        {step === "insufficient" && (
+          <div className="flex flex-col gap-4">
+            <p><Badge tone="brand">AI 질문</Badge></p>
+            <h3 className="font-display text-title leading-[29px] text-white">자료가 부족해요</h3>
+            <BlankFieldsNotice>읽을 수 있는 자료가 없어서 질문을 만들지 못했어요. ‘오늘 한 일’을 한 칸이라도 적거나, 자료를 PDF·TXT로 다시 올려 주세요.</BlankFieldsNotice>
+            <div className="flex flex-wrap items-center gap-3">
+              <TextLink variant="inverse-border" onClick={returnToMaterials}>← 자료로</TextLink>
+              <Button variant="cta" className="ml-auto" onClick={writeToday}>오늘 한 일 쓰러 가기 →</Button>
+            </div>
+          </div>
+        )}
         {step === "questions" && (
           <ProjectRecordQuestions
             state={questionState}
@@ -199,13 +228,14 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
           />
         )}
         {step === "materials" && (
-          <div className="flex flex-col items-start gap-4">
+          <div className="flex flex-col items-start gap-5">
             <div className="w-full">
               <RecordAttachmentsField
                 onBusyChange={setAttachmentBusy}
                 label={
                   <>
-                    자료 첨부 <span className="text-ink-subtle">· 선택 · 회의록, 발표 자료, 디자인 화면, 피그마 링크</span>
+                    <span className="block font-display text-body leading-6 text-ink-strong">자료 첨부</span>
+                    <span className="mt-1 block text-label leading-5 text-ink-subtle">어떤 자료인지 먼저 고르고 파일이나 링크를 올려 주세요.</span>
                   </>
                 }
                 attachments={attachments}
@@ -218,9 +248,9 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
               />
             </div>
             <section className="w-full" aria-labelledby="record-materials-label">
-              <h3 id="record-materials-label" className="text-body font-bold">오늘 한 일</h3>
-              <p className="mb-3 text-label text-ink-subtle">아는 칸만 채워도 돼요. 빈칸은 AI가 질문으로 물어봐요.</p>
-              <div className="rounded-2xl border border-line p-4">
+              <h3 id="record-materials-label" className="mb-2 font-display text-body leading-6 text-ink-strong">오늘 한 일</h3>
+              {/* 프로토타입처럼 다섯 칸을 2px 회색 테두리 상자로 묶는다. */}
+              <div className="rounded-[18px] border-2 border-line p-[18px]">
                 <RecordFieldsGrid getFieldProps={({ key, formLabel, placeholder }) => ({
                   label: formLabel,
                   placeholder,
@@ -234,29 +264,34 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
                 })} />
               </div>
             </section>
-            {confirmRegenerate && <div role="group" aria-label="자료 변경 확인" className="flex flex-wrap gap-2 rounded-xl bg-tint-yellow p-3">
-              <p className="w-full text-body-sm">자료가 바뀌었어요. 질문을 새로 만들면 {confirmRegenerate.answerCount === null ? "이전 답은 지워져요." : `지금까지 쓴 답 ${confirmRegenerate.answerCount}개가 사라져요.`}</p>
-              <Button size="sm" disabled={busy} onClick={() => { setConfirmRegenerate(null); cancelAttachmentWait(); }}>취소</Button>
-              <Button size="sm" disabled={busy} onClick={() => continueAi("CONTINUE")}>이전 질문 이어 쓰기</Button>
-              <Button size="sm" disabled={busy} onClick={() => continueAi("REGENERATE")}>질문 새로 만들기</Button>
-            </div>}
-            {waitingForAttachments && <div role="status" className="flex flex-wrap items-center gap-2 text-label text-ink-muted">
-              <p>자료를 읽고 있어요. 잠시 후 질문을 시작해요.</p>
-              <Button size="sm" variant="secondary" onClick={cancelAttachmentWait}>대기 취소</Button>
-            </div>}
+            {/* 질문을 받은 뒤 자료를 고쳤을 때의 확인(13-f). 회고 자료 화면과 같은 주황 상자다. */}
+            <div className="w-full">
+              <MaterialsChangeNotice
+                open={Boolean(confirmRegenerate)}
+                answerCount={confirmRegenerate?.answerCount ?? null}
+                busy={busy}
+                onCancel={() => { setConfirmRegenerate(null); cancelAttachmentWait(); }}
+                onContinue={() => continueAi("CONTINUE")}
+                onRegenerate={() => continueAi("REGENERATE")}
+              />
+            </div>
+            {/* 첨부를 아직 읽는 중에 'AI와 정리하기'를 누르면 다 읽을 때까지 기다린다(13-d). */}
+            {waitingForAttachments && (
+              <div role="status" className="flex w-full flex-wrap items-center gap-3">
+                <div className="min-w-0 flex-1"><BlankFieldsNotice tone="wait">자료를 읽고 있어요. 잠시 후 질문을 시작해요.</BlankFieldsNotice></div>
+                <TextLink size="sm" onClick={cancelAttachmentWait}>대기 취소</TextLink>
+              </div>
+            )}
             <ActionFooter>
               <TextLink onClick={onCancel}>취소</TextLink>
               <div className="ml-auto flex flex-wrap gap-2">
-                <Button disabled={busy || attachmentBusy} onClick={startAiSummary}>{busy ? "기록 준비 중…" : "AI와 정리하기 →"}</Button>
+                <Button variant="ink" disabled={busy || attachmentBusy} aria-busy={waitingForAttachments} onClick={startAiSummary}>{waitingForAttachments ? "자료 읽는 중…" : busy ? "기록 준비 중…" : "AI와 정리하기 →"}</Button>
               </div>
             </ActionFooter>
-            {insufficientMaterial && (
-              <BlankFieldsNotice>자료가 부족해요. 읽을 수 있는 자료가 없어서 질문을 만들지 못했어요. 오늘 한 일을 적거나 PDF·TXT로 다시 올려 주세요.</BlankFieldsNotice>
-            )}
           </div>
         )}
-        <AiWaitingNotice active={aiTask !== null} doing={aiTask === "organize" ? "답을 바탕으로 기록을 정리하고 있어요" : "자료를 읽고 질문을 만들고 있어요"} />
-        {notice && <p role="alert" className="text-label text-tint-red-ink">{notice} {step === "questions" && <button type="button" onClick={showReview}>정리 다시 시도</button>}</p>}
+        <AiWaitingNotice active={aiTask !== null} doing={aiTask === "organize" ? "답을 바탕으로 기록을 정리하고 있어요" : "자료를 읽고 질문을 만들고 있어요"} className={isDark ? "text-locked!" : ""} />
+        {notice && <p role="alert" className={`text-label ${isDark ? "text-tint-red" : "text-tint-red-ink"}`}>{notice} {step === "questions" && <TextLink size="sm" variant={isDark ? "inverse" : "link"} onClick={showReview}>정리 다시 시도</TextLink>}</p>}
       </fieldset>
       <Toast toast={toast} onDismiss={hideToast} />
     </Card>
