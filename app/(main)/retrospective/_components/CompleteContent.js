@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
+import Image from "next/image";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { getAuthMode } from "@/lib/authConfig";
 import { formatDeadline } from "@/lib/formatDate";
 import { getRetrospective } from "@/lib/retrospectiveApi";
+import RetroResultCard from "./RetroResultCard";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { copyText } from "@/lib/clipboard";
@@ -59,38 +59,32 @@ export default function CompleteContent() {
     router.push("/retrospective");
   }
 
+  // 완료 카드(11/13 디자인): 620px 흰 카드, 진한 손그림 테두리, 반짝이는 구름 캐릭터.
   return (
     <>
-      <RetrospectiveSteps currentStep={4} />
-      <div className="mt-7 flex flex-col items-center">
-        <Card as="section" size="md" className="flex w-[620px] flex-col items-center gap-3.5 rounded-[32px]! px-8! py-10! text-center" aria-labelledby="retrospective-complete-title">
-          <div aria-hidden="true" className="relative h-[120px] w-[180px]">
-            <ShapeCharacter shape="sunFine" color="yellow" size={96} cropped className="absolute top-[2.88px] left-[49.552px]" />
-            <ShapeCharacter shape="triangle" color="coral" size={32} face="none" cropped className="absolute top-[32.56px] left-[1.92px]" />
-            <ShapeCharacter shape="square" color="green" size={26} face="none" cropped className="absolute top-[86.08px] left-[156.08px]" />
-          </div>
-          <p className="text-label text-accent-strong">{week.weekNumber}주차 {isAssignment ? "과제" : "세션"} 회고 완료</p>
-          <h2 id="retrospective-complete-title" className="text-[26px] leading-[1.6] tracking-[-0.02em]">사자록에 카드 1장을 저장했어요</h2>
-          <p className="text-body text-ink-subtle">노션에 붙여넣기 했나요? 아직이면 지금 복사해 두세요.</p>
-          <div className="flex justify-center gap-2 pt-1.5">
-            <Button onClick={copyRetrospective} disabled={!card}>회고록 복사</Button>
-            <Button variant="secondary" href={card ? `/my-record?card=${card.cardId}` : "/my-record"}>나의 사자록 보기</Button>
-          </div>
-          {pendingAssignment && (
-            <div className="w-full pt-2">
-              <div className="flex items-center gap-3 rounded-2xl px-3.5 py-3 text-left">
-                <div className="min-w-0 flex-1">
-                  <p className="text-body">과제 회고가 남았어요</p>
-                  <p className="text-label leading-[1.5] text-ink-subtle">마감 {formatDeadline(pendingAssignment.deadline)} · 과제를 낸 뒤에 써요</p>
-                </div>
-                <Button size="sm" href="/retrospective?type=assignment">과제 회고 쓰기</Button>
-              </div>
+      {/* 제목·단계·카드 사이 간격은 앞 단계 화면들과 같다(프로토타입 11/13). */}
+      <RetrospectiveSteps currentStep={4} className="mt-[38px]" />
+      <RetroResultCard titleId="retrospective-complete-title" className="mt-10 max-w-[620px] gap-3 px-8 pt-12 pb-10">
+        <Image src="/images/characters/cloud-done.png" alt="" width={150} height={113} className="done-pop mb-3" />
+        <p className="text-body-sm leading-[21px] font-bold text-ink-subtle">{week.weekNumber}주차 {isAssignment ? "과제" : "세션"} 회고 완료</p>
+        <h2 id="retrospective-complete-title" className="font-display text-[24px] leading-[39px] tracking-[-0.48px] text-balance break-keep text-ink-strong">사자록에 카드 1장을 저장했어요</h2>
+        <p className="text-body leading-6 text-balance break-keep text-ink-subtle">노션에 붙여넣기 했나요? 아직이면 지금 복사해 두세요.</p>
+        <div className="mt-3 flex flex-wrap justify-center gap-3">
+          <Button variant="ink" onClick={copyRetrospective} disabled={!card}>회고록 복사</Button>
+          <Button variant="ink-outline" href={card ? `/my-record?card=${card.cardId}` : "/my-record"}>나의 사자록 보기</Button>
+        </div>
+        {pendingAssignment && (
+          <div className="mt-1 flex w-full flex-wrap items-center gap-3 rounded-2xl bg-canvas p-4 text-left">
+            <div className="flex min-w-[200px] flex-1 flex-col gap-0.5">
+              <p className="font-display text-body leading-6 text-ink-strong">과제 회고가 남았어요</p>
+              <p className="text-label leading-5 text-ink-subtle">마감 {formatDeadline(pendingAssignment.deadline)} · 과제를 낸 뒤에 써요</p>
             </div>
-          )}
-          {canRestartDemo && <TextLink onClick={restartDemo}>데모 처음부터 다시 보기</TextLink>}
-        </Card>
-        <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
-      </div>
+            <Button variant="cta" href="/retrospective?type=assignment">과제 회고 쓰기 →</Button>
+          </div>
+        )}
+        {canRestartDemo && <TextLink className="mt-2" onClick={restartDemo}>데모 처음부터 다시 보기</TextLink>}
+      </RetroResultCard>
+      <p role="status" className={notice ? "mt-3 text-center text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
       <Toast toast={toast} onDismiss={hideToast} />
     </>
   );

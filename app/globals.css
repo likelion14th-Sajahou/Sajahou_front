@@ -220,6 +220,17 @@ body {
   .step-wobble { animation: step-wobble 1.6s ease-in-out infinite; }
 }
 
+/* 회고 완료 카드의 구름 캐릭터가 튀어나오듯 나타난다(11/13 디자인). */
+@keyframes done-pop {
+  0% { transform: scale(0) rotate(-30deg); }
+  60% { transform: scale(1.15) rotate(8deg); }
+  100% { transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .done-pop { animation: done-pop 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) both; }
+}
+
 /* AI 질문 진행 목록의 '지금 답하는 중' 점이 천천히 깜빡인다(11/13 디자인). */
 @keyframes question-blink {
   50% { opacity: 0.25; }

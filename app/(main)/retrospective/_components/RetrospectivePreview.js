@@ -155,9 +155,9 @@ export function RetrospectiveHeading() {
         {/* 과제 회고가 따로 없는 주(기록하기·없음)에는 탭을 보이지 않는다. */}
         {(assignmentPending || (isAssignment && assignment)) && (
           <nav aria-label="회고 작성 상태" className="flex max-w-full flex-wrap gap-1.5 pt-2">
-            {/* 세션 회고와 과제 회고를 오가는 전환 탭이다(R-01). */}
-            <Chip selected={!isAssignment} href="/retrospective">세션 회고 · {STATE_LABELS[session.state]}</Chip>
-            <Chip selected={isAssignment} href="/retrospective?type=assignment">과제 회고 · {STATE_LABELS[assignment?.state ?? "NOT_STARTED"]}</Chip>
+            {/* 세션 회고와 과제 회고를 오가는 전환 탭이다(R-01). 탭도 버튼이라 삼립호빵체다. */}
+            <Chip className="font-display" selected={!isAssignment} href="/retrospective">세션 회고 · {STATE_LABELS[session.state]}</Chip>
+            <Chip className="font-display" selected={isAssignment} href="/retrospective?type=assignment">과제 회고 · {STATE_LABELS[assignment?.state ?? "NOT_STARTED"]}</Chip>
           </nav>
         )}
       </div>
