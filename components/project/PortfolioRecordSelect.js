@@ -6,22 +6,24 @@ import Card from "@/components/ui/Card";
 import Checkbox from "@/components/ui/Checkbox";
 import TextLink from "@/components/ui/TextLink";
 import ActionFooter from "@/components/ui/ActionFooter";
+import DrawnBorder from "@/components/ui/DrawnBorder";
+import { formatMonthDay } from "@/lib/formatDate";
 
 function RecordOption({ record, isSelected, onToggle }) {
   const { date, weekday, did, problem, attachments } = record;
-  const title = [`${date}(${weekday})`, did].filter(Boolean).join(" · ");
   const summary = [problem, attachments.length > 0 && `첨부 ${attachments.length}개`]
     .filter(Boolean)
     .join(" · ");
 
   return (
     <label
-      className={`flex cursor-pointer items-start gap-3 rounded-2xl border bg-white px-4 py-3.5 ${isSelected ? "border-ink" : "border-line"}`}
+      className={`relative flex cursor-pointer items-start gap-3 rounded-[18px] px-4 py-3.5 ${isSelected ? "bg-[#fffbea]" : "bg-white"}`}
     >
+      <DrawnBorder variant="thin-outline" color={isSelected ? "var(--color-ink-900)" : "var(--color-ink-300)"} />
       <Checkbox checked={isSelected} onChange={onToggle} className="mt-0.5 mr-0.5 ml-1" />
       <span className="flex min-w-0 flex-col">
         <span className="flex flex-wrap items-center gap-1 text-body text-ink">
-          <span className="leading-6">{title}</span>
+          <span className="leading-6"><strong>{formatMonthDay(date)}({weekday})</strong>{did && ` · ${did}`}</span>
         </span>
         {summary && <span className="text-label leading-[19.5px] text-ink-subtle">{summary}</span>}
       </span>
@@ -29,7 +31,7 @@ function RecordOption({ record, isSelected, onToggle }) {
   );
 }
 
-export default function PortfolioRecordSelect({ records, initialSelectedIds, onCancel, onNext }) {
+export default function PortfolioRecordSelect({ records, initialSelectedIds, onCancel, onNext, waitingNotice }) {
   // 처음 마칠 때도 다시 만들 때도 모든 기록을 고른 채로 시작한다(H-16). 빈 곳 질문에서 돌아오면 고른 기록을 그대로 둔다.
   const [selectedIds, setSelectedIds] = useState(() => initialSelectedIds ?? records.map(({ id }) => id));
 
@@ -42,7 +44,8 @@ export default function PortfolioRecordSelect({ records, initialSelectedIds, onC
   }
 
   return (
-    <Card as="section" size="md" aria-labelledby="portfolio-select-title" className="flex flex-col gap-4">
+    <Card as="section" size="md" aria-labelledby="portfolio-select-title" className="relative flex flex-col gap-5 font-display text-ink-strong">
+      <DrawnBorder variant="section-card" color="var(--color-ink-300)" />
       <div>
         <p className="text-label leading-[20.8px] text-accent-strong">
           1 / 3 · 기록 고르기
@@ -63,12 +66,15 @@ export default function PortfolioRecordSelect({ records, initialSelectedIds, onC
           onToggle={() => toggleRecord(record.id)}
         />
       ))}
-      <ActionFooter>
-        <TextLink onClick={onCancel}>취소</TextLink>
-        <Button variant="accent" className="ml-auto" disabled={selectedIds.length === 0} onClick={() => onNext(selectedIds)}>
-          AI가 빈 곳 찾기 →
-        </Button>
-      </ActionFooter>
+      <div className="flex flex-col gap-3">
+        <ActionFooter>
+          <TextLink onClick={onCancel}>취소</TextLink>
+          <Button variant="cta-ink" className="ml-auto h-[46px]!" disabled={selectedIds.length === 0} onClick={() => onNext(selectedIds)}>
+            AI가 빈 곳 찾기 →
+          </Button>
+        </ActionFooter>
+        {waitingNotice}
+      </div>
     </Card>
   );
 }

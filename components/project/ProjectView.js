@@ -106,7 +106,7 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
         lastRecordedAt={records[0]?.date}
       />
       {isMakingPortfolio ? (
-        <div className="pt-6">
+        <div className="pt-7">
           <ProjectPortfolio
             project={project}
             records={records}
