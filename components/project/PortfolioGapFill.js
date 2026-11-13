@@ -53,7 +53,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
             <h2 className="text-title leading-[29px] tracking-[-0.2px]">{question.content}</h2>
             {hasSavedArtifact && <p className="text-label text-locked">이미 산출물을 첨부했어요. 그대로 진행하거나 새 자료를 첨부해 바꿀 수 있어요.</p>}
             {question.answer && <p className="whitespace-pre-wrap text-body-sm text-locked">{question.answer}</p>}
-            <div className="portfolio-attachments"><RecordAttachmentsField category="OUTPUT" linkPlaceholder="시연·피그마·GitHub 링크" attachments={attachments} onBusyChange={setAttachmentBusy} onChange={(items) => onChange({ ...state, attachments: { ...state.attachments, [question.questionId]: items } })} /></div>
+            <div className="portfolio-attachments"><RecordAttachmentsField category="OUTPUT" attachments={attachments} onBusyChange={setAttachmentBusy} onChange={(items) => onChange({ ...state, attachments: { ...state.attachments, [question.questionId]: items } })} /></div>
             <div className="flex flex-wrap items-center gap-3"><TextLink variant="inverse-border" disabled={attachmentBusy} onClick={back}>{index === 0 ? "← 기록 고르기" : "← 이전 질문"}</TextLink><span aria-hidden="true" className="h-4 w-px bg-ink-600" /><TextLink variant="inverse-border" disabled={attachmentBusy} onClick={() => submit("SKIPPED")}>아직 없어요</TextLink>
               <Button variant="soft" className="ml-auto h-[46px]!" disabled={attachmentBusy || (!hasSavedArtifact && !attachments.length) || attachments.some((a) => a.extractStatus === "PENDING")}
                 onClick={() => hasSavedArtifact ? next() : submit("ANSWERED")}>{hasSavedArtifact ? "기존 산출물로 다음 →" : "첨부하고 다음 →"}</Button></div>

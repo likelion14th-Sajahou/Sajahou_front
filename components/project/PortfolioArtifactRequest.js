@@ -28,7 +28,6 @@ export default function PortfolioArtifactRequest({
           category="OUTPUT"
           onBusyChange={setAttachmentBusy}
           attachments={attachments}
-          linkPlaceholder="시연·피그마·GitHub 링크"
           onChange={setAttachments}
         />
       </div>
