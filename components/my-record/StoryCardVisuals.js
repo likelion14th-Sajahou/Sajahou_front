@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Badge from "@/components/ui/Badge";
-import { projectBadgeImage } from "@/lib/stickerBadges";
+import { projectBadgeImageByName } from "@/lib/stickerBadges";
 import FootprintSticker from "./FootprintSticker";
 import { STORY_CARD_TYPES } from "./storyCardTypes";
 
@@ -9,9 +9,7 @@ export function StoryCardIcon({ card, size = 38 }) {
   if (card.type !== "project") {
     return <FootprintSticker week={card.week} size={size} />;
   }
-  const project = /아이디어톤/.test(card.whenLabel) ? "IDEATHON"
-    : /해커톤/.test(card.whenLabel) ? "HACKATHON" : "central-hackathon";
-  return <Image src={projectBadgeImage(project)} alt="" width={size} height={size}
+  return <Image src={projectBadgeImageByName(card.whenLabel)} alt="" width={size} height={size}
     style={{ width: size, height: size }} className="shrink-0 object-contain" />;
 }
 
