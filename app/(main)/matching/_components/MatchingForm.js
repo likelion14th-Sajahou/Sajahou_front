@@ -79,7 +79,11 @@ export default function MatchingForm({ jobPostingId = null }) {
   // 공고 저장·역량 찾기(36번) 응답과 회사 이름이다. 결과 화면이 이 값으로 그려진다.
   const [posting, setPosting] = useState(null);
   const [matchedSnapshot, setMatchedSnapshot] = useState(null);
+  const [editedAnswerCount, setEditedAnswerCount] = useState(0);
+  const [confirmSearch, setConfirmSearch] = useState(false);
+  const [dismissedConfirmation, setDismissedConfirmation] = useState(null);
   const formRef = useRef(null);
+  const searchButtonRef = useRef(null);
   const questionRefs = useRef(new Map());
   const controllerRef = useRef(null);
   // 링크 본문을 못 읽었다는 안내가 뜨면 JD 칸으로 커서를 옮긴다(M-02).
@@ -106,6 +110,10 @@ export default function MatchingForm({ jobPostingId = null }) {
   });
   const currentSnapshot = formSnapshot(fields, questions, attachments.items);
   const canSearch = matchedSnapshot === null || currentSnapshot !== matchedSnapshot;
+  // 직접 고친 답이 있고 지원 자료가 달라지면, 재검색을 누르기 전부터 안내한다.
+  // 취소한 자료에서는 안내를 닫고, 자료를 다시 수정하거나 찾기를 누르면 다시 연다.
+  const showSearchConfirmation = canSearch && editedAnswerCount > 0 && !isSearching
+    && (confirmSearch || dismissedConfirmation !== currentSnapshot);
 
   // 역량을 찾는 중에 화면을 떠나면 요청을 취소한다.
   useEffect(() => () => controllerRef.current?.abort(), []);
@@ -132,8 +140,9 @@ export default function MatchingForm({ jobPostingId = null }) {
   }
 
   // 내 사자록에서 찾기(M-05): 입력을 확인한 뒤 공고 저장·역량 찾기(36번)를 부른다.
-  async function submit(event) {
-    event.preventDefault();
+  async function submit(event, confirmed = false) {
+    event?.preventDefault();
+    if (confirmed) setConfirmSearch(false);
     // 저장된 결과를 불러오는 중에는 찾지 않는다. 늦게 온 결과가 새로 찾은 결과를 덮지 않게 한다.
     if (isSearching || attachments.isBusy || restored.isRestoring || !canSearch) return;
     setError("");
@@ -154,6 +163,10 @@ export default function MatchingForm({ jobPostingId = null }) {
       showEmptyPosting();
       return;
     }
+    if (editedAnswerCount > 0 && !confirmed) {
+      setConfirmSearch(true);
+      return;
+    }
 
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -162,6 +175,8 @@ export default function MatchingForm({ jobPostingId = null }) {
       const request = toJobPostingRequest(fields, questionTexts, attachments.items.map(({ attachmentId }) => attachmentId));
       const created = await createJobPosting(request, { signal: controller.signal, request: authenticatedRequest });
       setPosting({ ...created, company: request.company });
+      setEditedAnswerCount(0);
+      setDismissedConfirmation(null);
       // 요청을 보낸 시점의 자료를 남겨, 응답을 기다리며 고친 내용도 다시 찾을 수 있게 한다.
       setMatchedSnapshot(currentSnapshot);
       restored.markHandled(created.jobPostingId);
@@ -220,12 +235,19 @@ export default function MatchingForm({ jobPostingId = null }) {
       <ActionFooter className="justify-between gap-3.5">
         <TextLink onClick={loadSample}>예시 공고 넣기</TextLink>
         {/* 첨부를 올리는 중에는 아직 목록에 없는 첨부가 빠지지 않도록 기다린다. */}
-        {(canSearch || isSearching) && (
-          <Button type="submit" variant="accent" disabled={isSearching || attachments.isBusy || restored.isRestoring} aria-busy={isSearching}>
-            {isSearching ? "내 사자록에서 찾는 중…" : "내 사자록에서 찾기 →"}
-          </Button>
-        )}
+        <Button ref={searchButtonRef} type="submit" variant="primary" className="max-w-full border-2 border-ink! disabled:border-line! disabled:bg-canvas! disabled:text-ink-300!" disabled={!canSearch || isSearching || attachments.isBusy || restored.isRestoring} aria-busy={isSearching}>
+          {isSearching ? "내 사자록에서 찾는 중…" : !canSearch ? "찾기 완료 ✓" : posting ? "바뀐 내용으로 다시 찾기 →" : "내 사자록에서 찾기 →"}
+        </Button>
       </ActionFooter>
+      {showSearchConfirmation && (
+        <div role="group" aria-label="다시 찾기 확인" className="flex flex-wrap items-center justify-end gap-x-4 gap-y-3">
+          <p role="status" className="text-body-sm font-display text-ink">
+            다시 찾으면 직접 고친 답 {editedAnswerCount}개가 새 초안으로 바뀌어요.
+          </p>
+          <TextLink onClick={() => { setConfirmSearch(false); setDismissedConfirmation(currentSnapshot); searchButtonRef.current?.focus(); }}>취소</TextLink>
+          <Button variant="ink" disabled={attachments.isBusy || restored.isRestoring} onClick={() => submit(null, true)}>다시 찾기</Button>
+        </div>
+      )}
       <AiWaitingNotice active={isSearching} doing="공고를 읽고 내 사자록에서 맞는 역량을 찾고 있어요" className="-mt-2 text-right" />
       {error && <p role="alert" className="-mt-2 text-right text-body-sm text-error">{error}</p>}
       <p role="status" className="sr-only">{notice}</p>
@@ -247,6 +269,7 @@ export default function MatchingForm({ jobPostingId = null }) {
         posting={posting}
         drafts={answerDrafts.drafts}
         onRetry={answerDrafts.retry}
+        onEditedCountChange={setEditedAnswerCount}
       />
     )}
     </>
