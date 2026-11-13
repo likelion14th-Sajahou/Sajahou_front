@@ -1,5 +1,5 @@
 import Image from "next/image";
-import DrawnBorder from "@/components/ui/DrawnBorder";
+import RetroSideCard from "./RetroSideCard";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import MaterialsStep from "./MaterialsStep";
 
@@ -19,11 +19,7 @@ export default function MaterialsContent() {
       <div className="mt-10 grid grid-cols-1 items-start gap-4 min-[901px]:grid-cols-[minmax(0,1fr)_320px]">
         <MaterialsStep />
         {/* 오른쪽 안내 카드(Figma 'Sidebar'): 마감일 카드와 같은 노란 손그림 테두리 */}
-        <aside aria-labelledby="upload-guide-title" className="relative rounded-[24px] bg-white p-6">
-          <DrawnBorder variant="deadline-card" />
-          <h2 id="upload-guide-title" className="border-b border-ink pb-3 font-display text-[18px] leading-[28.8px] tracking-[-0.18px] text-ink">
-            이렇게 올리면 잘 읽어요
-          </h2>
+        <RetroSideCard titleId="upload-guide-title" title="이렇게 올리면 잘 읽어요">
           <ul className="flex flex-col gap-2 pt-4 text-label leading-[20.8px] text-ink">
             {UPLOAD_TIPS.map(({ text, bullet }) => (
               <li key={text} className="flex items-start gap-3">
@@ -37,7 +33,7 @@ export default function MaterialsContent() {
             <br />
             없는 성과를 지어내지 않아요.
           </p>
-        </aside>
+        </RetroSideCard>
       </div>
     </>
   );

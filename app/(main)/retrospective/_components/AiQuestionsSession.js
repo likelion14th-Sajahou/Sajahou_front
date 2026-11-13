@@ -2,21 +2,16 @@
 
 import { useRef, useState } from "react";
 import Badge from "@/components/ui/Badge";
-import Card from "@/components/ui/Card";
-import ShapeCharacter from "@/components/ui/ShapeCharacter";
 import TextLink from "@/components/ui/TextLink";
 import AiQuestionForm from "@/components/ui/AiQuestionForm";
-import CardTitle from "@/components/ui/CardTitle";
-import ActionFooter from "@/components/ui/ActionFooter";
 import AiQuestionsComplete from "./AiQuestionsComplete";
 import AnsweredQuestionList from "./AnsweredQuestionList";
+import QuestionProgressList from "./QuestionProgressList";
+import RetroDarkCard from "./RetroDarkCard";
+import RetroSideCard from "./RetroSideCard";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
-
-// 질문 성격 태그(R-15)의 색이다. 목록에 없는 태그는 회색으로 보여 준다.
-const TAG_TONES = { "근거와 숫자": "yellow", "빠진 칸": "red", "세션과 연결": "blue", "역량 신호": "green" };
-const STATUS_LABELS = { ANSWERED: "답함 ✓", SKIPPED: "건너뜀", PENDING: "대기" };
 
 const firstPendingIndex = (questions) => Math.max(0, questions.findIndex(({ status }) => status === "PENDING"));
 const isAllDone = (questions) => questions.length > 0 && questions.every(({ status }) => status !== "PENDING");
@@ -75,31 +70,34 @@ export default function AiQuestionsSession({ initialQuestions, saveAnswer }) {
     }
   }
 
-  const answeredOthers = questions.filter((item, itemIndex) => itemIndex !== index && item.status !== "PENDING");
+  // 지금 질문보다 앞에서 답하거나 건너뛴 질문만 아래에 쌓는다. 앞 질문으로 돌아가면 그 뒤 질문은 목록에서 빠진다.
+  const answeredBefore = questions.filter((item, itemIndex) => itemIndex < index && item.status !== "PENDING");
 
   return (
-    <div className="mt-7 grid grid-cols-[minmax(0,1fr)_320px] items-start gap-5">
-      <div className="flex min-w-0 flex-col gap-4">
+    <div className="mt-10 grid grid-cols-[minmax(0,1fr)_320px] items-start gap-4">
+      <div className="flex min-w-0 flex-col gap-3">
         {isComplete ? (
           <AiQuestionsComplete questions={questions} onEdit={openQuestion} />
         ) : (
           <>
-            <Card as="section" size="md" className="min-w-0 rounded-[28px]" aria-labelledby="ai-question-title">
+            <RetroDarkCard border="start-card" aria-labelledby="ai-question-title">
               {/* 답을 저장하는 동안 버튼을 막는다. */}
-              <fieldset disabled={isAnswering} aria-busy={isAnswering} className="min-w-0 p-1">
+              <fieldset disabled={isAnswering} aria-busy={isAnswering} className="min-w-0">
                 <AiQuestionForm
                   key={question.questionId}
                   size="lg"
+                  tone="dark"
                   questionId="ai-question-title"
-                  category={<Badge tone={TAG_TONES[question.tag] ?? "neutral"} size="sm">{question.tag}</Badge>}
+                  category={<Badge tone="tag" size="sm">{question.tag}</Badge>}
                   progress={`${index + 1} / ${questions.length}`}
                   progressLabel={`총 ${questions.length}개 중 ${index + 1}번째 질문`}
                   source={question.quote && (
                     <>
-                      내 자료의 <mark className="rounded bg-shape-yellow/60 px-[3px] text-ink">“{question.quote}”</mark> 에서 더 물어볼게요
+                      내 자료의 <mark className="rounded bg-yellow-400 px-[3px] text-ink-950">“{question.quote}”</mark> 에서 더 물어볼게요
                     </>
                   )}
                   question={question.content}
+                  placeholder="떠오르는 대로 짧게 써도 괜찮아요"
                   answer={answer}
                   onAnswerChange={(value) => { setDrafts((previous) => ({ ...previous, [question.questionId]: value })); setNotice(""); }}
                   // 첫 질문은 자료 단계로, 두 번째부터는 앞 질문으로 돌아간다(R-16).
@@ -110,9 +108,9 @@ export default function AiQuestionsSession({ initialQuestions, saveAnswer }) {
                   onSkip={() => submit("SKIPPED")}
                 />
               </fieldset>
-            </Card>
-            {answeredOthers.length > 0 && (
-              <AnsweredQuestionList questions={answeredOthers} label="답한 질문" onEdit={openQuestion} />
+            </RetroDarkCard>
+            {answeredBefore.length > 0 && (
+              <AnsweredQuestionList questions={answeredBefore} label="답한 질문" onEdit={openQuestion} />
             )}
           </>
         )}
@@ -121,29 +119,14 @@ export default function AiQuestionsSession({ initialQuestions, saveAnswer }) {
         </p>
       </div>
 
-      <Card as="aside" size="md" aria-labelledby="ai-question-guide-title">
-        <CardTitle id="ai-question-guide-title" action={<ShapeCharacter shape="triangle" color="coral" size={16} face="none" cropped />}>
-          AI가 찾은 더 물어볼 곳
-        </CardTitle>
-        <ol className="mt-4 flex flex-col gap-2">
-          {questions.map((item, itemIndex) => {
-            const isCurrent = !isComplete && itemIndex === index;
-            return (
-              <li key={item.questionId} aria-current={isCurrent ? "step" : undefined} className={`flex flex-col items-start gap-1 rounded-xl px-3 py-2.5 ${isCurrent ? "bg-tint-orange" : `bg-canvas ${item.status !== "PENDING" ? "opacity-70" : ""}`}`}>
-                <Badge tone={TAG_TONES[item.tag] ?? "neutral"} size="sm">{item.tag}</Badge>
-                {item.quote && <p className="text-[13.5px] leading-[1.6]">“{item.quote}”</p>}
-                <p className="text-label leading-[1.5] text-ink-subtle">{isCurrent ? "지금 질문 중" : STATUS_LABELS[item.status]}</p>
-              </li>
-            );
-          })}
-        </ol>
-        <p className="mt-3 text-label leading-[1.5] text-ink-subtle">자소서에 쓸 가치가 큰 곳부터 최대 4개만 물어요. 마지막은 느낀 점이에요.</p>
-        <ActionFooter className="flex-wrap gap-x-3.5 gap-y-1">
+      <RetroSideCard titleId="ai-question-guide-title" title="AI가 찾은 더 물어볼 곳">
+        <QuestionProgressList questions={questions} currentIndex={isComplete ? null : index} />
+        <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-4">
           <TextLink href={getStepHref("materials")}>← 자료 고치기</TextLink>
           <TextLink onClick={saveLater} disabled={isSaving} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "나중에 이어쓰기"}</TextLink>
           <SavedTime label={savedLabel} />
-        </ActionFooter>
-      </Card>
+        </div>
+      </RetroSideCard>
     </div>
   );
 }

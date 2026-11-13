@@ -11,6 +11,7 @@ import LinkPasteField from "@/components/ui/LinkPasteField";
 import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
 import MaterialsChangeNotice from "./MaterialsChangeNotice";
+import RetroDarkCard from "./RetroDarkCard";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { useQuestionRequest } from "./useQuestionRequest";
@@ -170,9 +171,8 @@ export default function MaterialsForm({ initialMaterials }) {
   }
 
   return (
-    // 자료 카드(Figma 'Section'): 진한 바탕 + 손그림 테두리. 안에 흰 섹션 카드가 쌓인다.
-    <section aria-labelledby="materials-title" className="relative flex min-w-0 flex-col gap-4 rounded-[24px] bg-ink-900 px-7 py-6">
-      <DrawnBorder variant="materials-card" />
+    // 자료 카드(Figma 'Section'): 진한 카드 안에 흰 섹션 카드가 쌓인다.
+    <RetroDarkCard border="materials-card" aria-labelledby="materials-title">
       <h2 id="materials-title" className="font-display text-title leading-8 tracking-[-0.4px] text-white">자료 올리기</h2>
 
       {/* 과제 회고는 같은 5단계지만 자료 단계에는 과제 칸만 있다(R-23). */}
@@ -293,6 +293,6 @@ export default function MaterialsForm({ initialMaterials }) {
           {files.pollingError} <TextLink variant="inverse" size="sm" onClick={files.retryPolling}>상태 다시 확인</TextLink>
         </p>
       )}
-    </section>
+    </RetroDarkCard>
   );
 }

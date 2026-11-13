@@ -220,6 +220,15 @@ body {
   .step-wobble { animation: step-wobble 1.6s ease-in-out infinite; }
 }
 
+/* AI 질문 진행 목록의 '지금 답하는 중' 점이 천천히 깜빡인다(11/13 디자인). */
+@keyframes question-blink {
+  50% { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .question-blink { animation: question-blink 1.4s ease-in-out infinite; }
+}
+
 /* 새 프로젝트 팝업에만 Figma의 필드 라벨·입력 크기를 적용한다. */
 .new-project-fields > label { gap: 6px; }
 .new-project-fields > label > span:first-child {

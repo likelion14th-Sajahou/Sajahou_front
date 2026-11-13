@@ -20,6 +20,7 @@ export default function TextField({
   size = "md",
   rows = 3,
   className = "",
+  labelClassName = "font-display text-label leading-5 text-ink",
   error,
   ...rest
 }) {
@@ -51,7 +52,7 @@ export default function TextField({
 
   return (
     <label className="flex w-full flex-col gap-2">
-      <span className="font-display text-label leading-5 text-ink">{label}</span>
+      <span className={labelClassName}>{label}</span>
       {control}
       {error && <span id={errorId} className="text-caption leading-5 text-error">{error}</span>}
     </label>
