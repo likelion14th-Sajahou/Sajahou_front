@@ -29,6 +29,14 @@ function WeekIcon({ week }) {
   return <FootprintSticker week={week.week} isProjectRecap={shape === "sun"} />;
 }
 
+function ProjectCapsule({ label }) {
+  return (
+    <span className="inline-flex h-[26px] items-center whitespace-nowrap rounded-full bg-shape-yellow px-3 text-caption text-ink">
+      {label}
+    </span>
+  );
+}
+
 export default function FootprintTimeline({
   sections,
   weeks,
@@ -53,6 +61,9 @@ export default function FootprintTimeline({
 
   const getGridColumn = (startWeek, endWeek) =>
     `${startWeek - firstWeek + 1} / span ${endWeek - startWeek + 1}`;
+  const hasProject = sections.some(({ isProject }) => isProject);
+  // 구간 이름 줄(전체 보기) 또는 프로젝트 캡슐 줄이 있으면 주차는 둘째 줄에 놓인다.
+  const weekRow = showSectionNames || hasProject ? 2 : 1;
 
   return (
     <div className="relative w-full rounded-[28px] border-2 border-transparent bg-white px-5 pt-6 pb-4">
@@ -67,27 +78,26 @@ export default function FootprintTimeline({
           }`}
           style={{ gridTemplateColumns: `repeat(${weeks.length}, minmax(36px, 1fr))` }}
         >
+          {/* 전체 보기: 구간 이름이 선 위에 놓인다. 프로젝트 구간은 이름을 노란 캡슐 안에 넣는다(11/14 QA). */}
           {showSectionNames &&
-            sections.map(({ id, label, startWeek, endWeek }) => (
+            sections.map(({ id, label, startWeek, endWeek, isProject }) => (
               <p
                 key={id}
                 className="row-start-1 self-end whitespace-nowrap border-b border-ink px-1.5 pb-2 text-label text-ink"
                 style={{ gridColumn: getGridColumn(startWeek, endWeek) }}
               >
-                {label}
+                {isProject ? <ProjectCapsule label={label} /> : label}
               </p>
             ))}
-          {sections
-            .filter(({ isProject }) => isProject)
-            .map(({ id, label, startWeek, endWeek }) => (
-              <p
-                key={id}
-                className="flex h-[26px] items-center self-end justify-self-start whitespace-nowrap rounded-full bg-shape-yellow px-3 text-caption text-ink"
-                style={{ gridColumn: getGridColumn(startWeek, endWeek), gridRow: showSectionNames ? 2 : 1 }}
-              >
-                {label}
-              </p>
-            ))}
+          {/* 가까이 보기: 구간 이름 줄이 없어서 프로젝트 캡슐만 주차 위에 띄운다. */}
+          {!showSectionNames &&
+            sections
+              .filter(({ isProject }) => isProject)
+              .map(({ id, label, startWeek, endWeek }) => (
+                <p key={id} className="row-start-1 self-end justify-self-start" style={{ gridColumn: getGridColumn(startWeek, endWeek) }}>
+                  <ProjectCapsule label={label} />
+                </p>
+              ))}
           {weeks.map((week) => {
             const isSelected = week.week === selectedWeek;
 
@@ -102,8 +112,7 @@ export default function FootprintTimeline({
                   week.status === "current" ? "bg-white shadow-[inset_0_0_0_2px_var(--color-ink)]"
                     : isSelected ? "bg-white shadow-[inset_0_0_0_1.5px_var(--color-ink)]" : ""
                 }`}
-                style={{ gridColumn: week.week - firstWeek + 1,
-                  gridRow: showSectionNames ? 3 : sections.some(({ isProject }) => isProject) ? 2 : 1 }}
+                style={{ gridColumn: week.week - firstWeek + 1, gridRow: weekRow }}
               >
                 <span aria-hidden="true" className="flex size-[38px] shrink-0 items-center justify-center rounded-xl">
                   <WeekIcon week={week} />
