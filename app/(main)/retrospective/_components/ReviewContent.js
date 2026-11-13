@@ -197,14 +197,6 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
               onChange={setSelectedTags}
               onLimit={showToast}
             />
-            <div className="text-label leading-[20.8px]">
-              <h3 className="mb-1.5 text-ink-subtle">기록에서 확인한 근거</h3>
-              <ul className="flex flex-col gap-1 text-ink">
-                {(initialCard.evidenceSummary ?? []).map((item) => (
-                  <li key={item} className="relative pl-3.5 before:absolute before:top-[8.4px] before:left-0 before:size-1.5 before:rounded-full before:bg-tint-green-ink">{item}</li>
-                ))}
-              </ul>
-            </div>
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-2.5 border-t border-[#d9d7d1] pt-4">
             {/* 모든 질문에 답했으면 질문 화면이 질문 끝(고치기 목록)으로 열린다(R-17). */}

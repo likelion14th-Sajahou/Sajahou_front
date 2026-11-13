@@ -92,7 +92,7 @@ function SummaryDetails({ summary }) {
 
 export default function StoryCardDetail({ card, competencies, titleId, onClose, onDelete, onUpdate }) {
   const { run, busy, error } = useProjectAction();
-  const { type, whenLabel, title, tags, evidence, document, summary } = card;
+  const { type, whenLabel, title, tags, document, summary } = card;
   const isProjectCard = type === "project";
   const documentText = isProjectCard ? RECORD_TEXT : RECAP_TEXT;
   const { toast, showToast, hideToast } = useToast();
@@ -159,10 +159,6 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
             </div>
           </section>
           <SummaryDetails summary={summary} />
-          <p className="flex w-full gap-2.5 rounded-2xl border border-line bg-white px-3.5 py-3 text-[13.5px] leading-[21.6px]">
-            <span className="shrink-0 text-yellow-700">근거</span>
-            <span>{evidence}</span>
-          </p>
           {isConfirmingDelete ? (
             <div role="alert" className="flex w-full flex-col gap-2.5 rounded-2xl bg-tint-red px-4 py-3.5">
               <p className="text-body-sm">
