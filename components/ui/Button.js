@@ -54,7 +54,7 @@ export default function Button({
   children,
   ...rest
 }) {
-  const classes = `relative inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center disabled:cursor-default disabled:border-line disabled:bg-line disabled:text-[#6b6358] ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`;
+  const classes = `relative inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center disabled:cursor-default disabled:border-line disabled:bg-line disabled:text-[#6b6358] disabled:[&>span[aria-hidden]]:grayscale! ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`;
 
   const borders = VARIANT_BORDERS[variant];
   const border = borders?.[size] ?? borders?.md;

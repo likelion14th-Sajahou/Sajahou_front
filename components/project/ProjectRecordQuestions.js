@@ -39,7 +39,7 @@ export default function ProjectRecordQuestions({ state, onChange, onBackToMateri
     <AiQuestionForm tone="dark" category={<Badge tone="tag" size="sm">{question.tag}</Badge>} progress={`${index + 1} / ${questions.length}`} source={sourceLabel ? <>
       첨부한 <mark className="rounded bg-yellow-400 px-[3px] break-all text-ink-950">{sourceLabel}</mark>을(를) 바탕으로 물어볼게요
     </> : question.sourceAttachmentId == null ? "적어 준 오늘 한 일을 바탕으로 물어볼게요" : "질문에 연결된 자료를 바탕으로 물어볼게요"}
-      question={question.content} placeholder="한두 문장이면 충분해요" answer={inputs[question.questionId] ?? question.answer ?? ""}
+      question={question.content} answer={inputs[question.questionId] ?? question.answer ?? ""}
       onAnswerChange={(answer) => onChange({ ...state, inputs: { ...inputs, [question.questionId]: answer } })}
       backLabel={index === 0 ? "← 자료로" : "← 이전 질문"} onBack={index === 0 ? onBackToMaterials : () => onChange({ ...state, index: index - 1 })}
       onAnswer={(answer) => submit("ANSWERED", answer)} onSkip={() => submit("SKIPPED")}

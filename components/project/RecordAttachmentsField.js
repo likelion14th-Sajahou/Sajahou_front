@@ -10,7 +10,7 @@ import LinkPasteField from "@/components/ui/LinkPasteField";
 import useAttachmentPolling from "@/components/ui/useAttachmentPolling";
 import * as api from "@/lib/attachmentApi";
 import { attachmentView } from "@/lib/projectViewModel";
-import { normalizeAttachmentUrl, INVALID_ATTACHMENT_URL_MESSAGE } from "@/lib/attachmentUrl";
+import { normalizeGithubAttachmentUrl, GITHUB_ONLY_MESSAGE } from "@/lib/attachmentUrl";
 import { ATTACHMENT_CATEGORIES, attachmentCategoryName } from "./recordFields";
 
 // 프로젝트 자료 종류는 먼저 선택한다. 산출물 요청에서는 지정된 category를 사용한다.
@@ -23,8 +23,8 @@ const EXTRACT_STATUS = {
 };
 const categoryName = (value) => attachmentCategoryName(value) ?? value;
 
-// label: 맨 위 제목줄(선택). linkPlaceholder를 주지 않으면 고른 자료 종류에 맞춰 '디자인 링크 붙여넣기'처럼 보여 준다.
-export default function RecordAttachmentsField({ label, attachments, category, linkPlaceholder, onChange, onBusyChange }) {
+// label: 맨 위 제목줄(선택). 프로젝트에서 새로 등록하는 링크는 GitHub만 허용한다.
+export default function RecordAttachmentsField({ label, attachments, category, onChange, onBusyChange }) {
   const [link, setLink] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [busy, setBusy] = useState(false);
@@ -71,8 +71,8 @@ export default function RecordAttachmentsField({ label, attachments, category, l
   }
   function addLink() {
     run(async (signal) => {
-      const url = normalizeAttachmentUrl(link);
-      if (!url) throw new Error(INVALID_ATTACHMENT_URL_MESSAGE);
+      const url = normalizeGithubAttachmentUrl(link);
+      if (!url) throw new Error(GITHUB_ONLY_MESSAGE);
       const linkCategory = category ?? selectedCategory;
       if (!linkCategory) throw new Error("자료 종류를 먼저 선택해 주세요.");
       const item = attachmentView(await api.createLinkAttachment(url, linkCategory, { signal, request: authenticatedRequest }));
@@ -80,7 +80,6 @@ export default function RecordAttachmentsField({ label, attachments, category, l
     });
   }
   const activeCategory = category ?? selectedCategory;
-  const placeholder = linkPlaceholder ?? (activeCategory ? `${categoryName(activeCategory)} 링크 붙여넣기` : "피그마·노션·GitHub 링크 붙여넣기");
   const skipped = attachments.some((a) => a.extractStatus === "SKIPPED");
   const failed = attachments.filter((a) => a.extractStatus === "FAILED");
 
@@ -122,8 +121,9 @@ export default function RecordAttachmentsField({ label, attachments, category, l
       {/* 자료 종류를 고르기 전에는 올릴 수 없다. */}
       <fieldset disabled={!activeCategory} className="flex min-w-0 flex-wrap items-stretch gap-2">
         <FileDropZone size="sm" label="파일 올리기" accept=".pdf,.zip,.md,.txt,.png,.jpg,.jpeg" onSelect={addFiles} disabled={!activeCategory || busy} />
-        <LinkPasteField className="flex-1 basis-[240px]" aria-label="링크" placeholder={placeholder} value={link} onChange={setLink} onAdd={addLink} />
+        <LinkPasteField className="flex-1 basis-[240px]" aria-label="GitHub 링크" placeholder="GitHub 링크 붙여넣기" value={link} onChange={setLink} onAdd={addLink} />
       </fieldset>
+      <p className="text-label text-ink-subtle">링크는 GitHub만 등록할 수 있어요. 다른 자료는 파일로 올려 주세요.</p>
       {busy && <p role="status">첨부 자료를 처리하고 있어요…</p>}
       {shownError && <p role="alert" className="text-label text-tint-red-ink">{shownError} <button type="button" onClick={() => { setError(""); polling.retry(); }}>상태 다시 확인</button></p>}
     </fieldset>

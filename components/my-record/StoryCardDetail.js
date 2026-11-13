@@ -10,6 +10,7 @@ import { COPY_FAILED_MESSAGE, RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTyp
 import { StoryCardIcon, StoryCardTypeBadge } from "./StoryCardVisuals";
 import { copyText } from "@/lib/clipboard";
 import useProjectAction from "@/components/project/useProjectAction";
+import { withoutDocumentTitle } from "@/lib/storyCardDocument";
 
 const RECAP_TEXT = {
   title: "회고록 전문",
@@ -92,15 +93,16 @@ function SummaryDetails({ summary }) {
 
 export default function StoryCardDetail({ card, competencies, titleId, onClose, onDelete, onUpdate }) {
   const { run, busy, error } = useProjectAction();
-  const { type, whenLabel, title, tags, evidence, document, summary } = card;
+  const { type, whenLabel, title, tags, document, summary } = card;
   const isProjectCard = type === "project";
+  const documentBody = isProjectCard ? withoutDocumentTitle(document, title) : document;
   const documentText = isProjectCard ? RECORD_TEXT : RECAP_TEXT;
   const { toast, showToast, hideToast } = useToast();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   async function copyDocument() {
-    showToast((await copyText(document)) ? documentText.copied : COPY_FAILED_MESSAGE);
+    showToast((await copyText(documentBody)) ? documentText.copied : COPY_FAILED_MESSAGE);
   }
 
   function handleSave(changes) {
@@ -150,7 +152,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
               <Button size="sm" className="border-[#fef5d2]! bg-[#fef5d2]!" onClick={copyDocument}>노션에 복사</Button>
             </div>
             <div className="pt-2">
-              {document
+              {documentBody
                 .split("\n")
                 .filter((line) => line.trim())
                 .map((line, index) => (
@@ -159,10 +161,6 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
             </div>
           </section>
           <SummaryDetails summary={summary} />
-          <p className="flex w-full gap-2.5 rounded-2xl border border-line bg-white px-3.5 py-3 text-[13.5px] leading-[21.6px]">
-            <span className="shrink-0 text-yellow-700">근거</span>
-            <span>{evidence}</span>
-          </p>
           {isConfirmingDelete ? (
             <div role="alert" className="flex w-full flex-col gap-2.5 rounded-2xl bg-tint-red px-4 py-3.5">
               <p className="text-body-sm">
