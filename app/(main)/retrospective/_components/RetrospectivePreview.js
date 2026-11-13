@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { formatDeadline } from "@/lib/formatDate";
-import { getCurrentRetrospective } from "@/lib/retrospectiveApi";
+import { loadRetrospectivePreview } from "@/lib/retrospectiveViewModel";
 
 const RetrospectivePreviewContext = createContext(null);
 
@@ -22,19 +22,6 @@ const STEP_PATHS = { 2: "materials", 3: "questions", 4: "review" };
 
 export function getStepPath(currentStep) {
   return STEP_PATHS[currentStep] ?? STEP_PATHS[2];
-}
-
-// 이번 주 회고(API 11)를 불러온다. 과제를 '나중에 쓸게요'로 고른 주면 과제 회고(R-23)도 함께 갖춘다.
-// openAssignments에는 지각 허용 기간(마감 + 7일)이 남은 과제 회고가 주차 오름차순으로 오고, 끝낸 것도 COMPLETED로 남는다.
-// 이 화면은 이번 주차 과제 회고만 다룬다. 지난주 것은 쓰지 않는다.
-// 시작 전이면 id·currentStep·lastSavedAt이 null이라 단계는 1(시작)로 본다.
-async function loadCurrent({ signal, request }) {
-  const current = await getCurrentRetrospective({ signal, request });
-  const open = current.openAssignments.find(({ weekNumber }) => weekNumber === current.week.weekNumber);
-  const assignment = open
-    ? { id: open.id, state: open.state, currentStep: open.currentStep ?? 1, lastSavedAt: open.lastSavedAt, deadline: open.deadline }
-    : null;
-  return { ...current, assignment };
 }
 
 // 제목·시작 화면·단계 화면이 함께 쓴다. 과제 선택도 제목 영역과 자료 폼에서 함께 사용한다.
@@ -51,7 +38,7 @@ export default function RetrospectivePreview({ children }) {
   // 파트를 바꾸면 그 파트의 마감일로 다시 불러온다.
   useEffect(() => {
     const controller = new AbortController();
-    loadCurrent({ signal: controller.signal, request: authenticatedRequest })
+    loadRetrospectivePreview({ signal: controller.signal, request: authenticatedRequest })
       .then((result) => setLoadState({ current: result, error: "" }))
       .catch((failure) => {
         if (controller.signal.aborted || failure.name === "AbortError") return;
@@ -62,7 +49,7 @@ export default function RetrospectivePreview({ children }) {
 
   // 시작·처음부터처럼 상태를 바꾼 뒤에 부른다. 새 상태를 받은 다음 화면을 옮겨야 다음 단계가 옛 값을 보지 않는다.
   async function refreshCurrent() {
-    const result = await loadCurrent({ request: authenticatedRequest });
+    const result = await loadRetrospectivePreview({ request: authenticatedRequest });
     setLoadState({ current: result, error: "" });
     return result;
   }
