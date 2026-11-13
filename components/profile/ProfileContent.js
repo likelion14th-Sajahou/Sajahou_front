@@ -129,7 +129,8 @@ function ProfileForm({ user }) {
         </fieldset>
         {requestError && <p role="alert" className="pb-4 text-body-sm text-error">{requestError}</p>}
         {/* 회원가입의 '가입하고 시작하기'와 같은 노란 버튼으로 저장한다. 취소는 내 정보 상자의 틀과 같은 매끈한 연회색 테두리다. */}
-        <div className="mt-6 grid grid-cols-2 gap-3">
+        {/* 파트 칸 아래 여백(24px)에 바로 이어 붙인다. */}
+        <div className="grid grid-cols-2 gap-3">
           <Button variant="outline" onClick={handleCancel} disabled={isAccountBusy} className="w-full border-[3px]! border-divider! font-display focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">취소</Button>
           <Button type="submit" disabled={isAccountBusy || !hasChanges} className="w-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
             {isSavingProfile ? "저장 중…" : "저장"}
