@@ -42,13 +42,14 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-      <p className="text-label text-accent-strong">카드 수정</p>
-      <TextField label="제목" name="title" defaultValue={card.title} required autoFocus />
+    <form onSubmit={handleSubmit} className="story-card-edit-form flex flex-col gap-3.5">
+      <p className="text-label text-yellow-700">카드 수정</p>
+      <TextField label="제목" name="title" defaultValue={card.title} className="h-[50px]!" required autoFocus />
       <CompetencyTagPicker
         id="edit-tags-label"
         competencies={competencies}
         selectedTags={selectedTags}
+        listClassName="gap-x-1.5 gap-y-2.5"
         onChange={setSelectedTags}
         onLimit={showToast}
       />
@@ -59,6 +60,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
           name={key}
           multiline
           rows={2}
+          className="h-[74px] text-body! leading-6"
           defaultValue={card.summary[key]}
         />
       ))}
@@ -73,11 +75,11 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         multiline
         name="document"
         defaultValue={card.document}
-        className="h-[234px] font-mono text-label! leading-[20.8px]"
+        className="h-[234px] font-mono text-label! font-bold leading-[20.8px]"
       />
       <div className="flex items-center justify-between gap-3.5 pt-1">
-        <TextLink onClick={onCancel}>취소</TextLink>
-        <Button type="submit">저장</Button>
+        <TextLink variant="underline" className="text-[#4a5163]!" onClick={onCancel}>취소</TextLink>
+        <Button type="submit" variant="ink" className="h-[46px]! px-6!">저장</Button>
       </div>
       <Toast toast={toast} onDismiss={hideToast} />
     </form>

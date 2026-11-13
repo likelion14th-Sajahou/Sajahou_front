@@ -1,33 +1,32 @@
 import { useEffect, useRef } from "react";
-import { TimelinePlaceholder, TimelineSticker } from "./TimelineShape";
+import DrawnBorder from "@/components/ui/DrawnBorder";
+import FootprintSticker, { CurrentWeekSticker } from "./FootprintSticker";
 
 const LABEL_CLASSES = {
   done: "text-ink",
-  none: "text-[#9a958c]",
-  current: "text-accent-strong",
-  upcoming: "text-ink",
+  none: "text-ink-300",
+  current: "font-bold text-accent",
+  upcoming: "text-ink-300",
 };
 
 function WeekIcon({ week }) {
-  const { status, shape, color } = week;
+  const { status, shape } = week;
 
   if (status === "none") {
     return (
-      <span className="flex size-[34px] shrink-0 items-center justify-center">
-        <span className="size-[10.88px] rounded-full bg-line-strong" />
-      </span>
+      <span className="size-2 rounded-full bg-line-strong" />
     );
   }
 
   if (status === "upcoming") {
-    return <TimelinePlaceholder shape={shape} />;
+    return <span className="size-[26px] rounded-full border-[1.5px] border-dashed border-ink-300" />;
   }
 
   if (status === "current") {
-    return <TimelineSticker shape="circle" color="accent" outlined={false} />;
+    return <CurrentWeekSticker />;
   }
 
-  return <TimelineSticker shape={shape} color={color} />;
+  return <FootprintSticker week={week.week} isProjectRecap={shape === "sun"} />;
 }
 
 export default function FootprintTimeline({
@@ -56,59 +55,66 @@ export default function FootprintTimeline({
     `${startWeek - firstWeek + 1} / span ${endWeek - startWeek + 1}`;
 
   return (
-    <div
-      ref={scrollerRef}
-      className="relative w-full overflow-x-auto rounded-[28px] bg-white px-5 pt-6 pb-4"
-    >
+    <div className="relative w-full rounded-[28px] border-2 border-transparent bg-white px-5 pt-6 pb-4">
+      <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />
       <div
-        className={`grid grid-rows-[auto_26px_62px] gap-x-1 gap-y-2.5 ${
-          showSectionNames ? "min-w-[1482px]" : "min-w-max"
-        }`}
-        style={{ gridTemplateColumns: `repeat(${weeks.length}, minmax(36px, 1fr))` }}
+        ref={scrollerRef}
+        className="relative w-full overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {showSectionNames &&
-          sections.map(({ id, label, startWeek, endWeek }) => (
-            <p
-              key={id}
-              className="row-start-1 self-end truncate border-b border-ink px-1.5 pb-2 text-label text-ink"
-              style={{ gridColumn: getGridColumn(startWeek, endWeek) }}
-            >
-              {label}
-            </p>
-          ))}
-        {sections
-          .filter(({ isProject }) => isProject)
-          .map(({ id, label, startWeek, endWeek }) => (
-            <p
-              key={id}
-              className="row-start-2 flex h-[26px] items-center self-end justify-self-start whitespace-nowrap rounded-full border border-ink bg-shape-yellow px-3 text-caption text-ink"
-              style={{ gridColumn: getGridColumn(startWeek, endWeek) }}
-            >
-              {label}
-            </p>
-          ))}
-        {weeks.map((week) => {
-          const isSelected = week.week === selectedWeek;
+        <div
+          className={`grid gap-x-1 gap-y-2.5 ${
+            showSectionNames ? "min-w-[1482px]" : "min-w-max"
+          }`}
+          style={{ gridTemplateColumns: `repeat(${weeks.length}, minmax(36px, 1fr))` }}
+        >
+          {showSectionNames &&
+            sections.map(({ id, label, startWeek, endWeek }) => (
+              <p
+                key={id}
+                className="row-start-1 self-end whitespace-nowrap border-b border-ink px-1.5 pb-2 text-label text-ink"
+                style={{ gridColumn: getGridColumn(startWeek, endWeek) }}
+              >
+                {label}
+              </p>
+            ))}
+          {sections
+            .filter(({ isProject }) => isProject)
+            .map(({ id, label, startWeek, endWeek }) => (
+              <p
+                key={id}
+                className="flex h-[26px] items-center self-end justify-self-start whitespace-nowrap rounded-full bg-shape-yellow px-3 text-caption text-ink"
+                style={{ gridColumn: getGridColumn(startWeek, endWeek), gridRow: showSectionNames ? 2 : 1 }}
+              >
+                {label}
+              </p>
+            ))}
+          {weeks.map((week) => {
+            const isSelected = week.week === selectedWeek;
 
-          return (
-            <button
-              key={week.week}
-              type="button"
-              aria-pressed={isSelected}
-              aria-label={`${week.week}주차 ${week.title ?? "예정"}`}
-              onClick={() => onSelectWeek(week.week)}
-              className={`row-start-3 flex w-[34.1px] cursor-pointer flex-col items-center gap-1.5 self-end justify-self-center rounded-[10px] py-1 ${
-                isSelected ? "bg-white shadow-[0_0_0_1.5px_var(--color-ink)]" : ""
-              }`}
-              style={{ gridColumn: week.week - firstWeek + 1 }}
-            >
-              <WeekIcon week={week} />
-              <span className={`text-[11px] leading-[14px] ${LABEL_CLASSES[week.status]}`}>
-                {week.week}
-              </span>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={week.week}
+                type="button"
+                aria-pressed={isSelected}
+                aria-label={`${week.week}주차 ${week.title ?? "예정"}`}
+                onClick={() => onSelectWeek(week.week)}
+                className={`flex w-[38px] cursor-pointer flex-col items-center gap-1.5 self-end justify-self-center rounded-xl pt-1.5 pb-1 ${
+                  week.status === "current" ? "bg-white shadow-[inset_0_0_0_2px_var(--color-ink)]"
+                    : isSelected ? "bg-white shadow-[inset_0_0_0_1.5px_var(--color-ink)]" : ""
+                }`}
+                style={{ gridColumn: week.week - firstWeek + 1,
+                  gridRow: showSectionNames ? 3 : sections.some(({ isProject }) => isProject) ? 2 : 1 }}
+              >
+                <span aria-hidden="true" className="flex size-[38px] shrink-0 items-center justify-center rounded-xl">
+                  <WeekIcon week={week} />
+                </span>
+                <span className={`text-caption leading-4 ${LABEL_CLASSES[week.status]}`}>
+                  {week.week}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ const SIZE_CLASSES = {
 };
 
 // 네이티브 dialog를 사용해 포커스 가두기, Esc 닫기, 포커스 복귀를 브라우저에 맡긴다.
-export default function Modal({ open, onClose, size = "md", className = "", contentClassName = "p-7", children, ...rest }) {
+export default function Modal({ open, onClose, size = "md", className = "", contentClassName = "p-7", border, children, ...rest }) {
   const dialogRef = useRef(null);
   const isBackdropPress = useRef(false);
 
@@ -55,6 +55,7 @@ export default function Modal({ open, onClose, size = "md", className = "", cont
       className={`m-auto max-h-[calc(100dvh-32px)] w-[calc(100%-32px)] overflow-y-auto rounded-[28px] bg-white text-ink backdrop:bg-ink/40 ${SIZE_CLASSES[size]} ${className}`}
       {...rest}
     >
+      {border}
       <div className={contentClassName}>{open && children}</div>
     </dialog>
   );

@@ -17,11 +17,12 @@ export default function FootprintsPanel({ sections, weeks, selectedWeek, section
   const chips = [{ id: ALL_SECTIONS, label: "전체" }, ...sections];
 
   return (
-    <section aria-label="사자 발자국" className="flex flex-col gap-4 pt-5 pb-2">
+    <section aria-label="사자 발자국" className="flex min-w-0 flex-col gap-4 pt-5 pb-2 font-display">
       <div role="group" aria-label="구간 선택" className="flex flex-wrap gap-1.5">
         {chips.map(({ id, label }) => (
           <Chip
             key={id}
+            drawn
             size="sm"
             selected={id === sectionId}
             onClick={() => {

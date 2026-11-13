@@ -21,7 +21,7 @@ function ProjectRow({ project, summary }) {
         href={`/projects/${encodeURIComponent(id)}`}
         className="relative flex h-16 items-center gap-3 rounded-2xl bg-white px-4 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
       >
-        <DrawnBorder variant="project-row" />
+        <DrawnBorder variant="thin-outline" />
         <Image src="/images/stars/star-01.png" alt="" width={27} height={26} className="shrink-0" />
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-body leading-6 font-bold text-ink">{name}</span>
