@@ -25,6 +25,7 @@ export default function ProfileModal({ onClose, onSaved }) {
       open
       onClose={onClose}
       busy={isAccountBusy}
+      showClose
       titleId={TITLE_ID}
       icon={<Image src="/images/brand/logo.png" alt="" width={117} height={42} />}
       title="내 정보 수정"
@@ -147,18 +148,19 @@ function ProfileForm({ user, onClose, onSaved }) {
           </MarkedSection>
         </fieldset>
         {requestError && <p role="alert" className="-mt-4 text-body-sm text-error">{requestError}</p>}
-        <FormDialogActions submitLabel="저장하기" busy={isSavingProfile} busyLabel="저장 중…" submitDisabled={isAccountBusy || !hasChanges} onCancel={onClose}>
-          {/* 로그아웃·회원 탈퇴는 Figma 디자인이 나오기 전까지 취소 아래에 작은 링크로 둔다. */}
-          <div className="flex w-full flex-col items-center gap-2 border-t border-line pt-4">
-            <div className="flex items-center gap-4">
-              <TextLink variant="underline" size="sm" onClick={logout} disabled={isAccountBusy} aria-busy={isLoggingOut} aria-describedby={logoutError ? "profile-logout-error" : undefined} className="disabled:cursor-default disabled:opacity-60">
+        {/* Figma 01-d(11/15): 취소 대신 오른쪽 위 닫기 버튼. 저장하기 아래 구분선 밑에 로그아웃 | 회원 탈퇴. */}
+        <FormDialogActions submitLabel="저장하기" busy={isSavingProfile} busyLabel="저장 중…" submitDisabled={isAccountBusy || !hasChanges}>
+          <div className="mt-2 flex w-full flex-col items-center gap-6 border-t border-line pt-6">
+            <div className="flex items-center gap-3">
+              <TextLink size="sm" onClick={logout} disabled={isAccountBusy} aria-busy={isLoggingOut} aria-describedby={logoutError ? "profile-logout-error" : undefined} className="px-0.5 py-1 disabled:cursor-default disabled:opacity-60">
                 {isLoggingOut ? "로그아웃 중…" : "로그아웃"}
               </TextLink>
-              <TextLink ref={withdrawButtonRef} variant="danger" size="sm" disabled={isAccountBusy} onClick={() => setWithdrawOpen(true)} className="disabled:cursor-default disabled:opacity-60">
+              <span aria-hidden="true" className="h-3 w-px bg-line-medium" />
+              <TextLink ref={withdrawButtonRef} variant="danger-link" size="sm" disabled={isAccountBusy} onClick={() => setWithdrawOpen(true)} className="px-0.5 py-1 disabled:cursor-default disabled:opacity-60">
                 회원 탈퇴
               </TextLink>
             </div>
-            {logoutError && <p id="profile-logout-error" role="alert" className="text-body-sm text-error">{logoutError}</p>}
+            {logoutError && <p id="profile-logout-error" role="alert" className="-mt-3 text-body-sm text-error">{logoutError}</p>}
           </div>
         </FormDialogActions>
       </form>
