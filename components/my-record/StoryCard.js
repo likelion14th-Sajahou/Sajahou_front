@@ -10,7 +10,7 @@ export default function StoryCard({ card, isHighlighted = false, onOpen }) {
     <Card
       as="article"
       size="sm"
-      className="relative flex h-full min-h-[203px] flex-col items-start gap-3 rounded-[24px]! font-display text-[#1f2433] tracking-[-0.15px]"
+      className="relative flex h-full flex-col items-start gap-3 rounded-[24px]! font-display text-[#1f2433] tracking-[-0.15px]"
     >
       <DrawnBorder variant="thin-outline" repeat="round" color={isHighlighted ? "var(--color-shape-yellow)" : "var(--color-ink-300)"} />
       <div className="flex w-full items-center gap-2">
@@ -18,7 +18,7 @@ export default function StoryCard({ card, isHighlighted = false, onOpen }) {
         <StoryCardTypeBadge type={type} />
         <span className="ml-auto text-right text-caption text-placeholder">{whenLabel}</span>
       </div>
-      <h3 className="break-keep text-[18px] leading-[27px] tracking-[-0.36px]">
+      <h3 className="flex-1 break-keep text-[18px] leading-[27px] tracking-[-0.36px]">
         {/* 카드 전체를 눌러도 열리도록 버튼의 영역을 카드 크기로 넓힌다. */}
         <button
           type="button"
