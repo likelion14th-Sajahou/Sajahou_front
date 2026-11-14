@@ -6,15 +6,15 @@ import { FormDialogActions } from "@/components/ui/FormDialog";
 import MarkedSection from "@/components/ui/MarkedSection";
 import TextField from "@/components/ui/TextField";
 import { PROJECT_ROLES } from "@/components/project/projectRoles";
+import { PROJECT_CATEGORIES } from "@/lib/projectViewModel";
 
-// 프로젝트 종류(Figma 11/15). 백엔드 필드·값이 아직 정해지지 않아 화면에서만 고르고 서버로 보내지 않는다.
-// 그래서 고르지 않아도 만들 수 있다. 필드가 정해지면 onCreate 값에 넣고 필수 검사를 더한다.
-const PROJECT_TYPES = ["아이디어톤", "중앙해커톤", "중커톤"];
 const DEFAULT_ROLES = ["기획"];
 
+// 프로젝트 종류(#73)는 꼭 하나 골라야 한다. 값은 API 코드(IDEATHON·HACKATHON·JUNGKATHON)로 보낸다.
 export default function NewProjectForm({ onCancel, onCreate, busy = false }) {
-  const [projectType, setProjectType] = useState(null);
+  const [category, setCategory] = useState(null);
   const [roles, setRoles] = useState(DEFAULT_ROLES);
+  const [categoryError, setCategoryError] = useState("");
   const [nameError, setNameError] = useState("");
   const [roleError, setRoleError] = useState("");
 
@@ -30,29 +30,43 @@ export default function NewProjectForm({ onCancel, onCreate, busy = false }) {
 
   function handleSubmit(event) {
     event.preventDefault();
+    const { elements } = event.currentTarget;
     const name = new FormData(event.currentTarget).get("name").trim();
 
+    setCategoryError(category ? "" : "프로젝트 종류를 골라 주세요");
     setNameError(name ? "" : "프로젝트 이름을 입력해 주세요");
     setRoleError(roles.length ? "" : "역할을 하나 이상 골라 주세요");
+    // 위에서부터 처음 비어 있는 칸으로 포커스를 옮긴다.
+    if (!category) {
+      elements.namedItem("category")[0].focus();
+      return;
+    }
     if (!name) {
-      event.currentTarget.elements.namedItem("name").focus();
+      elements.namedItem("name").focus();
       return;
     }
     if (roles.length === 0) return;
-    // 11/15 디자인에서 부제목 칸이 빠졌다. 이름이 예전 부제목 자리(예: 캠퍼스 중고마켓)를 맡는다.
-    onCreate({ name, subtitle: null, roles });
+    // 11/15 디자인에서 부제목 칸이 빠졌다. 종류가 예전 이름 자리, 이름이 예전 부제목 자리(예: 캠퍼스 중고마켓)를 맡는다.
+    onCreate({ category, name, subtitle: null, roles });
   }
 
   return (
     <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-8">
       <MarkedSection id="new-project-type" title="프로젝트 종류">
-        <div role="radiogroup" aria-labelledby="new-project-type" className="flex gap-2">
-          {PROJECT_TYPES.map((type) => (
-            <ChoiceChip key={type} name="projectType" value={type} checked={projectType === type} onChange={() => setProjectType(type)} className="flex-1">
-              {type}
+        <div
+          role="radiogroup"
+          aria-labelledby="new-project-type"
+          aria-invalid={categoryError ? true : undefined}
+          aria-describedby={categoryError ? "category-error" : undefined}
+          className="flex gap-2"
+        >
+          {PROJECT_CATEGORIES.map(({ code, name }) => (
+            <ChoiceChip key={code} name="category" value={code} checked={category === code} onChange={() => { setCategory(code); setCategoryError(""); }} className="flex-1">
+              {name}
             </ChoiceChip>
           ))}
         </div>
+        {categoryError && <p id="category-error" role="alert" className="-mt-2 text-caption leading-5 text-error">{categoryError}</p>}
       </MarkedSection>
       <MarkedSection id="new-project-name" title="프로젝트 이름">
         <div className="flex flex-col gap-2">

@@ -44,7 +44,7 @@ export default function useProjectData(user) {
   }, [authenticatedRequest]);
 
   async function create(values) {
-    const result = await api.createProject({ name: values.name, subtitle: values.subtitle ?? null, roles: roleCodes(values.roles) }, { request: authenticatedRequest });
+    const result = await api.createProject({ category: values.category, name: values.name, subtitle: values.subtitle ?? null, roles: roleCodes(values.roles) }, { request: authenticatedRequest });
     setProjects((previous) => [...previous, projectView({ ...result, recordCount: 0, lastRecordDate: null })]);
     try { await refresh(); } catch { setSyncWarning("프로젝트는 생성됐지만 목록 갱신에 실패했어요. 새로고침해 주세요."); }
     return result;
