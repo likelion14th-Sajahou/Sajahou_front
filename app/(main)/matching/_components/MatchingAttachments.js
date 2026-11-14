@@ -5,10 +5,9 @@ import LinkInputRow from "@/components/ui/LinkInputRow";
 import TextLink from "@/components/ui/TextLink";
 import { JOB_POSTING_ACCEPT } from "./useJobPostingAttachments";
 
-// 본문 읽기 상태(API 9)를 칩에 붙인다. 링크·파일 모두 같은 표시다(M-02). 피그마처럼 읽지 않는 첨부(SKIPPED)는 표시하지 않는다.
+// Figma처럼 성공·SKIPPED는 이름만, 읽는 중·실패는 상태 배지를 함께 표시한다(M-02).
 const READ_STATUS = {
   PENDING: { tone: "neutral", label: "읽는 중" },
-  DONE: { tone: "success", label: "본문 읽음" },
   FAILED: { tone: "warning", label: "본문 읽지 못함" },
 };
 
@@ -54,15 +53,16 @@ export default function MatchingAttachments({ attachments, onLinkUnreadable }) {
 
   return (
     <div className="matching-attachments flex min-w-0 flex-col gap-1.5">
-      <p className="text-label text-ink-muted">채용 공고 <span className="text-ink-subtle">· 붙여넣기, PDF·캡처, 링크 중 편한 것</span></p>
+      <p className="text-label text-ink-muted">채용 공고 <span className="text-ink-faintest">· 붙여넣기, PDF·캡처, 링크 중 편한 것</span></p>
       {items.length > 0 && (
-        <ul aria-label="첨부 공고" className="flex flex-wrap gap-2">
+        <ul aria-label="첨부 공고" className="flex flex-wrap gap-2 [&>li]:border-[#e4e2dd] [&>li]:text-ink-strong">
           {items.map(({ attachmentId, kind, name, extractStatus }) => {
             const status = READ_STATUS[extractStatus];
             return (
               <AttachmentChip
                 key={attachmentId}
                 kind={kind}
+                showKind={false}
                 name={kind === "link" ? name.replace(/^https?:\/\//, "") : name}
                 warning={extractStatus === "FAILED"}
                 status={status && <ChipStatus tone={status.tone}>{status.label}</ChipStatus>}

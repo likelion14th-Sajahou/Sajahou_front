@@ -214,8 +214,8 @@ export default function MatchingForm({ jobPostingId = null }) {
       <MatchingAttachments attachments={attachments} onLinkUnreadable={focusJd} />
       {field("jd", "주요 업무·자격 요건 (JD)", "공고 본문을 붙여 넣어요", 4)}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {field("preferences", <>채용 부서 우대사항 <span className="text-ink-subtle">· 선택</span></>, "예) 데이터로 디자인 결정을 설명할 수 있는 분", 3)}
-        {field("companyInfo", <>기업 정보·인재상 <span className="text-ink-subtle">· 선택</span></>, "예) 사용자 곁에서 생각하는 사람", 3)}
+        {field("preferences", <>채용 부서 우대사항 <span className="text-ink-faintest">· 선택</span></>, "예) 데이터로 디자인 결정을 설명할 수 있는 분", 3)}
+        {field("companyInfo", <>기업 정보·인재상 <span className="text-ink-faintest">· 선택</span></>, "예) 사용자 곁에서 생각하는 사람", 3)}
       </div>
       <fieldset className="flex min-w-0 flex-col gap-1.5">
         <legend className="mb-1.5 text-label text-ink-muted">자소서 문항</legend>
