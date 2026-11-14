@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import AttachmentChip, { ChipStatus } from "@/components/ui/AttachmentChip";
 import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
@@ -28,6 +28,7 @@ export default function RecordAttachmentsField({ label, attachments, category, o
   const [link, setLink] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [needsCategory, setNeedsCategory] = useState(false);
+  const categoryBorderId = useId();
   const categoryGroupRef = useRef(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -53,7 +54,7 @@ export default function RecordAttachmentsField({ label, attachments, category, o
     event.preventDefault();
     if (event.type !== "drop") event.stopPropagation();
     setNeedsCategory(true);
-    setError("자료 종류를 먼저 선택해 주세요.");
+    setError("");
     const chips = categoryGroupRef.current?.querySelectorAll("button");
     chips?.[0]?.focus();
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -77,7 +78,7 @@ export default function RecordAttachmentsField({ label, attachments, category, o
   }
   function addFiles(files) {
     const fileCategory = category ?? selectedCategory;
-    if (!fileCategory) { setError("자료 종류를 먼저 선택해 주세요."); return; }
+    if (!fileCategory) return;
     if (!files.every(api.isSupportedAttachmentFile)) {
       setError(api.UNSUPPORTED_FILE_MESSAGE); return;
     }
@@ -92,11 +93,11 @@ export default function RecordAttachmentsField({ label, attachments, category, o
     });
   }
   function addLink() {
+    const linkCategory = category ?? selectedCategory;
+    if (!linkCategory) return;
     run(async (signal) => {
       const url = normalizeGithubAttachmentUrl(link);
       if (!url) throw new Error(GITHUB_ONLY_MESSAGE);
-      const linkCategory = category ?? selectedCategory;
-      if (!linkCategory) throw new Error("자료 종류를 먼저 선택해 주세요.");
       const item = attachmentView(await api.createLinkAttachment(url, linkCategory, { signal, request: authenticatedRequest }));
       if (!signal.aborted) { latest.current.onChange([...latest.current.attachments, item]); setLink(""); }
     });
@@ -109,10 +110,16 @@ export default function RecordAttachmentsField({ label, attachments, category, o
     <fieldset disabled={busy} className="flex min-w-0 flex-col gap-2.5" aria-busy={busy}>
       {label && <legend className="mb-2.5">{label}</legend>}
       {category === undefined && (
-        // 자료 종류(11/13 디자인): 2px 테두리 칩, 고르면 진하게. 칩은 버튼이라 삼립호빵체다.
+        // 공용 Chip의 drawn 옵션을 사용한다. 미선택 안내는 같은 손그림 선만 노랑으로 강조한다.
         <div ref={categoryGroupRef} role="group" aria-label="새 첨부 자료 종류" className="flex flex-wrap gap-1.5">
+          {needsCategory && <svg aria-hidden="true" width="0" height="0" className="pointer-events-none absolute">
+            <defs><filter id={categoryBorderId} colorInterpolationFilters="sRGB">
+              <feFlood floodColor="var(--color-yellow-400)" result="color" />
+              <feComposite in="color" in2="SourceAlpha" operator="in" />
+            </filter></defs>
+          </svg>}
           {ATTACHMENT_CATEGORIES.map(([value, name]) => (
-            <Chip key={value} size="sm" className={`border-2! px-3.5! font-display ${needsCategory ? "border-yellow-400! outline outline-yellow-400" : ""}`} selected={selectedCategory === value} onClick={() => { setSelectedCategory(value); setNeedsCategory(false); setError(""); }}>{name}</Chip>
+            <Chip key={value} drawn size="sm" className={`px-3.5! ${needsCategory ? "[&>span[aria-hidden]]:[filter:var(--category-border-filter)]" : ""}`} style={needsCategory ? { "--category-border-filter": `url(#${categoryBorderId})` } : undefined} selected={selectedCategory === value} onClick={() => { setSelectedCategory(value); setNeedsCategory(false); setError(""); }}>{name}</Chip>
           ))}
         </div>
       )}
@@ -153,7 +160,6 @@ export default function RecordAttachmentsField({ label, attachments, category, o
           <LinkPasteField aria-label="GitHub 링크" placeholder="GitHub 링크 붙여넣기" value={link} onChange={setLink} onAdd={addLink} />
         </fieldset>
       </div>
-      <p className="text-label text-ink-subtle">링크는 GitHub만 등록할 수 있어요. 다른 자료는 파일로 올려 주세요.</p>
       {busy && <p role="status">첨부 자료를 처리하고 있어요…</p>}
       {shownError && <p role="alert" className="text-label text-tint-red-ink">{shownError} {!needsCategory && <button type="button" onClick={() => { setError(""); polling.retry(); }}>상태 다시 확인</button>}</p>}
     </fieldset>
