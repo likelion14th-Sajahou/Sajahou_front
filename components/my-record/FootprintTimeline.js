@@ -109,8 +109,7 @@ export default function FootprintTimeline({
                 aria-label={`${week.week}주차 ${week.title ?? "예정"}`}
                 onClick={() => onSelectWeek(week.week)}
                 className={`flex w-[38px] cursor-pointer flex-col items-center gap-1.5 self-end justify-self-center rounded-xl pt-1.5 pb-1 ${
-                  week.status === "current" ? "bg-white shadow-[inset_0_0_0_2px_var(--color-ink)]"
-                    : isSelected ? "bg-white shadow-[inset_0_0_0_1.5px_var(--color-ink)]" : ""
+                  isSelected ? "bg-white shadow-[inset_0_0_0_1.5px_var(--color-ink)]" : ""
                 }`}
                 style={{ gridColumn: week.week - firstWeek + 1, gridRow: weekRow }}
               >
