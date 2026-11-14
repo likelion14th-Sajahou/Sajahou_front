@@ -1,9 +1,9 @@
 "use client";
 
-import { useMockData } from "@/components/layout/MockDataProvider";
-import Modal from "@/components/ui/Modal";
-import DrawnBorder from "@/components/ui/DrawnBorder";
+import Image from "next/image";
 import { useRef, useState } from "react";
+import { useMockData } from "@/components/layout/MockDataProvider";
+import FormDialog from "@/components/ui/FormDialog";
 import NewProjectForm from "./NewProjectForm";
 
 const TITLE_ID = "new-project-title";
@@ -28,21 +28,19 @@ export default function NewProjectModal({ open, onClose, onCreated }) {
   }
 
   return (
-    // 모서리는 공용 테두리 선의 둥글기(약 24px)에 맞춘다. 손그림 테두리가 팝업 가장자리 밖으로 나가므로 팝업은 자르지 않고, 스크롤은 안쪽 칸이 맡는다(스토리 카드 팝업과 같은 방식).
-    <Modal
+    <FormDialog
       open={open}
-      size="project"
-      className="overflow-visible! rounded-[24px]! backdrop:bg-[#1f2433]/40!"
-      contentClassName="max-h-[calc(100dvh-32px)] overflow-y-auto rounded-[24px] px-[26px] pt-[38px] pb-[34px] sm:px-[38px]"
-      border={<DrawnBorder variant="start-card" />}
-      onClose={busy ? () => {} : onClose}
-      onCancel={(event) => { if (busy) event.preventDefault(); }}
-      aria-labelledby={TITLE_ID}
+      onClose={onClose}
+      busy={busy}
+      titleId={TITLE_ID}
+      icon={<Image src="/images/stars/star-03.png" alt="" width={56} height={56} className="size-14" />}
+      title="새 프로젝트"
+      description="프로젝트 종류와 이름, 역할을 정해요."
     >
       <fieldset disabled={busy} className="min-w-0">
-        <NewProjectForm titleId={TITLE_ID} onCancel={onClose} onCreate={createProject} busy={busy} />
-        {error && <p role="alert">{error}</p>}
+        <NewProjectForm onCancel={onClose} onCreate={createProject} busy={busy} />
+        {error && <p role="alert" className="mt-3 text-center text-label text-error">{error}</p>}
       </fieldset>
-    </Modal>
+    </FormDialog>
   );
 }

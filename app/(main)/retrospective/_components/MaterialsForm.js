@@ -18,7 +18,7 @@ import { useQuestionRequest } from "./useQuestionRequest";
 import useMaterialAttachments, { ATTACHMENT_FIELDS } from "./useMaterialAttachments";
 import ActionFooter from "@/components/ui/ActionFooter";
 import { aiWaitingMessage } from "@/components/ui/AiWaitingNotice";
-import { normalizeAttachmentUrl, INVALID_ATTACHMENT_URL_MESSAGE } from "@/lib/attachmentUrl";
+import { normalizeGithubAttachmentUrl, GITHUB_ONLY_MESSAGE } from "@/lib/attachmentUrl";
 import { hasRetrospectiveMaterials, EMPTY_RETROSPECTIVE_MATERIALS_MESSAGE } from "@/lib/retrospectiveMaterials";
 
 const ASSIGNMENT_MODES = { record: "RECORD", later: "LATER", none: "NONE" };
@@ -144,10 +144,11 @@ export default function MaterialsForm({ initialMaterials }) {
     setNotice(await files.upload(field, selected));
   }
 
+  // 과제 링크는 GitHub만 받는다(프로젝트 기록 추가와 같은 규칙). 노션 등 다른 자료는 파일로 올린다.
   async function addLink() {
-    const url = normalizeAttachmentUrl(link);
+    const url = normalizeGithubAttachmentUrl(link);
     if (!url) {
-      setLinkError(INVALID_ATTACHMENT_URL_MESSAGE);
+      setLinkError(GITHUB_ONLY_MESSAGE);
       return;
     }
     setLinkError("");
@@ -216,12 +217,12 @@ export default function MaterialsForm({ initialMaterials }) {
           <>
             <MaterialTextArea id="assignment" label="과제 내용 · 코드나 에러" hint="붙여넣기" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} className="h-[148px]" />
             <div className="flex min-w-0 flex-col gap-2">
-              <FieldLabel label="과제 노션이나 Git을 올려보세요" />
+              <FieldLabel label="과제 노션이나 GitHub를 올려보세요" />
               {attachments("assignmentFiles", "과제 파일 올리기", {
                 children: (
                   <LinkPasteField
                     name="assignmentLink"
-                    aria-label="과제 링크"
+                    aria-label="과제 GitHub 링크"
                     placeholder="GitHub 링크 붙여넣기"
                     aria-invalid={Boolean(linkError)}
                     aria-describedby={linkError ? "assignment-link-error" : undefined}
