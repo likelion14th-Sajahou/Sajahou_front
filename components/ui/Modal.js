@@ -5,7 +5,8 @@ import { useEffect, useRef } from "react";
 const SIZE_CLASSES = {
   md: "max-w-[460px]",
   lg: "max-w-[560px]",
-  project: "max-w-[520px]",
+  // 입력 팝업(FormDialog): 내 정보 수정·새 프로젝트
+  form: "max-w-[456px]",
 };
 
 // 네이티브 dialog를 사용해 포커스 가두기, Esc 닫기, 포커스 복귀를 브라우저에 맡긴다.
