@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 import { formatMonthDay } from "@/lib/formatDate";
-import { projectBadgeImageByName } from "@/lib/stickerBadges";
+import { projectBadgeImage, projectBadgeImageByName } from "@/lib/stickerBadges";
 import { formatRoles } from "./projectRoles";
 
 const STATUS = {
@@ -10,9 +10,14 @@ const STATUS = {
   done: { label: "완료", className: "bg-[#e4e2dd] text-ink" },
 };
 
-// 프로젝트 상세 머리(11/13 디자인): 프로젝트 스티커, 상태·역할 배지, 이름과 부제목, 오른쪽 숫자 카드(노란 손그림 테두리).
+// 프로젝트 상세 머리(11/13 디자인): 프로젝트 스티커, 상태·역할 배지, 제목과 작은 글씨, 오른쪽 숫자 카드(노란 손그림 테두리).
+// 프로젝트 목록과 같이 큰 제목은 프로젝트 종류, 작은 글씨는 프로젝트 이름, 스티커는 종류별이다(#73).
+// 종류가 없는 예전 데이터는 이름·부제목과 이름으로 고른 스티커를 쓴다.
 export default function ProjectHeader({ project, recordCount, lastRecordedAt }) {
-  const { name, subtitle, status, roles, startedAt } = project;
+  const { category, categoryLabel, name, subtitle, status, roles, startedAt } = project;
+  const title = categoryLabel ?? name;
+  const caption = categoryLabel ? name : subtitle;
+  const sticker = projectBadgeImage(category) ?? projectBadgeImageByName(name);
   const stats = [
     { label: "기록", value: recordCount },
     { label: "시작", value: formatMonthDay(startedAt) },
@@ -27,14 +32,14 @@ export default function ProjectHeader({ project, recordCount, lastRecordedAt }) 
           ← 프로젝트
         </Link>
         <div className="flex min-w-0 items-center gap-3.5">
-          <Image src={projectBadgeImageByName(name)} alt="" width={64} height={64} className="size-16 shrink-0 object-contain" />
+          <Image src={sticker} alt="" width={64} height={64} className="size-16 shrink-0 object-contain" />
           <div className="min-w-0">
             <p className="mb-0.5 flex gap-1.5 text-caption leading-[18px] font-bold">
               <span className={`rounded-full px-2.5 py-0.5 ${STATUS[status].className}`}>{STATUS[status].label}</span>
               <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-yellow-700">{formatRoles(roles)}</span>
             </p>
             <h1 className="font-display text-[32px] leading-[46px] tracking-[-0.64px] break-words text-ink-strong">
-              {name} {subtitle && <span className="text-[18px] tracking-[-0.18px] text-ink-subtle">{subtitle}</span>}
+              {title} {caption && <span className="text-[18px] tracking-[-0.18px] text-ink-subtle">{caption}</span>}
             </h1>
           </div>
         </div>
