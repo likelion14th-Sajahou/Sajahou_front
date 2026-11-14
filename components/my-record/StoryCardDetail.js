@@ -142,7 +142,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
         </>
       ) : (
         <>
-          <h2 id={titleId} className="break-keep text-[24px] leading-[34px] text-balance tracking-[-0.48px]">
+          <h2 id={titleId} className="w-full min-w-0 wrap-anywhere break-keep text-[24px] leading-[34px] text-balance tracking-[-0.48px]">
             {title}
           </h2>
           <CompetencyTags tags={tags} compact />
