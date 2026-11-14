@@ -110,7 +110,6 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
         {!posting.noCompetencyFound && posting.competencies.length > 0 && <DrawnBorder variant="start-card" color="var(--color-yellow-400)" />}
         <div className="mb-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <h2 id="matching-competencies" ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-[24px] tracking-[-0.48px] outline-none">공고가 원하는 역량</h2>
-          <p className="text-label text-ink-subtle">공고·우대사항·인재상에서 찾았어요</p>
         </div>
         {/* 공고에서 역량을 하나도 찾지 못하면 공고 내용을 더 넣도록 안내한다(M-06). */}
         {posting.noCompetencyFound || !posting.competencies.length ? (
