@@ -13,7 +13,7 @@ export default function AiQuestionsComplete({ questions, onEdit }) {
     <>
       <RetroDarkCard border="start-card" aria-labelledby="questions-complete-title">
         <div className="flex items-center justify-between">
-          <Badge tone="green" className="font-bold">질문 끝</Badge>
+          <Badge tone="brand">질문 끝</Badge>
           <p className="text-label font-bold text-locked">{questions.length} / {questions.length}</p>
         </div>
         <h2 id="questions-complete-title" className="font-display text-[24px] leading-[1.45] tracking-[-0.24px] text-white">
@@ -30,7 +30,7 @@ export default function AiQuestionsComplete({ questions, onEdit }) {
         <AiWaitingNotice active={review.isCreating} doing="답을 바탕으로 회고록과 스토리 카드 초안을 만들고 있어요" className="text-locked!" />
         {review.error && <p role="alert" className="text-body-sm text-tint-red">{review.error}</p>}
       </RetroDarkCard>
-      <AnsweredQuestionList questions={questions} label="질문과 답변 목록" onEdit={onEdit} />
+      <AnsweredQuestionList questions={questions} label="질문과 답변 목록" onEdit={onEdit} raised />
     </>
   );
 }
