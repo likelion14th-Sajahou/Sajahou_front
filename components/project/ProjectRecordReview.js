@@ -7,7 +7,7 @@ import SavedAttachments from "./SavedAttachments";
 import ActionFooter from "@/components/ui/ActionFooter";
 
 // AI 정리 결과를 직접 보완하고 역량 태그를 선택해 저장한다(13-c). 기록 수정(12-b)도 같은 모양을 쓴다.
-// 11/13 디자인: 흐린 안내 문구, 칸 이름이 작은 2열 칸, 진한 테두리 태그 칩, 진한 '기록 저장' 버튼.
+// 11/14 디자인: 다섯 칸을 세로로 배치하고, 내용 길이에 따라 입력칸이 늘어난다.
 export const REVIEW_TAG_PICKER_STYLE = {
   listClassName: "gap-x-1.5 gap-y-2",
   labelClassName: "text-ink-subtle",
@@ -38,7 +38,7 @@ export default function ProjectRecordReview({
         getFieldProps={({ key, formLabel }) => ({
           label: formLabel,
           // 정리된 글이 잘리지 않도록 내용 길이에 맞춰 칸이 늘어난다.
-          className: "min-h-[74px] field-sizing-content",
+          className: "min-h-12 field-sizing-content",
           ...getFieldValueProps(key),
         })}
       />
