@@ -10,7 +10,7 @@ import Toast, { useToast } from "@/components/ui/Toast";
 import ProjectPortfolio from "./ProjectPortfolio";
 import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
-import ProjectSidebar from "./ProjectSidebar";
+import ProjectSidebar, { DeleteProject, PortfolioCard } from "./ProjectSidebar";
 import RemoteProjectCard from "./RemoteProjectCard";
 import * as api from "@/lib/projectApi";
 import { recordBody } from "@/lib/projectViewModel";
@@ -115,7 +115,8 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
           />
         </div>
       ) : (
-        <div className="grid grid-cols-1 items-start gap-5 pt-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className={project.status === "done" ? "flex min-w-0 flex-col gap-8 pt-6" : "grid grid-cols-1 items-start gap-5 pt-6 lg:grid-cols-[minmax(0,1fr)_320px]"}>
+          {project.status === "done" && <PortfolioCard portfolio={project.portfolio} onRemake={() => { changeAddForm(false); setPortfolioBfcacheId(bfcacheId); }} />}
           <ProjectRecords
             key={`records-${bfcacheId}`}
             project={project}
@@ -127,13 +128,15 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
             onDeleteRecord={deleteRecord}
             onViewCard={(recordId) => setCardView({ recordId, bfcacheId })}
           />
-          <ProjectSidebar
+          {project.status === "done" ? (
+            <DeleteProject recordCount={records.length} cardCount={cards.length} onDelete={removeProject} />
+          ) : <ProjectSidebar
             key={`sidebar-${bfcacheId}`}
             status={project.status}
             portfolio={project.portfolio}
             deleteProps={{ recordCount: records.length, cardCount: cards.length, onDelete: removeProject }}
             onMakePortfolio={() => { changeAddForm(false); setPortfolioBfcacheId(bfcacheId); }}
-          />
+          />}
         </div>
       )}
       <Modal

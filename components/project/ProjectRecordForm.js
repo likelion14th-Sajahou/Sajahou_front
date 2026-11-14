@@ -68,7 +68,7 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
               setFields((current) => ({ ...current, [key]: event.target.value })),
             autoFocus: index === 0,
             // 저장된 글이 잘리지 않도록 내용 길이에 맞춰 칸이 늘어난다.
-            className: "min-h-[74px] field-sizing-content",
+            className: "min-h-12 field-sizing-content",
           })}
         />
         <p className="text-label leading-5 text-ink-subtle">

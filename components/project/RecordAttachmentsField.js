@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import AttachmentChip, { ChipStatus } from "@/components/ui/AttachmentChip";
 import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
@@ -27,6 +27,9 @@ const categoryName = (value) => attachmentCategoryName(value) ?? value;
 export default function RecordAttachmentsField({ label, attachments, category, onChange, onBusyChange }) {
   const [link, setLink] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [needsCategory, setNeedsCategory] = useState(false);
+  const categoryBorderId = useId();
+  const categoryGroupRef = useRef(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const latest = useRef({ attachments, onChange, onBusyChange });
@@ -45,6 +48,26 @@ export default function RecordAttachmentsField({ label, attachments, category, o
   }, { request: authenticatedRequest });
   const shownError = error || polling.error;
 
+  // 공용 업로드 UI는 그대로 두고, 이 화면에서 선택 전의 파일 선택·드롭을 가로챈다.
+  function requireCategory(event) {
+    if (category ?? selectedCategory) return;
+    event.preventDefault();
+    if (event.type !== "drop") event.stopPropagation();
+    setNeedsCategory(true);
+    setError("");
+    const chips = categoryGroupRef.current?.querySelectorAll("button");
+    chips?.[0]?.focus();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    chips?.forEach((chip, index) => {
+      chip.getAnimations().forEach((animation) => animation.cancel());
+      const direction = index % 2 === 0 ? 1 : -1;
+      const scale = index === 2 ? 1.2 : 1;
+      chip.animate([0, -4, 3.5, -2.5, 1.5, 0].map((angle) => ({
+        transform: `rotate(${angle * direction * scale}deg)`,
+      })), { duration: 420, easing: "ease-in-out" });
+    });
+  }
+
   async function run(action) {
     if (mutation.current) return;
     const controller = new AbortController();
@@ -54,11 +77,11 @@ export default function RecordAttachmentsField({ label, attachments, category, o
     finally { mutation.current = null; if (!controller.signal.aborted) setBusy(false); }
   }
   function addFiles(files) {
+    const fileCategory = category ?? selectedCategory;
+    if (!fileCategory) return;
     if (!files.every(api.isSupportedAttachmentFile)) {
       setError(api.UNSUPPORTED_FILE_MESSAGE); return;
     }
-    const fileCategory = category ?? selectedCategory;
-    if (!fileCategory) { setError("자료 종류를 먼저 선택해 주세요."); return; }
     run(async (signal) => {
       for (const file of files) {
         const item = attachmentView(await api.createFileAttachment(file, fileCategory, { signal, request: authenticatedRequest }));
@@ -70,11 +93,11 @@ export default function RecordAttachmentsField({ label, attachments, category, o
     });
   }
   function addLink() {
+    const linkCategory = category ?? selectedCategory;
+    if (!linkCategory) return;
     run(async (signal) => {
       const url = normalizeGithubAttachmentUrl(link);
       if (!url) throw new Error(GITHUB_ONLY_MESSAGE);
-      const linkCategory = category ?? selectedCategory;
-      if (!linkCategory) throw new Error("자료 종류를 먼저 선택해 주세요.");
       const item = attachmentView(await api.createLinkAttachment(url, linkCategory, { signal, request: authenticatedRequest }));
       if (!signal.aborted) { latest.current.onChange([...latest.current.attachments, item]); setLink(""); }
     });
@@ -87,10 +110,16 @@ export default function RecordAttachmentsField({ label, attachments, category, o
     <fieldset disabled={busy} className="flex min-w-0 flex-col gap-2.5" aria-busy={busy}>
       {label && <legend className="mb-2.5">{label}</legend>}
       {category === undefined && (
-        // 자료 종류(11/13 디자인): 2px 테두리 칩, 고르면 진하게. 칩은 버튼이라 삼립호빵체다.
-        <div role="group" aria-label="새 첨부 자료 종류" className="flex flex-wrap gap-1.5">
+        // 공용 Chip의 drawn 옵션을 사용한다. 미선택 안내는 같은 손그림 선만 노랑으로 강조한다.
+        <div ref={categoryGroupRef} role="group" aria-label="새 첨부 자료 종류" className="flex flex-wrap gap-1.5">
+          {needsCategory && <svg aria-hidden="true" width="0" height="0" className="pointer-events-none absolute">
+            <defs><filter id={categoryBorderId} colorInterpolationFilters="sRGB">
+              <feFlood floodColor="var(--color-yellow-400)" result="color" />
+              <feComposite in="color" in2="SourceAlpha" operator="in" />
+            </filter></defs>
+          </svg>}
           {ATTACHMENT_CATEGORIES.map(([value, name]) => (
-            <Chip key={value} size="sm" className="border-2! px-3.5! font-display" selected={selectedCategory === value} onClick={() => setSelectedCategory(value)}>{name}</Chip>
+            <Chip key={value} drawn size="sm" className={`px-3.5! ${needsCategory ? "[&>span[aria-hidden]]:[filter:var(--category-border-filter)]" : ""}`} style={needsCategory ? { "--category-border-filter": `url(#${categoryBorderId})` } : undefined} selected={selectedCategory === value} onClick={() => { setSelectedCategory(value); setNeedsCategory(false); setError(""); }}>{name}</Chip>
           ))}
         </div>
       )}
@@ -119,13 +148,20 @@ export default function RecordAttachmentsField({ label, attachments, category, o
         <BlankFieldsNotice key={a.id} tone="bad"><span><b>{a.name}</b> 내용을 읽지 못했어요. 링크가 공개인지 확인하거나 PDF·TXT 파일로 올려 주세요.</span></BlankFieldsNotice>
       ))}
       {/* 자료 종류를 고르기 전에는 올릴 수 없다. */}
-      <fieldset disabled={!activeCategory} className="flex min-w-0 flex-wrap items-stretch gap-2">
-        <FileDropZone size="sm" label="파일 올리기" accept=".pdf,.zip,.md,.txt,.png,.jpg,.jpeg" onSelect={addFiles} disabled={!activeCategory || busy} />
-        <LinkPasteField className="flex-1 basis-[240px]" aria-label="GitHub 링크" placeholder="GitHub 링크 붙여넣기" value={link} onChange={setLink} onAdd={addLink} />
-      </fieldset>
-      <p className="text-label text-ink-subtle">링크는 GitHub만 등록할 수 있어요. 다른 자료는 파일로 올려 주세요.</p>
+      <div className="flex min-w-0 flex-wrap items-stretch gap-2">
+        <div
+          onClickCapture={requireCategory}
+          onKeyDownCapture={(event) => { if (event.key === "Enter" || event.key === " ") requireCategory(event); }}
+          onDropCapture={requireCategory}
+        >
+          <FileDropZone size="sm" label="파일 올리기" accept=".pdf,.zip,.md,.txt,.png,.jpg,.jpeg" onSelect={addFiles} disabled={busy} />
+        </div>
+        <fieldset disabled={!activeCategory} className="min-w-0 flex-1 basis-[240px]">
+          <LinkPasteField aria-label="GitHub 링크" placeholder="GitHub 링크 붙여넣기" value={link} onChange={setLink} onAdd={addLink} />
+        </fieldset>
+      </div>
       {busy && <p role="status">첨부 자료를 처리하고 있어요…</p>}
-      {shownError && <p role="alert" className="text-label text-tint-red-ink">{shownError} <button type="button" onClick={() => { setError(""); polling.retry(); }}>상태 다시 확인</button></p>}
+      {shownError && <p role="alert" className="text-label text-tint-red-ink">{shownError} {!needsCategory && <button type="button" onClick={() => { setError(""); polling.retry(); }}>상태 다시 확인</button>}</p>}
     </fieldset>
   );
 }
