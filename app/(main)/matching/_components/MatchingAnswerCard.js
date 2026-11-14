@@ -140,7 +140,7 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
     // 문항에 맞는 카드가 없으면 초안을 만들지 않고 안내한다(M-08).
     body = (
       <>
-        <p className="text-body-sm text-ink-subtle">이 문항에 맞는 카드가 아직 없어요.</p>
+        <p className="rounded-2xl bg-[#fff0e8] px-[18px] py-4 text-body-sm text-accent-strong">⚑ 이 문항에 맞는 카드가 아직 없어요.</p>
         <MissingCompetencies competencies={draft.answer.missingCompetencies} />
       </>
     );
