@@ -254,7 +254,6 @@ export default function MatchingForm({ jobPostingId = null }) {
       {error && <p role="alert" className="-mt-2 text-right text-body-sm text-error">{error}</p>}
       <p role="status" className="sr-only">{notice}</p>
       <Toast toast={toast} onDismiss={hideToast} />
-      <p className="rounded-xl bg-tint-yellow px-3.5 py-2.5 text-label text-ink-muted">사자록에 기록된 내용으로만 초안을 써요. 기록에 없는 건 지어내지 않고 빈칸으로 남겨요.</p>
     </Card>
     {/* 주소에 남은 공고의 매칭 결과(39번)를 불러오는 중·실패 안내 */}
     {restored.isRestoring && <p role="status" className="pt-10 text-body-sm text-ink-muted">저장된 매칭 결과를 불러오는 중이에요.</p>}
