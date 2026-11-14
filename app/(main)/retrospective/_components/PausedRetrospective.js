@@ -28,9 +28,9 @@ export default function PausedRetrospective() {
     setIsUndoing(true);
     setError("");
     try {
-      const { state } = await setRetrospectiveRest(session.id, false, { request: authenticatedRequest });
-      setWeekStatus(HOME_WEEK_STATUS[state] ?? "idle");
-      await refreshCurrent();
+      await setRetrospectiveRest(session.id, false, { request: authenticatedRequest });
+      const { session: restored } = await refreshCurrent();
+      setWeekStatus(HOME_WEEK_STATUS[restored.state] ?? "idle");
     } catch (failure) {
       if (failure.status !== 401) setError(getRequestErrorMessage(failure, "휴회를 해제하지 못했어요. 잠시 후 다시 시도해 주세요."));
     } finally {
