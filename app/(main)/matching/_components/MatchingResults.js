@@ -119,14 +119,19 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
           <ul className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
             {/* 카드 수는 서버가 고정 역량 목록(C-06)으로 센 값이라 나의 사자록의 역량 필터 결과와 같다. */}
             {posting.competencies.map(({ competencyId, name, evidenceQuote, cardCount }) => (
-              <li key={competencyId} className="relative min-w-0 rounded-[20px] bg-white px-[18px] py-3.5">
+              <li key={competencyId} className="group relative min-w-0 rounded-[20px] bg-white px-[18px] py-3.5">
                 <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink-300)" />
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="min-w-0 break-words text-[17px] leading-[27.2px]">#{name.replace(/^#/, "")}</h3>
                   {/* 카드 전체를 같은 링크 영역으로 확장한다. '없음'은 누를 수 없다. */}
                   {cardCount > 0 ? (
-                    <Link href={recordHref(new URLSearchParams(), { tab: "cards", competencyId })} className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-ink-300 py-[3px] pr-2 pl-2.5 text-[12.5px] leading-5 text-ink-950 after:absolute after:inset-0 after:rounded-[20px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${name} 카드 ${cardCount}장 보기`}>
-                      {cardCount}장 보기 <span aria-hidden="true" className="relative inline-grid size-4 place-items-center"><Image src="/images/matching/arrow-dot.svg" alt="" width={16} height={16} /><span className="absolute inset-0 text-center leading-4">→</span></span>
+                    <Link href={recordHref(new URLSearchParams(), { tab: "cards", competencyId })} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-ink-300 py-[3px] pr-2 pl-2.5 text-[12.5px] leading-5 text-ink-950 after:absolute after:inset-0 after:rounded-[20px] group-hover:border-transparent group-hover:bg-yellow-400 focus-visible:border-transparent focus-visible:bg-yellow-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${name} 카드 ${cardCount}장 보기`}>
+                      {cardCount}장 보기
+                      <span aria-hidden="true" className="relative inline-grid size-4 place-items-center">
+                        <Image src="/images/matching/arrow-dot.svg" alt="" width={16} height={16} className="group-hover:hidden group-focus-within:hidden" />
+                        <Image src="/images/matching/arrow-dot-hover.svg" alt="" width={16} height={16} className="absolute hidden group-hover:block group-focus-within:block" />
+                        <span className="absolute size-3 rotate-180 bg-current mask-[url(/images/common/arrow-left-12-white.svg)] mask-contain mask-center mask-no-repeat" />
+                      </span>
                     </Link>
                   ) : <Badge tone="red" size="count">없음</Badge>}
                 </div>
