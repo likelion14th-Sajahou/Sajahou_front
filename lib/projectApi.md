@@ -11,6 +11,12 @@
 - 22번 데이터베이스에는 `sourceRecords`, `deletedRecordCount`가 남아 있다. 응답 필드명을 유지하면서 1:1 관계로 동작한다.
 - 역량 ID는 mock 전용 fixture다. 화면은 `/competencies`에서 받은 ID를 사용해야 한다.
 
+## 프로젝트 종류 (#73)
+
+- 백엔드 안내: `POST /projects`, `GET /projects`, `GET /projects/{projectId}`의 `data.category`. 값은 `IDEATHON`, `HACKATHON`, `JUNGKATHON` 중 하나다.
+- 새 프로젝트 팝업에서 종류를 꼭 하나 골라야 만들 수 있다. 화면 이름은 아이디어톤·중앙해커톤·중커톤이다(`lib/projectViewModel.js`의 `PROJECT_CATEGORIES`).
+- Mock은 세 값이 아니면 `400 VALIDATION_ERROR`(`fields.category`)로 거부하고, 생성·목록·상세 응답에 `category`를 돌려준다. `category`가 없는 예전 mock 데이터는 `null`로 응답한다.
+
 ## 11/12 백엔드 안내 반영 — 오늘 한 일
 
 - 기록 추가는 첨부와 ‘오늘 한 일’ 5칸을 자료로 받고 AI 정리로 진행한다. 입력 원문과 최종 검토 내용을 따로 관리해 화면 왕복 시 원문을 보존한다.

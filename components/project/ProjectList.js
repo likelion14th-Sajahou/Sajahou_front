@@ -13,6 +13,7 @@ import { formatRoles } from "./projectRoles";
 import RequireAuth from "@/components/layout/RequireAuth";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { formatMonthDay } from "@/lib/formatDate";
+import { projectBadgeImage } from "@/lib/stickerBadges";
 
 const SECTIONS = [
   { status: "active", title: "진행 중", empty: "진행 중인 프로젝트가 없어요" },
@@ -30,8 +31,13 @@ function getSummary({ recordCount, lastRecordDate }) {
 
 // 진행 중은 기록 추가로, 완료한 프로젝트는 포트폴리오가 먼저 보이는 상세로 이동한다.
 function ProjectListCard({ project }) {
-  const { id, name, subtitle, status, roles, recordCount, startedAt, lastRecordDate } = project;
+  const { id, category, categoryLabel, name, subtitle, status, roles, recordCount, startedAt, lastRecordDate } = project;
   const isActive = status === "active";
+  // Figma 15(11/14): 큰 제목은 프로젝트 종류, 둘째 줄은 프로젝트 이름, 스티커는 종류별이다.
+  // 종류가 없는 예전 데이터는 이름·부제목과 진행 상태별 스티커로 보여 준다.
+  const title = categoryLabel ?? name;
+  const caption = categoryLabel ? name : subtitle;
+  const sticker = projectBadgeImage(category) ?? `/images/stickers/${isActive ? "laurel" : "trophy"}.png`;
   const { projectData: { loadProject } } = useMockData();
 
   // 목록 응답에는 기록 본문이 없어 기존 상세 API로 최근 기록을 보완한다.
@@ -48,14 +54,14 @@ function ProjectListCard({ project }) {
     <li className={isActive ? "sm:col-span-2 lg:col-span-3" : ""}>
       <Link
         href={`/projects/${encodeURIComponent(id)}${isActive ? "?record=new" : ""}`}
-        aria-label={`${name} ${isActive ? "기록 추가" : "포트폴리오 보기"}`}
+        aria-label={`${categoryLabel ? `${categoryLabel} ` : ""}${name} ${isActive ? "기록 추가" : "포트폴리오 보기"}`}
         className={`relative flex h-full min-w-0 items-center rounded-[24px] ${isActive ? "gap-4 bg-white px-[22px] py-6 sm:gap-5 lg:min-h-[222px]" : "gap-4 bg-divider px-[18px] py-5 lg:min-h-[116px]"}`}
       >
         <DrawnBorder variant="thin-outline" repeat="round" color={isActive ? "var(--color-ink-900)" : "var(--color-ink-300)"} />
-        <Image src={`/images/stickers/${isActive ? "laurel" : "trophy"}.png`} width={isActive ? 80 : 56} height={isActive ? 80 : 56} alt="" className={`shrink-0 ${isActive ? "size-14 sm:size-20" : "size-14 opacity-65"}`} />
+        <Image src={sticker} width={isActive ? 80 : 56} height={isActive ? 80 : 56} alt="" className={`shrink-0 object-contain ${isActive ? "size-14 sm:size-20" : "size-14 opacity-65"}`} />
         <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className={`${isActive ? "text-heading leading-[30px]" : "text-[18px] leading-[26px]"} text-ink-strong`}>{name}</span>
-          {subtitle && <span className="text-body-sm leading-5 text-ink-600">{subtitle}</span>}
+          <span className={`${isActive ? "text-heading leading-[30px]" : "text-[18px] leading-[26px]"} text-ink-strong`}>{title}</span>
+          {caption && <span className="text-body-sm leading-5 text-ink-600">{caption}</span>}
           <span className="flex flex-wrap items-center gap-1.5 text-label leading-5 text-ink-500">
             <Badge tone={isActive ? "yellow" : "neutral"} className={isActive ? "py-px!" : "bg-white! py-px!"}>{formatRoles(roles)}</Badge>
             {isActive ? `기록 ${recordCount}개${startedAt ? ` · 시작 ${formatMonthDay(startedAt)}` : ""}` : getSummary(project)}
