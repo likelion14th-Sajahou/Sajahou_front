@@ -132,7 +132,13 @@ export default function ProjectRecords({
   const editingRecord = records.find((record) => record.id === editingRecordId);
 
   return (
-    <section aria-label="기록" className="flex min-w-0 flex-col gap-4">
+    <section aria-label="기록" className="flex w-full min-w-0 flex-col gap-4">
+      {status === "done" && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-title leading-8">기록 <span className="text-yellow-700">{records.length}</span></h2>
+          {!editingRecord && !isAdding && <Button variant="soft" size="sm" onClick={() => onChangeAdding(true)}><Image src="/images/project/plus-14.svg" alt="" width={14} height={14} className="mr-1.5" />기록 추가</Button>}
+        </div>
+      )}
       {editingRecord ? (
         <ProjectRecordForm
           key={editingRecord.id}
@@ -152,9 +158,9 @@ export default function ProjectRecords({
             closeAddForm();
           }}
         />
-      ) : (
+      ) : status === "active" ? (
         <AddRecordPrompt status={status} onAdd={() => onChangeAdding(true)} />
-      )}
+      ) : null}
       {records.length > 0 ? (
         <ol className="mt-1">
           {records.map((record, index) => (

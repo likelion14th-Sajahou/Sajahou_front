@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useMockData } from "@/components/layout/MockDataProvider";
@@ -28,19 +28,30 @@ function getSummary({ recordCount, lastRecordDate }) {
     .join(" · ");
 }
 
-// 카드 전체가 기록 추가 폼이 열린 프로젝트 상세로 가는 링크다(H-24). 완료한 프로젝트는 스티커를 회색으로 보여 준다.
+// 진행 중은 기록 추가로, 완료한 프로젝트는 포트폴리오가 먼저 보이는 상세로 이동한다.
 function ProjectListCard({ project }) {
   const { id, name, subtitle, status, roles, recordCount, startedAt, lastRecordDate } = project;
   const isActive = status === "active";
+  const { projectData: { loadProject } } = useMockData();
+
+  // 목록 응답에는 기록 본문이 없어 기존 상세 API로 최근 기록을 보완한다.
+  // 상세를 이미 불러온 프로젝트는 다시 요청하지 않는다.
+  useEffect(() => {
+    if (!isActive || startedAt !== undefined) return;
+    const controller = new AbortController();
+    loadProject(id, { signal: controller.signal }).catch(() => {});
+    return () => controller.abort();
+  }, [id, isActive, startedAt, loadProject]);
+  const recentRecords = project.records.slice(0, 2);
 
   return (
-    <li className={isActive ? "lg:col-span-2" : ""}>
+    <li className={isActive ? "sm:col-span-2 lg:col-span-3" : ""}>
       <Link
-        href={`/projects/${id}?record=new`}
-        aria-label={`${name} 기록 추가`}
-        className={`relative flex h-full min-w-0 items-center rounded-[24px] ${isActive ? "gap-5 bg-white px-[22px] py-6 lg:min-h-[178px]" : "gap-4 bg-divider px-[18px] py-5 lg:min-h-[116px]"}`}
+        href={`/projects/${encodeURIComponent(id)}${isActive ? "?record=new" : ""}`}
+        aria-label={`${name} ${isActive ? "기록 추가" : "포트폴리오 보기"}`}
+        className={`relative flex h-full min-w-0 items-center rounded-[24px] ${isActive ? "gap-4 bg-white px-[22px] py-6 sm:gap-5 lg:min-h-[222px]" : "gap-4 bg-divider px-[18px] py-5 lg:min-h-[116px]"}`}
       >
-        <DrawnBorder variant="thick-outline" color={isActive ? "var(--color-ink-900)" : "var(--color-ink-300)"} />
+        <DrawnBorder variant="thin-outline" repeat="round" color={isActive ? "var(--color-ink-900)" : "var(--color-ink-300)"} />
         <Image src={`/images/stickers/${isActive ? "laurel" : "trophy"}.png`} width={isActive ? 80 : 56} height={isActive ? 80 : 56} alt="" className={`shrink-0 ${isActive ? "size-14 sm:size-20" : "size-14 opacity-65"}`} />
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className={`${isActive ? "text-heading leading-[30px]" : "text-[18px] leading-[26px]"} text-ink-strong`}>{name}</span>
@@ -49,12 +60,19 @@ function ProjectListCard({ project }) {
             <Badge tone={isActive ? "yellow" : "neutral"} className={isActive ? "py-px!" : "bg-white! py-px!"}>{formatRoles(roles)}</Badge>
             {isActive ? `기록 ${recordCount}개${startedAt ? ` · 시작 ${formatMonthDay(startedAt)}` : ""}` : getSummary(project)}
           </span>
-          {isActive && <span className="flex flex-wrap items-center gap-3 pt-2">
-            <span className="min-w-0 basis-full rounded-xl bg-canvas px-3 py-2 text-body-sm leading-[22px] text-ink-900 sm:flex-1 sm:basis-0">{lastRecordDate ? `마지막 기록 ${formatMonthDay(lastRecordDate)}` : "아직 남긴 기록이 없어요"} · 기록 {recordCount}개</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-100 px-[18px] py-[11px] text-body-sm leading-[22px] text-ink-900"><Image src="/images/project/plus-14.svg" width={14} height={14} alt="" />오늘 한 일 남기기</span>
+          {isActive && <span className="flex flex-wrap items-end gap-3.5 pt-2">
+            <span className="flex min-w-0 basis-full flex-col gap-1.5 sm:flex-1 sm:basis-0">
+              {recentRecords.length > 0 ? recentRecords.map((record) => (
+                <span key={record.id} className="flex min-w-0 items-baseline gap-2 rounded-xl bg-canvas px-3 py-2 text-body-sm leading-[22px]">
+                  <span className="shrink-0 text-yellow-700">{formatMonthDay(record.date)}({record.weekday})</span>
+                  <span className="truncate text-ink-900">{record.did || "한 일 비어 있음"}</span>
+                </span>
+              )) : <span className="rounded-xl bg-canvas px-3 py-2 text-body-sm leading-[22px] text-ink-900">{lastRecordDate ? `마지막 기록 ${formatMonthDay(lastRecordDate)}` : "아직 남긴 기록이 없어요"} · 기록 {recordCount}개</span>}
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-yellow-100 px-[18px] py-[11px] text-body-sm leading-[22px] text-ink-900"><Image src="/images/project/plus-14.svg" width={14} height={14} alt="" />오늘 한 일 남기기</span>
           </span>}
         </span>
-        {!isActive && <Image src="/images/project/add-record.png" width={40} height={40} alt="" className="shrink-0" />}
+        {!isActive && <span className="grid size-10 shrink-0 place-items-center"><Image src="/images/project/portfolio-chevron.svg" width={35.2} height={35.2} alt="" /></span>}
       </Link>
     </li>
   );
@@ -72,7 +90,6 @@ export default function ProjectList() {
         <h1 className="text-[32px] leading-[46px] tracking-[-0.64px] text-ink-strong">
           프로젝트
         </h1>
-        {isAuthenticated && projectData.status !== "ready" && <Button onClick={() => setIsModalOpen(true)}>+ 새 프로젝트</Button>}
       </div>
       <RequireAuth>
         {projectData.status === "loading" && <p role="status">프로젝트를 불러오고 있어요…</p>}
@@ -89,7 +106,7 @@ export default function ProjectList() {
                   {sectionProjects.map((project) => (
                     <ProjectListCard key={project.id} project={project} />
                   ))}
-                  {status === "active" && isAuthenticated && <li><button type="button" onClick={() => setIsModalOpen(true)} className="relative flex min-h-[178px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[24px] p-5 text-ink-900">
+                  {status === "active" && sectionProjects.length === 0 && isAuthenticated && <li><button type="button" onClick={() => setIsModalOpen(true)} className="relative flex min-h-[178px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[24px] p-5 text-ink-900">
                     <DrawnBorder variant="thin-outline" color="var(--color-ink-300)" />
                     <span className="flex size-11 items-center justify-center rounded-full border-2 border-ink-300"><Image src="/images/project/plus-20.svg" width={20} height={20} alt="" /></span>
                     <span className="text-[16px] leading-[25.6px]">새 프로젝트</span>

@@ -6,7 +6,7 @@ export default function AnsweredQuestionList({ questions, label, onEdit }) {
   return (
     <ol aria-label={label} className="flex flex-col gap-2">
       {questions.map(({ questionId, seq, tag, content, status, answer }) => (
-        <li key={questionId} className="flex flex-col gap-1 rounded-2xl bg-white px-4 py-3 text-body-sm leading-[22.4px]">
+        <li key={questionId} className="flex flex-col gap-1 rounded-2xl border-2 border-[#cfcbc2] bg-white px-4 py-3 text-body-sm leading-[22.4px] shadow-[0_4px_0_0_#e4e1da,0_12px_24px_0_rgba(31,36,51,0.1)]">
           <div className="flex items-center justify-between gap-3">
             <p className="text-label leading-[19.5px] text-ink-subtle">질문 {seq} · {tag}</p>
             <TextLink size="sm" aria-label={`질문 ${seq} 답 고치기`} onClick={() => onEdit(questionId)}>

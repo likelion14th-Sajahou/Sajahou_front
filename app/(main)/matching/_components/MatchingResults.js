@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/components/layout/AuthProvider";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -19,12 +20,6 @@ import { SOURCE_MARKS, answerText, cardSourceLabel, countCharacters } from "./ma
 function savedEdits(questions) {
   return Object.fromEntries(questions.filter(({ editedAnswer }) => editedAnswer)
     .map(({ questionId, editedAnswer }) => [questionId, { text: editedAnswer, charCount: countCharacters(editedAnswer) }]));
-}
-
-// 내 카드 수에 따라 색을 나눈다: 2장 이상 초록, 1장 노랑, 없음 빨강(M-06).
-function getCountTone(cardCount) {
-  if (cardCount >= 2) return "green";
-  return cardCount === 1 ? "yellow" : "red";
 }
 
 // 매칭 결과. posting은 공고 저장·역량 찾기(36번) 응답이나 불러온 매칭 결과(39번), drafts는 문항별 답 초안(37번) 상태다.
@@ -110,28 +105,37 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
   }
 
   return (
-    <div className="pt-10">
-      <section aria-labelledby="matching-competencies">
-        <h2 id="matching-competencies" ref={headingRef} tabIndex={-1} className="mb-4 scroll-mt-6 text-[24px] tracking-[-0.48px] outline-none">공고가 원하는 역량</h2>
+    <div className="pt-14">
+      <section aria-labelledby="matching-competencies" className={`relative min-w-0 ${posting.noCompetencyFound || !posting.competencies.length ? "" : "rounded-[24px] bg-white p-5 sm:p-6"}`}>
+        {!posting.noCompetencyFound && posting.competencies.length > 0 && <DrawnBorder variant="start-card" color="var(--color-yellow-400)" />}
+        <div className="mb-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <h2 id="matching-competencies" ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-[24px] tracking-[-0.48px] outline-none">공고가 원하는 역량</h2>
+          <p className="text-label text-ink-subtle">공고·우대사항·인재상에서 찾았어요</p>
+        </div>
         {/* 공고에서 역량을 하나도 찾지 못하면 공고 내용을 더 넣도록 안내한다(M-06). */}
         {posting.noCompetencyFound || !posting.competencies.length ? (
-          <p className="text-body-sm text-ink-subtle">주요 업무나 우대사항을 조금 더 넣어 주세요</p>
+          <p className="rounded-2xl bg-tint-yellow px-[18px] py-4 text-body-sm text-tint-yellow-ink">⚑ 공고에서 역량을 찾지 못했어요. 주요 업무나 우대사항을 조금 더 넣어 주세요.</p>
         ) : (
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
             {/* 카드 수는 서버가 고정 역량 목록(C-06)으로 센 값이라 나의 사자록의 역량 필터 결과와 같다. */}
             {posting.competencies.map(({ competencyId, name, evidenceQuote, cardCount }) => (
-              <li key={competencyId} className="relative min-w-0 rounded-2xl bg-white px-[18px] py-3.5">
+              <li key={competencyId} className="group relative min-w-0 rounded-[20px] bg-white px-[18px] py-3.5">
                 <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink-300)" />
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-[17px] leading-[27.2px]">{name}</h3>
-                  {/* N장 보기(M-07): 나의 사자록 스토리 카드에서 이 역량 카드만 보여 준다. '없음'은 누를 수 없다. */}
+                  <h3 className="min-w-0 break-words text-[17px] leading-[27.2px]">#{name.replace(/^#/, "")}</h3>
+                  {/* 카드 전체를 같은 링크 영역으로 확장한다. '없음'은 누를 수 없다. */}
                   {cardCount > 0 ? (
-                    <Link href={recordHref(new URLSearchParams(), { tab: "cards", competencyId })} className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${name} 카드 ${cardCount}장 보기`}>
-                      <Badge tone={getCountTone(cardCount)} size="count" className="bg-yellow-400! text-ink-950!">{cardCount}장 보기 →</Badge>
+                    <Link href={recordHref(new URLSearchParams(), { tab: "cards", competencyId })} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-ink-300 py-[3px] pr-2 pl-2.5 text-[12.5px] leading-5 text-ink-950 after:absolute after:inset-0 after:rounded-[20px] group-hover:border-transparent group-hover:bg-yellow-400 focus-visible:border-transparent focus-visible:bg-yellow-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${name} 카드 ${cardCount}장 보기`}>
+                      {cardCount}장 보기
+                      <span aria-hidden="true" className="relative inline-grid size-4 place-items-center">
+                        <Image src="/images/matching/arrow-dot.svg" alt="" width={16} height={16} className="group-hover:hidden group-focus-within:hidden" />
+                        <Image src="/images/matching/arrow-dot-hover.svg" alt="" width={16} height={16} className="absolute hidden group-hover:block group-focus-within:block" />
+                        <span className="absolute size-3 rotate-180 bg-current mask-[url(/images/common/arrow-left-12-white.svg)] mask-contain mask-center mask-no-repeat" />
+                      </span>
                     </Link>
-                  ) : <Badge tone={getCountTone(cardCount)} size="count">없음</Badge>}
+                  ) : <Badge tone="red" size="count">없음</Badge>}
                 </div>
-                <p className="mt-1 text-body-sm text-ink-subtle">“{evidenceQuote}”</p>
+                <p className="mt-1 break-words text-body-sm text-ink-subtle">“{evidenceQuote}”</p>
               </li>
             ))}
           </ul>

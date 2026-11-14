@@ -13,7 +13,7 @@ export default function AiQuestionsComplete({ questions, onEdit }) {
     <>
       <RetroDarkCard border="start-card" aria-labelledby="questions-complete-title">
         <div className="flex items-center justify-between">
-          <Badge tone="green" className="font-bold">질문 끝</Badge>
+          <Badge tone="brand">질문 끝</Badge>
           <p className="text-label font-bold text-locked">{questions.length} / {questions.length}</p>
         </div>
         <h2 id="questions-complete-title" className="font-display text-[24px] leading-[1.45] tracking-[-0.24px] text-white">

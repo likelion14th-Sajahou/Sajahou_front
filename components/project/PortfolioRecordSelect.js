@@ -53,9 +53,6 @@ export default function PortfolioRecordSelect({ records, initialSelectedIds, onC
         <h2 id="portfolio-select-title" className="text-title leading-8 tracking-[-0.4px] text-ink">
           포트폴리오에 넣을 기록 고르기
         </h2>
-        <p className="text-label leading-[19.5px] text-ink-subtle">
-          고른 기록만 근거로 써요. 기록에 없는 성과는 넣지 않아요.
-        </p>
       </div>
       {/* 기록 목록은 최신순이지만, 고를 때는 시안대로 진행 순서(오래된 기록부터)로 보여 준다. */}
       {records.toReversed().map((record) => (
