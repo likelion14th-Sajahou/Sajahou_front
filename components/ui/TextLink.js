@@ -18,6 +18,8 @@ const VARIANT_CLASSES = {
   border: "border-b border-ink font-bold leading-[20.8px] text-ink",
   accent:
     "text-accent-strong underline decoration-from-font [text-underline-position:from-font]",
+  // 내 정보 수정의 '회원 탈퇴'(Figma 11/15): 빨간 삼립호빵체 + 빨간 아래 테두리선(link와 같은 모양)
+  "danger-link": "border-b border-[#d64545] font-display leading-5 text-[#d64545]",
   danger:
     "px-0.5 py-1 text-danger underline decoration-from-font [text-underline-position:from-font]",
 };

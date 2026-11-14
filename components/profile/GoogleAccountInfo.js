@@ -1,4 +1,4 @@
-// '계정' 구역(Figma 회원가입 'Section · 계정'): 제목 + 바꿀 수 없는 Google 이메일 칸. 회원가입과 내 정보가 함께 쓴다.
+// '계정' 구역(Figma 회원가입 'Section · 계정'): 제목 + 바꿀 수 없는 Google 이메일 칸. 회원가입에서 쓴다(내 정보 수정 팝업은 형광펜 구역 제목을 쓴다).
 export default function GoogleAccountInfo({ email, className = "" }) {
   return (
     <section aria-labelledby="google-account-title" className={`flex flex-col gap-4 ${className}`}>
