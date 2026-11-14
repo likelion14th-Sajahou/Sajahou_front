@@ -49,7 +49,8 @@ export default function Modal({ open, onClose, size = "md", className = "", cont
   return (
     <dialog
       ref={dialogRef}
-      onClose={onClose}
+      // 팝업 안에서 연 다른 팝업(예: 내 정보 수정 → 회원 탈퇴)의 close가 React 트리를 따라 올라와도 바깥 팝업은 닫지 않는다.
+      onClose={(event) => { if (event.target === event.currentTarget) onClose(); }}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onClick={handleClick}

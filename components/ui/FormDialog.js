@@ -34,10 +34,11 @@ export default function FormDialog({ open, onClose, busy = false, titleId, icon,
 }
 
 // 팝업 맨 아래: 꽉 찬 노란 주 버튼과 밑줄 '취소'. children은 취소 아래에 더 두는 작은 링크다(예: 로그아웃·회원 탈퇴).
-export function FormDialogActions({ submitLabel, busy = false, busyLabel = submitLabel, onCancel, children }) {
+// submitDisabled: 바꾼 게 없을 때처럼 주 버튼을 막는다.
+export function FormDialogActions({ submitLabel, busy = false, busyLabel = submitLabel, submitDisabled = false, onCancel, children }) {
   return (
     <div className="flex flex-col items-center gap-4">
-      <Button type="submit" className="w-full">{busy ? busyLabel : submitLabel}</Button>
+      <Button type="submit" disabled={submitDisabled} className="w-full">{busy ? busyLabel : submitLabel}</Button>
       <TextLink size="sm" onClick={onCancel}>취소</TextLink>
       {children}
     </div>

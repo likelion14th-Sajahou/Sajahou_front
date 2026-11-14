@@ -6,14 +6,13 @@ const LOGO_SIZES = {
   small: { width: 117, height: 42 },
 };
 
-// 로그인·회원가입·내 정보 카드 위쪽의 로고 + 제목 + 설명(Figma 'Auth Header').
-// 로고가 없는 화면(내 정보)은 showBrand={false}.
-export default function AuthHeader({ titleId, title, description, size = "large", showBrand = true }) {
+// 로그인·회원가입 카드 위쪽의 로고 + 제목 + 설명(Figma 'Auth Header').
+export default function AuthHeader({ titleId, title, description, size = "large" }) {
   const logo = LOGO_SIZES[size];
 
   return (
     <div className="flex flex-col items-center gap-4 text-center">
-      {showBrand && <Image src="/images/brand/logo.png" alt="사자록" width={logo.width} height={logo.height} priority />}
+      <Image src="/images/brand/logo.png" alt="사자록" width={logo.width} height={logo.height} priority />
       <div className="flex flex-col items-center gap-1.5">
         <h1 id={titleId} className="font-display text-[26px] leading-9 text-balance">
           {title}
