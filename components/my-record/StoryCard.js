@@ -4,7 +4,7 @@ import CompetencyTags from "./CompetencyTags";
 import { StoryCardIcon, StoryCardTypeBadge } from "./StoryCardVisuals";
 
 export default function StoryCard({ card, isHighlighted = false, onOpen }) {
-  const { type, whenLabel, title, tags, evidence } = card;
+  const { type, whenLabel, title, tags } = card;
 
   return (
     <Card
@@ -30,10 +30,6 @@ export default function StoryCard({ card, isHighlighted = false, onOpen }) {
         </button>
       </h3>
       <CompetencyTags tags={tags} />
-      <p className="flex w-full gap-1.5 border-t border-dashed border-line pt-3 text-label leading-[20.8px] text-ink-subtle">
-        <span className="shrink-0 text-yellow-700">근거</span>
-        <span>{evidence}</span>
-      </p>
     </Card>
   );
 }
