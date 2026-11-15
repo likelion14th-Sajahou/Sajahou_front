@@ -210,7 +210,6 @@ body {
   }
   .home-hero-copy {
     top: 33.6114%;
-    left: 49.5833%;
   }
   .home-hero-character {
     width: 35.8333%;
@@ -220,8 +219,9 @@ body {
     bottom: auto;
   }
   .home-hero-cta {
-    top: 52.6818%;
-    left: 64.6528%;
+    /* Figma 1440 × 839: 꽃 영역의 왼쪽 위 (922, 457). */
+    top: 54.4696%;
+    left: 64.0278%;
     right: auto;
   }
 }
