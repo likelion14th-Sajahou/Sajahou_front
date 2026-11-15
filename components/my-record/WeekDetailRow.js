@@ -3,7 +3,7 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 import { weekDestination } from "@/lib/myRecordNavigation";
 
 const ROW_CLASSES =
-  "relative flex w-full flex-wrap items-center gap-x-3.5 gap-y-2 rounded-[20px] px-[22px] py-[18px]";
+  "relative flex min-h-[78px] w-full flex-wrap items-center gap-x-3.5 gap-y-2 rounded-[20px] px-[22px] py-[18px]";
 const ACTIVE_ROW_CLASSES = `${ROW_CLASSES} border-2 border-transparent bg-white`;
 const MUTED_ROW_CLASSES = `${ROW_CLASSES} border-[1.5px] border-transparent bg-[#fafaf8]`;
 
