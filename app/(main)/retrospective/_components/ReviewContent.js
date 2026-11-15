@@ -83,7 +83,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
     router.push(getStepHref("questions"));
   }
 
-  // 나중에 이어쓰기: 카드를 저장하고 지금 단계(4)와 저장 시각을 남긴다(API 14).
+  // 임시 저장: 카드를 저장하고 지금 단계(4)와 저장 시각을 남긴다(API 14).
   async function saveLater() {
     if (initialCard.cardId) {
       const message = await saveCard();
@@ -202,7 +202,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
             {/* 모든 질문에 답했으면 질문 화면이 질문 끝(고치기 목록)으로 열린다(R-17). */}
             <TextLink onClick={backToQuestions} disabled={isBusy}>← 질문으로</TextLink>
             <div className="ml-auto flex gap-2">
-              <Button variant="ink-outline" onClick={saveLater} disabled={isBusy} aria-busy={isBusy && !isCompleting}>{isBusy && !isCompleting ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
+              <Button variant="ink-outline" onClick={saveLater} disabled={isBusy} aria-busy={isBusy && !isCompleting}>{isBusy && !isCompleting ? "저장하는 중…" : "임시 저장"}</Button>
               <Button variant="cta-ink" onClick={complete} disabled={isBusy} aria-busy={isCompleting}>{isCompleting ? "저장하는 중…" : "저장하고 사자록에 추가"}</Button>
             </div>
           </div>

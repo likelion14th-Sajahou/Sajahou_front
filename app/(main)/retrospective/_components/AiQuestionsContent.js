@@ -13,6 +13,7 @@ import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { useReviewDraftRequest } from "./useReviewDraftRequest";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
+import { answerDraftKey, readAnswerDrafts } from "@/lib/retrospectiveAnswerDrafts";
 
 // 자료가 부족해 질문을 만들지 못했을 때(R-15). 프로토타입처럼 질문 카드와 같은 진한 카드다.
 function InsufficientMaterial() {
@@ -38,7 +39,7 @@ function InsufficientMaterial() {
 // 과제 회고(R-23)는 과제 중심 질문이고, 마지막은 '이번 과제에서 다음에도 가져가고 싶은 것'이다(서버가 고른다).
 function Questions() {
   const router = useRouter();
-  const { authenticatedRequest } = useAuth();
+  const { authenticatedRequest, user } = useAuth();
   const { retrospective, getStepHref } = useRetrospectivePreview();
   const retrospectiveId = retrospective?.id;
   const startHref = getStepHref();
@@ -60,13 +61,22 @@ function Questions() {
         const result = await requestQuestions(retrospectiveId, "AUTO", options);
         return { questions: result.questions, insufficient: result.insufficientMaterial };
       })
-      .then(setLoaded)
+      .then((result) => {
+        if (controller.signal.aborted) return;
+        const draftKey = answerDraftKey(user?.id, retrospectiveId);
+        try {
+          const drafts = readAnswerDrafts(window.localStorage, draftKey, result.questions);
+          setLoaded({ ...result, draftKey, drafts });
+        } catch {
+          setLoaded({ ...result, draftKey, drafts: {}, draftError: "이 브라우저에 임시 저장한 답변을 불러오지 못했어요." });
+        }
+      })
       .catch((failure) => {
         if (controller.signal.aborted || failure.name === "AbortError" || failure.status === 401) return;
         setError(getRequestErrorMessage(failure, "질문을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."));
       });
     return () => controller.abort();
-  }, [retrospectiveId, startHref, authenticatedRequest, router, reloadKey]);
+  }, [retrospectiveId, startHref, authenticatedRequest, router, reloadKey, user?.id]);
 
   if (!loaded) {
     return (
@@ -87,7 +97,11 @@ function Questions() {
 
   return (
     <AiQuestionsSession
+      key={loaded.draftKey}
       initialQuestions={loaded.questions}
+      initialDrafts={loaded.drafts}
+      draftKey={loaded.draftKey}
+      draftError={loaded.draftError}
       saveAnswer={(question, values) => answerQuestion(question.questionId, values, { request: authenticatedRequest })}
     />
   );
