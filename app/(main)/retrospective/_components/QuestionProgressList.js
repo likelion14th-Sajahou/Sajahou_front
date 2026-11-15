@@ -21,7 +21,7 @@ const STATES = {
     quote: "text-ink-faint",
   },
   skip: {
-    label: "건너뛰었어요 · 답 안 함",
+    label: "건너뛰었어요",
     item: "bg-[#fafaf8] shadow-[inset_0_0_0_1.5px_#ecece8]",
     dot: "border-[1.5px] border-[#b9bbc0] bg-white text-[15px] text-ink-faint",
     status: "text-ink-faint",
