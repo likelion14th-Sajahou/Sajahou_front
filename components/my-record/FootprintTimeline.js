@@ -9,8 +9,13 @@ const LABEL_CLASSES = {
   upcoming: "text-ink-300",
 };
 
+// 아이콘 우선순위: 프로젝트 스티커(stickers) → 회고 상태(status). 발표 주는 회고와 프로젝트 완료가 함께 있을 수 있다.
 function WeekIcon({ week }) {
-  const { status, shape } = week;
+  const { status, stickers } = week;
+
+  if (stickers.length > 0) {
+    return <FootprintSticker week={week.week} category={stickers[0]} />;
+  }
 
   if (status === "none") {
     return (
@@ -26,7 +31,7 @@ function WeekIcon({ week }) {
     return <CurrentWeekSticker />;
   }
 
-  return <FootprintSticker week={week.week} isProjectRecap={shape === "sun"} />;
+  return <FootprintSticker week={week.week} />;
 }
 
 function ProjectCapsule({ label }) {
@@ -106,7 +111,7 @@ export default function FootprintTimeline({
                 key={week.week}
                 type="button"
                 aria-pressed={isSelected}
-                aria-label={`${week.week}주차 ${week.title ?? "예정"}`}
+                aria-label={`${week.week}주차 ${week.title ?? "예정"}${week.stickers.length > 0 ? " · 프로젝트 완료" : ""}`}
                 onClick={() => onSelectWeek(week.week)}
                 className={`flex w-[38px] cursor-pointer flex-col items-center gap-1.5 self-end justify-self-center rounded-xl pt-1.5 pb-1 ${
                   isSelected ? "bg-white shadow-[inset_0_0_0_1.5px_var(--color-ink)]" : ""
