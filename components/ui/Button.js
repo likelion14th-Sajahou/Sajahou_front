@@ -40,8 +40,8 @@ const VARIANT_BORDERS = {
 };
 
 const SIZE_CLASSES = {
-  md: "h-12 px-[22px] text-body leading-6",
-  sm: "h-[38px] px-4 text-body-sm",
+  md: "h-12 px-[22px] text-body leading-6 [--drawn-border-height:48px]",
+  sm: "h-[38px] px-4 text-body-sm [--drawn-border-height:38px]",
 };
 
 export default function Button({

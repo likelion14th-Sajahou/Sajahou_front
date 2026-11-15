@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import AttachmentChip, { ChipStatus } from "@/components/ui/AttachmentChip";
 import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
@@ -28,7 +28,6 @@ export default function RecordAttachmentsField({ label, attachments, category, o
   const [link, setLink] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [needsCategory, setNeedsCategory] = useState(false);
-  const categoryBorderId = useId();
   const categoryGroupRef = useRef(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -110,16 +109,10 @@ export default function RecordAttachmentsField({ label, attachments, category, o
     <fieldset disabled={busy} className="flex min-w-0 flex-col gap-2.5" aria-busy={busy}>
       {label && <legend className="mb-2.5">{label}</legend>}
       {category === undefined && (
-        // 공용 Chip의 drawn 옵션을 사용한다. 미선택 안내는 같은 손그림 선만 노랑으로 강조한다.
+        // 공용 Chip의 노란 손그림 테두리를 사용하고, 선택하지 않고 업로드하면 칩을 흔들어 안내한다.
         <div ref={categoryGroupRef} role="group" aria-label="새 첨부 자료 종류" className="flex flex-wrap gap-1.5">
-          {needsCategory && <svg aria-hidden="true" width="0" height="0" className="pointer-events-none absolute">
-            <defs><filter id={categoryBorderId} colorInterpolationFilters="sRGB">
-              <feFlood floodColor="var(--color-yellow-400)" result="color" />
-              <feComposite in="color" in2="SourceAlpha" operator="in" />
-            </filter></defs>
-          </svg>}
           {ATTACHMENT_CATEGORIES.map(([value, name]) => (
-            <Chip key={value} drawn size="sm" className={`px-3.5! ${needsCategory ? "[&>span[aria-hidden]]:[filter:var(--category-border-filter)]" : ""}`} style={needsCategory ? { "--category-border-filter": `url(#${categoryBorderId})` } : undefined} selected={selectedCategory === value} onClick={() => { setSelectedCategory(value); setNeedsCategory(false); setError(""); }}>{name}</Chip>
+            <Chip key={value} drawn size="sm" selectedTone="yellow" className="px-3.5!" selected={selectedCategory === value} onClick={() => { setSelectedCategory(value); setNeedsCategory(false); setError(""); }}>{name}</Chip>
           ))}
         </div>
       )}

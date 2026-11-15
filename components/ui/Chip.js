@@ -10,6 +10,7 @@ const SIZE_CLASSES = {
 // drawn: 손그림 테두리 + 삼립호빵체(회고 자료 화면의 '있었어요·없었어요' 등). 테두리는 DrawnBorder가 그린다.
 export default function Chip({
   selected = false,
+  selectedTone = "ink",
   size = "md",
   drawn = false,
   href,
@@ -17,16 +18,21 @@ export default function Chip({
   children,
   ...rest
 }) {
-  // 디자인 시스템(Figma 'Part Chip'): 선택은 진한 바탕 + 흰 글씨, 기본은 흰 바탕 + 회색 테두리.
+  // 자료 종류는 기본 노란 선을 유지하고, 선택하면 노란 배경과 더 진한 선으로 표시한다.
+  const yellowTone = selectedTone === "yellow";
+  const selectedClasses = yellowTone ? "bg-yellow-400 text-ink-800" : "bg-ink text-white";
+  const unselectedClasses = yellowTone ? "bg-white text-ink-800" : "bg-white text-ink";
+  const borderClasses = yellowTone ? (selected ? "border-yellow-500" : "border-yellow-400") : (selected ? "border-ink" : "border-line");
   const stateClasses = drawn
-    ? `relative font-display ${selected ? "bg-ink text-white" : "bg-white text-ink"}`
-    : `border ${selected ? "border-ink bg-ink text-white" : "border-line bg-white text-ink"}`;
+    ? `relative font-display ${selected ? selectedClasses : unselectedClasses}`
+    : `border ${borderClasses} ${selected ? selectedClasses : unselectedClasses}`;
+  const focusClasses = yellowTone ? "focus:outline-none" : "";
 
-  const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center ${stateClasses} ${SIZE_CLASSES[size]} ${className}`;
+  const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center ${stateClasses} ${focusClasses} ${SIZE_CLASSES[size]} ${className}`;
   const content = (
     <>
       {children}
-      {drawn && <DrawnBorder variant={selected ? "chip-ink" : "chip-line"} />}
+      {drawn && <DrawnBorder variant={selected ? "chip-ink" : "chip-line"} color={yellowTone ? (selected ? "var(--color-yellow-500)" : "var(--color-yellow-400)") : undefined} />}
     </>
   );
 
