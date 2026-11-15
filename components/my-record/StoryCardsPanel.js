@@ -66,7 +66,7 @@ export default function StoryCardsPanel({
   }, [highlightedCardId, highlightToken, visibleIds, filtered.loading]);
 
   return (
-    <section aria-label="스토리 카드" className="flex min-w-0 flex-col gap-4 pt-5 font-display">
+    <section aria-label="스토리 카드" className="flex min-w-0 flex-col gap-4 pt-5 font-sans">
       <div className="flex flex-wrap items-center gap-2">
         <div role="group" aria-label="카드 유형" className="flex flex-wrap gap-2">
           {TYPE_FILTERS.map(({ id, label }) => (
@@ -136,7 +136,7 @@ export default function StoryCardsPanel({
         open={Boolean(openCardId)}
         onClose={closeCard}
         size="lg"
-        className="overflow-visible! rounded-[20px]! font-display text-[#1f2433] backdrop:bg-ink/40"
+        className="overflow-visible! rounded-[20px]! font-sans text-[#1f2433] backdrop:bg-ink/40"
         contentClassName="max-h-[calc(100dvh-32px)] overflow-y-auto rounded-[20px] px-5 py-7 sm:px-[30px]"
         border={<DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />}
         aria-labelledby="story-card-title"

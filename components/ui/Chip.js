@@ -9,7 +9,7 @@ const SIZE_CLASSES = {
 };
 
 // href를 주면 같은 모양의 링크가 된다(예: 회고의 세션·과제 전환 탭).
-// drawn: 손그림 테두리 + 삼립호빵체(회고 자료 화면의 '있었어요·없었어요' 등). 테두리는 DrawnBorder가 그린다.
+// 모든 칩은 동작 요소라 삼립호빵체다. drawn은 DrawnBorder로 손그림 테두리를 그린다.
 export default function Chip({
   selected = false,
   selectedTone = "ink",
@@ -27,11 +27,11 @@ export default function Chip({
   const unselectedClasses = yellowTone ? "bg-white text-ink-800" : "bg-white text-ink";
   const borderClasses = yellowTone ? (selected ? "border-yellow-500" : "border-yellow-400") : (selected ? "border-ink" : "border-line");
   const stateClasses = drawn
-    ? `relative font-display ${selected ? selectedClasses : unselectedClasses}`
+    ? `relative ${selected ? selectedClasses : unselectedClasses}`
     : `border ${borderClasses} ${selected ? selectedClasses : unselectedClasses}`;
   const focusClasses = yellowTone ? "focus:outline-none" : "";
 
-  const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center ${stateClasses} ${focusClasses} ${SIZE_CLASSES[size]} ${className}`;
+  const classes = `font-display inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center ${stateClasses} ${focusClasses} ${SIZE_CLASSES[size]} ${className}`;
   const content = (
     <>
       {children}

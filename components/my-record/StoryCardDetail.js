@@ -65,7 +65,7 @@ function SummaryDetails({ summary }) {
         <span aria-hidden="true" className="hidden w-[15px] text-body group-open:inline">▾</span>
         <span className="text-body">
           자소서에 쓰는 요약{" "}
-          <span className="text-label text-[#5a606c]">상황 · 행동 · 이유 · 결과 · 배운 점</span>
+          <span className="font-sans text-label text-[#5a606c]">상황 · 행동 · 이유 · 결과 · 배운 점</span>
         </span>
       </summary>
       <dl className="pt-1">
@@ -113,7 +113,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
   }
 
   return (
-    <fieldset disabled={busy} className="flex min-w-0 flex-col items-start gap-3.5 font-display text-[#1f2433] tracking-[-0.15px]">
+    <fieldset disabled={busy} className="flex min-w-0 flex-col items-start gap-3.5 font-sans text-[#1f2433] tracking-[-0.15px]">
       {error && <p role="alert">{error}</p>}
       <div className="flex w-full items-center gap-2.5">
         <span className="flex size-[52px] shrink-0 items-center justify-center"><StoryCardIcon card={card} size={50} /></span>
@@ -151,7 +151,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
               <h3 className="text-body font-normal">{documentText.title}</h3>
               <Button size="sm" className="border-[#fef5d2]! bg-[#fef5d2]!" onClick={copyDocument}>노션에 복사</Button>
             </div>
-            <div className="pt-2">
+            <div className="pt-2 font-input">
               {documentBody
                 .split("\n")
                 .filter((line) => line.trim())
@@ -176,7 +176,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
                 <TextLink variant="underline" className="text-[#4a5163]!" autoFocus onClick={() => setIsConfirmingDelete(false)}>
                   취소
                 </TextLink>
-                <Button variant="danger" className="h-[46px]! bg-error! px-6! font-display" onClick={() => run((signal) => onDelete(signal))}>지우기</Button>
+                <Button variant="danger" className="h-[46px]! bg-error! px-6!" onClick={() => run((signal) => onDelete(signal))}>지우기</Button>
               </div>
             </div>
           ) : (

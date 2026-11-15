@@ -12,7 +12,7 @@ import AiPromptHeader from "./AiPromptHeader";
 // - 답 보관: answer·onAnswerChange를 넘기면 쓰는 화면이 답을 들고 있고, 없으면 폼 안에서 들고 있다.
 //   폼 안에서 들 때는 질문이 바뀌면 입력을 비우도록 쓰는 곳에서 질문별 key를 준다.
 // - size: "md"는 카드 안의 h3(20px), "lg"는 화면의 주 제목인 h2(24px, 회고 04 시안)다.
-// - tone: "dark"는 진한 카드 위(회고 AI 질문, 11/13 디자인)다. 질문은 흰 삼립호빵체, 답 칸은 Pretendard,
+// - tone: "dark"는 진한 카드 위다. AI 질문은 흰 NPS, 답 칸은 Pretendard,
 //   링크는 흰 밑줄, 버튼은 노란 버튼이다. 프로젝트 화면은 아직 "light"(기존 모양)를 쓴다.
 const QUESTION_SIZES = {
   md: { as: "h3", className: "text-title leading-[29px] tracking-[-0.2px]" },
@@ -21,7 +21,7 @@ const QUESTION_SIZES = {
 
 const TONES = {
   light: {
-    question: "text-ink",
+    question: "font-sans text-ink",
     source: "bg-canvas text-ink-muted",
     label: undefined,
     answer: "h-[98px]",
@@ -30,7 +30,7 @@ const TONES = {
     button: "primary",
   },
   dark: {
-    question: "font-display text-white",
+    question: "font-sans text-white",
     source: "bg-white/10 leading-[22.4px] text-locked",
     label: "text-label leading-[20.8px] font-bold text-white",
     answer: "h-[98px] font-input leading-6 text-ink-strong!",

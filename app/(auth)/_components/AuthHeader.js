@@ -17,7 +17,7 @@ export default function AuthHeader({ titleId, title, description, size = "large"
         <h1 id={titleId} className="font-display text-[26px] leading-9 text-balance">
           {title}
         </h1>
-        <p className={`text-label leading-5 text-ink-subtle ${size === "large" ? "font-display" : ""}`}>{description}</p>
+        <p className="font-sans text-label leading-5 text-ink-subtle">{description}</p>
       </div>
     </div>
   );

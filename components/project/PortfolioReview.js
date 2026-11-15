@@ -28,9 +28,9 @@ export default function PortfolioReview({ project, initialMarkdown, blanks = [],
 
   return (
     <>
-      <p className="font-display text-label leading-[20.8px] text-accent-strong">3 / 3 · 포트폴리오 검토</p>
+      <p className="font-sans text-label leading-[20.8px] text-accent-strong">3 / 3 · 포트폴리오 검토</p>
       <div className="pt-3">
-        <Card as="section" size="md" aria-labelledby="portfolio-title" className="relative flex min-w-0 flex-col gap-3 font-display text-ink-strong">
+        <Card as="section" size="md" aria-labelledby="portfolio-title" className="relative flex min-w-0 flex-col gap-3 font-sans text-ink-strong">
           <DrawnBorder variant="section-card" color="var(--color-ink-300)" />
           <fieldset disabled={busy} className="flex min-w-0 flex-col gap-3">
           <BlankFieldsNotice labels={blanks.map((field) => PORTFOLIO_FIELD_LABELS[field]).filter(Boolean)} />

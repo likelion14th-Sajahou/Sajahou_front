@@ -134,10 +134,10 @@ export function RetrospectiveHeading() {
 
   return (
     <div className={`flex flex-wrap items-end justify-between gap-x-6 gap-y-3.5 ${isStartScreen ? "mx-auto max-w-[896px]" : ""}`}>
-      {/* 회고 상단 헤더(Figma '회고 상단 헤더'): 홈 링크, 파트, 제목은 삼립호빵체 */}
+      {/* 회고 상단 헤더(Figma '회고 상단 헤더'): 홈 링크·제목은 삼립호빵체, 파트 안내는 NPS */}
       <div className="flex min-w-0 max-w-full flex-col items-start gap-3">
         <Link href="/" className="font-display text-body-sm leading-[22.4px] text-ink-muted">← 홈</Link>
-        <div className="flex flex-col items-start font-display">
+        <div className="flex flex-col items-start font-sans">
           <p className="text-label leading-[20.8px] text-accent-strong">{part}</p>
           <h1 className="text-[32px] leading-[45.6px] tracking-[-0.76px] text-balance">
             {week.weekNumber}주차 {isAssignment ? "과제" : "세션"} 회고
@@ -147,8 +147,8 @@ export function RetrospectiveHeading() {
         {(assignmentPending || (isAssignment && assignment)) && (
           <nav aria-label="회고 작성 상태" className="flex max-w-full flex-wrap gap-1.5 pt-2">
             {/* 세션 회고와 과제 회고를 오가는 전환 탭이다(R-01). 탭도 버튼이라 삼립호빵체다. */}
-            <Chip className="font-display" selected={!isAssignment} href="/retrospective">세션 회고 · {STATE_LABELS[session.state]}</Chip>
-            <Chip className="font-display" selected={isAssignment} href="/retrospective?type=assignment">과제 회고 · {STATE_LABELS[assignment?.state ?? "NOT_STARTED"]}</Chip>
+            <Chip selected={!isAssignment} href="/retrospective">세션 회고 · {STATE_LABELS[session.state]}</Chip>
+            <Chip selected={isAssignment} href="/retrospective?type=assignment">과제 회고 · {STATE_LABELS[assignment?.state ?? "NOT_STARTED"]}</Chip>
           </nav>
         )}
       </div>

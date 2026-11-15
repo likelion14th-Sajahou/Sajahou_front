@@ -68,9 +68,9 @@ function AnswerDraft({ question, answer, edit, cardViews, companyLabel, onEdit, 
   return (
     <>
       {editing ? (
-        <textarea rows={9} aria-label={`문항 ${question.seq} 초안`} value={text} onChange={(event) => onEdit(event.target.value)} autoFocus className="h-[297px] w-full resize-none rounded-2xl border border-transparent bg-canvas px-5 py-[18px] text-[16px] leading-[1.8] focus-visible:outline-2 focus-visible:outline-ink" />
+        <textarea rows={9} aria-label={`문항 ${question.seq} 초안`} value={text} onChange={(event) => onEdit(event.target.value)} autoFocus className="font-input h-[297px] w-full resize-none rounded-2xl border border-transparent bg-canvas px-5 py-[18px] text-[16px] leading-[1.8] focus-visible:outline-2 focus-visible:outline-ink" />
       ) : (
-        <div className="rounded-[20px] bg-tint-yellow px-4 py-5 text-[16px] leading-[1.95] whitespace-pre-wrap break-words sm:px-[22px]">
+        <div className="font-input rounded-[20px] bg-tint-yellow px-4 py-5 text-[16px] leading-[1.95] whitespace-pre-wrap break-words sm:px-[22px]">
           {edit ? text : <DraftSegments segments={answer.segments} />}
         </div>
       )}
@@ -153,7 +153,7 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
       <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />
       <div className="flex items-start gap-3">
         <Badge tone="yellow" size="question" className="mt-0.5 bg-yellow-400! text-ink-950!">Q{question.seq}</Badge>
-        <h3 id={headingId} className="text-[18px] leading-[1.5]">{question.content}</h3>
+        <h3 id={headingId} className="font-sans text-[18px] leading-[1.5]">{question.content}</h3>
       </div>
       {body}
     </Card>

@@ -9,7 +9,7 @@ export const metadata = { title: "자소서 매칭 | 사자록" };
 
 export default function MatchingPage({ searchParams }) {
   return (
-    <main className="matching-page mx-auto w-full max-w-[1120px] px-4 pt-10 pb-20 font-display tracking-[-0.15px]">
+    <main className="matching-page mx-auto w-full max-w-[1120px] px-4 pt-10 pb-20 font-sans tracking-[-0.15px]">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div className="flex min-w-0 flex-col gap-1.5">
           <Link href="/my-record" className="w-fit text-body-sm text-ink-muted">← 나의 사자록</Link>

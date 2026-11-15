@@ -86,7 +86,7 @@ export function PortfolioCard({ portfolio, onRemake }) {
     <SideCard title="포트폴리오" label="포트폴리오" description="노션·포트폴리오 사이트에 그대로 붙여 넣을 수 있어요">
       {portfolio ? (
         <>
-          {/* 저장한 포트폴리오는 사용자가 만든 글이라 Pretendard(font-input)다. */}
+          {/* 포트폴리오는 저장 후 읽기 화면에서도 Pretendard(font-input)를 유지한다. */}
           <TextField
             multiline
             readOnly

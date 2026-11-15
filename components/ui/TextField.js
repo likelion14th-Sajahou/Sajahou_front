@@ -5,7 +5,7 @@ const SIZE_CLASSES = {
   sm: "rounded-xl px-3 text-label",
 };
 
-// 디자인 시스템(Figma 'Input'·'Form Field'): 회색 바탕, 높이 48, 오류면 빨간 테두리. 라벨은 삼립호빵체.
+// 회색 바탕, 높이 48, 오류면 빨간 테두리. 입력값은 Pretendard, placeholder도 Pretendard, 라벨·안내는 NPS.
 const INPUT_HEIGHT_CLASSES = {
   md: "h-12 py-3",
   sm: "h-[38px] py-[7px]",
@@ -45,7 +45,7 @@ export default function TextField({
   appearance = "filled",
   rows = 3,
   className = "",
-  labelClassName = "font-display text-label leading-5 text-ink",
+  labelClassName = "text-label leading-5 text-ink",
   error,
   drawn = false,
   wrapperClassName = "",
@@ -55,7 +55,7 @@ export default function TextField({
   const look = appearanceClasses(appearance, size, error);
   // drawn: 손그림 테두리 틀(DrawnFieldFrame) 안에 들어가는 둥근 흰 칸. 기본(filled) 모양 위에 덮어쓴다.
   const drawnClasses = drawn ? "rounded-full! border-transparent! bg-white! px-3.5! text-body-sm! text-[#1f2433] placeholder:text-[#8a8f9a]" : "";
-  const controlClasses = `w-full text-ink placeholder:text-placeholder ${look.control} ${drawnClasses} ${className}`;
+  const controlClasses = `w-full font-input text-ink placeholder:font-input placeholder:text-placeholder ${look.control} ${drawnClasses} ${className}`;
   const accessibilityProps = error ? {
     "aria-invalid": true,
     "aria-describedby": [rest["aria-describedby"], errorId].filter(Boolean).join(" "),
@@ -87,7 +87,7 @@ export default function TextField({
   }
 
   return (
-    <label className="flex w-full flex-col gap-2">
+    <label className="flex w-full flex-col gap-2 font-sans">
       <span className={labelClassName}>{label}</span>
       {framedControl}
       {error && <span id={errorId} className="text-caption leading-5 text-error">{error}</span>}

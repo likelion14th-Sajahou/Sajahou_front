@@ -133,7 +133,7 @@ export default function SignupForm() {
             <Checkbox name="privacyAgreed" checked={values.privacyAgreed} onChange={handleChange} aria-invalid={errors.privacyAgreed ? true : undefined} aria-describedby={errors.privacyAgreed ? "privacyAgreed-error" : undefined} />
           </span>
           <span className="flex min-w-0 flex-col gap-1">
-            <span className="text-body-sm leading-[22px] text-ink">[필수] 개인정보 수집·이용에 동의해요</span>
+            <span className="font-display text-body-sm leading-[22px] text-ink">[필수] 개인정보 수집·이용에 동의해요</span>
             <span className="text-caption leading-[18px] text-ink-subtle">
               사자록 회원 관리와 회고·자소서 기능 제공을 위해 이름·학번·학과·기수·파트·이메일을 수집하며, 회원 탈퇴 시까지 보관해요.
             </span>

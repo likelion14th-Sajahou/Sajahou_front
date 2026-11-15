@@ -48,7 +48,7 @@ export default function ProjectHeader({ project, recordCount, lastRecordedAt }) 
         <DrawnBorder variant="start-card" color="var(--color-yellow-400)" />
         {stats.map(({ label, value }) => (
           <div key={label} className="flex flex-col-reverse">
-            <dd className="font-display text-[26px] leading-[1.2] text-ink-strong">{value}</dd>
+            <dd className="font-sans text-[26px] leading-[1.2] text-ink-strong">{value}</dd>
             <dt className="text-caption font-bold text-ink-500">{label}</dt>
           </div>
         ))}

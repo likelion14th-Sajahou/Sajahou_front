@@ -61,13 +61,13 @@ function ProjectListCard({ project }) {
         <Image src={sticker} width={isActive ? 80 : 56} height={isActive ? 80 : 56} alt="" className={`shrink-0 object-contain ${isActive ? "size-14 sm:size-20" : "size-14 opacity-65"}`} />
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className={`${isActive ? "text-heading leading-[30px]" : "text-[18px] leading-[26px]"} text-ink-strong`}>{title}</span>
-          {caption && <span className="text-body-sm leading-5 text-ink-600">{caption}</span>}
-          <span className="flex flex-wrap items-center gap-1.5 text-label leading-5 text-ink-500">
+          {caption && <span className="font-sans text-body-sm leading-5 text-ink-600">{caption}</span>}
+          <span className="font-sans flex flex-wrap items-center gap-1.5 text-label leading-5 text-ink-500">
             <Badge tone={isActive ? "yellow" : "neutral"} className={isActive ? "py-px!" : "bg-white! py-px!"}>{formatRoles(roles)}</Badge>
             {isActive ? `기록 ${recordCount}개${startedAt ? ` · 시작 ${formatMonthDay(startedAt)}` : ""}` : getSummary(project)}
           </span>
           {isActive && <span className="flex flex-wrap items-end gap-3.5 pt-2">
-            <span className="flex min-w-0 basis-full flex-col gap-1.5 sm:flex-1 sm:basis-0">
+            <span className="font-sans flex min-w-0 basis-full flex-col gap-1.5 sm:flex-1 sm:basis-0">
               {recentRecords.length > 0 ? recentRecords.map((record) => (
                 <span key={record.id} className="flex min-w-0 items-baseline gap-2 rounded-xl bg-canvas px-3 py-2 text-body-sm leading-[22px]">
                   <span className="shrink-0 text-yellow-700">{formatMonthDay(record.date)}({record.weekday})</span>
@@ -92,7 +92,7 @@ export default function ProjectList() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-4 font-display">
+      <div className="flex flex-wrap items-center justify-between gap-4 font-sans">
         <h1 className="text-[32px] leading-[46px] tracking-[-0.64px] text-ink-strong">
           프로젝트
         </h1>
@@ -104,7 +104,7 @@ export default function ProjectList() {
           const sectionProjects = projects.filter((project) => project.status === status);
 
           return (
-            <section key={status} aria-label={title} className={`font-display ${index === 0 ? "pt-7" : "pt-10"}`}>
+            <section key={status} aria-label={title} className={`font-sans ${index === 0 ? "pt-7" : "pt-10"}`}>
               <h2 className="text-title leading-8 tracking-[-0.4px] text-ink-strong">
                 {title} <span className="text-yellow-700">{sectionProjects.length}</span>
               </h2>

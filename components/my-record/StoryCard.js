@@ -10,7 +10,7 @@ export default function StoryCard({ card, isHighlighted = false, onOpen }) {
     <Card
       as="article"
       size="sm"
-      className="relative flex h-full min-w-0 flex-col items-start gap-3 rounded-[24px]! font-display text-[#1f2433] tracking-[-0.15px]"
+      className="relative flex h-full min-w-0 flex-col items-start gap-3 rounded-[24px]! font-sans text-[#1f2433] tracking-[-0.15px]"
     >
       <DrawnBorder variant="thin-outline" repeat="round" color={isHighlighted ? "var(--color-shape-yellow)" : "var(--color-ink-300)"} />
       <div className="flex w-full items-center gap-2">

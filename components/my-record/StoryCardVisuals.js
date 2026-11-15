@@ -18,7 +18,7 @@ export function StoryCardIcon({ card, size = 38 }) {
 const TYPE_BADGE_TONES = { session: "yellow", assignment: "cream", project: "dark" };
 
 export function StoryCardTypeBadge({ type }) {
-  return <Badge tone={TYPE_BADGE_TONES[type]} className="font-display tracking-[-0.15px]">
+  return <Badge tone={TYPE_BADGE_TONES[type]} className="font-sans tracking-[-0.15px]">
     {STORY_CARD_TYPES[type].label}
   </Badge>;
 }
