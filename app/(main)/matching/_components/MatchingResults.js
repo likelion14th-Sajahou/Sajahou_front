@@ -119,7 +119,7 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
             {/* 카드 수는 서버가 고정 역량 목록(C-06)으로 센 값이라 나의 사자록의 역량 필터 결과와 같다. */}
             {posting.competencies.map(({ competencyId, name, evidenceQuote, cardCount }) => (
               <li key={competencyId} className="relative min-w-0 rounded-[20px] bg-white px-[18px] py-4">
-                <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink-300)" />
+                <DrawnBorder color="var(--color-ink-300)" />
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="min-w-0 break-words text-[17px] leading-[27.2px]">#{name.replace(/^#/, "")}</h3>
                   {/* 카드 전체를 같은 링크 영역으로 확장한다. '없음'은 누를 수 없다.

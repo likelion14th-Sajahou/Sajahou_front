@@ -78,7 +78,7 @@ export default function TextField({
   );
 
   const framedControl = drawn ? (
-    <DrawnFieldFrame height={size === "sm" ? 38 : 48} className={wrapperClassName} error={Boolean(error)}>
+    <DrawnFieldFrame className={wrapperClassName} error={Boolean(error)}>
       {control}
     </DrawnFieldFrame>
   ) : control;

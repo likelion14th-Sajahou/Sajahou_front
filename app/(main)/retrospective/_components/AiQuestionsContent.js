@@ -21,7 +21,7 @@ function InsufficientMaterial() {
   const review = useReviewDraftRequest();
 
   return (
-    <RetroDarkCard border="start-card" className="mt-10" aria-labelledby="insufficient-material-title">
+    <RetroDarkCard className="mt-10" aria-labelledby="insufficient-material-title">
       <h2 id="insufficient-material-title" className="text-body leading-6 text-white">질문할 자료가 부족해요. 세션 자료나 메모를 조금만 더 올려 주세요.</h2>
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-locked pt-4">
         <Button variant="inverse-muted" href={getStepHref("materials")}>← 자료로</Button>

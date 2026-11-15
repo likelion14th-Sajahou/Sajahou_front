@@ -138,7 +138,7 @@ export default function StoryCardsPanel({
         size="lg"
         className="overflow-visible! rounded-[20px]! font-display text-[#1f2433] backdrop:bg-ink/40"
         contentClassName="max-h-[calc(100dvh-32px)] overflow-y-auto rounded-[20px] px-5 py-7 sm:px-[30px]"
-        border={<DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />}
+        border={<DrawnBorder color="var(--color-ink)" width={2} />}
         aria-labelledby="story-card-title"
       >
         {openCardId && <RemoteStoryCard key={openCardId} cardId={openCardId}

@@ -57,7 +57,7 @@ function ProjectListCard({ project }) {
         aria-label={`${categoryLabel ? `${categoryLabel} ` : ""}${name} ${isActive ? "기록 추가" : "포트폴리오 보기"}`}
         className={`relative flex h-full min-w-0 items-center rounded-[24px] ${isActive ? "gap-4 bg-white px-[22px] py-6 sm:gap-5 lg:min-h-[222px]" : "gap-4 bg-divider px-[18px] py-5 lg:min-h-[116px]"}`}
       >
-        <DrawnBorder variant="thin-outline" repeat="round" color={isActive ? "var(--color-ink-900)" : "var(--color-ink-300)"} />
+        <DrawnBorder color={isActive ? "var(--color-ink-900)" : "var(--color-ink-300)"} />
         <Image src={sticker} width={isActive ? 80 : 56} height={isActive ? 80 : 56} alt="" className={`shrink-0 object-contain ${isActive ? "size-14 sm:size-20" : "size-14 opacity-65"}`} />
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className={`${isActive ? "text-heading leading-[30px]" : "text-[18px] leading-[26px]"} text-ink-strong`}>{title}</span>
@@ -113,7 +113,7 @@ export default function ProjectList() {
                     <ProjectListCard key={project.id} project={project} />
                   ))}
                   {status === "active" && sectionProjects.length === 0 && isAuthenticated && <li><button type="button" onClick={() => setIsModalOpen(true)} className="relative flex min-h-[178px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[24px] p-5 text-ink-900">
-                    <DrawnBorder variant="thin-outline" color="var(--color-ink-300)" />
+                    <DrawnBorder color="var(--color-ink-300)" />
                     <span className="flex size-11 items-center justify-center rounded-full border-2 border-ink-300"><Image src="/images/project/plus-20.svg" width={20} height={20} alt="" /></span>
                     <span className="text-[16px] leading-[25.6px]">새 프로젝트</span>
                   </button></li>}

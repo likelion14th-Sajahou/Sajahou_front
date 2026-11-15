@@ -191,7 +191,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
 
   return (
     <Card as="section" size="md" className={`relative ${isDark ? "bg-ink-900! text-white" : ""}`} aria-labelledby="record-add-title">
-      <DrawnBorder variant="start-card" color={isDark ? undefined : "var(--color-ink-300)"} />
+      <DrawnBorder color={isDark ? undefined : "var(--color-ink-300)"} />
       <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4" aria-busy={busy}>
         <RecordFormTitle id="record-add-title" date={todayLabel()} tone={isDark ? "dark" : "light"}>기록 추가</RecordFormTitle>
         {step === "insufficient" && (

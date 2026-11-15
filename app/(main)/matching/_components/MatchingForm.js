@@ -37,7 +37,7 @@ function formSnapshot(fields, questions, attachments) {
 function FormSection({ id, title, note, children }) {
   return (
     <div className="relative rounded-[20px] bg-white px-5 py-[18px]">
-      <DrawnBorder variant="section-card" color="white" />
+      <DrawnBorder color="white" />
       <MarkedSection id={id} title={title} note={note} size="lg">{children}</MarkedSection>
     </div>
   );
@@ -212,7 +212,7 @@ export default function MatchingForm({ jobPostingId = null }) {
   return (
     <>
     <form className="matching-form relative mt-7 flex min-w-0 flex-col gap-4 rounded-[24px] bg-ink px-7 py-6" aria-labelledby="matching-form-title" onSubmit={submit} ref={formRef}>
-      <DrawnBorder variant="start-card" color="var(--color-ink)" />
+      <DrawnBorder />
       <h2 id="matching-form-title" className="text-[20px] leading-8 tracking-[-0.4px] text-white">지원할 곳 알려 주기</h2>
       <FormSection id="matching-place" title="지원할 곳">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -249,7 +249,7 @@ export default function MatchingForm({ jobPostingId = null }) {
       <div className="flex flex-wrap items-center justify-between gap-3.5 pt-1">
         <TextLink variant="inverse" onClick={loadSample}>예시 공고 넣기</TextLink>
         {/* 첨부를 올리는 중에는 아직 목록에 없는 첨부가 빠지지 않도록 기다린다. */}
-        <Button ref={searchButtonRef} type="submit" variant="cta" borderColor="var(--color-ink)" className="matching-search max-w-full disabled:bg-canvas! disabled:text-ink-300!" disabled={!canSearch || isSearching || attachments.isBusy || restored.isRestoring} aria-busy={isSearching}>
+        <Button ref={searchButtonRef} type="submit" variant="cta" className="max-w-full disabled:bg-canvas! disabled:text-ink-300!" disabled={!canSearch || isSearching || attachments.isBusy || restored.isRestoring} aria-busy={isSearching}>
           {isSearching ? "내 사자록에서 찾는 중…" : !canSearch ? "찾기 완료 ✓" : posting ? "바뀐 내용으로 다시 찾기 →" : "내 사자록에서 찾기 →"}
         </Button>
       </div>

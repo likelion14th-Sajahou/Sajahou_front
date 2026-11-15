@@ -22,7 +22,7 @@ export default function MaterialsChangeNotice({
       aria-describedby="materials-change-description"
       className="relative flex min-w-0 flex-col gap-2.5 rounded-2xl bg-tint-peach px-4 py-3.5"
     >
-      <DrawnBorder variant="alert-orange" />
+      <DrawnBorder color="#ffb37a" />
       <div className="min-w-0 text-body-sm leading-[22.4px] break-keep text-ink-strong">
         <h3 id="materials-change-title" className="font-display">자료가 바뀌었어요</h3>
         <p id="materials-change-description">

@@ -6,7 +6,7 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 export default function RetroResultCard({ titleId, className = "", children }) {
   return (
     <section aria-labelledby={titleId} className={`relative mx-auto flex w-full flex-col items-center rounded-[32px] bg-white text-center ${className}`}>
-      <DrawnBorder variant="start-card" />
+      <DrawnBorder />
       {children}
     </section>
   );

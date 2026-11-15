@@ -1,14 +1,14 @@
 import Link from "next/link";
-import DrawnBorder from "@/components/ui/DrawnBorder";
 
 // primary·secondary는 디자인 시스템(Figma 'Button')의 Primary·Secondary다.
 // Primary: 주요 동작, 노란 바탕. Secondary: 보조 동작, 회색 바탕. 동작 요소는 모두 삼립호빵체다.
 // Secondary는 회색 바탕이라 흰 카드 안에 둔다(회색 페이지 바탕 위에서는 잘 안 보인다).
-// soft·inverse는 진한 카드(회고 시작 카드) 위에 두는 버튼이다. soft: 연노랑 바탕, inverse: 흰 굵은 테두리.
-// ink·ink-outline은 흰 카드(휴회 카드) 위의 진한 버튼과 진한 테두리 버튼이다.
+// soft·inverse는 진한 카드(회고 시작 카드) 위에 두는 버튼이다. soft: 연노랑 바탕, inverse: 흰 선.
+// ink·ink-outline은 흰 카드(휴회 카드) 위의 진한 버튼과 진한 선 버튼이다.
 // inverse-muted·cta는 진한 카드(회고 자료 카드) 하단의 '임시 저장'(회색 선)와 'AI 질문 받기'(노랑)다.
-// cta-ink는 밝은 카드 위의 노란 버튼에 진한 테두리를 두른 것이다.
-// 이 일곱 가지는 Figma에서 테두리가 손그림처럼 울퉁불퉁해서 DrawnBorder로 그린다(VARIANT_BORDERS).
+// cta-ink는 밝은 카드 위의 노란 버튼이다.
+// 버튼은 손그림 선 없이 매끈하다(이슈 #65, Figma '테두리 샘플'). 바탕이 있는 버튼은 선이 없고,
+// 선만 있는 버튼(inverse·inverse-muted·ink-outline)은 같은 색의 곧은 2px 선을 둔다.
 const VARIANT_CLASSES = {
   primary: "border border-yellow-400 bg-yellow-400 font-display text-ink",
   secondary: "border border-canvas bg-canvas text-ink",
@@ -16,32 +16,21 @@ const VARIANT_CLASSES = {
   accent: "border border-accent bg-accent text-white",
   highlight: "border border-shape-yellow bg-shape-yellow text-ink",
   danger: "border border-ink bg-danger text-white",
-  soft: "bg-yellow-100 font-display text-ink",
+  soft: "border-2 border-transparent bg-yellow-100 font-display text-ink",
   // Figma 'Button' Type=Google. 색은 Google 로그인 버튼 안내(테두리 #747775, 글자 #1F1F1F)를 따른다.
   google: "border border-[#747775] bg-white font-noto font-medium text-[#1f1f1f]",
-  inverse: "bg-transparent font-display text-white",
-  ink: "bg-ink-900 font-display text-white",
-  "ink-outline": "bg-white font-display text-ink",
-  "inverse-muted": "bg-transparent font-display text-white",
-  cta: "bg-yellow-400 font-display text-ink-950",
-  // 흰·연회색 카드 위의 노란 주요 버튼(회고 검토의 '저장하고 사자록에 추가'): 노랑 + 진한 손그림 테두리
-  "cta-ink": "bg-yellow-400 font-display text-ink",
-};
-
-// 크기별 테두리 이미지. 크기에 맞는 이미지가 없으면 md 것을 쓴다.
-const VARIANT_BORDERS = {
-  soft: { md: "pill-cream" },
-  inverse: { md: "pill-white" },
-  ink: { md: "pill-ink", sm: "pill-ink-sm" },
-  "ink-outline": { md: "pill-ink", sm: "pill-ink-sm" },
-  "inverse-muted": { md: "pill-muted" },
-  cta: { md: "pill-yellow" },
-  "cta-ink": { md: "pill-ink" },
+  inverse: "border-2 border-white bg-transparent font-display text-white",
+  ink: "border-2 border-transparent bg-ink-900 font-display text-white",
+  "ink-outline": "border-2 border-ink bg-white font-display text-ink",
+  "inverse-muted": "border-2 border-ink-300 bg-transparent font-display text-white",
+  cta: "border-2 border-transparent bg-yellow-400 font-display text-ink-950",
+  // 흰·연회색 카드 위의 노란 주요 버튼(회고 검토의 '저장하고 사자록에 추가')
+  "cta-ink": "border-2 border-transparent bg-yellow-400 font-display text-ink",
 };
 
 const SIZE_CLASSES = {
-  md: "h-12 px-[22px] text-body leading-6 [--drawn-border-height:48px]",
-  sm: "h-[38px] px-4 text-body-sm [--drawn-border-height:38px]",
+  md: "h-12 px-[22px] text-body leading-6",
+  sm: "h-[38px] px-4 text-body-sm",
 };
 
 export default function Button({
@@ -50,32 +39,22 @@ export default function Button({
   href,
   type = "button",
   className = "",
-  borderColor,
   children,
   ...rest
 }) {
-  const classes = `relative inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center disabled:cursor-default disabled:border-line disabled:bg-line disabled:text-[#6b6358] disabled:[&>span[aria-hidden]]:grayscale! ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`;
-
-  const borders = VARIANT_BORDERS[variant];
-  const border = borders?.[size] ?? borders?.md;
-  const content = (
-    <>
-      {children}
-      {border && <DrawnBorder variant={border} color={borderColor} />}
-    </>
-  );
+  const classes = `relative inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center disabled:cursor-default disabled:border-line disabled:bg-line disabled:text-[#6b6358] ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`;
 
   if (href) {
     return (
       <Link href={href} className={classes} {...rest}>
-        {content}
+        {children}
       </Link>
     );
   }
 
   return (
     <button type={type} className={classes} {...rest}>
-      {content}
+      {children}
     </button>
   );
 }

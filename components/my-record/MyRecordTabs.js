@@ -25,7 +25,8 @@ export default function MyRecordTabs({ activeTab, storyCardCount, searchParams }
               isActive ? "bg-white text-ink-strong shadow-[0_3px_0_#e4e1da]" : "text-ink-300 hover:text-ink-500"
             }`}
           >
-            {isActive && <DrawnBorder variant="pill-ink" color="var(--color-ink)" />}
+            {/* 선택된 탭은 나의 사자록 카드와 같은 2px 물결 선이다(이슈 #65). */}
+            {isActive && <DrawnBorder color="var(--color-ink)" width={2} />}
             <Image src={`/images/my-record/${icon}-${isActive ? "on" : "off"}.png`} alt="" width={34} height={34} />
             {label}
             {id === "cards" && (

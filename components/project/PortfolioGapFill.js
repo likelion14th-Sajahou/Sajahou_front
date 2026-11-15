@@ -45,7 +45,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
     <p className="font-display text-label text-accent-strong">2 / 3 · 빈 곳 채우기</p>
     <div className="grid grid-cols-1 items-start gap-5 pt-3 lg:grid-cols-[minmax(0,1fr)_320px]">
       <Card as="section" size="md" aria-label="빈 곳 채우기" className="portfolio-question relative bg-ink-900! font-display text-white">
-        <DrawnBorder variant="start-card" color="var(--color-ink-900)" />
+        <DrawnBorder color="var(--color-ink-900)" />
         <fieldset disabled={busy} className="min-w-0">
           {isArtifact ? <div className="flex flex-col gap-4">
             <AiPromptHeader label="AI 요청" tone="dark" category={<Badge tone="blue" size="sm">{question.tag}</Badge>} progress={`${index + 1} / ${questions.length}`} />
@@ -65,7 +65,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
         </fieldset>
       </Card>
       <Card as="aside" size="md" aria-label="AI가 찾은 빈 곳" className="relative font-display text-ink-strong">
-        <DrawnBorder variant="section-card" color="var(--color-ink-300)" />
+        <DrawnBorder color="var(--color-ink-300)" />
         <div className="flex items-center justify-between border-b border-ink-strong pb-3"><h2 className="text-[18px] leading-[28.8px]">AI가 찾은 빈 곳</h2><Image src="/images/project/gap-marker.svg" width={14.08} height={13.12} alt="" /></div>
         <ol className="flex flex-col gap-2 pt-4">
         {questions.map((q, i) => <li key={q.questionId} aria-current={i === index ? "step" : undefined} className={`flex flex-col items-start gap-1 rounded-xl px-3 py-2.5 ${i === index ? "bg-tint-orange" : "bg-canvas"}`}>

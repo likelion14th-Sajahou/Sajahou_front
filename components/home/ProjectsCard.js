@@ -25,7 +25,7 @@ function ProjectRow({ project, summary, done = false }) {
 
   return (
     <li className="relative flex h-16 items-center gap-3 rounded-2xl bg-white px-4 py-2">
-      <DrawnBorder variant="thin-outline" />
+      <DrawnBorder color="var(--color-ink-300)" />
       {sticker ? (
         <Image src={sticker} alt="" width={40} height={40} className="size-10 shrink-0 object-contain" />
       ) : (
@@ -74,7 +74,7 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
 
   return (
     <Card as="section" className="relative flex min-w-0 flex-col items-start gap-4 bg-divider! p-6!">
-      <DrawnBorder variant="projects-card" />
+      <DrawnBorder />
       <SectionHeader title="프로젝트" href="/projects" chevronSize={32} />
       <div className="flex w-full flex-col gap-3">
         <div className="flex w-full flex-col gap-2.5">
@@ -98,7 +98,6 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
                 onClick={(event) => { modalOpener.current = event.currentTarget; setIsModalOpen(true); }}
                 className="relative flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-yellow-100 px-4 font-display text-body leading-[22px] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
               >
-                <DrawnBorder variant="new-project-button" />
                 <Image src="/images/common/plus.svg" alt="" width={10} height={10} />
                 새 프로젝트
               </button>

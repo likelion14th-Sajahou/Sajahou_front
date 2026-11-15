@@ -18,7 +18,7 @@ const FINISH_STEPS = ["넣을 기록 고르기", "AI가 빈 곳을 찾아 질문
 function SideCard({ dark = false, title, label, description, children }) {
   return (
     <aside aria-label={label} className={`relative flex min-w-0 flex-col rounded-[24px] p-6 ${dark ? "bg-ink-900 text-white" : "bg-white text-ink"}`}>
-      <DrawnBorder variant="start-card" color={dark ? undefined : "var(--color-yellow-400)"} />
+      <DrawnBorder color={dark ? undefined : "var(--color-yellow-400)"} />
       <div className={`mb-4 flex items-center justify-between gap-3 border-b pb-3 ${dark ? "border-white" : "border-ink-strong"}`}>
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
           <h2 className={`font-display text-[18px] leading-[29px] ${dark ? "text-white" : "text-ink-strong"}`}>{title}</h2>

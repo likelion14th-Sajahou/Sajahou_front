@@ -26,7 +26,7 @@ function Sticker({ sticker }) {
 export default function StickerBoard({ count, stickers }) {
   return (
     <Card as="section" className="relative flex min-w-0 flex-col items-center gap-4 p-6! lg:min-h-[550px]">
-      <DrawnBorder variant="sticker-board" />
+      <DrawnBorder color="var(--color-ink-300)" />
       <SectionHeader
         titleSize="lg"
         title={
