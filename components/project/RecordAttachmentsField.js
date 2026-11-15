@@ -119,7 +119,7 @@ export default function RecordAttachmentsField({ label, attachments, category, o
             </filter></defs>
           </svg>}
           {ATTACHMENT_CATEGORIES.map(([value, name]) => (
-            <Chip key={value} drawn size="sm" className={`px-3.5! ${needsCategory ? "[&>span[aria-hidden]]:[filter:var(--category-border-filter)]" : ""}`} style={needsCategory ? { "--category-border-filter": `url(#${categoryBorderId})` } : undefined} selected={selectedCategory === value} onClick={() => { setSelectedCategory(value); setNeedsCategory(false); setError(""); }}>{name}</Chip>
+            <Chip key={value} drawn size="sm" selectedTone="yellow" className={`px-3.5! ${needsCategory ? "[&>span[aria-hidden]]:[filter:var(--category-border-filter)]" : ""}`} style={needsCategory ? { "--category-border-filter": `url(#${categoryBorderId})` } : undefined} selected={selectedCategory === value} onClick={() => { setSelectedCategory(value); setNeedsCategory(false); setError(""); }}>{name}</Chip>
           ))}
         </div>
       )}

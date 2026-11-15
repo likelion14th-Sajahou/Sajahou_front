@@ -10,6 +10,7 @@ const SIZE_CLASSES = {
 // drawn: 손그림 테두리 + 삼립호빵체(회고 자료 화면의 '있었어요·없었어요' 등). 테두리는 DrawnBorder가 그린다.
 export default function Chip({
   selected = false,
+  selectedTone = "ink",
   size = "md",
   drawn = false,
   href,
@@ -17,16 +18,18 @@ export default function Chip({
   children,
   ...rest
 }) {
-  // 디자인 시스템(Figma 'Part Chip'): 선택은 진한 바탕 + 흰 글씨, 기본은 흰 바탕 + 회색 테두리.
+  // 기본 선택색은 진한 바탕, 자료 종류는 노란 계열을 사용한다.
+  const yellowSelected = selected && selectedTone === "yellow";
+  const selectedClasses = yellowSelected ? "bg-yellow-100 text-yellow-700" : "bg-ink text-white";
   const stateClasses = drawn
-    ? `relative font-display ${selected ? "bg-ink text-white" : "bg-white text-ink"}`
-    : `border ${selected ? "border-ink bg-ink text-white" : "border-line bg-white text-ink"}`;
+    ? `relative font-display ${selected ? selectedClasses : "bg-white text-ink"}`
+    : `border ${selected ? `${yellowSelected ? "border-yellow-400" : "border-ink"} ${selectedClasses}` : "border-line bg-white text-ink"}`;
 
   const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center ${stateClasses} ${SIZE_CLASSES[size]} ${className}`;
   const content = (
     <>
       {children}
-      {drawn && <DrawnBorder variant={selected ? "chip-ink" : "chip-line"} />}
+      {drawn && <DrawnBorder variant={selected ? "chip-ink" : "chip-line"} color={yellowSelected ? "var(--color-yellow-400)" : undefined} />}
     </>
   );
 
