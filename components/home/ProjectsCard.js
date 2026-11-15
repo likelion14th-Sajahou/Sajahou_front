@@ -25,7 +25,7 @@ function ProjectRow({ project, summary, done = false }) {
 
   return (
     <li className="relative flex h-16 items-center gap-3 rounded-2xl bg-white px-4 py-2">
-      <DrawnBorder variant="thin-outline" />
+      <DrawnBorder color="var(--color-ink-300)" />
       {sticker ? (
         <Image src={sticker} alt="" width={40} height={40} className="size-10 shrink-0 object-contain" />
       ) : (
@@ -74,7 +74,7 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
 
   return (
     <Card as="section" className="relative flex min-w-0 flex-col items-start gap-4 bg-divider! p-6!">
-      <DrawnBorder variant="projects-card" />
+      <DrawnBorder />
       <SectionHeader title="프로젝트" href="/projects" chevronSize={32} />
       <div className="flex w-full flex-col gap-3">
         <div className="flex w-full flex-col gap-2.5">

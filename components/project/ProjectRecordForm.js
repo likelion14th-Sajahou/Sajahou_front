@@ -54,7 +54,7 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
 
   return (
     <Card as="section" size="md" className="relative" aria-labelledby="record-form-title">
-      <DrawnBorder variant="start-card" color="var(--color-ink-300)" />
+      <DrawnBorder color="var(--color-ink-300)" />
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4">
         <RecordFormTitle id="record-form-title" date={`${formatMonthDay(record.date)}(${record.weekday})`}>기록 수정</RecordFormTitle>

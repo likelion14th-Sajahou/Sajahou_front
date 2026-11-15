@@ -100,7 +100,7 @@ export default function AiQuestionsSession({ initialQuestions, attachments = [],
           <AiQuestionsComplete questions={questions} onEdit={openQuestion} />
         ) : (
           <>
-            <RetroDarkCard border="start-card" aria-labelledby="ai-question-title">
+            <RetroDarkCard aria-labelledby="ai-question-title">
               {/* 답을 저장하는 동안 버튼을 막는다. */}
               <fieldset disabled={isAnswering || isSaving} aria-busy={isAnswering || isSaving} className="min-w-0">
                 <AiQuestionForm

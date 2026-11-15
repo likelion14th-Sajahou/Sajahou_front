@@ -45,7 +45,7 @@ export default function WeekDetailRow({ week, searchParams }) {
 
   return (
     <Container {...(href ? { href } : {})} className={`${href ? ACTIVE_ROW_CLASSES : MUTED_ROW_CLASSES} ${textColorClass}`}>
-      <DrawnBorder variant="thin-outline" repeat="round" color={href ? "var(--color-ink)" : "var(--color-line)"} />
+      <DrawnBorder width={2} color={href ? "var(--color-ink)" : "var(--color-line)"} />
       <WeekName week={week.week} />
       {!upcoming && <WeekTitle title={title} completed={completed} />}
       {stateLabel && <WeekState completed={completed}>{stateLabel}</WeekState>}

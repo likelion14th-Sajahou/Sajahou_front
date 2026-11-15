@@ -45,7 +45,7 @@ export default async function RetrospectiveContent({ searchParams }) {
         {/* 회고 시작 카드(Figma '세션 회고 시작 카드'): 진한 바탕, 별 장식, 구름 캐릭터 말풍선. 과제 회고도 같은 모양이다.
             테두리는 바탕과 같은 색의 울퉁불퉁한 선(DrawnBorder)이라 가장자리가 손그림처럼 보인다. 선이 카드 밖으로 반쯤 나가므로 overflow를 자르지 않는다. */}
         <section aria-labelledby="start-title" className="relative flex flex-col items-center gap-4 rounded-[24px] bg-ink-900 p-6 text-center">
-          <DrawnBorder variant="start-card" />
+          <DrawnBorder />
           <StartCardStars />
           <h2 id="start-title" className="relative font-display text-[22px] leading-[35.2px] tracking-[-0.44px] text-balance text-white">
             {isAssignment ? "과제 회고를 시작해요" : "이번 주 세션 회고를 시작해요"}
@@ -53,7 +53,7 @@ export default async function RetrospectiveContent({ searchParams }) {
           <div className="relative flex items-end gap-3">
             <Image src="/images/characters/cloud-small.png" alt="" width={56} height={47} className="shrink-0" />
             <div className="relative min-w-0 rounded-[22px] rounded-bl-[6px] bg-canvas px-4 py-3 text-left text-[16px] leading-[27.55px] tracking-[-0.19px] text-ink sm:px-6 sm:py-4">
-              <DrawnBorder variant="bubble" />
+              <DrawnBorder color="#e4e2dd" />
               <p>{isAssignment ? "막혔던 그 순간이" : "지금은 조금 귀찮아도,"}</p>
               <p>{isAssignment ? "면접에서 제일 할 말 많은 이야기가 돼요." : "쌓이면 나만의 큰 자산이 돼요!"}</p>
             </div>

@@ -16,7 +16,7 @@ export default function FormDialog({ open, onClose, busy = false, showClose = fa
       size="form"
       className="overflow-visible! rounded-[24px]! backdrop:bg-ink-strong/40!"
       contentClassName="relative flex max-h-[calc(100dvh-32px)] flex-col gap-8 overflow-y-auto rounded-[24px] px-6 pt-12 pb-8 sm:px-12"
-      border={<DrawnBorder variant="start-card" />}
+      border={<DrawnBorder />}
       onClose={busy ? () => {} : onClose}
       onCancel={(event) => { if (busy) event.preventDefault(); }}
       aria-labelledby={titleId}

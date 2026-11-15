@@ -70,7 +70,7 @@ const GENERATING_NOTICE = aiWaitingMessage("자료를 읽고 질문을 만들고
 function MaterialSection({ title, titleId, controls, inactive = false, children }) {
   return (
     <section aria-labelledby={titleId} className="relative flex min-w-0 flex-col gap-3.5 rounded-[20px] bg-white px-5 py-[18px]">
-      <DrawnBorder variant={inactive ? "section-card-short" : "section-card"} />
+      <DrawnBorder color="white" />
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h3 id={titleId} className="shrink-0 font-display text-[19px] leading-7 text-ink-strong">{title}</h3>
         {controls}
@@ -173,7 +173,7 @@ export default function MaterialsForm({ initialMaterials }) {
 
   return (
     // 자료 카드(Figma 'Section'): 진한 카드 안에 흰 섹션 카드가 쌓인다.
-    <RetroDarkCard border="materials-card" aria-labelledby="materials-title">
+    <RetroDarkCard aria-labelledby="materials-title">
       <h2 id="materials-title" className="font-display text-title leading-8 tracking-[-0.4px] text-white">자료 올리기</h2>
 
       {/* 과제 회고는 같은 5단계지만 자료 단계에는 과제 칸만 있다(R-23). */}
@@ -262,7 +262,7 @@ export default function MaterialsForm({ initialMaterials }) {
           </span>
           <span className="relative block rounded-[14px]">
             <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="block h-[74px] font-input leading-6 text-ink-strong! placeholder:text-ink-300!" />
-            <DrawnBorder variant="memo-field" />
+            <DrawnBorder color="var(--color-canvas)" />
           </span>
         </label>
       )}

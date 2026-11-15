@@ -19,7 +19,7 @@ function RecordOption({ record, isSelected, onToggle }) {
     <label
       className={`relative flex cursor-pointer items-start gap-3 rounded-[18px] px-4 py-3.5 ${isSelected ? "bg-[#fffbea]" : "bg-white"}`}
     >
-      <DrawnBorder variant="thin-outline" color={isSelected ? "var(--color-ink-900)" : "var(--color-ink-300)"} />
+      <DrawnBorder color={isSelected ? "var(--color-ink-900)" : "var(--color-ink-300)"} />
       <Checkbox checked={isSelected} onChange={onToggle} className="mt-0.5 mr-0.5 ml-1" />
       <span className="flex min-w-0 flex-col">
         <span className="flex flex-wrap items-center gap-1 text-body text-ink">
@@ -45,7 +45,7 @@ export default function PortfolioRecordSelect({ records, initialSelectedIds, onC
 
   return (
     <Card as="section" size="md" aria-labelledby="portfolio-select-title" className="relative flex flex-col gap-5 font-display text-ink-strong">
-      <DrawnBorder variant="section-card" color="var(--color-ink-300)" />
+      <DrawnBorder color="var(--color-ink-300)" />
       <div>
         <p className="text-label leading-[20.8px] text-accent-strong">
           1 / 3 · 기록 고르기

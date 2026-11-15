@@ -150,7 +150,7 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
 
   return (
     <Card as="article" size="md" className="relative flex min-w-0 flex-col gap-4 rounded-[28px]! px-5! py-7! sm:px-[30px]!" aria-labelledby={headingId} aria-busy={!draft || draft.status === "loading"}>
-      <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />
+      <DrawnBorder />
       <div className="flex items-start gap-3">
         <Badge tone="yellow" size="question" className="mt-0.5 bg-yellow-400! text-ink-950!">Q{question.seq}</Badge>
         <h3 id={headingId} className="text-[18px] leading-[1.5]">{question.content}</h3>

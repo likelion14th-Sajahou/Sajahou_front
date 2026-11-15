@@ -37,7 +37,7 @@ function formSnapshot(fields, questions, attachments) {
 function FormSection({ id, title, note, children }) {
   return (
     <div className="relative rounded-[20px] bg-white px-5 py-[18px]">
-      <DrawnBorder variant="section-card" color="white" />
+      <DrawnBorder color="white" />
       <MarkedSection id={id} title={title} note={note} size="lg">{children}</MarkedSection>
     </div>
   );
@@ -212,7 +212,7 @@ export default function MatchingForm({ jobPostingId = null }) {
   return (
     <>
     <form className="matching-form relative mt-7 flex min-w-0 flex-col gap-4 rounded-[24px] bg-ink px-7 py-6" aria-labelledby="matching-form-title" onSubmit={submit} ref={formRef}>
-      <DrawnBorder variant="start-card" color="var(--color-ink)" />
+      <DrawnBorder />
       <h2 id="matching-form-title" className="text-[20px] leading-8 tracking-[-0.4px] text-white">지원할 곳 알려 주기</h2>
       <FormSection id="matching-place" title="지원할 곳">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
