@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -65,6 +65,12 @@ function GroupLabel({ children }) {
 export default function ProjectsCard({ inProgressProjects, doneProjects }) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const modalOpener = useRef(null);
+
+  // 팝업은 닫으면 화면에서 지워져 브라우저가 포커스를 되돌리지 못한다. 사라진 뒤에 연 버튼으로 옮긴다.
+  useEffect(() => {
+    if (!isModalOpen) modalOpener.current?.focus();
+  }, [isModalOpen]);
 
   return (
     <Card as="section" className="relative flex min-w-0 flex-col items-start gap-4 bg-divider! p-6!">
@@ -89,7 +95,7 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
               {/* 새 프로젝트 버튼(Figma '새 프로젝트 버튼'): 프로젝트 목록 화면처럼 진행 중인 프로젝트가 없을 때만 보여 준다. */}
               <button
                 type="button"
-                onClick={() => setIsModalOpen(true)}
+                onClick={(event) => { modalOpener.current = event.currentTarget; setIsModalOpen(true); }}
                 className="relative flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-yellow-100 px-4 font-display text-body leading-[22px] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
               >
                 <DrawnBorder variant="new-project-button" />
