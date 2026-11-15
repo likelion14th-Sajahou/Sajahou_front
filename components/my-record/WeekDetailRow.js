@@ -52,8 +52,6 @@ export default function WeekDetailRow({ week, searchParams }) {
         </span>
       ) : hasCards ? (
         <span className="ml-auto text-body-sm text-accent">{cardLabel}</span>
-      ) : href ? (
-        <span className="ml-auto text-body-sm text-accent">회고 보기 →</span>
       ) : null}
     </Container>
   );
