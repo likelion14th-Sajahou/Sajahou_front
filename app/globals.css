@@ -144,7 +144,7 @@
  * 홈 히어로가 이 높이를 빼서 첫 화면을 채우고, 스크롤로 옮겨 가는 대상(결과 제목, 강조 카드 등)이 헤더에 가리지 않게 띄운다.
  */
 :root {
-  --header-height: 120px;
+  --header-height: 110px;
 }
 
 @media (min-width: 64rem) {
@@ -164,54 +164,58 @@ body {
   line-height: 1.6;
 }
 
-/* 히어로 장식 배치에만 화면별 좌표를 쓴다. */
+/* 모바일·태블릿은 내용 흐름대로 쌓아 글이 늘어도 캐릭터·버튼과 겹치지 않는다. */
 .home-hero {
-  min-height: 640px;
-  height: calc(100dvh - var(--header-height));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 568px;
+  padding: 56px 16px 75px;
 }
 
 .home-hero-copy {
-  top: 14%;
-  left: 50%;
-  translate: -50% 0;
+  position: relative;
+  padding-inline: 0;
 }
 
 .home-hero-character {
-  width: min(76vw, 360px);
-  left: -5%;
-  bottom: 7%;
+  position: relative;
+  width: 195px;
+  flex-shrink: 0;
 }
 
 .home-hero-cta {
-  top: 54%;
-  right: 3%;
-}
-
-@media (min-width: 40rem) and (max-width: 63.999rem) {
-  .home-hero-character { left: 5%; }
-  .home-hero-cta { right: 13%; }
+  position: relative;
+  margin-top: 24px;
+  flex-shrink: 0;
 }
 
 @media (max-width: 63.999rem) {
-  .home-hero-stars > span:nth-child(1) { left: 83% !important; top: 8% !important; }
-  .home-hero-stars > span:nth-child(2) { left: 88% !important; top: 44% !important; }
-  .home-hero-stars > span:nth-child(3) { left: 8% !important; top: 6% !important; }
-  .home-hero-stars > span:nth-child(4) { left: 82% !important; top: 36% !important; }
-  .home-hero-stars > span:nth-child(5) { left: 3% !important; top: 32% !important; }
-  .home-hero-stars > span:nth-child(6) { left: 12% !important; top: 43% !important; }
-  .home-hero-stars > span:nth-child(7) { left: 20% !important; top: 55% !important; }
-  .home-hero-stars > span:nth-child(8) { left: 82% !important; top: 80% !important; }
-  .home-hero-stars > span:nth-child(9) { left: 55% !important; top: 89% !important; }
+  .home-hero-stars > span:nth-child(1) { left: 81% !important; top: 6% !important; width: 28px !important; height: 28px !important; }
+  .home-hero-stars > span:nth-child(2) { left: 77% !important; top: 79% !important; width: 24px !important; height: 24px !important; }
+  .home-hero-stars > span:nth-child(3) { left: 7% !important; top: 7% !important; width: 20px !important; height: 20px !important; }
+  .home-hero-stars > span:nth-child(4) { left: 9% !important; top: 56% !important; width: 30px !important; height: 30px !important; }
+  .home-hero-stars > span:nth-child(5) { left: 85% !important; top: 42% !important; width: 14px !important; height: 14px !important; }
+  .home-hero-stars > span:nth-child(n+6) { display: none; }
 }
 
 @media (min-width: 64rem) {
   .home-hero {
+    display: block;
     min-height: 520px;
+    height: calc(100dvh - var(--header-height));
+    padding: 0;
   }
   .home-hero-copy {
+    position: absolute;
     top: 33.6114%;
+    left: 50%;
+    translate: -50% 0;
+    padding-inline: 24px;
   }
   .home-hero-character {
+    position: absolute;
     width: 35.8333%;
     max-width: 600px;
     left: 10.0694%;
@@ -219,6 +223,8 @@ body {
     bottom: auto;
   }
   .home-hero-cta {
+    position: absolute;
+    margin-top: 0;
     /* Figma 1440 × 839: 꽃 영역의 왼쪽 위 (922, 457). */
     top: 54.4696%;
     left: 64.0278%;

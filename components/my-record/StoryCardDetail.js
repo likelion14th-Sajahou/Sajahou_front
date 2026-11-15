@@ -115,7 +115,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
   return (
     <fieldset disabled={busy} className="flex min-w-0 flex-col items-start gap-3.5 font-display text-[#1f2433] tracking-[-0.15px]">
       {error && <p role="alert">{error}</p>}
-      <div className="flex w-full items-center gap-2.5">
+      <div className="flex w-full flex-wrap items-center gap-2.5">
         <span className="flex size-[52px] shrink-0 items-center justify-center"><StoryCardIcon card={card} size={50} /></span>
         <StoryCardTypeBadge type={type} />
         <span className="text-label text-placeholder">{whenLabel}</span>
@@ -151,7 +151,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
               <h3 className="text-body font-normal">{documentText.title}</h3>
               <Button size="sm" className="border-[#fef5d2]! bg-[#fef5d2]!" onClick={copyDocument}>노션에 복사</Button>
             </div>
-            <div className="pt-2 font-sans">
+            <div className="wrap-anywhere pt-2 font-sans">
               {documentBody
                 .split("\n")
                 .filter((line) => line.trim())
@@ -180,7 +180,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
               </div>
             </div>
           ) : (
-            <div className="flex w-full items-center justify-between gap-3.5 pt-1">
+            <div className="flex w-full flex-wrap items-center justify-between gap-3.5 pt-1">
               <TextLink variant="danger" className="text-error!" onClick={() => setIsConfirmingDelete(true)}>삭제</TextLink>
               <div className="flex gap-2">
                 <Button variant="ink-outline" className="h-[46px]! px-6!" onClick={() => setIsEditing(true)}>수정</Button>

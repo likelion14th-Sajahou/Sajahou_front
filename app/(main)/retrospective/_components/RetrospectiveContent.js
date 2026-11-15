@@ -41,7 +41,7 @@ export default async function RetrospectiveContent({ searchParams }) {
       <RetrospectiveSteps className="mt-[38px]" />
 
       {/* Figma: 진행 단계는 본문 전체 폭, 카드 줄은 제목과 같은 896px(시작 카드 560 + 16 + 마감일 카드 320)로 가운데에 둔다. */}
-      <div className={`mx-auto mt-10 grid max-w-[896px] items-start gap-4 ${isAssignment ? "grid-cols-[minmax(0,1fr)_320px]" : "grid-cols-1 min-[901px]:grid-cols-[minmax(0,1fr)_320px]"}`}>
+      <div className="mx-auto mt-10 grid max-w-[896px] grid-cols-1 items-start gap-4 min-[901px]:grid-cols-[minmax(0,1fr)_320px]">
         {/* 회고 시작 카드(Figma '세션 회고 시작 카드'): 진한 바탕, 별 장식, 구름 캐릭터 말풍선. 과제 회고도 같은 모양이다.
             테두리는 바탕과 같은 색의 울퉁불퉁한 선(DrawnBorder)이라 가장자리가 손그림처럼 보인다. 선이 카드 밖으로 반쯤 나가므로 overflow를 자르지 않는다. */}
         <section aria-labelledby="start-title" className="relative flex flex-col items-center gap-4 rounded-[24px] bg-ink-900 p-6 text-center">

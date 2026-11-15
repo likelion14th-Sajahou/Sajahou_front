@@ -7,7 +7,7 @@ import SectionHeader from "./SectionHeader";
 import { homeStickerHref } from "@/lib/homeViewModel";
 
 // Figma Sticker: 셀 80px, 아이콘 영역 56px, 그림 52px, 라벨 간격 4px.
-const ITEM_CLASSES = "flex size-20 flex-col items-center gap-1";
+const ITEM_CLASSES = "flex h-20 w-16 flex-col items-center gap-1 min-[390px]:w-20";
 const ICON_SIZE_CLASSES = "size-14";
 
 function Sticker({ sticker }) {
@@ -43,7 +43,7 @@ export default function StickerBoard({ count, stickers }) {
       <div className="flex w-full flex-1 items-center justify-center py-8">
         {stickers.length === 0 ? (
           <p className="text-body text-ink-subtle">회고를 완료하면 스티커가 모여요.</p>
-        ) : <ul className="flex w-full max-w-[544px] flex-wrap justify-center gap-x-4 gap-y-[34px] sm:gap-x-9">
+        ) : <ul className="grid w-full max-w-[544px] grid-cols-3 justify-items-center gap-x-2 gap-y-4 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-9 sm:gap-y-[34px]">
           {stickers.map((sticker) => (
             <li key={`${sticker.kind}:${sticker.week}`}>
               <Sticker sticker={sticker} />

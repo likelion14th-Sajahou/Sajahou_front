@@ -34,7 +34,7 @@ export default function ProjectHeader({ project, recordCount, lastRecordedAt }) 
         <div className="flex min-w-0 items-center gap-3.5">
           <Image src={sticker} alt="" width={64} height={64} className="size-16 shrink-0 object-contain" />
           <div className="min-w-0">
-            <p className="mb-0.5 flex gap-1.5 text-caption leading-[18px] font-bold">
+            <p className="mb-0.5 flex flex-wrap gap-1.5 text-caption leading-[18px] font-bold">
               <span className={`rounded-full px-2.5 py-0.5 ${STATUS[status].className}`}>{STATUS[status].label}</span>
               <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-yellow-700">{formatRoles(roles)}</span>
             </p>
@@ -44,7 +44,7 @@ export default function ProjectHeader({ project, recordCount, lastRecordedAt }) 
           </div>
         </div>
       </div>
-      <dl className="relative flex shrink-0 flex-wrap gap-x-7 gap-y-2 rounded-[20px] bg-white px-6 py-3.5">
+      <dl className="relative flex w-full shrink-0 flex-wrap justify-between gap-x-4 gap-y-2 rounded-[20px] bg-white px-6 py-3.5 lg:w-auto lg:gap-x-7">
         <DrawnBorder color="var(--color-yellow-400)" />
         {stats.map(({ label, value }) => (
           <div key={label} className="flex flex-col-reverse">

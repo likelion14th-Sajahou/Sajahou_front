@@ -12,7 +12,7 @@ export default function useHeroGaze(characterRef, ctaRef) {
   useEffect(() => {
     const character = characterRef.current;
     const pupils = [...character.querySelectorAll("[data-pupil]")];
-    const motion = window.matchMedia("(prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine)");
+    const motion = window.matchMedia("(min-width: 1024px) and (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine)");
     const positions = EYE_CENTERS.map(() => ({ x: 0, y: 0, targetX: 0, targetY: 0 }));
     let frame = null;
     let pointer = null;
