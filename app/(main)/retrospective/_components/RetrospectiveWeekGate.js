@@ -2,7 +2,6 @@
 
 import Button from "@/components/ui/Button";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
-import { retrospectiveScreenState } from "@/lib/retrospectiveViewModel";
 
 // 과제 회고는 '나중에 쓸게요'를 고른 주에만 따로 생긴다(R-23). 그 밖의 주에 과제 회고로 들어오면 이유와 세션 회고로 가는 버튼을 보여 준다.
 // '나중에 쓸게요'를 골랐어도 지각 허용 기간(마감 + 7일)이 지나면 이번 주 회고 조회(API 11)의 openAssignments에서 빠진다.
@@ -37,11 +36,11 @@ export default function RetrospectiveWeekGate({ isAssignment, paused, complete, 
 
   if (isAssignment) {
     if (!assignment) return <NoAssignmentRetrospective assignmentMode={session.assignmentMode} />;
-    if (retrospectiveScreenState(assignment) === "COMPLETED") return complete;
+    if (assignment.state === "COMPLETED") return complete;
     return children;
   }
 
-  if (retrospectiveScreenState(session) === "COMPLETED") {
+  if (session.state === "COMPLETED") {
     return complete;
   }
 

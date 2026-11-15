@@ -10,7 +10,6 @@ import { resetRetrospective, setRetrospectiveRest, startRetrospective } from "@/
 import ResetRetrospectiveModal from "./ResetRetrospectiveModal";
 import { getStepPath, useRetrospectivePreview } from "./RetrospectivePreview";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
-import { retrospectiveScreenState } from "@/lib/retrospectiveViewModel";
 
 // 시작 전: '시작하기 →', 작성 중: '이어 쓰기 →' + '처음부터'(R-05).
 // 이어 쓰기는 마지막으로 저장한 단계(currentStep)로 간다(R-03). 과제 회고(R-23)도 같고, 휴회는 세션 회고에만 있다.
@@ -24,7 +23,7 @@ export default function StartActions({ isAssignment = false }) {
   const [isResetOpen, setIsResetOpen] = useState(false);
   const [isNavigating, startNavigation] = useTransition();
   const inFlight = useRef(false);
-  const isWriting = retrospectiveScreenState(retrospective) === "IN_PROGRESS";
+  const isWriting = retrospective.state === "IN_PROGRESS";
   const isCompleted = retrospective.state === "COMPLETED";
 
   async function run(kind, request, fallback) {

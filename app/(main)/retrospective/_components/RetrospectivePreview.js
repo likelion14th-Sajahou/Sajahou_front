@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { formatDeadline } from "@/lib/formatDate";
-import { loadRetrospectivePreview, retrospectiveScreenState } from "@/lib/retrospectiveViewModel";
+import { loadRetrospectivePreview } from "@/lib/retrospectiveViewModel";
 
 const RetrospectivePreviewContext = createContext(null);
 
@@ -142,8 +142,8 @@ export function RetrospectiveHeading() {
         {(assignmentPending || (isAssignment && assignment)) && (
           <nav aria-label="회고 작성 상태" className="flex max-w-full flex-wrap gap-1.5 pt-2">
             {/* 세션 회고와 과제 회고를 오가는 전환 탭이다(R-01). 탭도 버튼이라 삼립호빵체다. */}
-            <Chip className="font-display" selected={!isAssignment} href="/retrospective">세션 회고 · {STATE_LABELS[retrospectiveScreenState(session)]}</Chip>
-            <Chip className="font-display" selected={isAssignment} href="/retrospective?type=assignment">과제 회고 · {STATE_LABELS[retrospectiveScreenState(assignment)]}</Chip>
+            <Chip className="font-display" selected={!isAssignment} href="/retrospective">세션 회고 · {STATE_LABELS[session.state]}</Chip>
+            <Chip className="font-display" selected={isAssignment} href="/retrospective?type=assignment">과제 회고 · {STATE_LABELS[assignment?.state ?? "NOT_STARTED"]}</Chip>
           </nav>
         )}
       </div>
