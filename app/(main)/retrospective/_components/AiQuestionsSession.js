@@ -13,6 +13,7 @@ import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 import { readAnswerDrafts, writeAnswerDrafts } from "@/lib/retrospectiveAnswerDrafts";
+import { retrospectiveQuestionSource } from "@/lib/retrospectiveQuestionSource";
 
 const firstPendingIndex = (questions) => Math.max(0, questions.findIndex(({ status }) => status === "PENDING"));
 const isAllDone = (questions) => questions.length > 0 && questions.every(({ status }) => status !== "PENDING");
@@ -20,7 +21,7 @@ const isAllDone = (questions) => questions.length > 0 && questions.every(({ stat
 // 3단계 AI 질문(R-16~18). 한 번에 한 질문씩 답하거나 건너뛴다.
 // saveAnswer(question, { status, answer })는 저장된 { status, answer }를 돌려준다. 실패하면 넘어가지 않는다.
 // 다시 들어오면 임시 저장한 답변을 먼저 열고, 없으면 처음으로 안 푼 질문부터 연다.
-export default function AiQuestionsSession({ initialQuestions, initialDrafts = {}, draftKey, draftError = "", saveAnswer }) {
+export default function AiQuestionsSession({ initialQuestions, attachments = [], initialDrafts = {}, draftKey, draftError = "", saveAnswer }) {
   const { getStepHref } = useRetrospectivePreview();
   const [questions, setQuestions] = useState(initialQuestions);
   const [index, setIndex] = useState(() => {
@@ -35,6 +36,7 @@ export default function AiQuestionsSession({ initialQuestions, initialDrafts = {
   const inFlight = useRef(false);
   const { save, isSaving, savedLabel } = useSaveLater();
   const question = questions[index];
+  const source = retrospectiveQuestionSource(question, attachments);
   const answer = drafts[question.questionId] ?? question.answer ?? "";
 
   // 미제출 답은 로컬에 저장하고, API 14로 현재 단계만 저장한다. 답변 완료 처리는 하지 않는다.
@@ -109,9 +111,9 @@ export default function AiQuestionsSession({ initialQuestions, initialDrafts = {
                   category={<Badge tone="tag" size="sm">{question.tag}</Badge>}
                   progress={`${index + 1} / ${questions.length}`}
                   progressLabel={`총 ${questions.length}개 중 ${index + 1}번째 질문`}
-                  source={question.quote && (
+                  source={source && (
                     <>
-                      내 자료의 <mark className="rounded bg-yellow-400 px-[3px] text-ink-950">“{question.quote}”</mark> 에서 더 물어볼게요
+                      {source.label} · <mark className="rounded bg-yellow-400 px-[3px] text-ink-950">“{source.quote}”</mark>
                     </>
                   )}
                   question={question.content}
