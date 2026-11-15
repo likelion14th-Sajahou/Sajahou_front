@@ -86,13 +86,13 @@ export function PortfolioCard({ portfolio, onRemake }) {
     <SideCard title="포트폴리오" label="포트폴리오" description="노션·포트폴리오 사이트에 그대로 붙여 넣을 수 있어요">
       {portfolio ? (
         <>
-          {/* 포트폴리오는 저장 후 읽기 화면에서도 Pretendard(font-input)를 유지한다. */}
+          {/* 읽기 전용 포트폴리오는 TextField의 NPS 기본값을 사용한다. 편집 화면은 Pretendard다. */}
           <TextField
             multiline
             readOnly
             aria-label="저장한 포트폴리오"
             value={portfolio.markdown}
-            className="h-[520px] font-input text-[15.5px]! leading-[27.9px] text-ink-strong!"
+            className="h-[520px] text-[15.5px]! leading-[27.9px] text-ink-strong!"
           />
           <div className="flex flex-wrap gap-2 pt-3">
             <Button variant="ink" size="sm" onClick={copyMarkdown}>Markdown 복사</Button>

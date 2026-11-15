@@ -5,7 +5,7 @@ const SIZE_CLASSES = {
   sm: "rounded-xl px-3 text-label",
 };
 
-// 회색 바탕, 높이 48, 오류면 빨간 테두리. 입력값은 Pretendard, placeholder도 Pretendard, 라벨·안내는 NPS.
+// 회색 바탕, 높이 48, 오류면 빨간 테두리. 편집·placeholder는 Pretendard, 읽기 전용 값·라벨·안내는 NPS.
 const INPUT_HEIGHT_CLASSES = {
   md: "h-12 py-3",
   sm: "h-[38px] py-[7px]",
@@ -55,7 +55,8 @@ export default function TextField({
   const look = appearanceClasses(appearance, size, error);
   // drawn: 손그림 테두리 틀(DrawnFieldFrame) 안에 들어가는 둥근 흰 칸. 기본(filled) 모양 위에 덮어쓴다.
   const drawnClasses = drawn ? "rounded-full! border-transparent! bg-white! px-3.5! text-body-sm! text-[#1f2433] placeholder:text-[#8a8f9a]" : "";
-  const controlClasses = `w-full font-input text-ink placeholder:font-input placeholder:text-placeholder ${look.control} ${drawnClasses} ${className}`;
+  const fontClassName = rest.readOnly ? "font-sans" : "font-input";
+  const controlClasses = `w-full ${fontClassName} text-ink placeholder:font-input placeholder:text-placeholder ${look.control} ${drawnClasses} ${className}`;
   const accessibilityProps = error ? {
     "aria-invalid": true,
     "aria-describedby": [rest["aria-describedby"], errorId].filter(Boolean).join(" "),

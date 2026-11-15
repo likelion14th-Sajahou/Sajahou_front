@@ -151,7 +151,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
               <h3 className="text-body font-normal">{documentText.title}</h3>
               <Button size="sm" className="border-[#fef5d2]! bg-[#fef5d2]!" onClick={copyDocument}>노션에 복사</Button>
             </div>
-            <div className="pt-2 font-input">
+            <div className="pt-2 font-sans">
               {documentBody
                 .split("\n")
                 .filter((line) => line.trim())
