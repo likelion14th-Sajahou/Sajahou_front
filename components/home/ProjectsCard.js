@@ -7,13 +7,19 @@ import Link from "next/link";
 import Card from "@/components/ui/Card";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 import NewProjectModal from "@/components/project/NewProjectModal";
+import { categoryName } from "@/lib/projectViewModel";
+import { projectBadgeImage } from "@/lib/stickerBadges";
 import SectionHeader from "./SectionHeader";
 
-// 프로젝트 한 줄(Figma '프로젝트 목록 아이템'): 별 아이콘, 이름, 요약, 오른쪽 '>'. 줄 전체를 누르면 프로젝트 상세로 간다.
+// 프로젝트 한 줄(Figma '프로젝트 목록 아이템'): 종류 스티커, 종류 이름, 요약, 오른쪽 '>'. 줄 전체를 누르면 프로젝트 상세로 간다.
+// 종류(category, #82)가 있으면 굵은 글씨는 종류 이름, 아래 줄 앞에 프로젝트 이름을 붙인다(같은 종류가 여럿이어도 구분되게).
+// 종류가 없는 예전 데이터는 별 아이콘과 프로젝트 이름으로 보여 준다.
 // 진행 중과 완료 프로젝트가 같은 모양이다(H-08).
 // 디자인 적용(11/12)으로 오른쪽 '+'(기록 추가, H-09)를 '>'(프로젝트로 이동)로 바꿨다. 기록 추가는 상세 화면에서 한다.
 function ProjectRow({ project, summary }) {
-  const { id, name } = project;
+  const { id, name, category } = project;
+  const label = categoryName(category);
+  const sticker = projectBadgeImage(category);
 
   return (
     <li>
@@ -22,10 +28,14 @@ function ProjectRow({ project, summary }) {
         className="relative flex h-16 items-center gap-3 rounded-2xl bg-white px-4 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
       >
         <DrawnBorder variant="thin-outline" />
-        <Image src="/images/stars/star-01.png" alt="" width={27} height={26} className="shrink-0" />
+        {sticker ? (
+          <Image src={sticker} alt="" width={40} height={40} className="size-10 shrink-0 object-contain" />
+        ) : (
+          <Image src="/images/stars/star-01.png" alt="" width={27} height={26} className="shrink-0" />
+        )}
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-body leading-6 font-bold text-ink">{name}</span>
-          <span className="truncate text-[12.5px] leading-5 text-ink-subtle">{summary}</span>
+          <span className="truncate text-body leading-6 font-bold text-ink">{label ?? name}</span>
+          <span className="truncate text-[12.5px] leading-5 text-ink-subtle">{label ? `${name} · ${summary}` : summary}</span>
         </span>
         <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-full">
           <Image src="/images/common/chevron-right-20.svg" alt="" width={20} height={20} />
