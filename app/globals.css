@@ -258,10 +258,6 @@ body {
 .matching-form textarea[name^="question-"] { height: 74px; min-width: 0; }
 .matching-form input::placeholder,
 .matching-form textarea::placeholder { color: var(--color-ink-300); }
-.matching-attachments label:has(input[type="file"]) {
-  border-radius: 9999px;
-  border-color: var(--color-ink-300);
-}
 .matching-search:disabled > span[aria-hidden="true"] { opacity: 0.25; }
 
 /* 공용 폼의 기본 스타일은 유지하고 포트폴리오의 진한 카드 안에서만 조정한다. */
