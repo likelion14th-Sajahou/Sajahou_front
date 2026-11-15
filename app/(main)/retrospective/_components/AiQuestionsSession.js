@@ -12,31 +12,46 @@ import RetroSideCard from "./RetroSideCard";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
+import { readAnswerDrafts, writeAnswerDrafts } from "@/lib/retrospectiveAnswerDrafts";
 
 const firstPendingIndex = (questions) => Math.max(0, questions.findIndex(({ status }) => status === "PENDING"));
 const isAllDone = (questions) => questions.length > 0 && questions.every(({ status }) => status !== "PENDING");
 
 // 3단계 AI 질문(R-16~18). 한 번에 한 질문씩 답하거나 건너뛴다.
 // saveAnswer(question, { status, answer })는 저장된 { status, answer }를 돌려준다. 실패하면 넘어가지 않는다.
-// 다시 들어오면 처음으로 안 푼 질문부터 열고, 모두 풀었으면 질문 끝 화면을 보여 준다.
-export default function AiQuestionsSession({ initialQuestions, saveAnswer }) {
+// 다시 들어오면 임시 저장한 답변을 먼저 열고, 없으면 처음으로 안 푼 질문부터 연다.
+export default function AiQuestionsSession({ initialQuestions, initialDrafts = {}, draftKey, draftError = "", saveAnswer }) {
   const { getStepHref } = useRetrospectivePreview();
   const [questions, setQuestions] = useState(initialQuestions);
-  const [index, setIndex] = useState(() => firstPendingIndex(initialQuestions));
-  const [isComplete, setIsComplete] = useState(() => isAllDone(initialQuestions));
+  const [index, setIndex] = useState(() => {
+    const draftIndex = initialQuestions.findIndex((item) => Object.hasOwn(initialDrafts, item.questionId));
+    return draftIndex >= 0 ? draftIndex : firstPendingIndex(initialQuestions);
+  });
+  const [isComplete, setIsComplete] = useState(() => isAllDone(initialQuestions) && !Object.keys(initialDrafts).length);
   // 저장하지 않고 쓰던 답. 다른 질문으로 갔다가 돌아와도 남는다(R-16).
-  const [drafts, setDrafts] = useState({});
+  const [drafts, setDrafts] = useState(initialDrafts);
   const [isAnswering, setIsAnswering] = useState(false);
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState(draftError);
   const inFlight = useRef(false);
   const { save, isSaving, savedLabel } = useSaveLater();
   const question = questions[index];
   const answer = drafts[question.questionId] ?? question.answer ?? "";
 
-  // 질문의 답은 답할 때마다 저장된다(API 18). 여기서는 지금 단계만 저장한다.
+  // 미제출 답은 로컬에 저장하고, API 14로 현재 단계만 저장한다. 답변 완료 처리는 하지 않는다.
   async function saveLater() {
-    const message = await save({ currentStep: 3 });
-    if (message !== null) setNotice(message);
+    if (inFlight.current) return;
+    inFlight.current = true;
+    try {
+      writeAnswerDrafts(window.localStorage, draftKey, questions, drafts);
+      const message = await save({ currentStep: 3 });
+      if (message !== null) setNotice(message
+        ? `입력 중인 답변은 이 브라우저에 저장했지만 회고 단계 저장에 실패했어요. ${message}`
+        : "입력 중인 답변을 이 브라우저에 임시 저장했어요.");
+    } catch {
+      setNotice("답변을 임시 저장하지 못했어요. 브라우저 저장 공간과 설정을 확인한 뒤 다시 시도해 주세요.");
+    } finally {
+      inFlight.current = false;
+    }
   }
 
   function openQuestion(questionId) {
@@ -53,12 +68,15 @@ export default function AiQuestionsSession({ initialQuestions, saveAnswer }) {
     try {
       const saved = await saveAnswer(question, { status, answer: text });
       setQuestions((previous) => previous.map((item) => item.questionId === question.questionId ? { ...item, status: saved.status, answer: saved.answer } : item));
-      if (status === "ANSWERED") {
-        setDrafts((previous) => {
-          const next = { ...previous };
-          delete next[question.questionId];
-          return next;
-        });
+      const nextDrafts = { ...drafts };
+      delete nextDrafts[question.questionId];
+      setDrafts(nextDrafts);
+      try {
+        const storedDrafts = readAnswerDrafts(window.localStorage, draftKey, questions);
+        delete storedDrafts[question.questionId];
+        writeAnswerDrafts(window.localStorage, draftKey, questions, storedDrafts);
+      } catch {
+        setNotice("답변은 제출했지만 이 브라우저의 임시 저장 내용을 정리하지 못했어요.");
       }
       if (index === questions.length - 1) setIsComplete(true);
       else setIndex(index + 1);
@@ -82,7 +100,7 @@ export default function AiQuestionsSession({ initialQuestions, saveAnswer }) {
           <>
             <RetroDarkCard border="start-card" aria-labelledby="ai-question-title">
               {/* 답을 저장하는 동안 버튼을 막는다. */}
-              <fieldset disabled={isAnswering} aria-busy={isAnswering} className="min-w-0">
+              <fieldset disabled={isAnswering || isSaving} aria-busy={isAnswering || isSaving} className="min-w-0">
                 <AiQuestionForm
                   key={question.questionId}
                   size="lg"
@@ -123,9 +141,10 @@ export default function AiQuestionsSession({ initialQuestions, saveAnswer }) {
         <QuestionProgressList questions={questions} currentIndex={isComplete ? null : index} />
         <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-4">
           <TextLink href={getStepHref("materials")}>← 자료 고치기</TextLink>
-          <TextLink onClick={saveLater} disabled={isSaving} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "나중에 이어쓰기"}</TextLink>
+          <TextLink onClick={saveLater} disabled={isSaving || isAnswering} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "임시 저장"}</TextLink>
           <SavedTime label={savedLabel} />
         </div>
+        <p className="pt-2 text-caption text-ink-subtle">제출 전 답변은 임시 저장을 누르면 이 브라우저에만 저장돼요. 브라우저 데이터를 삭제하면 사라져요.</p>
       </RetroSideCard>
     </div>
   );

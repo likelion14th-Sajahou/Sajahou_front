@@ -7,7 +7,7 @@ import { saveRetrospective } from "@/lib/retrospectiveApi";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
-// 2~4단계의 '나중에 이어쓰기'(R-03). 지금 단계와 보낸 자료를 저장하고, 저장 시각을 'HH:MM 저장됨'으로 보여 준다.
+// 2~4단계의 '임시 저장'(R-03). 지금 단계와 보낸 자료를 저장하고, 저장 시각을 'HH:MM 저장됨'으로 보여 준다.
 // 지금 보는 회고(세션 또는 과제)를 저장한다.
 export function useSaveLater() {
   const { authenticatedRequest } = useAuth();
@@ -25,7 +25,7 @@ export function useSaveLater() {
       applySaved(await saveRetrospective(retrospective.id, changes, { request: authenticatedRequest }));
       return "";
     } catch (failure) {
-      return failure.status === 401 ? "" : getRequestErrorMessage(failure, "저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
+      return failure.status === 401 ? null : getRequestErrorMessage(failure, "저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       inFlight.current = false;
       setIsSaving(false);
