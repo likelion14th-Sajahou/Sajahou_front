@@ -2,7 +2,7 @@ import Link from "next/link";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 
 // primary·secondary는 디자인 시스템(Figma 'Button')의 Primary·Secondary다.
-// Primary: 주요 동작, 노란 바탕 + 삼립호빵체. Secondary: 보조 동작, 회색 바탕 + Noto Sans KR.
+// Primary: 주요 동작, 노란 바탕. Secondary: 보조 동작, 회색 바탕. 동작 요소는 모두 삼립호빵체다.
 // Secondary는 회색 바탕이라 흰 카드 안에 둔다(회색 페이지 바탕 위에서는 잘 안 보인다).
 // soft·inverse는 진한 카드(회고 시작 카드) 위에 두는 버튼이다. soft: 연노랑 바탕, inverse: 흰 굵은 테두리.
 // ink·ink-outline은 흰 카드(휴회 카드) 위의 진한 버튼과 진한 테두리 버튼이다.
@@ -11,7 +11,7 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 // 이 일곱 가지는 Figma에서 테두리가 손그림처럼 울퉁불퉁해서 DrawnBorder로 그린다(VARIANT_BORDERS).
 const VARIANT_CLASSES = {
   primary: "border border-yellow-400 bg-yellow-400 font-display text-ink",
-  secondary: "border border-canvas bg-canvas font-noto font-medium text-ink",
+  secondary: "border border-canvas bg-canvas text-ink",
   outline: "border border-line bg-white text-ink",
   accent: "border border-accent bg-accent text-white",
   highlight: "border border-shape-yellow bg-shape-yellow text-ink",

@@ -23,9 +23,9 @@ function RecordOption({ record, isSelected, onToggle }) {
       <Checkbox checked={isSelected} onChange={onToggle} className="mt-0.5 mr-0.5 ml-1" />
       <span className="flex min-w-0 flex-col">
         <span className="flex flex-wrap items-center gap-1 text-body text-ink">
-          <span className="leading-6"><strong>{formatMonthDay(date)}({weekday})</strong>{did && ` · ${did}`}</span>
+          <span className="font-sans leading-6"><strong className="font-display">{formatMonthDay(date)}({weekday})</strong>{did && ` · ${did}`}</span>
         </span>
-        {summary && <span className="text-label leading-[19.5px] text-ink-subtle">{summary}</span>}
+        {summary && <span className="font-sans text-label leading-[19.5px] text-ink-subtle">{summary}</span>}
       </span>
     </label>
   );

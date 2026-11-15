@@ -30,7 +30,7 @@ export default function RecentRetrospectives({ items }) {
                 <span className="w-full truncate text-body leading-[21px] text-ink">
                   {title}
                 </span>
-                <Badge tone={type === "session" ? "yellow" : STORY_CARD_TYPES[type].tone}>{STORY_CARD_TYPES[type].label}</Badge>
+                <Badge className="font-display" tone={type === "session" ? "yellow" : STORY_CARD_TYPES[type].tone}>{STORY_CARD_TYPES[type].label}</Badge>
               </span>
             </Link>
           </li>

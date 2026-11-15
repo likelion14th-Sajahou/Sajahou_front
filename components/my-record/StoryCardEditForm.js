@@ -64,7 +64,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
           defaultValue={card.summary[key]}
         />
       ))}
-      {/* Markdown 원문이라 고정폭 글꼴과 작은 글자로 보여 준다. */}
+      {/* 편집 가능한 회고록·프로젝트 문서는 Pretendard로 보여 준다. */}
       <TextField
         label={
           <>
@@ -75,7 +75,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         multiline
         name="document"
         defaultValue={card.type === "project" ? withoutDocumentTitle(card.document, card.title) : card.document}
-        className="h-[234px] font-mono text-label! font-bold leading-[20.8px]"
+        className="h-[234px] font-input text-label! font-bold leading-[20.8px]"
       />
       <div className="flex items-center justify-between gap-3.5 pt-1">
         <TextLink variant="underline" className="text-[#4a5163]!" onClick={onCancel}>취소</TextLink>

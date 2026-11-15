@@ -63,7 +63,7 @@ export default function QuestionProgressList({ questions, currentIndex }) {
 
   return (
     <>
-      {/* 프로토타입은 삼립호빵체라 폭이 좁다. 본문 글꼴(NPS)로도 네 칸이 한 줄에 들어가도록 칸 사이를 10px로 둔다. */}
+      {/* 진행 상태 요약은 좁은 화면에서도 읽기 쉽도록 줄바꿈을 허용하고 칸 사이를 10px로 둔다. */}
       <p className="mt-2.5 flex flex-wrap gap-x-2.5 gap-y-1.5 text-[12.5px] leading-5 text-ink-500">
         {summary.map(({ state, label, value }) => (
           <span key={state} className="inline-flex items-center gap-1.5 whitespace-nowrap">
