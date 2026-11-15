@@ -7,10 +7,8 @@ const ROW_CLASSES =
 const ACTIVE_ROW_CLASSES = `${ROW_CLASSES} border-2 border-transparent bg-white`;
 const MUTED_ROW_CLASSES = `${ROW_CLASSES} border-[1.5px] border-transparent bg-[#fafaf8]`;
 
-function getRecapLabel({ cardCount, isProjectRecap }) {
-  const recap = isProjectRecap ? "프로젝트 회고 완료" : "회고 완료";
-
-  return cardCount > 0 ? `${recap} · 카드 ${cardCount}장` : recap;
+function getRecapLabel({ cardCount }) {
+  return cardCount > 0 ? `회고 완료 · 카드 ${cardCount}장` : "회고 완료";
 }
 
 function WeekName({ week, completed = false, current = false }) {
@@ -37,6 +35,8 @@ export default function WeekDetailRow({ week, searchParams }) {
   const Container = href ? Link : "div";
   const textColorClass = current ? "text-ink-strong" : completed ? "text-ink" : "text-[#9a958c]";
   const stateLabel = upcoming ? "예정" : completed ? getRecapLabel(week) : "기록 없음";
+  // 회고 상태와 프로젝트 완료(stickers)는 따로 보여 준다. 발표 주에는 둘 다 있을 수 있다.
+  const projectDone = week.stickers.length > 0;
   const cardLabel = cardCount === 1 ? "카드 보기 →" : `카드 ${cardCount}장 보기 →`;
 
   return (
@@ -45,6 +45,7 @@ export default function WeekDetailRow({ week, searchParams }) {
       <WeekName week={week.week} completed={completed} current={current} />
       {!upcoming && <WeekTitle title={title} completed={completed} />}
       {!current && <WeekState completed={completed}>{stateLabel}</WeekState>}
+      {projectDone && <span className="rounded-full bg-tint-yellow px-2.5 py-0.5 text-label leading-[19.5px] text-tint-yellow-ink">프로젝트 완료</span>}
       {current ? (
         <span className="ml-auto flex h-[38px] items-center rounded-full bg-shape-yellow px-[18px] text-body-sm">
           회고 쓰기 →

@@ -2,7 +2,7 @@ import FootprintSticker, { CurrentWeekSticker } from "./FootprintSticker";
 
 const LEGEND_ITEMS = [
   { label: "회고 완료", icon: <FootprintSticker week={0} size={16} /> },
-  { label: "프로젝트 회고 완료", icon: <FootprintSticker week={13} isProjectRecap size={16} /> },
+  { label: "프로젝트 완료", icon: <FootprintSticker week={13} category="IDEATHON" size={16} /> },
   { label: "이번 주", icon: <CurrentWeekSticker small /> },
   { label: "예정", swatch: "size-3 rounded-full border-[1.5px] border-dashed border-ink-300" },
   { label: "기록 없음", swatch: "size-2 rounded-full bg-line-strong" },
