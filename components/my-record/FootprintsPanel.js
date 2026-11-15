@@ -24,6 +24,7 @@ export default function FootprintsPanel({ sections, weeks, selectedWeek, section
             key={id}
             drawn
             size="lg"
+            selectedTone="highlight"
             selected={id === sectionId}
             onClick={() => {
               const changes = { section: id };

@@ -66,9 +66,8 @@ export default function FootprintTimeline({
 
   const getGridColumn = (startWeek, endWeek) =>
     `${startWeek - firstWeek + 1} / span ${endWeek - startWeek + 1}`;
-  const hasProject = sections.some(({ isProject }) => isProject);
-  // 구간 이름 줄(전체 보기) 또는 프로젝트 캡슐 줄이 있으면 주차는 둘째 줄에 놓인다.
-  const weekRow = showSectionNames || hasProject ? 2 : 1;
+  // 구간 이름 줄(전체 보기)이 있으면 주차는 둘째 줄에 놓인다.
+  const weekRow = showSectionNames ? 2 : 1;
 
   return (
     <div className="relative w-full rounded-[28px] border-2 border-transparent bg-white px-5 pt-6 pb-4">
@@ -94,15 +93,6 @@ export default function FootprintTimeline({
                 {isProject ? <ProjectCapsule label={label} /> : label}
               </p>
             ))}
-          {/* 가까이 보기: 구간 이름 줄이 없어서 프로젝트 캡슐만 주차 위에 띄운다. */}
-          {!showSectionNames &&
-            sections
-              .filter(({ isProject }) => isProject)
-              .map(({ id, label, startWeek, endWeek }) => (
-                <p key={id} className="row-start-1 self-end justify-self-start" style={{ gridColumn: getGridColumn(startWeek, endWeek) }}>
-                  <ProjectCapsule label={label} />
-                </p>
-              ))}
           {weeks.map((week) => {
             const isSelected = week.week === selectedWeek;
 
