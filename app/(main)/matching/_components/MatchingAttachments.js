@@ -53,7 +53,6 @@ export default function MatchingAttachments({ attachments, onLinkUnreadable }) {
 
   return (
     <div className="matching-attachments flex min-w-0 flex-col gap-1.5">
-      <p className="text-label text-ink-muted">채용 공고 <span className="text-ink-faintest">· 붙여넣기, PDF·캡처, 링크 중 편한 것</span></p>
       {items.length > 0 && (
         <ul aria-label="첨부 공고" className="flex flex-wrap gap-2 [&>li]:border-[#e4e2dd] [&>li]:text-ink-strong">
           {items.map(({ attachmentId, kind, name, extractStatus }) => {

@@ -246,13 +246,9 @@ body {
 .story-card-edit-form [role="group"] > p { color: #4a5163; }
 
 /* 매칭 화면의 공통 필드는 다른 페이지의 입력 크기를 바꾸지 않고 시안에 맞춘다. */
-.matching-form > label,
-.matching-form > .grid > label { gap: 6px; }
-.matching-form > label > span:first-child,
-.matching-form > .grid > label > span:first-child {
-  color: var(--color-ink-subtle);
-  line-height: 20.8px;
-}
+/* 구역 카드(MarkedSection) 안의 입력칸: 라벨과 칸 사이 6px(11/15 디자인). 라벨 글자는 TextField 기본과 같다. */
+.matching-form section > label,
+.matching-form section > .grid > label { gap: 6px; }
 .matching-form input[name="company"],
 .matching-form input[name="role"] { height: 50px; }
 .matching-form textarea { line-height: 24px; }
