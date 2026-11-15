@@ -26,8 +26,9 @@ export default function Chip({
   const stateClasses = drawn
     ? `relative font-display ${selected ? selectedClasses : unselectedClasses}`
     : `border ${borderClasses} ${selected ? selectedClasses : unselectedClasses}`;
+  const focusClasses = yellowTone ? "focus:outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-yellow-500 focus-visible:outline-offset-4" : "";
 
-  const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center ${stateClasses} ${SIZE_CLASSES[size]} ${className}`;
+  const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center ${stateClasses} ${focusClasses} ${SIZE_CLASSES[size]} ${className}`;
   const content = (
     <>
       {children}
