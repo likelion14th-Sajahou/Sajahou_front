@@ -66,16 +66,16 @@ export default function FootprintTimeline({
 
   const getGridColumn = (startWeek, endWeek) =>
     `${startWeek - firstWeek + 1} / span ${endWeek - startWeek + 1}`;
-  const hasProject = sections.some(({ isProject }) => isProject);
-  // 구간 이름 줄(전체 보기) 또는 프로젝트 캡슐 줄이 있으면 주차는 둘째 줄에 놓인다.
-  const weekRow = showSectionNames || hasProject ? 2 : 1;
+  // 구간 이름 줄(전체 보기)이 있으면 주차는 둘째 줄에 놓인다.
+  const weekRow = showSectionNames ? 2 : 1;
 
   return (
     <div className="relative w-full rounded-[28px] border-2 border-transparent bg-white px-5 pt-6 pb-4">
       <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />
       <div
         ref={scrollerRef}
-        className="relative w-full overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        // 선택 테두리(38px)가 주차 칸(최소 36px)보다 넓어 양 끝 주차에서 잘리지 않도록, 스크롤 영역 안쪽에 좌우 여백을 두고 그만큼 밖으로 넓힌다.
+        className="relative -mx-1 w-[calc(100%+8px)] overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         <div
           className={`grid gap-x-1 gap-y-2.5 ${
@@ -94,15 +94,6 @@ export default function FootprintTimeline({
                 {isProject ? <ProjectCapsule label={label} /> : label}
               </p>
             ))}
-          {/* 가까이 보기: 구간 이름 줄이 없어서 프로젝트 캡슐만 주차 위에 띄운다. */}
-          {!showSectionNames &&
-            sections
-              .filter(({ isProject }) => isProject)
-              .map(({ id, label, startWeek, endWeek }) => (
-                <p key={id} className="row-start-1 self-end justify-self-start" style={{ gridColumn: getGridColumn(startWeek, endWeek) }}>
-                  <ProjectCapsule label={label} />
-                </p>
-              ))}
           {weeks.map((week) => {
             const isSelected = week.week === selectedWeek;
 

@@ -10,12 +10,15 @@ export function StoryCardIcon({ card, size = 38 }) {
   if (card.type !== "project") {
     return <FootprintSticker week={card.week} size={size} />;
   }
-  return <Image src={projectBadgeImage(card.category) ?? projectBadgeImageByName(card.whenLabel)} alt="" width={size} height={size}
+  return <Image src={projectBadgeImage(card.category) ?? projectBadgeImageByName(card.projectName)} alt="" width={size} height={size}
     style={{ width: size, height: size }} className="shrink-0 object-contain" />;
 }
 
+// 세션 회고는 연노랑, 과제 회고는 한 단계 진한 노랑, 프로젝트는 진한 회색이다(11/15 디자인).
+const TYPE_BADGE_TONES = { session: "yellow", assignment: "cream", project: "dark" };
+
 export function StoryCardTypeBadge({ type }) {
-  return <Badge tone={type === "project" ? "dark" : "cream"} className="font-display tracking-[-0.15px]">
+  return <Badge tone={TYPE_BADGE_TONES[type]} className="font-display tracking-[-0.15px]">
     {STORY_CARD_TYPES[type].label}
   </Badge>;
 }

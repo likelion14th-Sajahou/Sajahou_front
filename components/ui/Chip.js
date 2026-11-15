@@ -2,6 +2,8 @@ import Link from "next/link";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 
 const SIZE_CLASSES = {
+  // 나의 사자록의 구간·카드 유형 거르기
+  lg: "h-[38px] px-4 text-body-sm [--drawn-border-height:38px]",
   md: "h-9 px-3.5 text-body-sm [--drawn-border-height:36px]",
   sm: "h-8 px-3 text-label [--drawn-border-height:32px]",
 };
@@ -18,9 +20,10 @@ export default function Chip({
   children,
   ...rest
 }) {
-  // 자료 종류는 기본 노란 선을 유지하고, 선택하면 노란 배경과 더 진한 선으로 표시한다.
+  // 자료 종류(yellow)는 기본 노란 선을 유지하고, 선택하면 노란 배경과 더 진한 선으로 표시한다.
+  // highlight: 선은 기본(ink)과 같고, 선택하면 배경만 노란색이다(사자 발자국 구간 선택).
   const yellowTone = selectedTone === "yellow";
-  const selectedClasses = yellowTone ? "bg-yellow-400 text-ink-800" : "bg-ink text-white";
+  const selectedClasses = { yellow: "bg-yellow-400 text-ink-800", highlight: "bg-yellow-400 text-ink" }[selectedTone] ?? "bg-ink text-white";
   const unselectedClasses = yellowTone ? "bg-white text-ink-800" : "bg-white text-ink";
   const borderClasses = yellowTone ? (selected ? "border-yellow-500" : "border-yellow-400") : (selected ? "border-ink" : "border-line");
   const stateClasses = drawn
