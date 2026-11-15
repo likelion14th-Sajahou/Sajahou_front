@@ -2,6 +2,8 @@ import Link from "next/link";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 
 const SIZE_CLASSES = {
+  // 나의 사자록의 구간·카드 유형 거르기
+  lg: "h-[38px] px-4 text-body-sm [--drawn-border-height:38px]",
   md: "h-9 px-3.5 text-body-sm [--drawn-border-height:36px]",
   sm: "h-8 px-3 text-label [--drawn-border-height:32px]",
 };
