@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "@/components/layout/AuthProvider";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -106,10 +105,11 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
 
   return (
     <div className="pt-14">
-      <section aria-labelledby="matching-competencies" className={`relative min-w-0 ${posting.noCompetencyFound || !posting.competencies.length ? "" : "rounded-[24px] bg-white p-5 sm:p-6"}`}>
-        {!posting.noCompetencyFound && posting.competencies.length > 0 && <DrawnBorder variant="start-card" color="var(--color-yellow-400)" />}
+      {/* 11/15 디자인: 바깥 카드 없이 제목 옆에 어디서 찾았는지 적고, 역량 카드만 늘어놓는다. */}
+      <section aria-labelledby="matching-competencies" className="min-w-0">
         <div className="mb-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <h2 id="matching-competencies" ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-[24px] tracking-[-0.48px] outline-none">공고가 원하는 역량</h2>
+          <h2 id="matching-competencies" ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-[24px] leading-8 tracking-[-0.4px] outline-none">공고가 원하는 역량</h2>
+          <p className="font-display text-label leading-[19.5px] text-[#5a606c]">공고·우대사항·인재상에서 찾았어요</p>
         </div>
         {/* 공고에서 역량을 하나도 찾지 못하면 공고 내용을 더 넣도록 안내한다(M-06). */}
         {posting.noCompetencyFound || !posting.competencies.length ? (
@@ -118,23 +118,19 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
           <ul className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
             {/* 카드 수는 서버가 고정 역량 목록(C-06)으로 센 값이라 나의 사자록의 역량 필터 결과와 같다. */}
             {posting.competencies.map(({ competencyId, name, evidenceQuote, cardCount }) => (
-              <li key={competencyId} className="group relative min-w-0 rounded-[20px] bg-white px-[18px] py-3.5">
+              <li key={competencyId} className="relative min-w-0 rounded-[20px] bg-white px-[18px] py-4">
                 <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink-300)" />
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="min-w-0 break-words text-[17px] leading-[27.2px]">#{name.replace(/^#/, "")}</h3>
-                  {/* 카드 전체를 같은 링크 영역으로 확장한다. '없음'은 누를 수 없다. */}
+                  {/* 카드 전체를 같은 링크 영역으로 확장한다. '없음'은 누를 수 없다.
+                      색은 웹 프로토타입(11/16 최종)을 따른다: 2장 이상 노랑, 1장 연노랑, 없음 연분홍·빨강. 올리면 살짝 어둡게 + 밑줄. */}
                   {cardCount > 0 ? (
-                    <Link href={recordHref(new URLSearchParams(), { tab: "cards", competencyId })} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-ink-300 py-[3px] pr-2 pl-2.5 text-[12.5px] leading-5 text-ink-950 after:absolute after:inset-0 after:rounded-[20px] group-hover:border-transparent group-hover:bg-yellow-400 focus-visible:border-transparent focus-visible:bg-yellow-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label={`${name} 카드 ${cardCount}장 보기`}>
-                      {cardCount}장 보기
-                      <span aria-hidden="true" className="relative inline-grid size-4 place-items-center">
-                        <Image src="/images/matching/arrow-dot.svg" alt="" width={16} height={16} className="group-hover:hidden group-focus-within:hidden" />
-                        <Image src="/images/matching/arrow-dot-hover.svg" alt="" width={16} height={16} className="absolute hidden group-hover:block group-focus-within:block" />
-                        <span className="absolute size-3 rotate-180 bg-current mask-[url(/images/common/arrow-left-12-white.svg)] mask-contain mask-center mask-no-repeat" />
-                      </span>
+                    <Link href={recordHref(new URLSearchParams(), { tab: "cards", competencyId })} className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-[3px] text-[12.5px] leading-5 after:absolute after:inset-0 after:rounded-[20px] hover:underline hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${cardCount === 1 ? "bg-yellow-100 text-yellow-700" : "bg-yellow-400 text-ink-950"}`} aria-label={`${name} 카드 ${cardCount}장 보기`}>
+                      {cardCount}장 보기 →
                     </Link>
-                  ) : <Badge tone="red" size="count">없음</Badge>}
+                  ) : <Badge tone="red" size="count" className="text-error!">없음</Badge>}
                 </div>
-                <p className="mt-1 break-words text-body-sm text-ink-subtle">“{evidenceQuote}”</p>
+                <p className="mt-1 break-words text-body-sm text-[#5a606c]">“{evidenceQuote}”</p>
               </li>
             ))}
           </ul>
