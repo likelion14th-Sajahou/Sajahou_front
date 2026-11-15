@@ -17,7 +17,7 @@ export default function StartActions({ isAssignment = false }) {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
   const { setWeekStatus } = useMockData();
-  const { week, session, retrospective, getStepHref, refreshCurrent, showToast } = useRetrospectivePreview();
+  const { week, session, retrospective, getStepHref, refreshCurrent, applyStarted, showToast } = useRetrospectivePreview();
   const [pending, setPending] = useState(null);
   const [error, setError] = useState("");
   const [isResetOpen, setIsResetOpen] = useState(false);
@@ -33,7 +33,8 @@ export default function StartActions({ isAssignment = false }) {
     setError("");
     try {
       const result = await request({ request: authenticatedRequest });
-      await refreshCurrent();
+      if (kind === "start") applyStarted(result);
+      else await refreshCurrent();
       // 홈 화면은 아직 목업 상태를 보므로 세션 회고면 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
       if (!isAssignment) setWeekStatus("writing");
       setIsResetOpen(false);
