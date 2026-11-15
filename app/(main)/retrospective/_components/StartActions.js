@@ -73,6 +73,7 @@ export default function StartActions({ isAssignment = false }) {
 
   // 처음부터는 2단계 자료부터 빈 상태로 다시 쓴다(API 16 응답의 currentStep).
   function reset() {
+    if (!isWriting) return;
     run("reset", (options) => resetRetrospective(retrospective.id, options), "작성한 내용을 지우지 못했어요. 잠시 후 다시 시도해 주세요.");
   }
 
@@ -112,7 +113,7 @@ export default function StartActions({ isAssignment = false }) {
       )}
       {error && !isResetOpen && <p role="alert" className="text-body-sm text-tint-red">{error}</p>}
       <ResetRetrospectiveModal
-        open={isResetOpen}
+        open={isWriting && isResetOpen}
         isResetting={pending === "reset"}
         error={isResetOpen ? error : ""}
         onCancel={() => setIsResetOpen(false)}

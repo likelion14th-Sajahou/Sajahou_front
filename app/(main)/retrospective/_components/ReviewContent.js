@@ -133,7 +133,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   return (
     <>
       {/* 왼쪽은 진한 '노션용 회고록' 카드, 오른쪽은 연회색 '스토리 카드 초안' 카드다(11/13 디자인, 568:496). */}
-      <fieldset disabled={isBusy} aria-busy={isBusy} className="mt-10 grid min-w-0 grid-cols-[minmax(0,568fr)_minmax(0,496fr)] items-start gap-6">
+      <fieldset disabled={isBusy} aria-busy={isBusy} className="mt-10 grid min-w-0 grid-cols-1 items-start gap-6 min-[901px]:grid-cols-[minmax(0,568fr)_minmax(0,496fr)]">
         <RetroDarkCard border="materials-card" aria-labelledby="review-retrospective-title">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -201,7 +201,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
           <div className="mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-2.5 border-t border-[#d9d7d1] pt-4">
             {/* 모든 질문에 답했으면 질문 화면이 질문 끝(고치기 목록)으로 열린다(R-17). */}
             <TextLink onClick={backToQuestions} disabled={isBusy}>← 질문으로</TextLink>
-            <div className="ml-auto flex gap-2">
+            <div className="ml-auto flex flex-wrap gap-2">
               <Button variant="ink-outline" onClick={saveLater} disabled={isBusy} aria-busy={isBusy && !isCompleting}>{isBusy && !isCompleting ? "저장하는 중…" : "나중에 이어쓰기"}</Button>
               <Button variant="cta-ink" onClick={complete} disabled={isBusy} aria-busy={isCompleting}>{isCompleting ? "저장하는 중…" : "저장하고 사자록에 추가"}</Button>
             </div>
@@ -238,15 +238,22 @@ export default function ReviewContent() {
     const options = { signal: controller.signal, request: authenticatedRequest };
     async function load() {
       const competencyItems = await getCompetencies(options);
-      let { card } = await getRetrospective(retrospectiveId, options);
+      const detail = await getRetrospective(retrospectiveId, options);
+      let { card } = detail;
+      // 완료 카드 재생성은 완료 화면의 명시적인 동작으로만 시작한다.
+      if (!card && detail.state === "COMPLETED") {
+        router.replace(`${startHref}${startHref.includes("?") ? "&" : "?"}step=complete`);
+        return null;
+      }
       if (!card) {
         await createReviewDraft(retrospectiveId, options);
         ({ card } = await getRetrospective(retrospectiveId, options));
       }
+      if (!card) throw new Error("카드 초안을 찾을 수 없어요.");
       return { card, competencyItems };
     }
     load()
-      .then(setLoaded)
+      .then((result) => { if (!controller.signal.aborted) setLoaded(result); })
       .catch((failure) => {
         if (controller.signal.aborted || failure.name === "AbortError" || failure.status === 401) return;
         setError(getAiErrorMessage(failure, "초안을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."));

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { createReviewDraft } from "@/lib/retrospectiveApi";
@@ -17,11 +17,13 @@ export function useReviewDraftRequest() {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
   const controllerRef = useRef(null);
+  const [isNavigating, startNavigation] = useTransition();
 
   // 만드는 중에 화면을 떠나면 요청을 취소한다.
   useEffect(() => () => controllerRef.current?.abort(), []);
 
   async function openReview() {
+    if (controllerRef.current || isNavigating || !retrospective?.id) return;
     const controller = new AbortController();
     controllerRef.current = controller;
     setIsCreating(true);
@@ -29,14 +31,15 @@ export function useReviewDraftRequest() {
     try {
       await createReviewDraft(retrospective.id, { signal: controller.signal, request: authenticatedRequest });
       await refreshCurrent();
-      router.push(getStepHref("review"));
+      if (!controller.signal.aborted) startNavigation(() => router.push(getStepHref("review")));
     } catch (failure) {
       if (controller.signal.aborted || failure.status === 401) return;
       setError(getAiErrorMessage(failure, "초안을 만들지 못했어요. 잠시 후 다시 시도해 주세요."));
     } finally {
+      controllerRef.current = null;
       setIsCreating(false);
     }
   }
 
-  return { openReview, isCreating, error };
+  return { openReview, isCreating: isCreating || isNavigating, error };
 }

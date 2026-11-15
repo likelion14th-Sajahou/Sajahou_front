@@ -33,7 +33,7 @@ export default function WeekDetailRow({ week, searchParams }) {
   const upcoming = status === "upcoming";
   const hasCards = completed && cardCount > 0;
   // 카드 1장은 상세, 여러 장은 해당 주차 목록으로 이동하는 기존 규칙을 사용한다.
-  const href = current ? "/retrospective" : hasCards ? weekDestination(week, searchParams) : null;
+  const href = weekDestination(week, searchParams);
   const Container = href ? Link : "div";
   const textColorClass = current ? "text-ink-strong" : completed ? "text-ink" : "text-[#9a958c]";
   const stateLabel = upcoming ? "예정" : completed ? getRecapLabel(week) : "기록 없음";
@@ -51,6 +51,8 @@ export default function WeekDetailRow({ week, searchParams }) {
         </span>
       ) : hasCards ? (
         <span className="ml-auto text-body-sm text-accent">{cardLabel}</span>
+      ) : href ? (
+        <span className="ml-auto text-body-sm text-accent">회고 보기 →</span>
       ) : null}
     </Container>
   );

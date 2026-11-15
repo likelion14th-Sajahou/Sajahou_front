@@ -167,8 +167,9 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
                 이 카드를 지울까요?
                 <br />
                 {/* 프로젝트 카드는 기록과 한 쌍이라 기록도 함께 지워진다(H-22). */}
-                {isProjectCard ? "프로젝트의 이 기록도 함께 지워지고" : "그 주 스티커는 남고"}, 자소서 매칭에는 더 이상
-                쓰이지 않아요. 지운 카드는 되돌릴 수 없어요.
+                {isProjectCard
+                  ? "프로젝트의 이 기록도 함께 지워지고, 자소서 매칭에는 더 이상 쓰이지 않아요. 지운 카드는 되돌릴 수 없어요."
+                  : "작성한 회고와 그 주 스티커는 남고, 카드는 자소서 매칭에 더 이상 쓰이지 않아요. 현 주차 회고는 작성 가능 기간 안에 카드를 다시 만들 수 있어요."}
               </p>
               <div className="flex items-center justify-between gap-3.5 pt-1">
                 {/* 삭제 버튼이 사라져도 포커스를 잃지 않고, 안내가 화면에 보이도록 취소로 옮긴다. */}

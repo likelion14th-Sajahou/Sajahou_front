@@ -15,6 +15,7 @@ import RetroResultCard from "./RetroResultCard";
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import { useRetrospectivePreview } from "./RetrospectivePreview";
 import { copyText } from "@/lib/clipboard";
+import { useReviewDraftRequest } from "./useReviewDraftRequest";
 
 // 5단계 완료(R-22, 06·06-a). 저장한 회고의 회고록을 복사하고, 공개된 카드를 나의 사자록에서 열 수 있다.
 // 과제를 '나중에 쓸게요'로 고른 주에 아직 과제 회고가 남았으면 마감과 '과제 회고 쓰기'를 보여 준다.
@@ -22,26 +23,43 @@ export default function CompleteContent() {
   const router = useRouter();
   const { authenticatedRequest, isDemo } = useAuth();
   const { user, setWeekStatus } = useMockData();
-  const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent } = useRetrospectivePreview();
-  const [card, setCard] = useState(null);
+  const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent, getStepHref } = useRetrospectivePreview();
+  const [detail, setDetail] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [notice, setNotice] = useState("");
   const { toast, showToast, hideToast } = useToast();
   const retrospectiveId = retrospective?.id;
+  const startHref = getStepHref();
+  const loaded = detail !== null && detail.id === retrospectiveId;
+  const card = loaded ? detail.card : null;
+  const isDraft = card?.status === "DRAFT";
+  const canRecreate = loaded && !card && detail.week.weekNumber === week.weekNumber;
+  const { openReview, isCreating, error: createError } = useReviewDraftRequest();
   const canRestartDemo = isDemo && getAuthMode() === "mock";
   // 세션 회고를 끝냈고 과제 회고가 아직 남았을 때만 보여 준다.
   const pendingAssignment = !isAssignment && assignment && assignment.state !== "COMPLETED" ? assignment : null;
 
   // 저장한 회고의 카드(회고록)를 회고 상세(API 13)에서 가져온다. 끝낸 과제 회고도 이번 주 회고 조회(API 11)에 id가 남는다.
   useEffect(() => {
-    if (!retrospectiveId) return;
+    if (!retrospectiveId) {
+      router.replace(startHref);
+      return;
+    }
     const controller = new AbortController();
     getRetrospective(retrospectiveId, { signal: controller.signal, request: authenticatedRequest })
-      .then(({ card: saved }) => setCard(saved))
+      .then((saved) => {
+        if (controller.signal.aborted) return;
+        if (saved.state !== "COMPLETED") {
+          router.replace(startHref);
+          return;
+        }
+        setDetail(saved);
+      })
       .catch((failure) => {
         if (!controller.signal.aborted && failure.status !== 401) setNotice("저장한 회고록을 불러오지 못했어요. 나의 사자록에서 카드를 확인해 주세요.");
       });
     return () => controller.abort();
-  }, [retrospectiveId, authenticatedRequest]);
+  }, [retrospectiveId, authenticatedRequest, reloadKey, router, startHref]);
 
   async function copyRetrospective() {
     const copied = await copyText(card.fullMarkdown);
@@ -67,12 +85,21 @@ export default function CompleteContent() {
       <RetroResultCard titleId="retrospective-complete-title" className="mt-10 max-w-[620px] gap-3 px-8 pt-12 pb-10">
         <Image src="/images/characters/cloud-done.png" alt="" width={150} height={113} className="done-pop mb-3" />
         <p className="text-body-sm leading-[21px] font-bold text-ink-subtle">{week.weekNumber}주차 {isAssignment ? "과제" : "세션"} 회고 완료</p>
-        <h2 id="retrospective-complete-title" className="font-display text-[24px] leading-[39px] tracking-[-0.48px] text-balance break-keep text-ink-strong">사자록에 카드 1장을 저장했어요</h2>
-        <p className="text-body leading-6 text-balance break-keep text-ink-subtle">노션에 붙여넣기 했나요? 아직이면 지금 복사해 두세요.</p>
+        <h2 id="retrospective-complete-title" className="font-display text-[24px] leading-[39px] tracking-[-0.48px] text-balance break-keep text-ink-strong">
+          {!loaded ? "완료한 회고를 확인하고 있어요" : !card ? "카드를 지워도 회고는 남아 있어요" : isDraft ? "다시 만든 카드 초안이 있어요" : "사자록에 카드 1장을 저장했어요"}
+        </h2>
+        <p className="text-body leading-6 text-balance break-keep text-ink-subtle">
+          {!loaded ? "잠시만 기다려 주세요." : !card ? "작성한 자료와 답변, 회고 완료 상태는 그대로예요." : isDraft ? "초안을 검토하고 저장하면 사자록에 카드가 추가돼요." : "노션에 붙여넣기 했나요? 아직이면 지금 복사해 두세요."}
+        </p>
         <div className="mt-3 flex flex-wrap justify-center gap-3">
-          <Button variant="ink" onClick={copyRetrospective} disabled={!card}>회고록 복사</Button>
-          <Button variant="ink-outline" href={card ? `/my-record?card=${card.cardId}` : "/my-record"}>나의 사자록 보기</Button>
+          {card && <Button variant="ink" onClick={copyRetrospective} disabled={isCreating}>회고록 복사</Button>}
+          {canRecreate && <Button variant="ink" onClick={openReview} disabled={isCreating} aria-busy={isCreating}>{isCreating ? "카드를 만드는 중…" : "카드 다시 만들기"}</Button>}
+          {isDraft && <Button variant="ink" href={getStepHref("review")}>카드 초안 이어보기</Button>}
+          <Button variant="ink-outline" href={isCreating ? undefined : card && !isDraft ? `/my-record?card=${card.cardId}` : "/my-record"} disabled={isCreating}>나의 사자록 보기</Button>
+          {loaded && <Button variant="ink-outline" href={isCreating ? undefined : getStepHref("materials")} disabled={isCreating}>회고 내용 수정</Button>}
         </div>
+        {canRecreate && <p className="text-label text-ink-subtle">현 주차 회고만 카드를 다시 만들 수 있어요. 작성 가능 기간이 지나면 재생성이 제한돼요.</p>}
+        {notice && !loaded && <Button variant="ink-outline" onClick={() => { setNotice(""); setReloadKey((key) => key + 1); }}>다시 불러오기</Button>}
         {pendingAssignment && (
           <div className="mt-1 flex w-full flex-wrap items-center gap-3 rounded-2xl bg-canvas p-4 text-left">
             <div className="flex min-w-[200px] flex-1 flex-col gap-0.5">
@@ -82,9 +109,9 @@ export default function CompleteContent() {
             <Button variant="cta" href="/retrospective?type=assignment">과제 회고 쓰기 →</Button>
           </div>
         )}
-        {canRestartDemo && <TextLink className="mt-2" onClick={restartDemo}>데모 처음부터 다시 보기</TextLink>}
+        {canRestartDemo && <TextLink className="mt-2" onClick={restartDemo} disabled={isCreating}>데모 처음부터 다시 보기</TextLink>}
       </RetroResultCard>
-      <p role="status" className={notice ? "mt-3 text-center text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
+      <p role={createError || notice ? "alert" : "status"} className={notice || createError || isCreating ? "mt-3 text-center text-body-sm text-ink-muted" : "sr-only"}>{createError || notice || (isCreating ? "회고 자료와 답변으로 카드를 다시 만들고 있어요…" : "")}</p>
       <Toast toast={toast} onDismiss={hideToast} />
     </>
   );
