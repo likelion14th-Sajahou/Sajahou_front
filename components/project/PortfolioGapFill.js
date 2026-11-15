@@ -42,15 +42,15 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
     });
   }
   return <>
-    <p className="font-sans text-label text-accent-strong">2 / 3 · 빈 곳 채우기</p>
+    <p className="font-display text-label text-accent-strong">2 / 3 · 빈 곳 채우기</p>
     <div className="grid grid-cols-1 items-start gap-5 pt-3 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <Card as="section" size="md" aria-label="빈 곳 채우기" className="portfolio-question relative bg-ink-900! font-sans text-white">
+      <Card as="section" size="md" aria-label="빈 곳 채우기" className="portfolio-question relative bg-ink-900! font-display text-white">
         <DrawnBorder variant="start-card" color="var(--color-ink-900)" />
         <fieldset disabled={busy} className="min-w-0">
           {isArtifact ? <div className="flex flex-col gap-4">
             <AiPromptHeader label="AI 요청" tone="dark" category={<Badge tone="blue" size="sm">{question.tag}</Badge>} progress={`${index + 1} / ${questions.length}`} />
             {question.quote && <p className="rounded-xl bg-white/10 px-3.5 py-2.5 text-body-sm text-locked">{question.quote}</p>}
-            <h2 className="font-sans text-title leading-[29px] tracking-[-0.2px]">{question.content}</h2>
+            <h2 className="font-display text-title leading-[29px] tracking-[-0.2px]">{question.content}</h2>
             {hasSavedArtifact && <p className="text-label text-locked">이미 산출물을 첨부했어요. 그대로 진행하거나 새 자료를 첨부해 바꿀 수 있어요.</p>}
             {question.answer && <p className="whitespace-pre-wrap text-body-sm text-locked">{question.answer}</p>}
             <div className="portfolio-attachments"><RecordAttachmentsField category="OUTPUT" attachments={attachments} onBusyChange={setAttachmentBusy} onChange={(items) => onChange({ ...state, attachments: { ...state.attachments, [question.questionId]: items } })} /></div>
@@ -64,7 +64,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
           {error && <p role="alert">{error}</p>}
         </fieldset>
       </Card>
-      <Card as="aside" size="md" aria-label="AI가 찾은 빈 곳" className="relative font-sans text-ink-strong">
+      <Card as="aside" size="md" aria-label="AI가 찾은 빈 곳" className="relative font-display text-ink-strong">
         <DrawnBorder variant="section-card" color="var(--color-ink-300)" />
         <div className="flex items-center justify-between border-b border-ink-strong pb-3"><h2 className="text-[18px] leading-[28.8px]">AI가 찾은 빈 곳</h2><Image src="/images/project/gap-marker.svg" width={14.08} height={13.12} alt="" /></div>
         <ol className="flex flex-col gap-2 pt-4">

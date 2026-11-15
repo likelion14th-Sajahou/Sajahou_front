@@ -4,7 +4,7 @@ import { Noto_Sans_KR } from "next/font/google";
 // 디자인 시스템 폰트(Figma 'Design' 섹션). 파일 출처와 라이선스는 app/fonts/LICENSE.md에 있다.
 // 폰트 파일은 받은 그대로 쓴다(NPS 폰트는 변형 금지).
 
-// 본문: NPS 폰트(국민연금체). 서비스 설명·일반 저장 콘텐츠·입력 라벨과 선택 옵션.
+// NPS 폰트(국민연금체): 읽기 결과물·프로젝트 기록 요약·첨부 이름과 링크·자소서 빈칸 안내.
 // 배포된 OTF는 Chrome 웹폰트 검사(OTS: CFF Name INDEX 오류)를 통과하지 못해 TTF를 쓴다.
 // 디자인에 쓰인 Regular·Bold만 둔다. ExtraBold(TTF)도 배포되니 디자인에 쓰이면 여기에 추가한다.
 export const npsFont = localFont({
@@ -16,7 +16,7 @@ export const npsFont = localFont({
   display: "swap",
 });
 
-// 제목·클릭 가능한 동작 요소: 산돌 삼립호빵체 Basic
+// 기본 UI(제목·동작·라벨·설명·AI 질문): 산돌 삼립호빵체 Basic
 export const displayFont = localFont({
   src: "./fonts/SDSamliphopangcheBasic.otf",
   variable: "--font-samliphopang",

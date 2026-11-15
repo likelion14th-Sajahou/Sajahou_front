@@ -86,7 +86,7 @@ export function PortfolioCard({ portfolio, onRemake }) {
     <SideCard title="포트폴리오" label="포트폴리오" description="노션·포트폴리오 사이트에 그대로 붙여 넣을 수 있어요">
       {portfolio ? (
         <>
-          {/* 읽기 전용 포트폴리오는 TextField의 NPS 기본값을 사용한다. 편집 화면은 Pretendard다. */}
+          {/* 읽기 전용 포트폴리오는 TextField의 NPS 읽기 전용 값을 사용한다. 편집 화면은 Pretendard다. */}
           <TextField
             multiline
             readOnly

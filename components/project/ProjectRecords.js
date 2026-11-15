@@ -30,7 +30,7 @@ function AddRecordPrompt({ status, onAdd }) {
           <>
             오늘 한 일을 남겨 볼까요?
             <br />
-            <span className="font-sans text-label leading-5 text-locked">회의록·시안·링크를 올리면 AI가 정리를 도와요</span>
+            <span className="font-display text-label leading-5 text-locked">회의록·시안·링크를 올리면 AI가 정리를 도와요</span>
           </>
         ) : "끝난 뒤에 생긴 결과도 남겨 보세요"}
       </p>

@@ -234,7 +234,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
                 onBusyChange={setAttachmentBusy}
                 label={
                   <>
-                    <span className="block font-sans text-body leading-6 text-ink-strong">자료 첨부</span>
+                    <span className="block font-display text-body leading-6 text-ink-strong">자료 첨부</span>
                     <span className="mt-1 block text-label leading-5 text-ink-subtle">어떤 자료인지 먼저 고르고 파일이나 링크를 올려 주세요.</span>
                   </>
                 }
@@ -248,7 +248,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
               />
             </div>
             <section className="w-full" aria-labelledby="record-materials-label">
-              <h3 id="record-materials-label" className="mb-2 font-sans text-body leading-6 text-ink-strong">오늘 한 일</h3>
+              <h3 id="record-materials-label" className="mb-2 font-display text-body leading-6 text-ink-strong">오늘 한 일</h3>
               {/* 프로토타입처럼 다섯 칸을 2px 회색 테두리 상자로 묶는다. */}
               <div className="rounded-[18px] border-2 border-line p-[18px]">
                 <RecordFieldsGrid getFieldProps={({ key, formLabel, placeholder }) => ({

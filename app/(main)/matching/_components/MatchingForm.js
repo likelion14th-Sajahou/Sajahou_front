@@ -255,7 +255,7 @@ export default function MatchingForm({ jobPostingId = null }) {
       </div>
       {showSearchConfirmation && (
         <div role="group" aria-label="다시 찾기 확인" className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 rounded-2xl bg-white px-4 py-3">
-          <p role="status" className="text-body-sm font-sans text-ink">
+          <p role="status" className="text-body-sm font-display text-ink">
             다시 찾으면 직접 고친 답 {editedAnswerCount}개가 새 초안으로 바뀌어요.
           </p>
           <TextLink onClick={() => { setConfirmSearch(false); setDismissedConfirmation(currentSnapshot); searchButtonRef.current?.focus(); }}>취소</TextLink>

@@ -3,7 +3,7 @@ import { AUTH_PART_LABELS } from "@/lib/authConfig";
 const PARTS = ["PLAN_DESIGN", "FRONTEND", "BACKEND"];
 
 // '파트' 칸 이름은 이름·학번 등 다른 칸 이름과 같은 모양이다(Figma '[디] 00-c' 11/13 수정: 위쪽 구분선 없음).
-const LABEL_CLASS = "mb-2 font-sans text-label leading-5 text-ink";
+const LABEL_CLASS = "mb-2 font-display text-label leading-5 text-ink";
 
 // 회원가입: 세 파트 중 하나를 고른다(S-04). 고른 칩만 진한 바탕 + 흰 글씨.
 // 내 정보 수정 팝업은 파트를 바꿀 수 없어서 이 칸 대신 내 파트만 보여 준다(ProfileModal).

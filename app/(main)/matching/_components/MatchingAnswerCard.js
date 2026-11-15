@@ -153,7 +153,7 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
       <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />
       <div className="flex items-start gap-3">
         <Badge tone="yellow" size="question" className="mt-0.5 bg-yellow-400! text-ink-950!">Q{question.seq}</Badge>
-        <h3 id={headingId} className="font-sans text-[18px] leading-[1.5]">{question.content}</h3>
+        <h3 id={headingId} className="font-display text-[18px] leading-[1.5]">{question.content}</h3>
       </div>
       {body}
     </Card>

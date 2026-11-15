@@ -5,7 +5,7 @@ const SIZE_CLASSES = {
   sm: "rounded-xl px-3 text-label",
 };
 
-// 회색 바탕, 높이 48, 오류면 빨간 테두리. 편집·placeholder는 Pretendard, 읽기 전용 값·라벨·안내는 NPS.
+// 회색 바탕, 높이 48, 오류면 빨간 테두리. 편집·placeholder는 Pretendard, 읽기 전용 값은 NPS, 라벨·안내는 삼립호빵체.
 const INPUT_HEIGHT_CLASSES = {
   md: "h-12 py-3",
   sm: "h-[38px] py-[7px]",
@@ -88,7 +88,7 @@ export default function TextField({
   }
 
   return (
-    <label className="flex w-full flex-col gap-2 font-sans">
+    <label className="flex w-full flex-col gap-2 font-display">
       <span className={labelClassName}>{label}</span>
       {framedControl}
       {error && <span id={errorId} className="text-caption leading-5 text-error">{error}</span>}

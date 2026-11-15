@@ -37,7 +37,7 @@ function ProjectRow({ project, summary, done = false }) {
           {title}
           {label && <span className="sr-only"> {name}</span>}
         </span>
-        <span className="font-sans truncate text-[12.5px] leading-5 text-ink-subtle">{summary}</span>
+        <span className="font-display truncate text-[12.5px] leading-5 text-ink-subtle">{summary}</span>
       </Link>
       <Link
         href={done ? projectHref : `${projectHref}?record=new`}

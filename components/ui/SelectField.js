@@ -36,7 +36,7 @@ export default function SelectField({ label, error, className = "", wrapperClass
 
   return (
     // 디자인 시스템(Figma 'Input' Type=Select): TextField와 같은 모양 + 오른쪽 20px 화살표. 아직 고르지 않았으면(값이 "") 글자를 placeholder 색으로.
-    <label className={`flex min-w-0 flex-col gap-2 font-sans ${wrapperClassName}`}>
+    <label className={`flex min-w-0 flex-col gap-2 font-display ${wrapperClassName}`}>
       {label && <span className="text-label leading-5 text-ink">{label}</span>}
       {drawn ? (
         <DrawnFieldFrame height={size === "sm" ? 38 : 48} error={Boolean(error)}>{control}</DrawnFieldFrame>

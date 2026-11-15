@@ -22,7 +22,7 @@ export default function PortfolioArtifactRequest({
   return (
     <div className="flex flex-col gap-4">
       <AiPromptHeader label="AI 요청" category={category} progress={progress} />
-      <h3 className="font-sans text-title leading-[29px] tracking-[-0.2px] text-ink">{question}</h3>
+      <h3 className="font-display text-title leading-[29px] tracking-[-0.2px] text-ink">{question}</h3>
       <div className="pt-4">
         <RecordAttachmentsField
           category="OUTPUT"

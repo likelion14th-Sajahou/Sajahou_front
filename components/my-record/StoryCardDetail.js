@@ -65,16 +65,16 @@ function SummaryDetails({ summary }) {
         <span aria-hidden="true" className="hidden w-[15px] text-body group-open:inline">▾</span>
         <span className="text-body">
           자소서에 쓰는 요약{" "}
-          <span className="font-sans text-label text-[#5a606c]">상황 · 행동 · 이유 · 결과 · 배운 점</span>
+          <span className="font-display text-label text-[#5a606c]">상황 · 행동 · 이유 · 결과 · 배운 점</span>
         </span>
       </summary>
       <dl className="pt-1">
         {SUMMARY_FIELDS.map(({ key, label }) => (
           <div key={key} className="grid grid-cols-[52px_minmax(0,1fr)] gap-3 border-t-2 border-dashed border-yellow-200 py-3 sm:grid-cols-[64px_minmax(0,1fr)]">
             <dt className="pt-0.5 text-label text-yellow-700">{label}</dt>
-            <dd className="break-words text-body leading-[25.5px]">
+            <dd className="font-sans break-words text-body leading-[25.5px]">
               {summary[key] || (
-                <span className="inline-block rounded-lg border border-dashed border-line-medium px-2.5 text-body-sm text-ink-subtle">
+                <span className="font-display inline-block rounded-lg border border-dashed border-line-medium px-2.5 text-body-sm text-ink-subtle">
                   아직 기록에 없어요
                 </span>
               )}
@@ -113,7 +113,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
   }
 
   return (
-    <fieldset disabled={busy} className="flex min-w-0 flex-col items-start gap-3.5 font-sans text-[#1f2433] tracking-[-0.15px]">
+    <fieldset disabled={busy} className="flex min-w-0 flex-col items-start gap-3.5 font-display text-[#1f2433] tracking-[-0.15px]">
       {error && <p role="alert">{error}</p>}
       <div className="flex w-full items-center gap-2.5">
         <span className="flex size-[52px] shrink-0 items-center justify-center"><StoryCardIcon card={card} size={50} /></span>

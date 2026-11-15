@@ -10,10 +10,9 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   /*
-   * 글꼴 규칙: 제목·버튼은 산돌 삼립호빵체(font-display), 서비스가 주는 본문·설명은 NPS 폰트(font-sans),
-   * 입력값·편집 가능한 초안·placeholder는 Pretendard(font-input).
-   * 읽기 화면의 기록·회고록·포트폴리오·자소서 결과물과 첨부 파일명·링크는 NPS.
-   * 라벨·선택 옵션·오류 문구도 NPS. Google 로그인은 제공되는 폰트를 유지한다.
+   * 기본 UI(제목·버튼·라벨·설명·AI 질문 등)는 산돌 삼립호빵체(font-display).
+   * 읽기 화면의 Markdown 결과물·자소서 재구성 글/빈칸 안내·첨부 이름/링크·프로젝트 기록 요약만 NPS(font-sans).
+   * 직접 입력·편집하는 글과 placeholder는 Pretendard(font-input). Google 로그인은 제공되는 폰트를 유지한다.
    */
   --font-sans: var(--font-nps);
   --font-display: var(--font-samliphopang);
@@ -21,7 +20,7 @@
   --font-noto: var(--font-noto-sans-kr);
 }
 
-/* 기본 역할은 낮은 우선순위로 적용하고, AI 질문 등 예외는 font-sans로 지정한다. */
+/* NPS 읽기 콘텐츠는 해당 영역에 font-sans를 명시한다. 입력·편집 영역은 Pretendard다. */
 @layer base {
   h1, h2, h3, h4, h5, h6, button, a, summary {
     font-family: var(--font-display);
@@ -32,7 +31,7 @@
   }
 
   select, option {
-    font-family: var(--font-sans);
+    font-family: var(--font-display);
   }
 }
 
@@ -161,7 +160,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   line-height: 1.6;
 }
 
