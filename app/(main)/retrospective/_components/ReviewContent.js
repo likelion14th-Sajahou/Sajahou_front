@@ -133,7 +133,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   return (
     <>
       {/* 왼쪽은 진한 '노션용 회고록' 카드, 오른쪽은 연회색 '스토리 카드 초안' 카드다(11/13 디자인, 568:496). */}
-      <fieldset disabled={isBusy} aria-busy={isBusy} className="mt-10 grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,568fr)_minmax(0,496fr)]">
+      <fieldset disabled={isBusy} aria-busy={isBusy} className="grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,568fr)_minmax(0,496fr)]">
         <RetroDarkCard aria-labelledby="review-retrospective-title">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
@@ -259,11 +259,11 @@ export default function ReviewContent() {
   return (
     <>
       {/* 제목·단계·카드 사이 간격은 앞 단계 화면들과 같다(프로토타입 11/13). */}
-      <RetrospectiveSteps currentStep={3} className="mt-[38px]" />
+      <RetrospectiveSteps currentStep={3} />
       {loaded ? (
         <ReviewForm key={`${loaded.card.cardId}:${user.part}`} retrospectiveId={retrospectiveId} initialCard={loaded.card} competencyItems={loaded.competencyItems} />
       ) : (
-        <Card as="section" size="md" className="mt-10 flex flex-wrap items-center gap-3">
+        <Card as="section" size="md" className="flex flex-wrap items-center gap-3">
           {error ? (
             <>
               <p role="alert" className="text-body-sm text-error">{error}</p>

@@ -94,7 +94,7 @@ export default function AiQuestionsSession({ initialQuestions, attachments = [],
   const answeredBefore = questions.filter((item, itemIndex) => itemIndex < index && item.status !== "PENDING");
 
   return (
-    <div className="mt-10 grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex min-w-0 flex-col gap-3">
         {isComplete ? (
           <AiQuestionsComplete questions={questions} onEdit={openQuestion} />

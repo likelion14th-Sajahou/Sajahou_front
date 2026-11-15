@@ -35,14 +35,15 @@ function StepBadge({ index, done }) {
 // 회고 5단계 진행 표시(R-02, Figma '회고 진행 단계').
 // 끝낸 단계: 노란 배지 + 번호, 지금 단계: 구름 캐릭터 + 흔들림 + '지금 여기!', 남은 단계: 회색 배지 + 번호.
 // 지나온 길은 진한 점선, 남은 길은 연한 점선이다.
-// className으로 위 간격을 바꿀 수 있다(시작 화면은 Figma대로 제목과 38px).
-export default function RetrospectiveSteps({ currentStep = 0, className = "mt-6" }) {
+// 모바일·태블릿은 위아래 간격을 24px로 맞추고, 데스크톱에서만 말풍선 공간을 확보한다.
+// 단계별 콘텐츠(로딩·오류 포함)는 위 여백을 더하지 않는다.
+export default function RetrospectiveSteps({ currentStep = 0, className = "mt-4 mb-6 lg:mt-[38px] lg:mb-10" }) {
   return (
-    <div className={`relative pt-8 ${className}`}>
+    <div className={`relative pt-2 lg:pt-8 ${className}`}>
       {/* 첫 단계 가운데(10%)부터 마지막 단계 가운데(90%)까지 연한 점선, 지금 단계까지는 진한 점선을 덧그린다. */}
-      <span aria-hidden="true" className="absolute top-[59px] right-[10%] left-[10%] border-t-[3px] border-dashed border-locked" />
+      <span aria-hidden="true" className="absolute top-[35px] right-[10%] left-[10%] border-t-[3px] border-dashed border-locked lg:top-[59px]" />
       {currentStep > 0 && (
-        <span aria-hidden="true" className="absolute top-[59px] left-[10%] border-t-[3px] border-dashed border-ink" style={{ width: `${currentStep * 20}%` }} />
+        <span aria-hidden="true" className="absolute top-[35px] left-[10%] border-t-[3px] border-dashed border-ink lg:top-[59px]" style={{ width: `${currentStep * 20}%` }} />
       )}
       <ol aria-label="회고 단계" className="relative grid grid-cols-5">
         {STEPS.map((label, index) => {
@@ -62,7 +63,7 @@ export default function RetrospectiveSteps({ currentStep = 0, className = "mt-6"
               </span>
               <span className={`text-caption leading-[22.4px] sm:text-body-sm ${isCurrent ? "font-bold text-ink" : "text-ink"}`}>{label}</span>
               {isCurrent && (
-                <span className="absolute -top-[30px] left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-ink-muted px-2 py-1 text-[11px] leading-[17.6px] text-white after:absolute after:top-full after:left-1/2 after:-translate-x-1/2 after:border-x-4 after:border-t-4 after:border-x-transparent after:border-t-ink-muted sm:block">
+                <span className="absolute -top-[30px] left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-ink-muted px-2 py-1 text-[11px] leading-[17.6px] text-white after:absolute after:top-full after:left-1/2 after:-translate-x-1/2 after:border-x-4 after:border-t-4 after:border-x-transparent after:border-t-ink-muted lg:block">
                   지금 여기!
                 </span>
               )}
