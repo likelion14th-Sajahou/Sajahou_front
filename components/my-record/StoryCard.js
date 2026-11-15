@@ -4,7 +4,7 @@ import CompetencyTags from "./CompetencyTags";
 import { StoryCardIcon, StoryCardTypeBadge } from "./StoryCardVisuals";
 
 export default function StoryCard({ card, isHighlighted = false, onOpen }) {
-  const { type, whenLabel, title, tags } = card;
+  const { type, whenLabel, title, tags, evidence } = card;
 
   return (
     <Card
@@ -30,6 +30,13 @@ export default function StoryCard({ card, isHighlighted = false, onOpen }) {
         </button>
       </h3>
       <CompetencyTags tags={tags} />
+      {/* 이 카드를 만든 근거(11/15 디자인). 목록 응답의 evidenceSummary를 잇는다. */}
+      {evidence && (
+        <p className="flex w-full gap-1.5 border-t-2 border-dashed border-line pt-2.5 text-[13px] leading-[20.8px]">
+          <span className="shrink-0 text-yellow-700">근거</span>
+          <span className="min-w-0 wrap-anywhere text-ink-subtle">{evidence}</span>
+        </p>
+      )}
     </Card>
   );
 }
