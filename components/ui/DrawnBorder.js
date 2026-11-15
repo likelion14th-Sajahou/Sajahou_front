@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 // 손그림 테두리(이슈 #65). Figma '테두리 샘플'(11/16)의 Dynamic 선을 코드로 그린다.
 // Figma 설정: Frequency 400% · Wiggle 20% · Smoothen 100%. 내보낸 선을 재 보면
@@ -79,67 +79,11 @@ export function drawnBorderPath(w, h, r, strokeWidth) {
   return `M${points.join("L")}Z`;
 }
 
-// 예전 PNG 테두리(버튼·칩용). 버튼·칩·입력칸 틀을 바꾸는 다음 커밋에서 지운다.
-const IMAGE_SCALE = 2;
-const LEGACY_BORDERS = {
-  "pill-cream": { folder: "retrospective", outset: 4, slice: 26, pill: true },
-  "pill-white": { folder: "retrospective", outset: 4, slice: 26 },
-  "pill-ink": { folder: "retrospective", outset: 4, slice: 26 },
-  "pill-ink-sm": { folder: "retrospective", outset: 4, slice: 23 },
-  "pill-muted": { folder: "retrospective", outset: 4, slice: 26 },
-  "pill-yellow": { folder: "retrospective", outset: 4, slice: 26 },
-  "chip-ink": { folder: "retrospective", outset: 4, slice: 19, pill: true },
-  "chip-line": { folder: "retrospective", outset: 4, slice: 19, pill: true },
-  "new-project-button": { folder: "home", outset: 0, slice: 20 },
-};
-
-function LegacyDrawnBorder({ variant, repeat = "stretch", color }) {
-  const colorFilterId = useId();
-  const { folder, outset, slice, pill } = LEGACY_BORDERS[variant];
-  const borderWidth = pill ? `calc((var(--drawn-border-height, 32px) + ${outset * 2}px) / 2 - 1px)` : slice;
-
-  return (
-    <>
-      {color && (
-        <svg aria-hidden="true" width="0" height="0" className="pointer-events-none absolute">
-          <defs>
-            <filter id={colorFilterId} colorInterpolationFilters="sRGB">
-              <feFlood floodColor={color} result="color" />
-              <feComposite in="color" in2="SourceAlpha" operator="in" />
-            </filter>
-          </defs>
-        </svg>
-      )}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute z-10"
-        style={{
-          inset: -outset,
-          borderStyle: "solid",
-          borderColor: "transparent",
-          borderWidth,
-          borderImageSource: `url(/images/${folder}/border-${variant}.png)`,
-          borderImageSlice: slice * IMAGE_SCALE,
-          borderImageWidth: pill ? borderWidth : `${slice}px`,
-          borderImageRepeat: repeat,
-          filter: color ? `url(#${colorFilterId})` : undefined,
-        }}
-      />
-    </>
-  );
-}
-
 // 부모 요소에 relative와 둥근 모서리(rounded-*)가 있어야 한다. 부모에는 border를 주지 않는다.
 // color: 선 색(CSS 색이나 var(--color-…)), width: 선 두께(기본 4px. 나의 사자록의 카드만 2px).
 // 선의 가운데가 박스 가장자리를 따라가서, 두께의 절반은 박스 밖으로 나간다(Figma 'Center' 선).
 // 그리기 전(서버 렌더링·첫 화면)에는 같은 색·두께의 곧은 선을 보여 준다.
-export default function DrawnBorder({ variant, repeat, color, width = 4 }) {
-  // 예전 PNG는 color가 없으면 원본 색을 쓴다.
-  if (variant && LEGACY_BORDERS[variant]) return <LegacyDrawnBorder variant={variant} repeat={repeat} color={color} />;
-  return <BoxBorder color={color ?? "var(--color-ink)"} width={width} />;
-}
-
-function BoxBorder({ color, width }) {
+export default function DrawnBorder({ color = "var(--color-ink)", width = 4 }) {
   const ref = useRef(null);
   const [box, setBox] = useState(null);
 

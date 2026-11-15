@@ -39,7 +39,7 @@ export default function SelectField({ label, error, className = "", wrapperClass
     <label className={`flex min-w-0 flex-col gap-2 font-display ${wrapperClassName}`}>
       {label && <span className="text-label leading-5 text-ink">{label}</span>}
       {drawn ? (
-        <DrawnFieldFrame height={size === "sm" ? 38 : 48} error={Boolean(error)}>{control}</DrawnFieldFrame>
+        <DrawnFieldFrame error={Boolean(error)}>{control}</DrawnFieldFrame>
       ) : <span className="relative">{control}</span>}
       {error && <span id={errorId} className="text-caption leading-5 text-error">{error}</span>}
     </label>
