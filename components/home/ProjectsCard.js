@@ -98,7 +98,6 @@ export default function ProjectsCard({ inProgressProjects, doneProjects }) {
                 onClick={(event) => { modalOpener.current = event.currentTarget; setIsModalOpen(true); }}
                 className="relative flex h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-yellow-100 px-4 font-display text-body leading-[22px] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
               >
-                <DrawnBorder variant="new-project-button" />
                 <Image src="/images/common/plus.svg" alt="" width={10} height={10} />
                 새 프로젝트
               </button>

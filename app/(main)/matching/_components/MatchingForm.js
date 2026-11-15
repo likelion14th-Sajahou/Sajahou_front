@@ -249,7 +249,7 @@ export default function MatchingForm({ jobPostingId = null }) {
       <div className="flex flex-wrap items-center justify-between gap-3.5 pt-1">
         <TextLink variant="inverse" onClick={loadSample}>예시 공고 넣기</TextLink>
         {/* 첨부를 올리는 중에는 아직 목록에 없는 첨부가 빠지지 않도록 기다린다. */}
-        <Button ref={searchButtonRef} type="submit" variant="cta" borderColor="var(--color-ink)" className="matching-search max-w-full disabled:bg-canvas! disabled:text-ink-300!" disabled={!canSearch || isSearching || attachments.isBusy || restored.isRestoring} aria-busy={isSearching}>
+        <Button ref={searchButtonRef} type="submit" variant="cta" className="max-w-full disabled:bg-canvas! disabled:text-ink-300!" disabled={!canSearch || isSearching || attachments.isBusy || restored.isRestoring} aria-busy={isSearching}>
           {isSearching ? "내 사자록에서 찾는 중…" : !canSearch ? "찾기 완료 ✓" : posting ? "바뀐 내용으로 다시 찾기 →" : "내 사자록에서 찾기 →"}
         </Button>
       </div>

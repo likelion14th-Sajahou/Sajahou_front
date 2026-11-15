@@ -274,16 +274,12 @@ body {
 .matching-form textarea[name^="question-"] { height: 74px; min-width: 0; }
 .matching-form input::placeholder,
 .matching-form textarea::placeholder { color: var(--color-ink-300); }
-.matching-search:disabled > span[aria-hidden="true"] { opacity: 0.25; }
 
 /* 공용 폼의 기본 스타일은 유지하고 포트폴리오의 진한 카드 안에서만 조정한다. */
 .portfolio-question button { max-width: 100%; }
 .portfolio-question button.bg-yellow-400 {
   background-color: var(--color-yellow-100);
   height: 46px;
-}
-.portfolio-question button.bg-yellow-400 > span[aria-hidden="true"] {
-  border-image-source: url(/images/retrospective/border-pill-cream.png);
 }
 .portfolio-question label:has(textarea) { gap: 6px; }
 .portfolio-question label > span:first-child { font-weight: 400; }
