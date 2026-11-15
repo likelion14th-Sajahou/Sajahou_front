@@ -137,10 +137,10 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
       </div>
     );
   } else if (draft.answer.noMatchingCard) {
-    // 문항에 맞는 카드가 없으면 초안을 만들지 않고 안내한다(M-08).
+    // 문항에 맞는 카드가 없으면 초안을 만들지 않고 안내한다(M-08). 모양은 Figma 11-d(11/15)를 따른다.
     body = (
       <>
-        <p className="rounded-2xl bg-[#fff0e8] px-[18px] py-4 font-sans text-body-sm text-accent-strong">⚑ 이 문항에 맞는 카드가 아직 없어요.</p>
+        <p className="flex gap-2 rounded-2xl bg-[#fff0e8] px-[18px] py-4 font-sans text-body leading-[23px] text-[#b03a00]"><span aria-hidden="true">⚑</span>이 문항에 맞는 카드가 아직 없어요.</p>
         <MissingCompetencies competencies={draft.answer.missingCompetencies} />
       </>
     );

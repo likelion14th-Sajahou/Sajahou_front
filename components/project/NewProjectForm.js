@@ -11,7 +11,7 @@ import { PROJECT_CATEGORIES } from "@/lib/projectViewModel";
 const DEFAULT_ROLES = ["기획"];
 
 // 프로젝트 종류(#73)는 꼭 하나 골라야 한다. 값은 API 코드(IDEATHON·HACKATHON·JUNGKATHON)로 보낸다.
-export default function NewProjectForm({ onCancel, onCreate, busy = false }) {
+export default function NewProjectForm({ onCreate, busy = false }) {
   const [category, setCategory] = useState(null);
   const [roles, setRoles] = useState(DEFAULT_ROLES);
   const [categoryError, setCategoryError] = useState("");
@@ -92,7 +92,7 @@ export default function NewProjectForm({ onCancel, onCreate, busy = false }) {
         </div>
         {roleError && <p role="alert" className="-mt-2 text-caption leading-5 text-error">{roleError}</p>}
       </MarkedSection>
-      <FormDialogActions submitLabel="만들기" busy={busy} busyLabel="만드는 중…" onCancel={onCancel} />
+      <FormDialogActions submitLabel="만들기" busy={busy} busyLabel="만드는 중…" />
     </form>
   );
 }

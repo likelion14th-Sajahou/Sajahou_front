@@ -70,7 +70,7 @@ export default function StoryCardsPanel({
       <div className="flex flex-wrap items-center gap-2">
         <div role="group" aria-label="카드 유형" className="flex flex-wrap gap-2">
           {TYPE_FILTERS.map(({ id, label }) => (
-            <Chip key={id} drawn size="lg" selected={id === type} onClick={() => onNavigate({ type: id, card: null })}>
+            <Chip key={id} drawn size="lg" selectedTone="highlight" selected={id === type} onClick={() => onNavigate({ type: id, card: null })}>
               {label}
             </Chip>
           ))}

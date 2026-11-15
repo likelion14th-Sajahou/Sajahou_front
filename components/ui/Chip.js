@@ -21,7 +21,7 @@ export default function Chip({
   ...rest
 }) {
   // 자료 종류(yellow)는 기본 노란 선을 유지하고, 선택하면 노란 배경과 더 진한 선으로 표시한다.
-  // highlight: 선은 기본(ink)과 같고, 선택하면 배경만 노란색이다(사자 발자국 구간 선택).
+  // highlight: 선택하면 배경과 선이 같은 노란색이다(나의 사자록의 구간·카드 유형 거르기). 선택 전은 기본(ink)과 같다.
   const yellowTone = selectedTone === "yellow";
   const selectedClasses = { yellow: "bg-yellow-400 text-ink-800", highlight: "bg-yellow-400 text-ink" }[selectedTone] ?? "bg-ink text-white";
   const unselectedClasses = yellowTone ? "bg-white text-ink-800" : "bg-white text-ink";
@@ -30,12 +30,16 @@ export default function Chip({
     ? `relative ${selected ? selectedClasses : unselectedClasses}`
     : `border ${borderClasses} ${selected ? selectedClasses : unselectedClasses}`;
   const focusClasses = yellowTone ? "focus:outline-none" : "";
+  // 손그림 선 색. 지정하지 않으면 원본(ink·line) 색을 쓴다.
+  const drawnBorderColor = yellowTone
+    ? (selected ? "var(--color-yellow-500)" : "var(--color-yellow-400)")
+    : selected && selectedTone === "highlight" ? "var(--color-yellow-400)" : undefined;
 
   const classes = `font-display inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center ${stateClasses} ${focusClasses} ${SIZE_CLASSES[size]} ${className}`;
   const content = (
     <>
       {children}
-      {drawn && <DrawnBorder variant={selected ? "chip-ink" : "chip-line"} color={yellowTone ? (selected ? "var(--color-yellow-500)" : "var(--color-yellow-400)") : undefined} />}
+      {drawn && <DrawnBorder variant={selected ? "chip-ink" : "chip-line"} color={drawnBorderColor} />}
     </>
   );
 

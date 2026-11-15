@@ -32,13 +32,14 @@ export default function NewProjectModal({ open, onClose, onCreated }) {
       open={open}
       onClose={onClose}
       busy={busy}
+      showClose
       titleId={TITLE_ID}
       icon={<Image src="/images/stars/star-03.png" alt="" width={56} height={56} className="size-14" />}
       title="새 프로젝트"
       description="프로젝트 종류와 이름, 역할을 정해요."
     >
       <fieldset disabled={busy} className="min-w-0">
-        <NewProjectForm onCancel={onClose} onCreate={createProject} busy={busy} />
+        <NewProjectForm onCreate={createProject} busy={busy} />
         {error && <p role="alert" className="mt-3 text-center text-label text-error">{error}</p>}
       </fieldset>
     </FormDialog>

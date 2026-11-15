@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import AttachmentChip, { ChipStatus } from "@/components/ui/AttachmentChip";
-import FileUploadButton from "@/components/ui/FileUploadButton";
-import LinkInputRow from "@/components/ui/LinkInputRow";
+import FileDropZone from "@/components/ui/FileDropZone";
+import LinkPasteField from "@/components/ui/LinkPasteField";
 import TextLink from "@/components/ui/TextLink";
 import { JOB_POSTING_ACCEPT } from "./useJobPostingAttachments";
 
@@ -11,7 +11,7 @@ const READ_STATUS = {
   FAILED: { tone: "warning", label: "본문 읽지 못함" },
 };
 
-export const UNREADABLE_LINK_MESSAGE = "이 링크는 본문을 못 읽었어요. 공고 내용을 붙여 넣거나 PDF·캡처로 올려 주세요.";
+export const UNREADABLE_LINK_MESSAGE = "이 링크는 본문을 못 읽었어요. 로그인이 필요하거나 접근이 막힌 사이트예요. 공고 내용을 위에 붙여 넣거나 PDF·캡처로 올려 주세요.";
 
 // 입력한 링크를 전체 URL로 바꾼다. 'www.…'처럼 주소만 넣으면 https://를 붙인다. 올바르지 않으면 null이다.
 function toLinkUrl(value) {
@@ -25,6 +25,7 @@ function toLinkUrl(value) {
 }
 
 // 채용 공고 첨부(M-02): PDF·캡처 파일과 공고 링크. attachments는 useJobPostingAttachments의 반환값이다.
+// 11/15 디자인: JD 칸 아래에 첨부 칩 → 못 읽은 링크 안내 → 넓은 파일 올리기 칸 → 링크 칸 순서다(회고 자료와 같은 공용 칸).
 export default function MatchingAttachments({ attachments, onLinkUnreadable }) {
   const [link, setLink] = useState("");
   const [error, setError] = useState("");
@@ -52,10 +53,9 @@ export default function MatchingAttachments({ attachments, onLinkUnreadable }) {
   }
 
   return (
-    <div className="matching-attachments flex min-w-0 flex-col gap-1.5">
-      <p className="text-label text-ink-muted">채용 공고 <span className="text-ink-faintest">· 붙여넣기, PDF·캡처, 링크 중 편한 것</span></p>
+    <div className="flex min-w-0 flex-col gap-3">
       {items.length > 0 && (
-        <ul aria-label="첨부 공고" className="flex flex-wrap gap-2 [&>li]:border-[#e4e2dd] [&>li]:text-ink-strong">
+        <ul aria-label="첨부 공고" className="flex flex-wrap gap-2">
           {items.map(({ attachmentId, kind, name, extractStatus }) => {
             const status = READ_STATUS[extractStatus];
             return (
@@ -78,18 +78,16 @@ export default function MatchingAttachments({ attachments, onLinkUnreadable }) {
           <span>{UNREADABLE_LINK_MESSAGE}</span>
         </p>
       )}
-      <fieldset disabled={isBusy} aria-busy={isBusy} className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
-        <FileUploadButton
-          label={isBusy ? "올리는 중…" : "+ 공고 파일"}
-          ariaLabel="공고 파일"
+      <fieldset disabled={isBusy} aria-busy={isBusy} className="flex min-w-0 flex-col gap-[22px]">
+        <FileDropZone
+          label={isBusy ? "올리는 중…" : "공고 파일 올리기"}
           accept={JOB_POSTING_ACCEPT}
+          disabled={isBusy}
           onSelect={async (selected) => setError(await attachments.upload(selected))}
         />
-        <LinkInputRow
-          className="w-full basis-full sm:w-auto sm:basis-auto"
-          buttonVariant="ink-outline"
+        <LinkPasteField
           aria-label="공고 링크"
-          placeholder="공고 링크"
+          placeholder="공고 링크 붙여넣기"
           aria-invalid={Boolean(error)}
           aria-describedby={error ? "matching-attachment-error" : undefined}
           value={link}
