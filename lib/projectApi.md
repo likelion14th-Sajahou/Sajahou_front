@@ -16,6 +16,7 @@
 - 백엔드 안내: `POST /projects`, `GET /projects`, `GET /projects/{projectId}`의 `data.category`. 값은 `IDEATHON`, `HACKATHON`, `JUNGKATHON` 중 하나다.
 - 새 프로젝트 팝업에서 종류를 꼭 하나 골라야 만들 수 있다. 화면 이름은 아이디어톤·중앙해커톤·중커톤이다(`lib/projectViewModel.js`의 `PROJECT_CATEGORIES`).
 - Mock은 세 값이 아니면 `400 VALIDATION_ERROR`(`fields.category`)로 거부하고, 생성·목록·상세 응답에 `category`를 돌려준다. `category`가 없는 예전 mock 데이터는 `null`로 응답한다.
+- #82 백엔드 안내: `GET /home`의 `inProgressProjects[].category`·`doneProjects[].category`, `GET /story-cards`·`GET /story-cards/{cardId}`의 `category`(회고 카드는 `null`). 홈 프로젝트 칸은 종류 이름과 종류별 스티커를, 스토리 카드는 종류별 스티커를 보여 준다. `category`가 없으면 기존처럼 프로젝트 이름으로 표시한다.
 
 ## 11/12 백엔드 안내 반영 — 오늘 한 일
 
