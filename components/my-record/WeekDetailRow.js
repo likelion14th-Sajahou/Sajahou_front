@@ -11,7 +11,8 @@ const MUTED_ROW_CLASSES = `${ROW_CLASSES} border-[1.5px] border-transparent bg-[
 // 이번 주는 '회고 쓰기' 버튼이 상태를 대신한다.
 function getStateLabel({ status, cardCount, stickers }) {
   const recap = { done: "회고 완료", upcoming: "예정", none: "기록 없음" }[status];
-  return [recap, stickers.length > 0 && "프로젝트 완료", status === "done" && cardCount > 0 && `카드 ${cardCount}장`]
+  // 카드 수는 그 주 회고 카드와, 발표 주라면 완료한 프로젝트의 카드까지 센다(/footprints cardIds).
+  return [recap, stickers.length > 0 && "프로젝트 완료", status !== "current" && cardCount > 0 && `카드 ${cardCount}장`]
     .filter(Boolean).join(" · ");
 }
 
@@ -33,7 +34,8 @@ export default function WeekDetailRow({ week, searchParams }) {
   const completed = status === "done";
   const current = status === "current";
   const upcoming = status === "upcoming";
-  const hasCards = completed && cardCount > 0;
+  // 회고를 안 한 주라도 프로젝트를 완료해 카드가 생겼으면 보여 준다. 이번 주는 '회고 쓰기'가 우선이다.
+  const hasCards = !current && cardCount > 0;
   // 카드 1장은 상세, 여러 장은 해당 주차 목록으로 이동하는 기존 규칙을 사용한다.
   const href = weekDestination(week, searchParams);
   const Container = href ? Link : "div";
@@ -43,7 +45,7 @@ export default function WeekDetailRow({ week, searchParams }) {
 
   return (
     <Container {...(href ? { href } : {})} className={`${href ? ACTIVE_ROW_CLASSES : MUTED_ROW_CLASSES} ${textColorClass}`}>
-      <DrawnBorder variant="thin-outline" repeat="round" color={completed || current ? "var(--color-ink)" : "var(--color-line)"} />
+      <DrawnBorder variant="thin-outline" repeat="round" color={href ? "var(--color-ink)" : "var(--color-line)"} />
       <WeekName week={week.week} />
       {!upcoming && <WeekTitle title={title} completed={completed} />}
       {stateLabel && <WeekState completed={completed}>{stateLabel}</WeekState>}
