@@ -50,7 +50,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
           {isArtifact ? <div className="flex flex-col gap-4">
             <AiPromptHeader label="AI 요청" tone="dark" category={<Badge tone="blue" size="sm">{question.tag}</Badge>} progress={`${index + 1} / ${questions.length}`} />
             {question.quote && <p className="rounded-xl bg-white/10 px-3.5 py-2.5 text-body-sm text-locked">{question.quote}</p>}
-            <h2 className="text-title leading-[29px] tracking-[-0.2px]">{question.content}</h2>
+            <h2 className="font-display text-title leading-[29px] tracking-[-0.2px]">{question.content}</h2>
             {hasSavedArtifact && <p className="text-label text-locked">이미 산출물을 첨부했어요. 그대로 진행하거나 새 자료를 첨부해 바꿀 수 있어요.</p>}
             {question.answer && <p className="whitespace-pre-wrap text-body-sm text-locked">{question.answer}</p>}
             <div className="portfolio-attachments"><RecordAttachmentsField category="OUTPUT" attachments={attachments} onBusyChange={setAttachmentBusy} onChange={(items) => onChange({ ...state, attachments: { ...state.attachments, [question.questionId]: items } })} /></div>

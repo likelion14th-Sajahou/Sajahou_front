@@ -10,13 +10,29 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   /*
-   * 글꼴 규칙: 제목·버튼은 산돌 삼립호빵체(font-display), 서비스가 주는 본문·설명은 NPS 폰트(font-sans),
-   * 사용자가 직접 입력하는 글은 Pretendard(font-input). Secondary 버튼('데모 계정으로 둘러보기')은 Noto Sans KR(font-noto).
+   * 기본 UI(제목·버튼·라벨·설명·AI 질문 등)는 산돌 삼립호빵체(font-display).
+   * 읽기 화면의 Markdown 결과물·자소서 재구성 글/빈칸 안내·첨부 이름/링크·프로젝트 기록 요약만 NPS(font-sans).
+   * 직접 입력·편집하는 글과 placeholder는 Pretendard(font-input). Google 로그인은 제공되는 폰트를 유지한다.
    */
   --font-sans: var(--font-nps);
   --font-display: var(--font-samliphopang);
   --font-input: var(--font-pretendard);
   --font-noto: var(--font-noto-sans-kr);
+}
+
+/* NPS 읽기 콘텐츠는 해당 영역에 font-sans를 명시한다. 입력·편집 영역은 Pretendard다. */
+@layer base {
+  h1, h2, h3, h4, h5, h6, button, a, summary {
+    font-family: var(--font-display);
+  }
+
+  input, textarea, input::placeholder, textarea::placeholder {
+    font-family: var(--font-input);
+  }
+
+  select, option {
+    font-family: var(--font-display);
+  }
 }
 
 /*
@@ -144,7 +160,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   line-height: 1.6;
 }
 
@@ -194,7 +210,6 @@ body {
   }
   .home-hero-copy {
     top: 33.6114%;
-    left: 49.5833%;
   }
   .home-hero-character {
     width: 35.8333%;
@@ -204,8 +219,9 @@ body {
     bottom: auto;
   }
   .home-hero-cta {
-    top: 52.6818%;
-    left: 64.6528%;
+    /* Figma 1440 × 839: 꽃 영역의 왼쪽 위 (922, 457). */
+    top: 54.4696%;
+    left: 64.0278%;
     right: auto;
   }
 }

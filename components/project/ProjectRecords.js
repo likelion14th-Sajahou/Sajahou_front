@@ -30,7 +30,7 @@ function AddRecordPrompt({ status, onAdd }) {
           <>
             오늘 한 일을 남겨 볼까요?
             <br />
-            <span className="font-sans text-label leading-5 text-locked">회의록·시안·링크를 올리면 AI가 정리를 도와요</span>
+            <span className="font-display text-label leading-5 text-locked">회의록·시안·링크를 올리면 AI가 정리를 도와요</span>
           </>
         ) : "끝난 뒤에 생긴 결과도 남겨 보세요"}
       </p>
@@ -45,7 +45,7 @@ function AddRecordPrompt({ status, onAdd }) {
 }
 
 // 기록 하나(11/13 디자인): 왼쪽 상장 스티커와 점선, 흰 카드에 회색 손그림 테두리.
-// 기록 내용은 사용자가 남긴 글이라 Pretendard(font-input)다.
+// 저장된 일반 기록 내용은 NPS(font-sans), 수정 중인 입력값은 Pretendard다.
 function RecordItem({ record, order, isLast, onViewCard, onEdit, onDelete, onResult }) {
   const { date, weekday, tags, organizedByAi, attachments } = record;
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -73,7 +73,7 @@ function RecordItem({ record, order, isLast, onViewCard, onEdit, onDelete, onRes
           {RECORD_FIELDS.filter(({ key }) => record[key]).map(({ key, label }) => (
             <div key={key} className="col-span-2 grid grid-cols-subgrid">
               <dt className="text-label leading-[21.7px] font-bold whitespace-nowrap text-ink-500">{label}</dt>
-              <dd className="font-input whitespace-pre-wrap break-words text-body-sm leading-[21.7px] text-ink-strong">{record[key]}</dd>
+              <dd className="font-sans whitespace-pre-wrap break-words text-body-sm leading-[21.7px] text-ink-strong">{record[key]}</dd>
             </div>
           ))}
         </dl>

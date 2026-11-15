@@ -62,11 +62,11 @@ export default function HomeHero({ userName, week, weekStatus }) {
           </span>
         ))}
       </div>
-      <Link ref={ctaRef} href="/retrospective" data-active={["NOT_STARTED", "IN_PROGRESS"].includes(weekStatus)} className="home-hero-cta absolute flex h-[153px] w-[157px] items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+      <Link ref={ctaRef} href="/retrospective" data-active={["NOT_STARTED", "IN_PROGRESS"].includes(weekStatus)} className="home-hero-cta absolute flex h-[153px] w-[157px] items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:h-[167px] lg:w-[172px]">
         <span className="home-hero-cta-content relative flex size-full items-center justify-center">
-          <Image src="/images/home/cta-flower.png" alt="" fill sizes="157px" className="object-contain" />
-          <span className="relative flex items-center gap-1 pl-1.5 font-display text-[16px] leading-[25.6px] text-ink">
-            {cta}<Image src="/images/common/chevron-right-16.svg" alt="" width={16} height={16} />
+          <Image src="/images/home/cta-flower.png" alt="" fill sizes="(min-width: 1024px) 172px, 157px" className="object-contain" />
+          <span className="absolute inset-x-0 top-[44.3114%] flex items-center justify-center whitespace-nowrap font-display text-[14.208px] leading-[25.6px] tracking-[-0.15px] text-ink-strong">
+            {cta}<Image src="/images/home/cta-chevron-right.svg" alt="" width={16} height={16} className="shrink-0" />
           </span>
         </span>
       </Link>

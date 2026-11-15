@@ -38,7 +38,7 @@ export default function AttachmentChip({ as: Tag = "li", kind, name, prefix, sta
       {showKind && <Badge tone={tone} size="xs">{label}</Badge>}
       {prefix && <Badge tone="plain" size="xs" className="text-ink-subtle!">{prefix}</Badge>}
       {/* 긴 이름은 데스크톱에서 말줄임하고, 좁은 화면에서는 줄을 바꿔 모두 보여 준다. */}
-      <span className="min-w-0 truncate max-sm:overflow-visible max-sm:break-all max-sm:whitespace-normal" title={name}>
+      <span className="min-w-0 truncate font-sans max-sm:overflow-visible max-sm:break-all max-sm:whitespace-normal" title={name}>
         {name}
       </span>
       {status}

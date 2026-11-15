@@ -10,7 +10,7 @@ import { recordHref } from "@/lib/myRecordNavigation";
 import { SOURCE_MARKS, answerText, cardSourceLabel, countBlanks, countCharacters, showsSourceMark } from "./matchingAnswer";
 import { aiWaitingMessage } from "@/components/ui/AiWaitingNotice";
 
-const NOTICE_CLASS = "rounded-xl bg-tint-yellow px-3 py-2.5 text-label text-tint-yellow-ink";
+const NOTICE_CLASS = "rounded-xl bg-tint-yellow px-3 py-2.5 font-sans text-label text-tint-yellow-ink";
 
 // 문항이 묻지만 사자록에 카드가 없는 역량(M-13)
 function MissingCompetencies({ competencies }) {
@@ -68,9 +68,9 @@ function AnswerDraft({ question, answer, edit, cardViews, companyLabel, onEdit, 
   return (
     <>
       {editing ? (
-        <textarea rows={9} aria-label={`문항 ${question.seq} 초안`} value={text} onChange={(event) => onEdit(event.target.value)} autoFocus className="h-[297px] w-full resize-none rounded-2xl border border-transparent bg-canvas px-5 py-[18px] text-[16px] leading-[1.8] focus-visible:outline-2 focus-visible:outline-ink" />
+        <textarea rows={9} aria-label={`문항 ${question.seq} 초안`} value={text} onChange={(event) => onEdit(event.target.value)} autoFocus className="font-input h-[297px] w-full resize-none rounded-2xl border border-transparent bg-canvas px-5 py-[18px] text-[16px] leading-[1.8] focus-visible:outline-2 focus-visible:outline-ink" />
       ) : (
-        <div className="rounded-[20px] bg-tint-yellow px-4 py-5 text-[16px] leading-[1.95] whitespace-pre-wrap break-words sm:px-[22px]">
+        <div className="font-sans rounded-[20px] bg-tint-yellow px-4 py-5 text-[16px] leading-[1.95] whitespace-pre-wrap break-words sm:px-[22px]">
           {edit ? text : <DraftSegments segments={answer.segments} />}
         </div>
       )}
@@ -140,7 +140,7 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
     // 문항에 맞는 카드가 없으면 초안을 만들지 않고 안내한다(M-08). 모양은 Figma 11-d(11/15)를 따른다.
     body = (
       <>
-        <p className="flex gap-2 rounded-2xl bg-[#fff0e8] px-[18px] py-4 text-body leading-[23px] text-[#b03a00]"><span aria-hidden="true">⚑</span>이 문항에 맞는 카드가 아직 없어요.</p>
+        <p className="flex gap-2 rounded-2xl bg-[#fff0e8] px-[18px] py-4 font-sans text-body leading-[23px] text-[#b03a00]"><span aria-hidden="true">⚑</span>이 문항에 맞는 카드가 아직 없어요.</p>
         <MissingCompetencies competencies={draft.answer.missingCompetencies} />
       </>
     );
@@ -153,7 +153,7 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
       <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />
       <div className="flex items-start gap-3">
         <Badge tone="yellow" size="question" className="mt-0.5 bg-yellow-400! text-ink-950!">Q{question.seq}</Badge>
-        <h3 id={headingId} className="text-[18px] leading-[1.5]">{question.content}</h3>
+        <h3 id={headingId} className="font-display text-[18px] leading-[1.5]">{question.content}</h3>
       </div>
       {body}
     </Card>

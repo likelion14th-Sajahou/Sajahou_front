@@ -17,7 +17,7 @@ export default function PartField({ id, value, onChange, error }) {
         {PARTS.map((part) => (
           <label key={part} className="cursor-pointer">
             <input type="radio" name="part" value={part} checked={value === part} onChange={onChange} className="peer sr-only" />
-            <span className="flex items-center justify-center rounded-[14px] border border-line bg-white px-2 py-2.5 text-center text-body-sm leading-5 whitespace-nowrap text-ink peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink">
+            <span className="font-display flex items-center justify-center rounded-[14px] border border-line bg-white px-2 py-2.5 text-center text-body-sm leading-5 whitespace-nowrap text-ink peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink">
               {AUTH_PART_LABELS[part]}
             </span>
           </label>
