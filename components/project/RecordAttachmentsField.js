@@ -110,7 +110,7 @@ export default function RecordAttachmentsField({ label, attachments, category, o
     <fieldset disabled={busy} className="flex min-w-0 flex-col gap-2.5" aria-busy={busy}>
       {label && <legend className="mb-2.5">{label}</legend>}
       {category === undefined && (
-        // 공용 Chip의 drawn 옵션을 사용한다. 미선택 안내는 같은 손그림 선만 노랑으로 강조한다.
+        // 공용 Chip의 노란 손그림 테두리를 사용하고, 선택하지 않고 업로드하면 칩을 흔들어 안내한다.
         <div ref={categoryGroupRef} role="group" aria-label="새 첨부 자료 종류" className="flex flex-wrap gap-1.5">
           {needsCategory && <svg aria-hidden="true" width="0" height="0" className="pointer-events-none absolute">
             <defs><filter id={categoryBorderId} colorInterpolationFilters="sRGB">

@@ -18,18 +18,18 @@ export default function Chip({
   children,
   ...rest
 }) {
-  // 기본 선택색은 진한 바탕, 자료 종류는 노란 계열을 사용한다.
-  const yellowSelected = selected && selectedTone === "yellow";
-  const selectedClasses = yellowSelected ? "bg-yellow-100 text-yellow-700" : "bg-ink text-white";
+  // 자료 종류는 항상 노란 테두리를 유지하고, 선택한 칩에만 연노랑 배경을 채운다.
+  const yellowTone = selectedTone === "yellow";
+  const selectedClasses = yellowTone ? "bg-yellow-100 text-yellow-700" : "bg-ink text-white";
   const stateClasses = drawn
     ? `relative font-display ${selected ? selectedClasses : "bg-white text-ink"}`
-    : `border ${selected ? `${yellowSelected ? "border-yellow-400" : "border-ink"} ${selectedClasses}` : "border-line bg-white text-ink"}`;
+    : `border ${yellowTone ? "border-yellow-400" : selected ? "border-ink" : "border-line"} ${selected ? selectedClasses : "bg-white text-ink"}`;
 
   const classes = `inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-full text-center ${stateClasses} ${SIZE_CLASSES[size]} ${className}`;
   const content = (
     <>
       {children}
-      {drawn && <DrawnBorder variant={selected ? "chip-ink" : "chip-line"} color={yellowSelected ? "var(--color-yellow-400)" : undefined} />}
+      {drawn && <DrawnBorder variant={selected ? "chip-ink" : "chip-line"} color={yellowTone ? "var(--color-yellow-400)" : undefined} />}
     </>
   );
 
