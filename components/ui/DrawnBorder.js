@@ -19,7 +19,7 @@ const BORDERS = {
   "deadline-card": { folder: "retrospective", outset: 4, slice: 32 },
   bubble: { folder: "retrospective", outset: 4, slice: 28 },
   // 둥근 버튼(Button의 soft·inverse·ink·ink-outline·inverse-muted·cta). -sm은 높이 38px(size="sm")용이다.
-  "pill-cream": { folder: "retrospective", outset: 4, slice: 26 },
+  "pill-cream": { folder: "retrospective", outset: 4, slice: 26, pill: true },
   "pill-white": { folder: "retrospective", outset: 4, slice: 26 },
   "pill-ink": { folder: "retrospective", outset: 4, slice: 26 },
   "pill-ink-sm": { folder: "retrospective", outset: 4, slice: 23 },
@@ -46,7 +46,7 @@ const BORDERS = {
 export default function DrawnBorder({ variant, repeat = "stretch", color }) {
   const colorFilterId = useId();
   const { folder, outset, slice, pill, asset = variant } = BORDERS[variant];
-  // 칩의 모서리는 실제 높이와 함께 커져야 배경의 rounded-full과 곡률이 맞는다.
+  // 칩과 연노랑 버튼의 모서리는 실제 높이를 따라야 rounded-full 배경과 곡률이 맞는다.
   const borderWidth = pill ? `calc((var(--drawn-border-height, 32px) + ${outset * 2}px) / 2 - 1px)` : slice;
 
   return (
