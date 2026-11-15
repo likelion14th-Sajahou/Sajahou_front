@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import DrawnBorder from "@/components/ui/DrawnBorder";
 import { recordHref } from "@/lib/myRecordNavigation";
 
 // 아이콘은 탭이 켜졌을 때(색)와 꺼졌을 때(회색) 두 가지다(11/15 디자인).
@@ -21,9 +22,11 @@ export default function MyRecordTabs({ activeTab, storyCardCount, searchParams }
             scroll={false}
             aria-current={isActive ? "page" : undefined}
             className={`relative flex h-[50px] items-center gap-2 rounded-full py-1.5 pr-[22px] pl-3 text-[17px] leading-[27.2px] ${
-              isActive ? "border-2 border-ink bg-white text-ink-strong shadow-[0_3px_0_#e4e1da]" : "border-2 border-transparent text-ink-300 hover:text-ink-500"
+              isActive ? "bg-white text-ink-strong shadow-[0_3px_0_#e4e1da]" : "text-ink-300 hover:text-ink-500"
             }`}
           >
+            {/* 선택된 탭은 나의 사자록 카드와 같은 2px 물결 선이다(이슈 #65). */}
+            {isActive && <DrawnBorder color="var(--color-ink)" width={2} />}
             <Image src={`/images/my-record/${icon}-${isActive ? "on" : "off"}.png`} alt="" width={34} height={34} />
             {label}
             {id === "cards" && (
