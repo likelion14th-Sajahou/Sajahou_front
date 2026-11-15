@@ -6,7 +6,7 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 // Secondary는 회색 바탕이라 흰 카드 안에 둔다(회색 페이지 바탕 위에서는 잘 안 보인다).
 // soft·inverse는 진한 카드(회고 시작 카드) 위에 두는 버튼이다. soft: 연노랑 바탕, inverse: 흰 굵은 테두리.
 // ink·ink-outline은 흰 카드(휴회 카드) 위의 진한 버튼과 진한 테두리 버튼이다.
-// inverse-muted·cta는 진한 카드(회고 자료 카드) 하단의 '나중에 이어쓰기'(회색 선)와 'AI 질문 받기'(노랑)다.
+// inverse-muted·cta는 진한 카드(회고 자료 카드) 하단의 '임시 저장'(회색 선)와 'AI 질문 받기'(노랑)다.
 // cta-ink는 밝은 카드 위의 노란 버튼에 진한 테두리를 두른 것이다.
 // 이 일곱 가지는 Figma에서 테두리가 손그림처럼 울퉁불퉁해서 DrawnBorder로 그린다(VARIANT_BORDERS).
 const VARIANT_CLASSES = {
