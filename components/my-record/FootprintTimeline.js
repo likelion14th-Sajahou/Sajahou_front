@@ -74,7 +74,8 @@ export default function FootprintTimeline({
       <DrawnBorder variant="thin-outline" repeat="round" color="var(--color-ink)" />
       <div
         ref={scrollerRef}
-        className="relative w-full overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        // 선택 테두리(38px)가 주차 칸(최소 36px)보다 넓어 양 끝 주차에서 잘리지 않도록, 스크롤 영역 안쪽에 좌우 여백을 두고 그만큼 밖으로 넓힌다.
+        className="relative -mx-1 w-[calc(100%+8px)] overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         <div
           className={`grid gap-x-1 gap-y-2.5 ${
