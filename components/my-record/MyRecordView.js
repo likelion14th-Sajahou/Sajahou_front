@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { useMockData } from "@/components/layout/MockDataProvider";
 import { getFootprints, getStoryCards } from "@/lib/myRecordApi";
-import { footprintView, footprintSections } from "@/lib/myRecordViewModel";
+import { footprintView } from "@/lib/myRecordViewModel";
 import { cardView } from "@/lib/projectViewModel";
 import { readRecordLocation, recordHref } from "@/lib/myRecordNavigation";
 import FootprintsPanel from "./FootprintsPanel";
@@ -55,7 +55,7 @@ export default function MyRecordView() {
       </p>
     )}
     {location.tab === "footprints" && (footprints.data ? (
-      <FootprintsPanel sections={footprintSections} weeks={footprints.data.weeks}
+      <FootprintsPanel sections={footprints.data.sections} weeks={footprints.data.weeks}
         selectedWeek={location.week ?? footprints.data.currentWeek} sectionId={location.section}
         onChange={navigate} searchParams={params} />
     ) : <RecordRequestStatus resource={footprints} />)}
