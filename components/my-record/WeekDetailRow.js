@@ -7,12 +7,16 @@ const ROW_CLASSES =
 const ACTIVE_ROW_CLASSES = `${ROW_CLASSES} border-2 border-transparent bg-white`;
 const MUTED_ROW_CLASSES = `${ROW_CLASSES} border-[1.5px] border-transparent bg-[#fafaf8]`;
 
-function getRecapLabel({ cardCount }) {
-  return cardCount > 0 ? `회고 완료 · 카드 ${cardCount}장` : "회고 완료";
+// 회고 상태 · 프로젝트 완료(stickers) · 카드 수를 한 줄로 잇는다. 발표 주에는 회고와 프로젝트 완료가 함께 있을 수 있다.
+// 이번 주는 '회고 쓰기' 버튼이 상태를 대신한다.
+function getStateLabel({ status, cardCount, stickers }) {
+  const recap = { done: "회고 완료", upcoming: "예정", none: "기록 없음" }[status];
+  return [recap, stickers.length > 0 && "프로젝트 완료", status === "done" && cardCount > 0 && `카드 ${cardCount}장`]
+    .filter(Boolean).join(" · ");
 }
 
-function WeekName({ week, completed = false, current = false }) {
-  return <span className={`text-label ${completed || current ? "text-accent-strong" : ""}`}>{week}주차</span>;
+function WeekName({ week }) {
+  return <span className="rounded-full bg-yellow-200 px-2.5 py-0.5 text-label leading-[20.8px] text-yellow-700">{week}주차</span>;
 }
 
 function WeekTitle({ title, completed = false }) {
@@ -34,24 +38,21 @@ export default function WeekDetailRow({ week, searchParams }) {
   const href = current ? "/retrospective" : hasCards ? weekDestination(week, searchParams) : null;
   const Container = href ? Link : "div";
   const textColorClass = current ? "text-ink-strong" : completed ? "text-ink" : "text-[#9a958c]";
-  const stateLabel = upcoming ? "예정" : completed ? getRecapLabel(week) : "기록 없음";
-  // 회고 상태와 프로젝트 완료(stickers)는 따로 보여 준다. 발표 주에는 둘 다 있을 수 있다.
-  const projectDone = week.stickers.length > 0;
+  const stateLabel = getStateLabel(week);
   const cardLabel = cardCount === 1 ? "카드 보기 →" : `카드 ${cardCount}장 보기 →`;
 
   return (
     <Container {...(href ? { href } : {})} className={`${href ? ACTIVE_ROW_CLASSES : MUTED_ROW_CLASSES} ${textColorClass}`}>
       <DrawnBorder variant="thin-outline" repeat="round" color={completed || current ? "var(--color-ink)" : "var(--color-line)"} />
-      <WeekName week={week.week} completed={completed} current={current} />
+      <WeekName week={week.week} />
       {!upcoming && <WeekTitle title={title} completed={completed} />}
-      {!current && <WeekState completed={completed}>{stateLabel}</WeekState>}
-      {projectDone && <span className="rounded-full bg-tint-yellow px-2.5 py-0.5 text-label leading-[19.5px] text-tint-yellow-ink">프로젝트 완료</span>}
+      {stateLabel && <WeekState completed={completed}>{stateLabel}</WeekState>}
       {current ? (
         <span className="ml-auto flex h-[38px] items-center rounded-full bg-shape-yellow px-[18px] text-body-sm">
           회고 쓰기 →
         </span>
       ) : hasCards ? (
-        <span className="ml-auto text-body-sm text-accent">{cardLabel}</span>
+        <span className="ml-auto text-body-sm text-yellow-700">{cardLabel}</span>
       ) : null}
     </Container>
   );
