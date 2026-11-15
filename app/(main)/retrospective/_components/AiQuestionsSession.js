@@ -143,10 +143,10 @@ export default function AiQuestionsSession({ initialQuestions, attachments = [],
         <QuestionProgressList questions={questions} currentIndex={isComplete ? null : index} />
         <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-4">
           <TextLink href={getStepHref("materials")}>← 자료 고치기</TextLink>
-          <TextLink onClick={saveLater} disabled={isSaving || isAnswering} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "임시 저장"}</TextLink>
+          <TextLink onClick={saveLater} disabled={isSaving || isAnswering} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "저장"}</TextLink>
           <SavedTime label={savedLabel} />
         </div>
-        <p className="pt-2 text-caption text-ink-subtle">제출 전 답변은 임시 저장을 누르면 이 브라우저에만 저장돼요. 브라우저 데이터를 삭제하면 사라져요.</p>
+        <p className="pt-2 text-caption text-ink-subtle">제출 전 답변은 저장을 누르면 이 브라우저에만 저장돼요. 브라우저 데이터를 삭제하면 사라져요.</p>
       </RetroSideCard>
     </div>
   );
