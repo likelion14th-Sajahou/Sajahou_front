@@ -57,9 +57,9 @@ function Questions() {
     const options = { signal: controller.signal, request: authenticatedRequest };
     getRetrospective(retrospectiveId, options)
       .then(async (detail) => {
-        if (detail.questions.length) return { questions: detail.questions, insufficient: false };
+        if (detail.questions.length) return { questions: detail.questions, attachments: detail.attachments, insufficient: false };
         const result = await requestQuestions(retrospectiveId, "AUTO", options);
-        return { questions: result.questions, insufficient: result.insufficientMaterial };
+        return { questions: result.questions, attachments: detail.attachments, insufficient: result.insufficientMaterial };
       })
       .then((result) => {
         if (controller.signal.aborted) return;
@@ -99,6 +99,7 @@ function Questions() {
     <AiQuestionsSession
       key={loaded.draftKey}
       initialQuestions={loaded.questions}
+      attachments={loaded.attachments}
       initialDrafts={loaded.drafts}
       draftKey={loaded.draftKey}
       draftError={loaded.draftError}

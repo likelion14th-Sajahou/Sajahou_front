@@ -3,7 +3,7 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 import { weekDestination } from "@/lib/myRecordNavigation";
 
 const ROW_CLASSES =
-  "relative flex w-full flex-wrap items-center gap-x-3.5 gap-y-2 rounded-[20px] px-[22px] py-[18px]";
+  "relative flex min-h-[78px] w-full flex-wrap items-center gap-x-3.5 gap-y-2 rounded-[20px] px-[22px] py-[18px]";
 const ACTIVE_ROW_CLASSES = `${ROW_CLASSES} border-2 border-transparent bg-white`;
 const MUTED_ROW_CLASSES = `${ROW_CLASSES} border-[1.5px] border-transparent bg-[#fafaf8]`;
 
@@ -35,7 +35,7 @@ export default function WeekDetailRow({ week, searchParams }) {
   const upcoming = status === "upcoming";
   const hasCards = completed && cardCount > 0;
   // 카드 1장은 상세, 여러 장은 해당 주차 목록으로 이동하는 기존 규칙을 사용한다.
-  const href = current ? "/retrospective" : hasCards ? weekDestination(week, searchParams) : null;
+  const href = weekDestination(week, searchParams);
   const Container = href ? Link : "div";
   const textColorClass = current ? "text-ink-strong" : completed ? "text-ink" : "text-[#9a958c]";
   const stateLabel = getStateLabel(week);

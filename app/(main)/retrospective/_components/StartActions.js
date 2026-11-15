@@ -17,13 +17,14 @@ export default function StartActions({ isAssignment = false }) {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
   const { setWeekStatus } = useMockData();
-  const { week, session, retrospective, getStepHref, refreshCurrent, showToast } = useRetrospectivePreview();
+  const { week, session, retrospective, getStepHref, refreshCurrent, applyStarted, showToast } = useRetrospectivePreview();
   const [pending, setPending] = useState(null);
   const [error, setError] = useState("");
   const [isResetOpen, setIsResetOpen] = useState(false);
   const [isNavigating, startNavigation] = useTransition();
   const inFlight = useRef(false);
   const isWriting = retrospective.state === "IN_PROGRESS";
+  const isCompleted = retrospective.state === "COMPLETED";
 
   async function run(kind, request, fallback) {
     if (inFlight.current) return;
@@ -32,7 +33,8 @@ export default function StartActions({ isAssignment = false }) {
     setError("");
     try {
       const result = await request({ request: authenticatedRequest });
-      await refreshCurrent();
+      if (kind === "start") applyStarted(result);
+      else await refreshCurrent();
       // 홈 화면은 아직 목업 상태를 보므로 세션 회고면 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
       if (!isAssignment) setWeekStatus("writing");
       setIsResetOpen(false);
@@ -52,6 +54,7 @@ export default function StartActions({ isAssignment = false }) {
   // 휴회(R-06). 시작 전이면 휴회로 회고를 만들고(API 12), 시작한 뒤면 휴회로 표시한다(API 15).
   // 상태가 RESTED로 바뀌면 시작 화면 대신 휴회 화면이 보인다.
   async function markRested() {
+    if (isCompleted) return;
     if (inFlight.current) return;
     inFlight.current = true;
     setPending("rest");
@@ -73,6 +76,7 @@ export default function StartActions({ isAssignment = false }) {
 
   // 처음부터는 2단계 자료부터 빈 상태로 다시 쓴다(API 16 응답의 currentStep).
   function reset() {
+    if (!isWriting || isCompleted) return;
     run("reset", (options) => resetRetrospective(retrospective.id, options), "작성한 내용을 지우지 못했어요. 잠시 후 다시 시도해 주세요.");
   }
 
@@ -83,14 +87,14 @@ export default function StartActions({ isAssignment = false }) {
         <Button variant="soft" disabled aria-busy="true">시작하는 중…</Button>
       ) : isWriting ? (
         <div className="flex flex-wrap justify-center gap-3">
-          <Button
+          {!isCompleted && <Button
             variant="inverse"
             className="min-w-0"
             disabled={pending !== null}
             onClick={() => { setError(""); setIsResetOpen(true); }}
           >
             처음부터
-          </Button>
+          </Button>}
           <Button
             variant="soft"
             className="min-w-0"
@@ -105,14 +109,14 @@ export default function StartActions({ isAssignment = false }) {
           {pending === "start" ? "시작하는 중…" : "시작하기 →"}
         </Button>
       )}
-      {!isAssignment && (
+      {!isAssignment && !isCompleted && (
         <TextLink variant="inverse" onClick={markRested} disabled={pending !== null || isNavigating} aria-busy={pending === "rest"}>
           {pending === "rest" ? "휴회로 표시하는 중…" : "이번 주는 휴회했어요"}
         </TextLink>
       )}
       {error && !isResetOpen && <p role="alert" className="text-body-sm text-tint-red">{error}</p>}
       <ResetRetrospectiveModal
-        open={isResetOpen}
+        open={isWriting && !isCompleted && isResetOpen}
         isResetting={pending === "reset"}
         error={isResetOpen ? error : ""}
         onCancel={() => setIsResetOpen(false)}

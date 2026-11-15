@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { formatDeadline } from "@/lib/formatDate";
-import { loadRetrospectivePreview } from "@/lib/retrospectiveViewModel";
+import { applyStartedRetrospective, loadRetrospectivePreview } from "@/lib/retrospectiveViewModel";
 
 const RetrospectivePreviewContext = createContext(null);
 
@@ -47,11 +47,15 @@ export default function RetrospectivePreview({ children }) {
     return () => controller.abort();
   }, [authenticatedRequest, user.part, reloadKey]);
 
-  // 시작·처음부터처럼 상태를 바꾼 뒤에 부른다. 새 상태를 받은 다음 화면을 옮겨야 다음 단계가 옛 값을 보지 않는다.
+  // 처음부터·휴회처럼 상태를 바꾼 뒤에 부른다.
   async function refreshCurrent() {
     const result = await loadRetrospectivePreview({ request: authenticatedRequest });
     setLoadState({ current: result, error: "" });
     return result;
+  }
+
+  function applyStarted(result) {
+    setLoadState((previous) => ({ ...previous, current: applyStartedRetrospective(previous.current, result) }));
   }
 
   // 임시 저장(API 14) 응답으로 단계·저장 시각을 바로 반영한다. 시작 화면의 '이어 쓰기'가 이 단계로 간다.
@@ -85,6 +89,7 @@ export default function RetrospectivePreview({ children }) {
       assignment: formatDeadline(current.week.assignmentDeadline),
     },
     refreshCurrent,
+    applyStarted,
     applySaved,
     showToast,
   };

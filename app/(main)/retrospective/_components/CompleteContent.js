@@ -22,26 +22,32 @@ export default function CompleteContent() {
   const router = useRouter();
   const { authenticatedRequest, isDemo } = useAuth();
   const { user, setWeekStatus } = useMockData();
-  const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent } = useRetrospectivePreview();
+  const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent, getStepHref } = useRetrospectivePreview();
   const [card, setCard] = useState(null);
   const [notice, setNotice] = useState("");
   const { toast, showToast, hideToast } = useToast();
   const retrospectiveId = retrospective?.id;
+  const startHref = getStepHref();
+  const isComplete = retrospective?.state === "COMPLETED";
   const canRestartDemo = isDemo && getAuthMode() === "mock";
   // 세션 회고를 끝냈고 과제 회고가 아직 남았을 때만 보여 준다.
   const pendingAssignment = !isAssignment && assignment && assignment.state !== "COMPLETED" ? assignment : null;
 
-  // 저장한 회고의 카드(회고록)를 회고 상세(API 13)에서 가져온다. 끝낸 과제 회고도 이번 주 회고 조회(API 11)에 id가 남는다.
+  // 완료 화면에서만 카드(회고록)를 조회한다. 삭제로 작성 전 상태가 되면 기존 시작 화면으로 돌아간다.
   useEffect(() => {
+    if (!isComplete) {
+      router.replace(startHref);
+      return;
+    }
     if (!retrospectiveId) return;
     const controller = new AbortController();
     getRetrospective(retrospectiveId, { signal: controller.signal, request: authenticatedRequest })
-      .then(({ card: saved }) => setCard(saved))
+      .then(({ card: saved }) => { if (!controller.signal.aborted) setCard(saved); })
       .catch((failure) => {
         if (!controller.signal.aborted && failure.status !== 401) setNotice("저장한 회고록을 불러오지 못했어요. 나의 사자록에서 카드를 확인해 주세요.");
       });
     return () => controller.abort();
-  }, [retrospectiveId, authenticatedRequest]);
+  }, [retrospectiveId, authenticatedRequest, isComplete, router, startHref]);
 
   async function copyRetrospective() {
     const copied = await copyText(card.fullMarkdown);
@@ -58,6 +64,8 @@ export default function CompleteContent() {
     await refreshCurrent();
     router.push("/retrospective");
   }
+
+  if (!isComplete) return <p role="status" className="mt-6 text-body-sm text-ink-muted">회고 상태를 불러오는 중이에요.</p>;
 
   // 완료 카드(11/13 디자인): 620px 흰 카드, 진한 손그림 테두리, 반짝이는 구름 캐릭터.
   return (

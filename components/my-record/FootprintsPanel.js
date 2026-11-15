@@ -11,7 +11,7 @@ export default function FootprintsPanel({ sections, weeks, selectedWeek, section
   const selectedSection = sections.find(({ id }) => id === sectionId);
   const visibleWeeks = selectedSection
     ? weeks.filter(
-        ({ week }) => week >= selectedSection.startWeek && week <= selectedSection.endWeek,
+        ({ phase }) => phase === selectedSection.phase,
       )
     : weeks;
   const chips = [{ id: ALL_SECTIONS, label: "전체" }, ...sections];
