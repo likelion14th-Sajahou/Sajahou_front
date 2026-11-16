@@ -282,14 +282,23 @@ body {
   }
   .home-hero-copy p { font-size: clamp(14px, calc(var(--home-hero-height) * 0.05), 24px); }
   .home-hero-copy h1 { font-size: clamp(28px, calc(var(--home-hero-height) * 0.12), 56px); }
+  /* 구름 크기는 화면 너비의 35.8333%(Figma 1440px에서 516px)로 바뀌고, 최대 600px이다.
+     창 높이가 낮으면 아래가 잘리지 않게 히어로 높이의 0.72배까지만 커진다.
+     눈에 보이는 구름의 오른쪽 끝~화면 가운데(제목) 간격은 Figma대로 항상 163.65px로 두고,
+     화면 너비가 바뀌면 왼쪽 여백(화면 끝~구름)이 나머지를 맡는다.
+     구름 그림(1425 × 1083)은 오른쪽에 289px(그림 너비의 20.2807%) 투명한 여백이 있고, 여백도 그림과 함께 줄어든다.
+     그래서 right로 상자 오른쪽 끝을 그 간격 자리에 두고, translate로 여백만큼 상자를 오른쪽으로 밀어 보이는 구름 끝을 맞춘다.
+     Figma 1440 × 839: 구름 상자(516 × 392)는 x 145, 보이는 구름 오른쪽 끝은 556.35 → 가운데(720)까지 163.65px. */
   .home-hero-character {
     position: absolute;
     width: 35.8333%;
     height: auto;
     max-width: min(600px, calc(var(--home-hero-height) * 0.72));
-    left: 10.0694%;
+    left: auto;
+    right: calc(50% + 163.65px);
     top: 41.5971%;
     bottom: auto;
+    translate: 20.2807% 0;
   }
   .home-hero-cta {
     position: absolute;
