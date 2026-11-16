@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import Checkbox from "@/components/ui/Checkbox";
 import MarkedSection from "@/components/ui/MarkedSection";
 import ProfileFields from "@/components/profile/ProfileFields";
+import useProfileForm from "@/components/profile/useProfileForm";
 import TextLink from "@/components/ui/TextLink";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { signupWithGoogle } from "@/lib/auth";
@@ -20,54 +21,22 @@ function validateSignup(values) {
 
 export default function SignupForm() {
   const { signup, cancelSignup, markSignupSubmitted, completeLogin } = useAuth();
-  const formRef = useRef(null);
-  const focusErrors = useRef(false);
   const requestInFlight = useRef(false);
   const controllerRef = useRef(null);
   const [submitting, setSubmitting] = useState(false);
-  const [requestError, setRequestError] = useState("");
-  const [errors, setErrors] = useState({});
-  const [values, setValues] = useState(() => ({
+  const { formRef, values, errors, requestError, setRequestError, handleChange, showErrors } = useProfileForm(() => ({
     ...createProfileValues({ name: signup?.suggestedName }),
     part: "", privacyAgreed: false,
-  }));
+  }), validateSignup);
 
   useEffect(() => () => controllerRef.current?.abort(), []);
-
-  useEffect(() => {
-    if (!focusErrors.current) return;
-    focusErrors.current = false;
-    const firstInvalid = Array.from(formRef.current?.elements ?? []).find((element) => {
-      const errorName = element.name === "otherDepartment" ? "department" : element.name;
-      return errors[errorName] && !(element.name === "department" && values.department === "other");
-    });
-    firstInvalid?.focus();
-  }, [errors, values.department]);
-
-  function handleChange(event) {
-    const { name, value, type, checked } = event.target;
-    const nextValues = { ...values, [name]: type === "checkbox" ? checked : name === "cohort" ? Number(value) : value };
-    setValues(nextValues);
-    setRequestError("");
-    const errorName = name === "otherDepartment" ? "department" : name;
-    if (errors[errorName]) {
-      const nextError = validateSignup(nextValues)[errorName];
-      setErrors((previous) => {
-        const nextErrors = { ...previous };
-        if (nextError) nextErrors[errorName] = nextError;
-        else delete nextErrors[errorName];
-        return nextErrors;
-      });
-    }
-  }
 
   async function handleSubmit(event) {
     event.preventDefault();
     if (requestInFlight.current || !signup) return;
     if (!signup.submitted) {
       const nextErrors = validateSignup(values);
-      focusErrors.current = true;
-      setErrors(nextErrors);
+      showErrors(nextErrors);
       if (Object.keys(nextErrors).length) return;
       if (signup.expiresAt <= Date.now()) {
         cancelSignup("가입 시간이 만료되었어요. 다시 로그인해 주세요.");
@@ -103,8 +72,7 @@ export default function SignupForm() {
         for (const name of ["name", "studentNo", "department", "cohort", "part", "privacyAgreed"]) {
           if (typeof failure.fields?.[name] === "string") fieldErrors[name] = failure.fields[name];
         }
-        focusErrors.current = true;
-        setErrors(fieldErrors);
+        showErrors(fieldErrors);
         setRequestError(failure.message);
       } else {
         setRequestError(signupAccepted ? "가입은 완료됐어요. 로그인 상태를 다시 확인해 주세요."

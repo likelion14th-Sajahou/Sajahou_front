@@ -9,6 +9,7 @@ import TextLink from "@/components/ui/TextLink";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { createProfileValues, toProfilePayload, validateProfile } from "@/lib/profile";
 import GoogleAccountInfo from "./GoogleAccountInfo";
+import useProfileForm from "./useProfileForm";
 import ProfileFields from "./ProfileFields";
 import WithdrawAccountModal from "./WithdrawAccountModal";
 
@@ -41,11 +42,7 @@ export default function ProfileModal({ onClose, onSaved }) {
 function ProfileForm({ user, onClose, onSaved }) {
   const { saveProfile, isSavingProfile, isAccountBusy, logout, isLoggingOut, logoutError } = useAuth();
   const [withdrawOpen, setWithdrawOpen] = useState(false);
-  const [values, setValues] = useState(() => createProfileValues(user));
-  const [errors, setErrors] = useState({});
-  const [requestError, setRequestError] = useState("");
-  const formRef = useRef(null);
-  const focusErrors = useRef(false);
+  const { formRef, values, errors, requestError, setRequestError, handleChange, showErrors } = useProfileForm(() => createProfileValues(user), validateProfile);
   const requestInFlight = useRef(false);
   const controllerRef = useRef(null);
   const withdrawButtonRef = useRef(null);
@@ -61,39 +58,11 @@ function ProfileForm({ user, onClose, onSaved }) {
     wasWithdrawOpen.current = withdrawOpen;
   }, [withdrawOpen]);
 
-  useEffect(() => {
-    if (!focusErrors.current) return;
-    focusErrors.current = false;
-    const firstInvalid = Array.from(formRef.current?.elements ?? []).find((element) => {
-      const errorName = element.name === "otherDepartment" ? "department" : element.name;
-      return errors[errorName] && !(element.name === "department" && values.department === "other");
-    });
-    firstInvalid?.focus();
-  }, [errors, values.department]);
-
-  function handleChange(event) {
-    const { name, value } = event.target;
-    const nextValues = { ...values, [name]: name === "cohort" ? Number(value) : value };
-    setValues(nextValues);
-    setRequestError("");
-    const errorName = name === "otherDepartment" ? "department" : name;
-    if (errors[errorName]) {
-      const nextError = validateProfile(nextValues)[errorName];
-      setErrors((previous) => {
-        const next = { ...previous };
-        if (nextError) next[errorName] = nextError;
-        else delete next[errorName];
-        return next;
-      });
-    }
-  }
-
   async function handleSubmit(event) {
     event.preventDefault();
     if (requestInFlight.current || isAccountBusy) return;
     const nextErrors = validateProfile(values);
-    focusErrors.current = true;
-    setErrors(nextErrors);
+    showErrors(nextErrors);
     setRequestError("");
     if (Object.keys(nextErrors).length || !hasChanges) return;
 
@@ -112,8 +81,7 @@ function ProfileForm({ user, onClose, onSaved }) {
         for (const field of ["name", "studentNo", "department", "cohort"]) {
           if (typeof failure.fields?.[field] === "string") fieldErrors[field] = failure.fields[field];
         }
-        focusErrors.current = true;
-        setErrors(fieldErrors);
+        showErrors(fieldErrors);
         setRequestError(failure.message);
       } else {
         setRequestError(failure.kind === "timeout"
