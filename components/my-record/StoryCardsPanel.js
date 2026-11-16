@@ -9,7 +9,7 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 import SelectField from "@/components/ui/SelectField";
 import StoryCardList from "./StoryCardList";
 import StoryCardSearch from "./StoryCardSearch";
-import StoryCardDetailLoader from "./StoryCardDetailLoader";
+import StoryCardDetailLoader from "@/components/story-card/StoryCardDetailLoader";
 import { getStoryCards } from "@/lib/myRecordApi";
 import { cardView } from "@/lib/projectViewModel";
 import useApiResource from "@/components/ui/useApiResource";

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { COPY_FAILED_MESSAGE, PORTFOLIO_TEXT } from "@/components/my-record/storyCardTypes";
+import { PORTFOLIO_TEXT } from "@/lib/portfolioViewModel";
 import Button from "@/components/ui/Button";
 import CardTitle from "@/components/ui/CardTitle";
 import DrawnBorder from "@/components/ui/DrawnBorder";
@@ -10,8 +10,8 @@ import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import DeleteConfirm from "./DeleteConfirm";
-import { copyText } from "@/lib/clipboard";
-import useProjectAction from "./useProjectAction";
+import { COPY_FAILED_MESSAGE, copyText } from "@/lib/clipboard";
+import useAsyncAction from "@/components/ui/useAsyncAction";
 
 const FINISH_STEPS = ["넣을 기록 고르기", "AI가 빈 곳을 찾아 질문·요청", "포트폴리오 완성"];
 
@@ -32,7 +32,7 @@ function SideCard({ dark = false, title, label, description, children }) {
 // '프로젝트 삭제'(H-25, 12-g). 진행 중은 안내 카드 안, 완료는 기록 목록 아래에 둔다.
 export function DeleteProject({ recordCount, cardCount, onDelete }) {
   const [isConfirming, setIsConfirming] = useState(false);
-  const { run, busy, error } = useProjectAction();
+  const { run, busy, error } = useAsyncAction();
 
   return (
     <fieldset disabled={busy} className="flex min-w-0 flex-col items-center pt-4">

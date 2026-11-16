@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 // 저장 실패 시 입력을 유지하고, 이탈 시 늦은 응답이 화면에 반영되지 않게 한다.
 // toMessage로 실패 안내 문구를 바꿀 수 있다. 기본은 서버가 보낸 문구다. AI 요청은 getAiErrorMessage를 넘긴다.
-export default function useProjectAction(toMessage = (error) => error.message) {
+export default function useAsyncAction(toMessage = (error) => error.message) {
   const active = useRef(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { STORY_CARD_TYPES } from "@/components/my-record/storyCardTypes";
+import { STORY_CARD_TYPES } from "@/components/story-card/storyCardTypes";
 import Badge from "@/components/ui/Badge";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 import SectionHeader from "./SectionHeader";

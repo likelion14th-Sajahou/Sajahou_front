@@ -1,25 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { COPY_FAILED_MESSAGE, PORTFOLIO_TEXT } from "@/components/my-record/storyCardTypes";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
-import { copyText } from "@/lib/clipboard";
+import { COPY_FAILED_MESSAGE, copyText } from "@/lib/clipboard";
 import ActionFooter from "@/components/ui/ActionFooter";
 import CardTitle from "@/components/ui/CardTitle";
-import useProjectAction from "./useProjectAction";
+import useAsyncAction from "@/components/ui/useAsyncAction";
 import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
-import { PORTFOLIO_FIELD_LABELS } from "@/lib/portfolioViewModel";
+import { PORTFOLIO_FIELD_LABELS, PORTFOLIO_TEXT } from "@/lib/portfolioViewModel";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 
 // 3단계 포트폴리오 검토(H-18, 14). 카드는 만들지 않고(카드는 기록마다 이미 있다, H-22) Markdown만 저장한다.
 export default function PortfolioReview({ project, initialMarkdown, blanks = [], backLabel = "← 이전 질문으로", onBack, onSave }) {
   const isFirstPortfolio = project.status === "active";
   const [markdown, setMarkdown] = useState(initialMarkdown);
-  const { run, busy, error } = useProjectAction();
+  const { run, busy, error } = useAsyncAction();
   const { toast, showToast, hideToast } = useToast();
 
   async function copyMarkdown() {

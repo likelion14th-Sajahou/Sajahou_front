@@ -11,7 +11,7 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
-import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
+import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/story-card/CompetencyTagPicker";
 import { getCompetencies, updateStoryCard } from "@/lib/myRecordApi";
 import { completeRetrospective, createReviewDraft, getRetrospective } from "@/lib/retrospectiveApi";
 import RetrospectiveSteps from "./RetrospectiveSteps";

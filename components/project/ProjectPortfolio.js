@@ -5,7 +5,7 @@ import { useAuth } from "@/components/layout/AuthProvider";
 import PortfolioGapFill from "./PortfolioGapFill";
 import PortfolioRecordSelect from "./PortfolioRecordSelect";
 import PortfolioReview from "./PortfolioReview";
-import useProjectAction from "./useProjectAction";
+import useAsyncAction from "@/components/ui/useAsyncAction";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { requestFinishQuestions, createPortfolioDraft } from "@/lib/projectApi";
@@ -19,7 +19,7 @@ export default function ProjectPortfolio({ project, records, onCancel, onSave })
   const [questions, setQuestions] = useState({ questions: [], inputs: {}, attachments: {}, index: 0 });
   const [draft, setDraft] = useState(null);
   // AI 실패(시간 초과·AI 오류 등)는 회고·자소서 매칭과 같은 안내로 보여 준다.
-  const { run, busy, error, clearError } = useProjectAction((failure) => getAiErrorMessage(failure, failure.message));
+  const { run, busy, error, clearError } = useAsyncAction((failure) => getAiErrorMessage(failure, failure.message));
   // 지금 기다리는 AI 작업: "questions"(마치기 질문, 32번) | "draft"(포트폴리오 초안, 33번)
   const [aiTask, setAiTask] = useState(null);
   const { authenticatedRequest } = useAuth();

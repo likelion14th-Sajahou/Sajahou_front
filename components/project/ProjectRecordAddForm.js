@@ -3,7 +3,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { useAppData } from "@/components/layout/AppDataProvider";
-import { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
+import { EMPTY_TAGS_MESSAGE } from "@/components/story-card/CompetencyTagPicker";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import DrawnBorder from "@/components/ui/DrawnBorder";

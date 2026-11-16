@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import FootprintSticker, { CurrentWeekSticker } from "./FootprintSticker";
+import FootprintSticker, { CurrentWeekSticker } from "@/components/story-card/FootprintSticker";
 
 const LABEL_CLASSES = {
   done: "text-ink",

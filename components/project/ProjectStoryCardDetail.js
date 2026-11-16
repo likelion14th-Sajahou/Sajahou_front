@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppData } from "@/components/layout/AppDataProvider";
-import StoryCardDetailLoader from "@/components/my-record/StoryCardDetailLoader";
+import StoryCardDetailLoader from "@/components/story-card/StoryCardDetailLoader";
 
 export default function ProjectStoryCardDetail({ cardId, titleId, onClose }) {
   const { projectData } = useAppData();

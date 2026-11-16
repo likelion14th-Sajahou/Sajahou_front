@@ -6,10 +6,10 @@ import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTags from "./CompetencyTags";
 import StoryCardEditForm from "./StoryCardEditForm";
-import { COPY_FAILED_MESSAGE, RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTypes";
+import { RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTypes";
 import { StoryCardIcon, StoryCardTypeBadge } from "./StoryCardVisuals";
-import { copyText } from "@/lib/clipboard";
-import useProjectAction from "@/components/project/useProjectAction";
+import { COPY_FAILED_MESSAGE, copyText } from "@/lib/clipboard";
+import useAsyncAction from "@/components/ui/useAsyncAction";
 import { withoutDocumentTitle } from "@/lib/storyCardDocument";
 
 const RECAP_TEXT = {
@@ -92,7 +92,7 @@ function SummaryDetails({ summary }) {
 }
 
 export default function StoryCardDetail({ card, competencies, titleId, onClose, onDelete, onUpdate }) {
-  const { run, busy, error } = useProjectAction();
+  const { run, busy, error } = useAsyncAction();
   const { type, whenLabel, title, tags, document, summary } = card;
   const isProjectCard = type === "project";
   const documentBody = isProjectCard ? withoutDocumentTitle(document, title) : document;

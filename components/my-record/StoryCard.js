@@ -1,6 +1,6 @@
 import Card from "@/components/ui/Card";
-import CompetencyTags from "./CompetencyTags";
-import { StoryCardIcon, StoryCardTypeBadge } from "./StoryCardVisuals";
+import CompetencyTags from "@/components/story-card/CompetencyTags";
+import { StoryCardIcon, StoryCardTypeBadge } from "@/components/story-card/StoryCardVisuals";
 
 export default function StoryCard({ card, isHighlighted = false, onOpen }) {
   const { type, whenLabel, title, tags } = card;

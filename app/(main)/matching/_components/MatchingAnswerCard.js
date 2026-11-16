@@ -5,7 +5,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 import { TEXTAREA_GROW_CLASSES } from "@/components/ui/TextField";
-import { StoryCardIcon } from "@/components/my-record/StoryCardVisuals";
+import { StoryCardIcon } from "@/components/story-card/StoryCardVisuals";
 import TextLink from "@/components/ui/TextLink";
 import { recordHref } from "@/lib/myRecordNavigation";
 import { SOURCE_MARKS, answerText, cardSourceLabel, countBlanks, countCharacters, showsSourceMark } from "./matchingAnswer";

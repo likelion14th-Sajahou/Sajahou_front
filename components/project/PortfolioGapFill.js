@@ -8,7 +8,7 @@ import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import AiQuestionForm from "@/components/ui/AiQuestionForm";
 import RecordAttachmentsField from "./RecordAttachmentsField";
-import useProjectAction from "./useProjectAction";
+import useAsyncAction from "@/components/ui/useAsyncAction";
 import { saveQuestionAnswer } from "@/lib/projectApi";
 import AiPromptHeader from "@/components/ui/AiPromptHeader";
 import CardTitle from "@/components/ui/CardTitle";
@@ -17,7 +17,7 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 export default function PortfolioGapFill({ state, onChange, onBackToRecords, onComplete }) {
   const { questions, inputs, index } = state;
   const question = questions[index];
-  const { run, busy, error } = useProjectAction();
+  const { run, busy, error } = useAsyncAction();
   const { authenticatedRequest } = useAuth();
   const [attachmentBusy, setAttachmentBusy] = useState(false);
   if (!question) return <div><p>추가 질문이 없어요.</p><Button onClick={onBackToRecords}>← 기록 고르기</Button><Button onClick={onComplete}>포트폴리오 초안 만들기</Button></div>;
