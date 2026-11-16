@@ -113,8 +113,8 @@ export default function AiQuestionsSession({ initialQuestions, attachments = [],
                   progressLabel={`총 ${questions.length}개 중 ${index + 1}번째 질문`}
                   source={source && (
                     <span className="font-display leading-[26.6px] [overflow-wrap:anywhere]">
-                      <span className="rounded bg-white/10 px-1.5 py-0.5 text-white">{source.label}</span>의{" "}
-                      <mark className="box-decoration-clone rounded bg-yellow-400 px-[3px] py-0.5 leading-[18px] text-ink-950">“{source.quote}”</mark> 부분에서 물어봐요
+                      {source.label && <><span className="rounded bg-white/10 px-1.5 py-0.5 text-white">{source.label}</span>{source.isEntire ? " · " : "의 "}</>}
+                      <mark className="box-decoration-clone rounded bg-yellow-400 px-[3px] py-0.5 leading-[18px] text-ink-950">{source.isEntire ? source.quote : `“${source.quote}”`}</mark> 부분에서 물어봐요
                     </span>
                   )}
                   question={question.content}
