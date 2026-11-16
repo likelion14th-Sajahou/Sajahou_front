@@ -60,7 +60,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
           name={key}
           multiline
           rows={2}
-          className="h-[74px] text-body! leading-6"
+          className="text-body! leading-6"
           defaultValue={card.summary[key]}
         />
       ))}
@@ -75,7 +75,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         multiline
         name="document"
         defaultValue={card.type === "project" ? withoutDocumentTitle(card.document, card.title) : card.document}
-        className="h-[234px] font-input text-label! font-bold leading-[20.8px]"
+        className="font-input text-label! font-bold leading-[20.8px]"
       />
       <div className="flex items-center justify-between gap-3.5 pt-1">
         <TextLink variant="underline" className="text-[#4a5163]!" onClick={onCancel}>취소</TextLink>

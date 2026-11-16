@@ -37,8 +37,6 @@ export default function ProjectRecordReview({
       <RecordFieldsGrid
         getFieldProps={({ key, formLabel }) => ({
           label: formLabel,
-          // 정리된 글이 잘리지 않도록 내용 길이에 맞춰 칸이 늘어난다.
-          className: "min-h-12 field-sizing-content",
           ...getFieldValueProps(key),
         })}
       />

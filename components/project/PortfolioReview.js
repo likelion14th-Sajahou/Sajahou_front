@@ -45,7 +45,7 @@ export default function PortfolioReview({ project, initialMarkdown, blanks = [],
             aria-label="포트폴리오"
             value={markdown}
             onChange={(event) => setMarkdown(event.target.value)}
-            className="h-[560px] font-input text-[14.5px]! leading-[25.375px] text-ink-strong!"
+            className="font-input text-[14.5px]! leading-[25.375px] text-ink-strong!"
           />
           <ActionFooter>
             <TextLink onClick={onBack}>{backLabel}</TextLink>

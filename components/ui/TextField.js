@@ -16,6 +16,13 @@ const TEXTAREA_PADDING_CLASSES = {
   sm: "py-[7px]",
 };
 
+// 여러 줄 칸(textarea)은 높이를 고정하지 않는다. 최소 높이만 두고, 글이 넘치면 칸 안에서 스크롤하지 않고 칸이 늘어난다(field-sizing: content).
+// 최소 높이 100px은 이번 주 회고 자료 화면 '실습 내용' 칸의 높이다. 화면에서 h-[…]로 높이를 고정하지 않는다.
+// singleLine: 한 줄 높이(48px)에서 시작해 길면 감싸며 늘어나는 칸(예: 스토리 카드 제목).
+// TextField를 쓰지 않는 textarea도 같은 규칙을 쓰도록 class를 내보낸다.
+export const TEXTAREA_GROW_CLASSES = "field-sizing-content min-h-[100px]";
+const SINGLE_LINE_GROW_CLASSES = "field-sizing-content min-h-12";
+
 // appearance: 칸의 바탕과 테두리.
 // - filled: 디자인 시스템 기본(회색 바탕, 테두리 없음).
 // - outlined: 흰 바탕 + 2px 회색 테두리, 누르면 진하게(회고 검토의 스토리 카드 초안, 11/13 디자인). md 크기만 쓴다.
@@ -41,6 +48,7 @@ function appearanceClasses(appearance, size, error) {
 export default function TextField({
   label,
   multiline = false,
+  singleLine = false,
   size = "md",
   appearance = "filled",
   rows = 3,
@@ -65,7 +73,7 @@ export default function TextField({
   const control = multiline ? (
     <textarea
       rows={rows}
-      className={`resize-none ${look.textarea} ${controlClasses}`}
+      className={`resize-none ${singleLine ? SINGLE_LINE_GROW_CLASSES : TEXTAREA_GROW_CLASSES} ${look.textarea} ${controlClasses}`}
       {...rest}
       {...accessibilityProps}
     />
