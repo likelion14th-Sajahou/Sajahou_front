@@ -86,8 +86,10 @@ export default function Header() {
   // 최소 높이와 실측 높이를 분리해, 화면이 넓어질 때 헤더가 다시 한 줄 높이로 줄어들 수 있게 한다.
   return (
     <>
-    <header ref={headerRef} className="sticky top-0 z-40 min-h-[110px] w-full border-b border-transparent bg-canvas/80 backdrop-blur-[8px] lg:min-h-[75px]">
-      <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-x-6 gap-y-2 p-4">
+    {/* 1024px 미만(두 줄)은 메뉴 링크 아래에 노란 마커 자리(8px)가 있어서, 헤더 아래 여백을 그만큼 줄인다(pb-2).
+        그러면 마커 아래 끝~헤더 끝이 위쪽 여백(로고까지 16px)과 같아진다. 높이는 globals.css의 --header-height 기본값과 맞춘다. */}
+    <header ref={headerRef} className="sticky top-0 z-40 min-h-[103px] w-full border-b border-transparent bg-canvas/80 backdrop-blur-[8px] lg:min-h-[75px]">
+      <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 pt-4 pb-2 lg:pb-4">
         <Link href="/" aria-label="사자록 홈" className="shrink-0">
           <Image src="/images/brand/logo.png" alt="" width={117} height={42} className="h-auto w-[94px] lg:w-[117px]" priority />
         </Link>
