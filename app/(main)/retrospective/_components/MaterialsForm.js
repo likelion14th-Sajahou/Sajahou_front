@@ -256,15 +256,12 @@ export default function MaterialsForm({ initialMaterials }) {
       </MaterialSection>
 
       {!isAssignment && (
-        // 진한 카드 위라 칸 이름은 흰 글씨(보조 설명은 반투명)다. 입력칸은 손그림 테두리.
+        // 진한 카드 위라 칸 이름은 흰 글씨(보조 설명은 반투명)다. 입력칸은 다른 입력칸과 같은 기본 칸(물결 테두리 없음).
         <label className="flex flex-col gap-1.5">
           <span className="text-label leading-[20.8px] font-bold text-white">
             고민 메모<span className="ml-0.5 text-caption font-normal text-white/50"> · 선택</span>
           </span>
-          <span className="relative block rounded-[14px]">
-            <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="block font-input leading-6 text-ink-strong! placeholder:text-ink-300!" />
-            <DrawnBorder color="var(--color-canvas)" />
-          </span>
+          <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="block font-input leading-6 text-ink-strong! placeholder:text-ink-300!" />
         </label>
       )}
       <MaterialsChangeNotice

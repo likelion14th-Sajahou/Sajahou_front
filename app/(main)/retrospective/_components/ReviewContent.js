@@ -147,9 +147,9 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
             </div>
             <Button variant="cta" className="shrink-0" onClick={copyRetrospective}>회고록 복사</Button>
           </div>
-          {/* 회고록 본문은 편집 중에도 NPS를 쓴다. 공통 입력칸의 Pretendard보다 우선 적용한다. */}
-          <div className="relative rounded-[20px] bg-white p-1">
-            <DrawnBorder color="white" />
+          {/* 회고록 본문은 편집 중에도 NPS를 쓴다. 공통 입력칸의 Pretendard보다 우선 적용한다.
+              다른 입력칸처럼 물결 테두리 없이 흰 상자만 둔다. */}
+          <div className="rounded-[20px] bg-white p-1">
             <TextField
               multiline
               appearance="plain"
