@@ -26,7 +26,7 @@ function Sticker({ sticker }) {
 
 export default function StickerBoard({ count, stickers }) {
   // 데스크톱의 10개에서 다시 선택해 프로젝트는 유지하고 가장 오래된 일반 스티커만 뺀다.
-  // CSS로 표시를 바꿔 화면 크기 감지 상태나 중복 목록 없이 모바일·태블릿에는 9개를 보여 준다.
+  // CSS로 표시를 바꿔 중복 목록 없이 모바일에는 9개, 태블릿부터는 10개를 보여 준다.
   const mobileWeeks = new Set(selectBoardStickers(stickers, 9).map(({ week }) => week));
 
   return (
@@ -48,9 +48,9 @@ export default function StickerBoard({ count, stickers }) {
       <div className="flex w-full flex-1 items-center justify-center py-8">
         {stickers.length === 0 ? (
           <p className="text-body text-ink-subtle">회고를 완료하면 스티커가 모여요.</p>
-        ) : <ul className="grid w-full max-w-[544px] grid-cols-3 justify-items-center gap-x-2 gap-y-4 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-9 sm:gap-y-[34px]">
+        ) : <ul className="grid w-full max-w-[544px] grid-cols-3 justify-items-center gap-x-2 gap-y-4 md:flex md:flex-wrap md:justify-center md:gap-x-9 md:gap-y-[34px]">
           {stickers.map((sticker) => (
-            <li key={`${sticker.kind}:${sticker.week}`} className={mobileWeeks.has(sticker.week) ? undefined : "hidden lg:list-item"}>
+            <li key={`${sticker.kind}:${sticker.week}`} className={mobileWeeks.has(sticker.week) ? undefined : "hidden md:list-item"}>
               <Sticker sticker={sticker} />
             </li>
           ))}
