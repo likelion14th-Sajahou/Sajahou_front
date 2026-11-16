@@ -2,7 +2,7 @@
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -33,7 +33,7 @@ function todayLabel() {
 }
 
 export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
-  const { projectData } = useMockData();
+  const { projectData } = useAppData();
   const { authenticatedRequest } = useAuth();
   const [attachments, setAttachments] = useState([]);
   const [materials, setMaterials] = useState({});

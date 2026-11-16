@@ -4,7 +4,7 @@ import { startTransition, useEffect, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import Modal from "@/components/ui/Modal";
 import Toast, { useToast } from "@/components/ui/Toast";
 import ProjectPortfolio from "./ProjectPortfolio";
@@ -43,7 +43,7 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
   // 기록의 '카드 보기'로 연 카드 팝업(A-10)이다. 링크로 새로 들어오면 닫히도록 연 시점의 bfcacheId도 기억한다.
   const [cardView, setCardView] = useState(null);
   const { toast, showToast, hideToast } = useToast();
-  const { showFlashToast, projectData } = useMockData();
+  const { showFlashToast, projectData } = useAppData();
   const cards = projectData.cards.filter(({ projectId }) => projectId === project.id);
   const viewingCard =
     cardView?.bfcacheId === bfcacheId
@@ -152,7 +152,7 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
 }
 
 export default function ProjectView({ projectId, initialIsAdding }) {
-  const { projects, projectData } = useMockData();
+  const { projects, projectData } = useAppData();
   const [detailStatus, setDetailStatus] = useState("loading");
   const [detailError, setDetailError] = useState("");
   const [attempt, setAttempt] = useState(0);

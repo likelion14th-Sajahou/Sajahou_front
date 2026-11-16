@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -21,7 +21,7 @@ import useProjectAction from "./useProjectAction";
 // 기록 수정(H-15, 12-b). 저장하면 카드도 함께 바뀐다(카드 제목은 유지).
 // 11/13 디자인: 기록 추가의 정리 결과와 같은 모양에 회색 손그림 테두리 상자.
 export default function ProjectRecordForm({ record, onCancel, onSave }) {
-  const { projectData } = useMockData();
+  const { projectData } = useAppData();
   const competencies = projectData.competencyItems.map((item) => item.name);
   const { run, busy, error } = useProjectAction();
   const [fields, setFields] = useState(() =>

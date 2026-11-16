@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import Toast, { useToast } from "@/components/ui/Toast";
@@ -27,7 +27,7 @@ export function getStepPath(currentStep) {
 // 제목·시작 화면·단계 화면이 함께 쓴다. 과제 선택도 제목 영역과 자료 폼에서 함께 사용한다.
 // 파트는 가입 때 고른 사용자 파트다. 파트에 따라 마감일이 다르다.
 export default function RetrospectivePreview({ children }) {
-  const { user } = useMockData();
+  const { user } = useAppData();
   const { authenticatedRequest } = useAuth();
   const [assignmentStatus, setAssignmentStatus] = useState("record");
   const [{ current, error }, setLoadState] = useState({ current: null, error: "" });

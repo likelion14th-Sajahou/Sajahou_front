@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
@@ -227,7 +227,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
 export default function ReviewContent() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { user } = useMockData();
+  const { user } = useAppData();
   const { retrospective, getStepHref } = useRetrospectivePreview();
   const retrospectiveId = retrospective?.id;
   const startHref = getStepHref();

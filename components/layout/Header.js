@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import { useAuth } from "./AuthProvider";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
@@ -49,7 +49,7 @@ function CurrentNavLinks() {
 }
 
 export default function Header() {
-  const { user } = useMockData();
+  const { user } = useAppData();
   const { isAuthenticated, restoreStatus, logout, isLoggingOut, isAccountBusy, logoutError } = useAuth();
   // 이름을 누르면 내 정보 수정 팝업을 연다. 닫으면 누른 버튼으로 포커스를 돌려준다.
   const [profileOpen, setProfileOpen] = useState(false);

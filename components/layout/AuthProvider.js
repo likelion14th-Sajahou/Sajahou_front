@@ -166,7 +166,7 @@ export default function AuthProvider({ children }) {
       if (signal?.aborted || generation.current !== mutation.generation) throw new DOMException("로그인 상태가 변경되었거나 요청이 취소되었습니다.", "AbortError");
       const user = validateUser(result);
       if (user.id !== session.user.id) throw new Error("수정한 사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.");
-      // id를 유지하므로 MockDataProvider의 사용자별 기록은 초기화되지 않는다.
+      // id를 유지하므로 AppDataProvider의 사용자별 기록은 초기화되지 않는다.
       setSession((current) => current ? { ...current, user } : current);
       return user;
     } finally {

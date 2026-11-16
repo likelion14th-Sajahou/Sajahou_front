@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import { getFootprints, getStoryCards } from "@/lib/myRecordApi";
 import { footprintView } from "@/lib/myRecordViewModel";
 import { cardView } from "@/lib/projectViewModel";
@@ -17,7 +17,7 @@ import RecordRequestStatus from "./RecordRequestStatus";
 export default function MyRecordView() {
   const params = useSearchParams();
   const location = readRecordLocation(params);
-  const { user, projectData } = useMockData();
+  const { user, projectData } = useAppData();
   const { authenticatedRequest } = useAuth();
   const loadFootprints = useCallback(async (signal) => footprintView(await getFootprints({ signal, request: authenticatedRequest })), [authenticatedRequest]);
   const loadCards = useCallback((signal) => getStoryCards({}, { signal, request: authenticatedRequest }), [authenticatedRequest]);

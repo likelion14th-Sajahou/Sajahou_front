@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import Button from "@/components/ui/Button";
 import Image from "next/image";
 import TextLink from "@/components/ui/TextLink";
@@ -21,7 +21,7 @@ import { copyText } from "@/lib/clipboard";
 export default function CompleteContent() {
   const router = useRouter();
   const { authenticatedRequest, isDemo } = useAuth();
-  const { user } = useMockData();
+  const { user } = useAppData();
   const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent, getStepHref } = useRetrospectivePreview();
   const [card, setCard] = useState(null);
   const [notice, setNotice] = useState("");
