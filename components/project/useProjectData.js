@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import * as api from "@/lib/projectApi";
+import { getCompetencies } from "@/lib/myRecordApi";
 import { projectView, roleCodes, cardView } from "@/lib/projectViewModel";
 
 export default function useProjectData(user) {
@@ -19,7 +20,7 @@ export default function useProjectData(user) {
   const refresh = useCallback(async ({ signal } = {}) => {
     if (!user) return;
     const version = ++current.current;
-    const [list, competencies, cardList] = await Promise.all([api.listProjects({ signal, request: authenticatedRequest }), api.getProjectCompetencies({ signal, request: authenticatedRequest }), api.listProjectCards({ signal, request: authenticatedRequest })]);
+    const [list, competencies, cardList] = await Promise.all([api.listProjects({ signal, request: authenticatedRequest }), getCompetencies({ signal, request: authenticatedRequest }), api.listProjectCards({ signal, request: authenticatedRequest })]);
     if (signal?.aborted || version !== current.current) return;
     setProjects([...list.inProgressProjects.map((p) => projectView(p, "IN_PROGRESS")), ...list.doneProjects.map((p) => projectView(p, "DONE"))]
       .map((p) => loaded.current.has(p.id) ? { ...loaded.current.get(p.id), ...p, startedAt: loaded.current.get(p.id).startedAt, records: loaded.current.get(p.id).records } : p));

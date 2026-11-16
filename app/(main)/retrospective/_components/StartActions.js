@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import { resetRetrospective, setRetrospectiveRest, startRetrospective } from "@/lib/retrospectiveApi";
 import ResetRetrospectiveModal from "./ResetRetrospectiveModal";
-import { getStepPath, useRetrospectivePreview } from "./RetrospectivePreview";
+import { getStepPath, useRetrospective } from "./RetrospectiveProvider";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 // 시작 전: '시작하기 →', 작성 중: '이어 쓰기 →' + '처음부터'(R-05).
@@ -15,7 +15,7 @@ import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 export default function StartActions({ isAssignment = false }) {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { week, session, retrospective, getStepHref, refreshCurrent, applyStarted, showToast } = useRetrospectivePreview();
+  const { week, session, retrospective, getStepHref, refreshCurrent, applyStarted, showToast } = useRetrospective();
   const [pending, setPending] = useState(null);
   const [error, setError] = useState("");
   const [isResetOpen, setIsResetOpen] = useState(false);

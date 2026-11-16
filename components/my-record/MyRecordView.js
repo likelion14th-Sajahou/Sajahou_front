@@ -11,8 +11,8 @@ import { readRecordLocation, recordHref } from "@/lib/myRecordNavigation";
 import FootprintsPanel from "./FootprintsPanel";
 import MyRecordTabs from "./MyRecordTabs";
 import StoryCardsPanel from "./StoryCardsPanel";
-import useRecordResource from "./useRecordResource";
-import RecordRequestStatus from "./RecordRequestStatus";
+import useApiResource from "@/components/ui/useApiResource";
+import RequestStatus from "@/components/ui/RequestStatus";
 
 export default function MyRecordView() {
   const params = useSearchParams();
@@ -21,8 +21,8 @@ export default function MyRecordView() {
   const { authenticatedRequest } = useAuth();
   const loadFootprints = useCallback(async (signal) => footprintView(await getFootprints({ signal, request: authenticatedRequest })), [authenticatedRequest]);
   const loadCards = useCallback((signal) => getStoryCards({}, { signal, request: authenticatedRequest }), [authenticatedRequest]);
-  const footprints = useRecordResource(loadFootprints, String(user.id));
-  const cardList = useRecordResource(loadCards, String(user.id));
+  const footprints = useApiResource(loadFootprints, String(user.id));
+  const cardList = useApiResource(loadCards, String(user.id));
   const competencyItems = projectData.competencyItems;
   const [revision, setRevision] = useState(0);
   const cards = cardList.data?.cards.map(cardView) ?? [];
@@ -58,14 +58,14 @@ export default function MyRecordView() {
       <FootprintsPanel sections={footprints.data.sections} weeks={footprints.data.weeks}
         selectedWeek={location.week ?? footprints.data.currentWeek} sectionId={location.section}
         onChange={navigate} searchParams={params} />
-    ) : <RecordRequestStatus resource={footprints} />)}
+    ) : <RequestStatus resource={footprints} />)}
     {location.tab === "cards" && !competencyItems.length && projectData.status !== "ready" ? (
-      <RecordRequestStatus resource={{ loading: projectData.status === "loading", error: projectData.error,
-        refresh: () => { void projectData.sync(); } }}>역량 목록을 불러오는 중이에요.</RecordRequestStatus>
+      <RequestStatus resource={{ loading: projectData.status === "loading", error: projectData.error,
+        refresh: () => { void projectData.sync(); } }}>역량 목록을 불러오는 중이에요.</RequestStatus>
     ) : location.tab === "cards" && (cardList.data ? (
       <StoryCardsPanel cards={cards} competencyItems={competencyItems} userId={user.id}
         location={location} searchParams={params} onNavigate={navigate}
         revision={revision} onChanged={onChanged} />
-    ) : <RecordRequestStatus resource={cardList} />)}
+    ) : <RequestStatus resource={cardList} />)}
   </>;
 }

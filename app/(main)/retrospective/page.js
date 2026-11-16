@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import RetrospectiveContent from "./_components/RetrospectiveContent";
-import RetrospectivePreview, { RetrospectiveHeading } from "./_components/RetrospectivePreview";
+import RetrospectiveProvider, { RetrospectiveHeading } from "./_components/RetrospectiveProvider";
 import RequireAuth from "@/components/layout/RequireAuth";
 
 export const metadata = {
@@ -11,7 +11,7 @@ export default function RetrospectivePage({ searchParams }) {
   return (
     <main className="mx-auto w-full max-w-[1120px] px-4 pt-6 pb-20">
       <RequireAuth>
-        <RetrospectivePreview>
+        <RetrospectiveProvider>
           <Suspense
             fallback={
               <p role="status" className="mt-6 text-body-sm text-ink-muted">
@@ -22,7 +22,7 @@ export default function RetrospectivePage({ searchParams }) {
             <RetrospectiveHeading />
             <RetrospectiveContent searchParams={searchParams} />
           </Suspense>
-        </RetrospectivePreview>
+        </RetrospectiveProvider>
       </RequireAuth>
     </main>
   );

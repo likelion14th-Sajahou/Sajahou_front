@@ -9,7 +9,7 @@ import { answerQuestion, getRetrospective, requestQuestions } from "@/lib/retros
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import AiQuestionsSession from "./AiQuestionsSession";
 import RetroDarkCard from "./RetroDarkCard";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { useReviewDraftRequest } from "./useReviewDraftRequest";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
@@ -17,7 +17,7 @@ import { answerDraftKey, readAnswerDrafts } from "@/lib/retrospectiveAnswerDraft
 
 // 자료가 부족해 질문을 만들지 못했을 때(R-15). 프로토타입처럼 질문 카드와 같은 진한 카드다.
 function InsufficientMaterial() {
-  const { getStepHref } = useRetrospectivePreview();
+  const { getStepHref } = useRetrospective();
   const review = useReviewDraftRequest();
 
   return (
@@ -40,7 +40,7 @@ function InsufficientMaterial() {
 function Questions() {
   const router = useRouter();
   const { authenticatedRequest, user } = useAuth();
-  const { retrospective, getStepHref } = useRetrospectivePreview();
+  const { retrospective, getStepHref } = useRetrospective();
   const retrospectiveId = retrospective?.id;
   const startHref = getStepHref();
   const [loaded, setLoaded] = useState(null);

@@ -18,7 +18,7 @@ import RecordAttachmentsField from "./RecordAttachmentsField";
 import RecordFormTitle from "./RecordFormTitle";
 import { EMPTY_RECORD_MESSAGE } from "./recordFields";
 import ActionFooter from "@/components/ui/ActionFooter";
-import { createProjectRecord, updateProjectRecord, getRecordQuestionsWithRetry, organizeProjectRecord } from "@/lib/projectApi";
+import { createProjectRecord, updateProjectRecord, requestRecordQuestionsWithRetry, organizeProjectRecord } from "@/lib/projectApi";
 import { recordBody, recordQuestionState } from "@/lib/projectViewModel";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
 import Badge from "@/components/ui/Badge";
@@ -140,7 +140,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
         recordId = draft.recordId;
         setDraftId(draft.recordId);
       } else await updateProjectRecord(draftId, materialBody, options);
-      const result = await getRecordQuestionsWithRetry(recordId, { ...options, mode });
+      const result = await requestRecordQuestionsWithRetry(recordId, { ...options, mode });
       controller.signal.throwIfAborted();
       setQuestionState((current) => recordQuestionState(current, result.questions, attachments, { regenerate }));
       setConfirmRegenerate(null);

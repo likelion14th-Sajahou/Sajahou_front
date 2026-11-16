@@ -13,7 +13,7 @@ import { formatDeadline } from "@/lib/formatDate";
 import { getRetrospective } from "@/lib/retrospectiveApi";
 import RetroResultCard from "./RetroResultCard";
 import RetrospectiveSteps from "./RetrospectiveSteps";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { copyText } from "@/lib/clipboard";
 
 // 5단계 완료(R-22, 06·06-a). 저장한 회고의 회고록을 복사하고, 공개된 카드를 나의 사자록에서 열 수 있다.
@@ -22,7 +22,7 @@ export default function CompleteContent() {
   const router = useRouter();
   const { authenticatedRequest, isDemo } = useAuth();
   const { user } = useAppData();
-  const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent, getStepHref } = useRetrospectivePreview();
+  const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent, getStepHref } = useRetrospective();
   const [card, setCard] = useState(null);
   const [notice, setNotice] = useState("");
   const { toast, showToast, hideToast } = useToast();

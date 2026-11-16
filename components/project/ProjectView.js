@@ -11,7 +11,7 @@ import ProjectPortfolio from "./ProjectPortfolio";
 import ProjectHeader from "./ProjectHeader";
 import ProjectRecords from "./ProjectRecords";
 import ProjectSidebar, { DeleteProject, PortfolioCard } from "./ProjectSidebar";
-import RemoteProjectCard from "./RemoteProjectCard";
+import ProjectStoryCardDetail from "./ProjectStoryCardDetail";
 import * as api from "@/lib/projectApi";
 import { recordBody } from "@/lib/projectViewModel";
 
@@ -142,7 +142,7 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
         aria-labelledby="record-card-title"
       >
         {viewingCard && (
-          <RemoteProjectCard key={viewingCard.cardId} cardId={viewingCard.cardId} titleId="record-card-title" onClose={() => setCardView(null)} />
+          <ProjectStoryCardDetail key={viewingCard.cardId} cardId={viewingCard.cardId} titleId="record-card-title" onClose={() => setCardView(null)} />
         )}
       </Modal>
       <Toast toast={toast} onDismiss={hideToast} />

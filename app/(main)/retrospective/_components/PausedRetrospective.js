@@ -6,12 +6,12 @@ import { useAuth } from "@/components/layout/AuthProvider";
 import Button from "@/components/ui/Button";
 import { setRetrospectiveRest } from "@/lib/retrospectiveApi";
 import RetroResultCard from "./RetroResultCard";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 export default function PausedRetrospective() {
   const { authenticatedRequest } = useAuth();
-  const { week, session, refreshCurrent } = useRetrospectivePreview();
+  const { week, session, refreshCurrent } = useRetrospective();
   const [isUndoing, setIsUndoing] = useState(false);
   const [error, setError] = useState("");
   const inFlight = useRef(false);

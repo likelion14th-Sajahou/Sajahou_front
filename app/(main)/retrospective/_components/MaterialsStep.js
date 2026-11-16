@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { getRetrospective } from "@/lib/retrospectiveApi";
 import MaterialsForm from "./MaterialsForm";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { splitAttachments } from "./useMaterialAttachments";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
@@ -30,7 +30,7 @@ function toFormMaterials(materials = {}, attachments = []) {
 export default function MaterialsStep() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { retrospective, isAssignment, getStepHref, setAssignmentStatus } = useRetrospectivePreview();
+  const { retrospective, isAssignment, getStepHref, setAssignmentStatus } = useRetrospective();
   const retrospectiveId = retrospective?.id;
   const startHref = getStepHref();
   const [loaded, setLoaded] = useState(null);

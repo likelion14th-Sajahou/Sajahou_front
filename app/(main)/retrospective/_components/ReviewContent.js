@@ -15,7 +15,7 @@ import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/
 import { getCompetencies, updateStoryCard } from "@/lib/myRecordApi";
 import { completeRetrospective, createReviewDraft, getRetrospective } from "@/lib/retrospectiveApi";
 import RetrospectiveSteps from "./RetrospectiveSteps";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { copyText } from "@/lib/clipboard";
 import { selectedCompetencyNames } from "@/lib/competencySelection";
@@ -40,7 +40,7 @@ const STORY_FIELDS = [
 function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { getStepHref, refreshCurrent, isAssignment } = useRetrospectivePreview();
+  const { getStepHref, refreshCurrent, isAssignment } = useRetrospective();
   const [fields, setFields] = useState(() => Object.fromEntries(STORY_FIELDS.map(({ name }) => [name, initialCard[name] ?? ""])));
   const [fullMarkdown, setFullMarkdown] = useState(initialCard.fullMarkdown ?? "");
   const [tagSelection, setSelectedTags] = useState(() => initialCard.competencies);
@@ -228,7 +228,7 @@ export default function ReviewContent() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
   const { user } = useAppData();
-  const { retrospective, getStepHref } = useRetrospectivePreview();
+  const { retrospective, getStepHref } = useRetrospective();
   const retrospectiveId = retrospective?.id;
   const startHref = getStepHref();
   const [loaded, setLoaded] = useState(null);

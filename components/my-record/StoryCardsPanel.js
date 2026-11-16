@@ -9,11 +9,11 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 import SelectField from "@/components/ui/SelectField";
 import StoryCardList from "./StoryCardList";
 import StoryCardSearch from "./StoryCardSearch";
-import RemoteStoryCard from "./RemoteStoryCard";
+import StoryCardDetailLoader from "./StoryCardDetailLoader";
 import { getStoryCards } from "@/lib/myRecordApi";
 import { cardView } from "@/lib/projectViewModel";
-import useRecordResource from "./useRecordResource";
-import RecordRequestStatus from "./RecordRequestStatus";
+import useApiResource from "@/components/ui/useApiResource";
+import RequestStatus from "@/components/ui/RequestStatus";
 import { recordHref, resolveRecordCompetency } from "@/lib/myRecordNavigation";
 
 const ALL = "all";
@@ -53,7 +53,7 @@ export default function StoryCardsPanel({
     : selectedCompetency ? `#${selectedCompetency.name} (${selectedCompetency.cardCount})` : "역량 전체";
   const query = JSON.stringify({ type: type === ALL ? undefined : type.toUpperCase(), competencyId, weekNumber: week, q: search.trim() || undefined });
   const load = useCallback((signal) => getStoryCards(JSON.parse(query), { signal, request: authenticatedRequest }), [query, authenticatedRequest]);
-  const filtered = useRecordResource(load, invalidCompetency || query === "{}" ? null : `${userId}:${revision}:${query}`, search ? 250 : 0);
+  const filtered = useApiResource(load, invalidCompetency || query === "{}" ? null : `${userId}:${revision}:${query}`, search ? 250 : 0);
   const visibleCards = invalidCompetency ? [] : query === "{}" ? cards : filtered.data?.cards.map(cardView) ?? [];
   const visibleIds = visibleCards.map((card) => card.id).join(",");
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function StoryCardsPanel({
         <p role="status" className="text-body-sm text-ink-muted">강조할 카드가 현재 목록에 없어요.</p>
       )}
 
-      {filtered.loading || filtered.error ? <RecordRequestStatus resource={filtered}>조건에 맞는 카드를 불러오는 중이에요.</RecordRequestStatus> : visibleCards.length > 0 ? (
+      {filtered.loading || filtered.error ? <RequestStatus resource={filtered}>조건에 맞는 카드를 불러오는 중이에요.</RequestStatus> : visibleCards.length > 0 ? (
         <StoryCardList
           cards={visibleCards}
           highlightedCardId={highlightedCardId}
@@ -133,7 +133,7 @@ export default function StoryCardsPanel({
         border={<DrawnBorder color="var(--color-ink)" width={2} />}
         aria-labelledby="story-card-title"
       >
-        {openCardId && <RemoteStoryCard key={openCardId} cardId={openCardId}
+        {openCardId && <StoryCardDetailLoader key={openCardId} cardId={openCardId}
           competencyItems={competencyItems} titleId="story-card-title" onClose={closeCard} onChanged={onChanged} />}
       </Modal>
     </section>

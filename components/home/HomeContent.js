@@ -9,7 +9,7 @@ import StickerBoard from "./StickerBoard";
 import { useAuth } from "@/components/layout/AuthProvider";
 import Toast from "@/components/ui/Toast";
 import useHomeData from "./useHomeData";
-import RecordRequestStatus from "@/components/my-record/RecordRequestStatus";
+import RequestStatus from "@/components/ui/RequestStatus";
 import ScrollReveal from "./ScrollReveal";
 
 export default function HomeContent() {
@@ -17,7 +17,7 @@ export default function HomeContent() {
   const home = useHomeData();
   const homeStatus = home.data?.sessionRetrospective.state;
 
-  if (!home.data) return <main className="mx-auto max-w-[1120px] px-4 py-8"><RecordRequestStatus resource={home}>홈을 불러오는 중이에요.</RecordRequestStatus></main>;
+  if (!home.data) return <main className="mx-auto max-w-[1120px] px-4 py-8"><RequestStatus resource={home}>홈을 불러오는 중이에요.</RequestStatus></main>;
 
   return (
     <>
