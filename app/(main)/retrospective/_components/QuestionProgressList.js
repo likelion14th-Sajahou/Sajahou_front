@@ -22,25 +22,25 @@ const STATES = {
   },
   skip: {
     label: "건너뛰었어요",
-    item: "bg-[#fafaf8] shadow-[inset_0_0_0_1.5px_#ecece8]",
-    dot: "border-[1.5px] border-[#b9bbc0] bg-white text-[15px] text-ink-faint",
+    item: "bg-surface-muted shadow-[inset_0_0_0_1.5px_#ecece8]",
+    dot: "border-[1.5px] border-line-pending bg-white text-[15px] text-ink-faint",
     status: "text-ink-faint",
     quote: "text-ink-faint",
   },
   next: {
     label: "앞으로 답할 질문",
     item: "bg-white shadow-[inset_0_0_0_1.5px_#ecece8]",
-    dot: "border-[1.5px] border-dashed border-[#b9bbc0] bg-white text-[#9a9da4]",
-    status: "text-[#9a9da4]",
+    dot: "border-[1.5px] border-dashed border-line-pending bg-white text-ink-pending",
+    status: "text-ink-pending",
     quote: "text-ink-500",
   },
 };
 
 const SUMMARY_DOTS = {
   done: "bg-ink-strong",
-  skip: "border-[1.5px] border-[#b9bbc0] bg-white",
+  skip: "border-[1.5px] border-line-pending bg-white",
   now: "bg-yellow-400 shadow-[0_0_0_2px_#fff1c2]",
-  next: "border-[1.5px] border-dashed border-[#b9bbc0] bg-white",
+  next: "border-[1.5px] border-dashed border-line-pending bg-white",
 };
 
 function questionState(question, index, currentIndex) {
@@ -69,7 +69,7 @@ export default function QuestionProgressList({ questions, currentIndex }) {
           <span key={state} className="inline-flex items-center gap-1.5 whitespace-nowrap">
             {/* 건너뜀 점 안의 '–'는 글자 대신 막대로 그려 가운데에 맞춘다(글꼴마다 '–'의 높이가 달라서). */}
             <i aria-hidden="true" className={`grid size-2.5 place-items-center rounded-full ${SUMMARY_DOTS[state]}`}>
-              {state === "skip" && <span className="h-[1.5px] w-1 rounded-full bg-[#9a9da4]" />}
+              {state === "skip" && <span className="h-[1.5px] w-1 rounded-full bg-ink-pending" />}
             </i>
             {label} <b className="text-ink-strong">{value}</b>
           </span>
@@ -84,7 +84,7 @@ export default function QuestionProgressList({ questions, currentIndex }) {
             <li key={question.questionId} aria-current={state === "now" ? "step" : undefined} className={`relative flex items-start gap-3 rounded-[14px] py-3 pr-3.5 pl-3 ${style.item}`}>
               {/* 다음 질문과 잇는 세로 선. 끝낸 질문 아래는 진하게(25%) 긋는다. */}
               {!isLast && (
-                <span aria-hidden="true" className={`absolute top-10 -bottom-3 left-6 w-0.5 ${state === "done" || state === "skip" ? "bg-ink-strong/25" : "bg-[#e4e4de]"}`} />
+                <span aria-hidden="true" className={`absolute top-10 -bottom-3 left-6 w-0.5 ${state === "done" || state === "skip" ? "bg-ink-strong/25" : "bg-line"}`} />
               )}
               <span aria-hidden="true" className={`relative z-[1] grid size-[26px] shrink-0 place-items-center rounded-full text-caption leading-none font-bold ${style.dot}`}>
                 {state === "done" ? <Image src="/images/common/check-12-white.svg" alt="" width={12} height={12} /> : state === "skip" ? "–" : index + 1}

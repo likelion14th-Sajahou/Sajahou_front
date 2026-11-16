@@ -109,7 +109,7 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
       <section aria-labelledby="matching-competencies" className="min-w-0">
         <div className="mb-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <h2 id="matching-competencies" ref={headingRef} tabIndex={-1} className="scroll-mt-6 text-[24px] leading-8 tracking-[-0.4px] outline-none">공고가 원하는 역량</h2>
-          <p className="font-display text-label leading-[19.5px] text-[#5a606c]">공고·우대사항·인재상에서 찾았어요</p>
+          <p className="font-display text-label leading-[19.5px] text-ink-secondary">공고·우대사항·인재상에서 찾았어요</p>
         </div>
         {/* 공고에서 역량을 하나도 찾지 못하면 공고 내용을 더 넣도록 안내한다(M-06). */}
         {posting.noCompetencyFound || !posting.competencies.length ? (
@@ -130,7 +130,7 @@ export default function MatchingResults({ posting, drafts, onRetry, onEditedCoun
                     </Link>
                   ) : <Badge tone="red" size="count" className="text-error!">없음</Badge>}
                 </div>
-                <p className="mt-1 break-words text-body-sm text-[#5a606c]">“{evidenceQuote}”</p>
+                <p className="mt-1 break-words text-body-sm text-ink-secondary">“{evidenceQuote}”</p>
               </li>
             ))}
           </ul>

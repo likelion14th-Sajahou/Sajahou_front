@@ -58,7 +58,7 @@ function DraftSegments({ segments }) {
       {index > 0 && " "}
       {segment.type === "blank" ? (
         // 줄이 바뀌면 테두리를 닫지 않고 이어 그린다.
-        <span className="rounded-md border-[1.5px] border-dashed border-[#ff9a66] bg-[#ffe6d9] px-1.5 py-px text-[14px] font-bold text-[#b03a00]">
+        <span className="rounded-md border-[1.5px] border-dashed border-[#ff9a66] bg-[#ffe6d9] px-1.5 py-px text-[14px] font-bold text-warning">
           [{segment.hint}]
         </span>
       ) : (

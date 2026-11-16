@@ -27,8 +27,8 @@ export default function FileDropZone({ label, hint = "끌어다 놓아도 돼요
       }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
-      className={`${isSmall ? "inline-flex h-11 shrink-0 border-[1.5px]" : "flex h-14 w-full border-2"} cursor-pointer items-center justify-center gap-2.5 rounded-xl px-4 text-body-sm text-ink focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink hover:border-ink hover:bg-[#fef5d2] has-disabled:cursor-not-allowed has-disabled:opacity-60 ${
-        isDragging ? "border-solid border-ink bg-[#fef5d2]" : "border-dashed border-line-strong bg-white"
+      className={`${isSmall ? "inline-flex h-11 shrink-0 border-[1.5px]" : "flex h-14 w-full border-2"} cursor-pointer items-center justify-center gap-2.5 rounded-xl px-4 text-body-sm text-ink focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink hover:border-ink hover:bg-tint-cream has-disabled:cursor-not-allowed has-disabled:opacity-60 ${
+        isDragging ? "border-solid border-ink bg-tint-cream" : "border-dashed border-line-strong bg-white"
       }`}
     >
       <span className="inline-flex shrink-0 items-center gap-1.5 font-display">
