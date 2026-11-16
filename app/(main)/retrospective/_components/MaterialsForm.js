@@ -194,7 +194,7 @@ export default function MaterialsForm({ initialMaterials }) {
           }>
             {hasPractice ? (
               <>
-                <MaterialTextArea id="practice" label="실습 내용" hint="무엇을 배웠는지 적어보세요" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} className="h-[100px]" />
+                <MaterialTextArea id="practice" label="실습 내용" hint="무엇을 배웠는지 적어보세요" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} />
                 {attachments("practiceFiles", "노션 ZIP·캡처 올리기")}
               </>
             ) : (
@@ -217,7 +217,7 @@ export default function MaterialsForm({ initialMaterials }) {
       )}>
         {assignmentStatus === "record" ? (
           <>
-            <MaterialTextArea id="assignment" label="과제 내용 · 코드나 에러" hint="붙여넣기" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} className="h-[148px]" />
+            <MaterialTextArea id="assignment" label="과제 내용 · 코드나 에러" hint="붙여넣기" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} />
             <div className="flex min-w-0 flex-col gap-2">
               <FieldLabel label="과제 노션이나 GitHub를 올려보세요" />
               {attachments("assignmentFiles", "과제 파일 올리기", {
@@ -243,7 +243,6 @@ export default function MaterialsForm({ initialMaterials }) {
                 hint="짝이 남긴 코멘트 3개"
                 value={materials.codeReview}
                 onChange={(event) => updateField("codeReview", event.target.value)}
-                className="h-[100px]"
               />
             )}
           </>
@@ -263,7 +262,7 @@ export default function MaterialsForm({ initialMaterials }) {
             고민 메모<span className="ml-0.5 text-caption font-normal text-white/50"> · 선택</span>
           </span>
           <span className="relative block rounded-[14px]">
-            <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="block h-[74px] font-input leading-6 text-ink-strong! placeholder:text-ink-300!" />
+            <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="block font-input leading-6 text-ink-strong! placeholder:text-ink-300!" />
             <DrawnBorder color="var(--color-canvas)" />
           </span>
         </label>

@@ -22,17 +22,20 @@ import { selectedCompetencyNames } from "@/lib/competencySelection";
 import RetroDarkCard from "./RetroDarkCard";
 import { getAiErrorMessage, getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
-// API 19의 초안 값을 편집하고 API 23으로 저장하는 6개 필드다(R-20). 높이와 안내 문구는 11/13 디자인(프로토타입)을 따른다.
+// API 19의 초안 값을 편집하고 API 23으로 저장하는 6개 필드다(R-20). 안내 문구는 11/13 디자인(프로토타입)을 따른다.
 // blank: 칸이 비어 있을 때 그 칸 바로 아래에 띄우는 안내(⚑). 행동·결과·배운 점은 프로토타입 문구이고,
 // 제목·상황·이유는 같은 말투로 새로 썼다. 칸을 채우면 안내는 바로 사라진다.
 const STORY_FIELDS = [
   { name: "title", label: "제목", blank: "제목이 비어 있어요. 이 경험을 한 줄로 이름 붙여 주세요." },
-  { name: "situation", label: "상황", height: "h-[72px]", blank: "상황은 기록에서 찾지 못해 비워 뒀어요. 어떤 상황이었는지 한 줄 남겨 주세요." },
-  { name: "action", label: "행동", height: "h-[120px]", placeholder: "근거를 더 추가할 수 있어요", blank: "행동이 기록에 부족해요. 근거를 더 추가할 수 있어요." },
-  { name: "reason", label: "이유", height: "h-[72px]", placeholder: "왜 그렇게 했는지 한 줄 남겨 주세요", blank: "이유는 기록에서 찾지 못해 비워 뒀어요. 왜 그렇게 했는지 한 줄 남겨 주세요." },
-  { name: "result", label: "결과", height: "h-[72px]", placeholder: "근거를 더 추가할 수 있어요 · 기록에 없는 수치는 넣지 않았어요", blank: "결과나 수치는 기록에서 찾지 못해 비워 뒀어요. 근거를 더 추가할 수 있어요." },
-  { name: "learned", label: "배운 점", height: "h-[72px]", placeholder: "다음에도 가져갈 한 가지를 남겨 주세요", blank: "느낀 점은 비워 뒀어요. 직접 한 줄 남겨 주세요." },
+  { name: "situation", label: "상황", blank: "상황은 기록에서 찾지 못해 비워 뒀어요. 어떤 상황이었는지 한 줄 남겨 주세요." },
+  { name: "action", label: "행동", placeholder: "근거를 더 추가할 수 있어요", blank: "행동이 기록에 부족해요. 근거를 더 추가할 수 있어요." },
+  { name: "reason", label: "이유", placeholder: "왜 그렇게 했는지 한 줄 남겨 주세요", blank: "이유는 기록에서 찾지 못해 비워 뒀어요. 왜 그렇게 했는지 한 줄 남겨 주세요." },
+  { name: "result", label: "결과", placeholder: "근거를 더 추가할 수 있어요 · 기록에 없는 수치는 넣지 않았어요", blank: "결과나 수치는 기록에서 찾지 못해 비워 뒀어요. 근거를 더 추가할 수 있어요." },
+  { name: "learned", label: "배운 점", placeholder: "다음에도 가져갈 한 가지를 남겨 주세요", blank: "느낀 점은 비워 뒀어요. 직접 한 줄 남겨 주세요." },
 ];
+
+// 칸 안 스크롤 없이 글 길이만큼 칸이 늘어난다(이슈 #108, TextField 공통 규칙).
+// 제목은 줄바꿈 없이 한 문장으로 저장하되, 길면 다음 줄로 감싸 보이도록 한 줄 높이에서 시작하는 여러 줄 칸(singleLine)을 쓰고 입력된 줄바꿈은 지운다.
 
 function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   const router = useRouter();
@@ -155,7 +158,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
               name="retrospective"
               value={fullMarkdown}
               onChange={(event) => setFullMarkdown(event.target.value)}
-              className="block h-[480px] font-sans! leading-6 text-ink-strong! lg:h-[900px]"
+              className="block font-sans! leading-6 text-ink-strong!"
             />
           </div>
         </RetroDarkCard>
@@ -165,9 +168,10 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
           <h2 id="review-story-title" className="font-display text-title leading-8 tracking-[-0.4px] text-ink-strong">스토리 카드 초안</h2>
           {/* 기록에서 찾지 못한 칸은 지어내지 않고 비워 둔다(R-20). */}
           <div className="flex flex-col gap-4">
-            {STORY_FIELDS.map(({ name, label, height, placeholder, blank }) => {
+            {STORY_FIELDS.map(({ name, label, placeholder, blank }) => {
               // 비운 칸은 바로 안내가 생기고, 채우면 사라지도록 입력값으로 정한다.
               const isBlank = !fields[name].trim();
+              const isTitle = name === "title";
               return (
                 <div key={name} className="flex flex-col gap-2">
                   <TextField
@@ -175,12 +179,17 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
                     labelClassName="text-label leading-5 text-ink-subtle"
                     appearance="outlined"
                     name={name}
-                    multiline={name !== "title"}
+                    multiline
+                    singleLine={isTitle}
+                    rows={1}
                     value={fields[name]}
                     placeholder={placeholder}
-                    onChange={(event) => setFields((previous) => ({ ...previous, [name]: event.target.value }))}
+                    onChange={(event) => {
+                      const value = isTitle ? event.target.value.replace(/[\r\n]+/g, " ") : event.target.value;
+                      setFields((previous) => ({ ...previous, [name]: value }));
+                    }}
                     aria-describedby={isBlank ? `${name}-blank` : undefined}
-                    className={`font-input leading-6 text-ink-strong! ${height ?? ""}`}
+                    className="font-input leading-6 text-ink-strong!"
                   />
                   {isBlank && <BlankFieldsNotice id={`${name}-blank`}>{blank}</BlankFieldsNotice>}
                 </div>

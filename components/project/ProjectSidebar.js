@@ -92,7 +92,7 @@ export function PortfolioCard({ portfolio, onRemake }) {
             readOnly
             aria-label="저장한 포트폴리오"
             value={portfolio.markdown}
-            className="h-[520px] text-[15.5px]! leading-[27.9px] text-ink-strong!"
+            className="text-[15.5px]! leading-[27.9px] text-ink-strong!"
           />
           <div className="flex flex-wrap gap-2 pt-3">
             <Button variant="ink" size="sm" onClick={copyMarkdown}>Markdown 복사</Button>

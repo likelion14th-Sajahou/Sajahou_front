@@ -4,6 +4,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import DrawnBorder from "@/components/ui/DrawnBorder";
+import { TEXTAREA_GROW_CLASSES } from "@/components/ui/TextField";
 import { StoryCardIcon } from "@/components/my-record/StoryCardVisuals";
 import TextLink from "@/components/ui/TextLink";
 import { recordHref } from "@/lib/myRecordNavigation";
@@ -68,7 +69,7 @@ function AnswerDraft({ question, answer, edit, cardViews, companyLabel, onEdit, 
   return (
     <>
       {editing ? (
-        <textarea rows={9} aria-label={`문항 ${question.seq} 초안`} value={text} onChange={(event) => onEdit(event.target.value)} autoFocus className="font-input h-[297px] w-full resize-none rounded-2xl border border-transparent bg-canvas px-5 py-[18px] text-[16px] leading-[1.8] focus-visible:outline-2 focus-visible:outline-ink" />
+        <textarea rows={9} aria-label={`문항 ${question.seq} 초안`} value={text} onChange={(event) => onEdit(event.target.value)} autoFocus className={`font-input ${TEXTAREA_GROW_CLASSES} w-full resize-none rounded-2xl border border-transparent bg-canvas px-5 py-[18px] text-[16px] leading-[1.8] focus-visible:outline-2 focus-visible:outline-ink`} />
       ) : (
         <div className="font-sans rounded-[20px] bg-tint-yellow px-4 py-5 text-[16px] leading-[1.95] whitespace-pre-wrap break-words sm:px-[22px]">
           {edit ? text : <DraftSegments segments={answer.segments} />}

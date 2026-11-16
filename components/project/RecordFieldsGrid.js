@@ -7,7 +7,7 @@ export default function RecordFieldsGrid({ getFieldProps }) {
   return (
     <div className="grid w-full grid-cols-1 gap-3.5">
       {RECORD_FIELDS.map((field, index) => {
-        const { className = "min-h-12 field-sizing-content", ...props } = getFieldProps(field, index);
+        const { className = "", ...props } = getFieldProps(field, index);
         return (
           <div key={field.key} className="min-w-0">
             <TextField

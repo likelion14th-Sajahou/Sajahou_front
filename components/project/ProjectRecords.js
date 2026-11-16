@@ -83,7 +83,7 @@ function RecordItem({ record, order, isLast, onViewCard, onEdit, onDelete, onRes
           <summary className="cursor-pointer text-label font-bold text-accent-strong">AI 제안 · 결과를 더 남겨 볼까요?</summary>
           <div className="flex flex-col items-start gap-2.5 pt-2.5">
             <p className="text-body-sm text-ink">직접 확인한 결과나 받은 반응이 있나요? 모르면 비워 두어도 괜찮아요.</p>
-            <TextField multiline aria-label="추가할 결과" placeholder="한 줄이면 충분해요" value={result} onChange={(e) => setResult(e.target.value)} className="h-[74px] bg-white! font-input leading-6" />
+            <TextField multiline aria-label="추가할 결과" placeholder="한 줄이면 충분해요" value={result} onChange={(e) => setResult(e.target.value)} className="bg-white! font-input leading-6" />
             <Button variant="ink" size="sm" disabled={!result.trim()} onClick={() => run(() => onResult(record.id, result.trim()))}>결과 추가</Button>
           </div>
         </details>}
