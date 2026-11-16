@@ -144,7 +144,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
             </div>
             <Button variant="cta" className="shrink-0" onClick={copyRetrospective}>회고록 복사</Button>
           </div>
-          {/* 회고록은 손그림 테두리의 흰 상자 안에 둔다(자료 화면의 흰 섹션과 같은 선). 고칠 수 있는 칸이라 글은 Pretendard다. */}
+          {/* 회고록 본문은 편집 중에도 NPS를 쓴다. 공통 입력칸의 Pretendard보다 우선 적용한다. */}
           <div className="relative rounded-[20px] bg-white p-1">
             <DrawnBorder color="white" />
             <TextField
@@ -155,7 +155,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
               name="retrospective"
               value={fullMarkdown}
               onChange={(event) => setFullMarkdown(event.target.value)}
-              className="block h-[480px] font-input leading-6 text-ink-strong! lg:h-[900px]"
+              className="block h-[480px] font-sans! leading-6 text-ink-strong! lg:h-[900px]"
             />
           </div>
         </RetroDarkCard>
