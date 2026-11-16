@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import DrawnBorder from "@/components/ui/DrawnBorder";
 import FootprintSticker, { CurrentWeekSticker } from "./FootprintSticker";
 
 const LABEL_CLASSES = {
@@ -70,8 +69,7 @@ export default function FootprintTimeline({
   const weekRow = showSectionNames ? 2 : 1;
 
   return (
-    <div className="relative w-full rounded-[28px] border-2 border-transparent bg-white px-5 pt-6 pb-4">
-      <DrawnBorder color="var(--color-ink)" width={2} />
+    <div className="relative w-full rounded-[28px] border-2 border-ink bg-white px-5 pt-6 pb-4">
       <div
         ref={scrollerRef}
         // 선택 테두리(38px)가 주차 칸(최소 36px)보다 넓어 양 끝 주차에서 잘리지 않도록, 스크롤 영역 안쪽에 좌우 여백을 두고 그만큼 밖으로 넓힌다.
