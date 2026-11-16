@@ -49,7 +49,7 @@ export default function HomeHero({ userName, week, weekStatus }) {
         <h1 className="font-display break-keep whitespace-pre-line text-balance text-[clamp(36px,12.8vw,56px)] leading-[1.22] tracking-[-1.5px] lg:tracking-[-1.68px]">{title}</h1>
       </div>
       <div ref={characterRef} aria-hidden="true" className="home-hero-character pointer-events-none absolute aspect-[516/392]">
-        <Image src="/images/home/hero-cloud-body.png" alt="" fill sizes="(min-width: 1675px) 600px, (min-width: 1024px) 36vw, 195px" preload />
+        <Image src="/images/home/hero-cloud-body.png" alt="" fill sizes="(min-width: 1675px) 600px, (min-width: 1024px) 36vw, (min-width: 768px) 320px, 195px" preload />
         {EYES.map(({ name, image, x, y, size }) => (
           <span key={name} data-pupil={image === "pupil" ? "" : undefined} className="absolute hidden lg:block" style={{ left: `${x / 5.16}%`, top: `${y / 3.92}%`, width: `${size / 5.16}%`, aspectRatio: 1 }}>
             <Image
@@ -62,11 +62,11 @@ export default function HomeHero({ userName, week, weekStatus }) {
           </span>
         ))}
       </div>
-      <Link ref={ctaRef} href="/retrospective" data-active={["NOT_STARTED", "IN_PROGRESS"].includes(weekStatus)} className="home-hero-cta flex h-[109px] w-28 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:absolute lg:h-[167px] lg:w-[172px]">
+      <Link ref={ctaRef} href="/retrospective" data-active={["NOT_STARTED", "IN_PROGRESS"].includes(weekStatus)} className="home-hero-cta flex h-[109px] w-28 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:h-[153px] md:w-[157px] lg:absolute lg:h-[167px] lg:w-[172px]">
         <span className="home-hero-cta-content relative flex size-full items-center justify-center">
-          <Image src="/images/home/cta-flower.png" alt="" fill sizes="(min-width: 1024px) 172px, 112px" className="object-contain" />
-          <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 pt-1 whitespace-nowrap font-display text-[14.208px] leading-[25.6px] tracking-[-0.15px] text-ink-strong lg:inset-x-0 lg:top-[44.3114%] lg:bottom-auto lg:flex-row lg:gap-0 lg:pt-0">
-            {cta}<Image src="/images/home/cta-chevron-right.svg" alt="" width={16} height={16} className="shrink-0 rotate-90 lg:rotate-0" />
+          <Image src="/images/home/cta-flower.png" alt="" fill sizes="(min-width: 1024px) 172px, (min-width: 768px) 157px, 112px" className="object-contain" />
+          <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 pt-1 whitespace-nowrap font-display text-[14.208px] leading-[25.6px] tracking-[-0.15px] text-ink-strong md:inset-x-0 md:top-[44.3114%] md:bottom-auto md:flex-row md:gap-0 md:pt-0">
+            {cta}<Image src="/images/home/cta-chevron-right.svg" alt="" width={16} height={16} className="shrink-0 rotate-90 md:rotate-0" />
           </span>
         </span>
       </Link>

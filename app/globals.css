@@ -24,15 +24,24 @@
 @layer base {
   h1, h2, h3, h4, h5, h6, button, a, summary {
     font-family: var(--font-display);
+    font-synthesis-weight: none;
   }
 
   input, textarea, input::placeholder, textarea::placeholder {
     font-family: var(--font-input);
+    font-synthesis-weight: auto;
   }
 
   select, option {
     font-family: var(--font-display);
+    font-synthesis-weight: none;
   }
+}
+
+/* Basic만 있는 삼립호빵체는 합성 Bold를 막고, 다른 폰트의 기존 굵기 처리는 유지한다. */
+@layer utilities {
+  .font-display { font-synthesis-weight: none; }
+  .font-sans, .font-input, .font-noto { font-synthesis-weight: auto; }
 }
 
 /*
@@ -161,10 +170,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-display);
+  font-synthesis-weight: none;
   line-height: 1.6;
 }
 
-/* 모바일·태블릿은 내용 흐름대로 쌓아 글이 늘어도 캐릭터·버튼과 겹치지 않는다. */
+/* 모바일은 세로로 쌓고, 태블릿은 제목 아래 캐릭터·버튼을 좌우로 배치한다. */
 .home-hero {
   display: flex;
   flex-direction: column;
@@ -198,6 +208,23 @@ body {
   .home-hero-stars > span:nth-child(4) { left: 9% !important; top: 56% !important; width: 30px !important; height: 30px !important; }
   .home-hero-stars > span:nth-child(5) { left: 85% !important; top: 42% !important; width: 14px !important; height: 14px !important; }
   .home-hero-stars > span:nth-child(n+6) { display: none; }
+}
+
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+  .home-hero {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: center;
+    justify-items: center;
+    column-gap: 32px;
+    padding: 48px 48px 56px;
+  }
+  .home-hero-copy { grid-column: 1 / -1; }
+  .home-hero-character {
+    width: min(100%, 320px);
+    justify-self: end;
+  }
+  .home-hero-cta { margin-top: 0; }
 }
 
 @media (min-width: 64rem) {

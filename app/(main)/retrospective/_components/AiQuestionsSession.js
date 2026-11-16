@@ -114,7 +114,7 @@ export default function AiQuestionsSession({ initialQuestions, attachments = [],
                   source={source && (
                     <span className="font-display leading-[26.6px] [overflow-wrap:anywhere]">
                       <span className="rounded bg-white/10 px-1.5 py-0.5 text-white">{source.label}</span>의{" "}
-                      <mark className="rounded bg-yellow-400 px-[3px] text-ink-950">“{source.quote}”</mark> 부분에서 물어봐요
+                      <mark className="box-decoration-clone rounded bg-yellow-400 px-[3px] py-0.5 leading-[18px] text-ink-950">“{source.quote}”</mark> 부분에서 물어봐요
                     </span>
                   )}
                   question={question.content}
