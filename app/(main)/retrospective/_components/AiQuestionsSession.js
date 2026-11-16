@@ -143,7 +143,9 @@ export default function AiQuestionsSession({ initialQuestions, attachments = [],
       <RetroSideCard titleId="ai-question-guide-title" title="AI가 찾은 더 물어볼 곳">
         <QuestionProgressList questions={questions} currentIndex={isComplete ? null : index} />
         <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 pt-4">
-          <TextLink href={getStepHref("materials")}>← 자료 고치기</TextLink>
+          {(isComplete || index > 0) && (
+            <TextLink href={getStepHref("materials")}>← 자료 고치기</TextLink>
+          )}
           <TextLink onClick={saveLater} disabled={isSaving || isAnswering} aria-busy={isSaving}>{isSaving ? "저장하는 중…" : "저장"}</TextLink>
           <SavedTime label={savedLabel} />
         </div>
