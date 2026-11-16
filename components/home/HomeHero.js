@@ -65,8 +65,8 @@ export default function HomeHero({ userName, week, weekStatus }) {
       <Link ref={ctaRef} href="/retrospective" data-active={["NOT_STARTED", "IN_PROGRESS"].includes(weekStatus)} className="home-hero-cta flex h-[109px] w-28 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:h-[153px] md:w-[157px] lg:absolute lg:h-[167px] lg:w-[172px]">
         <span className="home-hero-cta-content relative flex size-full items-center justify-center">
           <Image src="/images/home/cta-flower.png" alt="" fill sizes="(min-width: 1024px) 172px, (min-width: 768px) 157px, 112px" className="object-contain" />
-          <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 pt-1 whitespace-nowrap font-display text-[14.208px] leading-[25.6px] tracking-[-0.15px] text-ink-strong md:inset-x-0 md:top-[44.3114%] md:bottom-auto md:flex-row md:gap-0 md:pt-0">
-            {cta}<Image src="/images/home/cta-chevron-right.svg" alt="" width={16} height={16} className="shrink-0 rotate-90 md:rotate-0" />
+          <span className="absolute inset-x-0 top-[44.3114%] flex items-center justify-center whitespace-nowrap font-display text-[14.208px] leading-[25.6px] tracking-[-0.15px] text-ink-strong">
+            {cta}<Image src="/images/home/cta-chevron-right.svg" alt="" width={16} height={16} className="shrink-0" />
           </span>
         </span>
       </Link>
