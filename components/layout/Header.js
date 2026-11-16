@@ -92,8 +92,12 @@ export default function Header() {
           <Image src="/images/brand/logo.png" alt="" width={117} height={42} className="h-auto w-[94px] lg:w-[117px]" priority />
         </Link>
         <nav aria-label="주요 메뉴" className="order-last w-full min-w-0 overflow-x-auto px-1.5 lg:order-none lg:ml-auto lg:w-auto">
-          {/* 메뉴가 들어가면 가운데 정렬하고, 넘치면 첫 메뉴부터 끝 메뉴까지 스크롤할 수 있다. */}
-          <div className="flex w-max min-w-full items-center justify-center gap-3 sm:gap-6">
+          {/* 메뉴가 들어가면 모바일(640px 미만)은 줄 전체에 고르게(space-evenly) 둔다.
+              모바일 최소 간격(gap 6px)을 nav 양옆 안쪽 여백(px-1.5, 6px)과 같게 해 양 끝과 메뉴 사이 간격이 같아진다.
+              640~1023px은 639px 화면의 메뉴 줄 너비(639 - 헤더 여백 32 - nav 여백 12 = 595px)로 고정해 가운데에 두어,
+              640px에서 메뉴가 튀지 않고 639px의 간격을 유지한다. 1024px 이상(한 줄 헤더)은 가운데로 모은다.
+              넘치면 첫 메뉴부터 끝 메뉴까지 스크롤할 수 있다. */}
+          <div className="flex w-max min-w-full items-center justify-evenly gap-1.5 sm:mx-auto sm:w-[595px] sm:min-w-0 lg:mx-0 lg:w-max lg:min-w-full lg:justify-center lg:gap-6">
           {/* 동적 경로에서는 주소를 요청 시점에야 알 수 있어, 메뉴는 먼저 보여 주고 선택 표시만 나중에 채운다. */}
           <Suspense fallback={<NavLinks />}>
             <CurrentNavLinks />
