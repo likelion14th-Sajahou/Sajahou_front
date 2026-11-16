@@ -18,6 +18,37 @@ function MissingCompetencies({ competencies }) {
   return <p className={NOTICE_CLASS}>⚑ {competencies.map(({ name }) => `#${name}`).join(" ")} 경험은 아직 사자록에 없어요.</p>;
 }
 
+// 초안이 없는 두 경우를 문항의 추출 역량으로 구분한다(이슈 #103).
+function NoMatchingCardNotice({ question, answer }) {
+  const noCompetencyFound = question.competencyIds.length === 0;
+
+  return (
+    <div className={`flex flex-col gap-2 rounded-2xl p-[18px] font-display tracking-[-0.15px] ${noCompetencyFound ? "bg-tint-yellow" : "bg-[#f3f4f1]"}`}>
+      <div className="flex items-start gap-2 text-body leading-[23px] text-ink-strong">
+        <span aria-hidden="true" className="shrink-0 text-tint-yellow-ink">⚑</span>
+        {noCompetencyFound ? (
+          <p className="min-w-0 break-words">이 문항은 어떤 역량을 묻는지 분명하지 않아요.</p>
+        ) : (
+          <p className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0 break-words">
+            <span>사자록에</span>
+            {answer.missingCompetencies.map(({ competencyId, name }, index) => (
+              <Fragment key={competencyId}>
+                {index > 0 && <span>·</span>}
+                <span className="relative isolate min-w-0 px-0.5">
+                  <span aria-hidden="true" className="absolute inset-x-0 bottom-px -z-10 h-2.5 rounded-[5px] bg-yellow-400" />
+                  #{name.replace(/^#/, "")}
+                </span>
+              </Fragment>
+            ))}
+            <span>경험이 아직 없어요</span>
+          </p>
+        )}
+      </div>
+      {noCompetencyFound && <p className="pl-5 text-body-sm leading-[22.4px] break-words text-ink-subtle">문항의 내용을 수정하거나 구체적으로 적어주세요.</p>}
+    </div>
+  );
+}
+
 // 초안 본문: 카드 문장 끝에 출처(①②③)를, 카드에 없는 내용은 주황 점선 빈칸으로 보여 준다(M-09, M-10).
 // 같은 출처 문장이 이어지면 마지막 문장에만 출처를 붙인다.
 function DraftSegments({ segments }) {
@@ -123,6 +154,7 @@ function AnswerDraft({ question, answer, edit, cardViews, companyLabel, onEdit, 
 // 문항 하나의 답 카드. 초안(37번)을 만드는 중·실패·맞는 카드 없음·초안을 나눠 보여 준다.
 export default function MatchingAnswerCard({ question, draft, edit, cardViews, companyLabel, onEdit, onSaveEdit, onRetry, onCopy }) {
   const headingId = `answer-heading-${question.questionId}`;
+  const isWarning = draft?.status === "done" && draft.answer.noMatchingCard;
   let body;
   if (!draft || draft.status === "loading") {
     body = <p role="status" className="text-body-sm text-ink-muted">{aiWaitingMessage("사자록 카드로 답 초안을 만들고 있어요")}</p>;
@@ -137,23 +169,17 @@ export default function MatchingAnswerCard({ question, draft, edit, cardViews, c
       </div>
     );
   } else if (draft.answer.noMatchingCard) {
-    // 문항에 맞는 카드가 없으면 초안을 만들지 않고 안내한다(M-08). 모양은 Figma 11-d(11/15)를 따른다.
-    body = (
-      <>
-        <p className="flex gap-2 rounded-2xl bg-[#fff0e8] px-[18px] py-4 font-sans text-body leading-[23px] text-[#b03a00]"><span aria-hidden="true">⚑</span>이 문항에 맞는 카드가 아직 없어요.</p>
-        <MissingCompetencies competencies={draft.answer.missingCompetencies} />
-      </>
-    );
+    body = <NoMatchingCardNotice question={question} answer={draft.answer} />;
   } else {
     body = <AnswerDraft question={question} answer={draft.answer} edit={edit} cardViews={cardViews} companyLabel={companyLabel} onEdit={onEdit} onSaveEdit={onSaveEdit} onCopy={onCopy} />;
   }
 
   return (
-    <Card as="article" size="md" className="relative flex min-w-0 flex-col gap-4 rounded-[28px]! px-5! py-7! sm:px-[30px]!" aria-labelledby={headingId} aria-busy={!draft || draft.status === "loading"}>
-      <DrawnBorder />
+    <Card as="article" size="md" className={`relative flex min-w-0 flex-col gap-4 rounded-[28px]! px-5! py-7! sm:px-[30px]! ${isWarning ? "border border-ink" : ""}`} aria-labelledby={headingId} aria-busy={!draft || draft.status === "loading"}>
+      {!isWarning && <DrawnBorder />}
       <div className="flex items-start gap-3">
         <Badge tone="yellow" size="question" className="mt-0.5 bg-yellow-400! text-ink-950!">Q{question.seq}</Badge>
-        <h3 id={headingId} className="font-display text-[18px] leading-[1.5]">{question.content}</h3>
+        <h3 id={headingId} className={`min-w-0 break-words font-display text-[18px] leading-[1.5] ${isWarning ? "tracking-[-0.15px] text-ink-strong" : ""}`}>{question.content}</h3>
       </div>
       {body}
     </Card>
