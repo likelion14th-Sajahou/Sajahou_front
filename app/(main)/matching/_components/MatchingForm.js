@@ -10,7 +10,7 @@ import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import MarkedSection from "@/components/ui/MarkedSection";
 import { createJobPosting } from "@/lib/matchingApi";
-import { MATCHING_SAMPLE } from "@/lib/mock/matching";
+import { MATCHING_SAMPLE } from "@/lib/matchingSample";
 import { ATTACHMENT_PENDING_MESSAGE, getAiErrorMessage } from "@/lib/requestErrorMessage";
 import MatchingAttachments, { UNREADABLE_LINK_MESSAGE } from "./MatchingAttachments";
 import MatchingResults from "./MatchingResults";

@@ -3,7 +3,6 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import { resetRetrospective, setRetrospectiveRest, startRetrospective } from "@/lib/retrospectiveApi";
@@ -16,7 +15,6 @@ import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 export default function StartActions({ isAssignment = false }) {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { setWeekStatus } = useMockData();
   const { week, session, retrospective, getStepHref, refreshCurrent, applyStarted, showToast } = useRetrospectivePreview();
   const [pending, setPending] = useState(null);
   const [error, setError] = useState("");
@@ -35,8 +33,6 @@ export default function StartActions({ isAssignment = false }) {
       const result = await request({ request: authenticatedRequest });
       if (kind === "start") applyStarted(result);
       else await refreshCurrent();
-      // 홈 화면은 아직 목업 상태를 보므로 세션 회고면 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
-      if (!isAssignment) setWeekStatus("writing");
       setIsResetOpen(false);
       startNavigation(() => router.push(getStepHref(getStepPath(result.currentStep))));
     } catch (failure) {
@@ -63,8 +59,6 @@ export default function StartActions({ isAssignment = false }) {
       const options = { request: authenticatedRequest };
       await (session.id ? setRetrospectiveRest(session.id, true, options) : startRetrospective({ weekId: week.weekId, rested: true }, options));
       await refreshCurrent();
-      // 홈 화면은 아직 목업 상태를 보므로 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
-      setWeekStatus("paused");
       showToast("이번 주는 휴회로 표시했어요");
     } catch (failure) {
       if (failure.status !== 401) setError(getRequestErrorMessage(failure, "휴회로 표시하지 못했어요. 잠시 후 다시 시도해 주세요."));
@@ -99,7 +93,6 @@ export default function StartActions({ isAssignment = false }) {
             variant="soft"
             className="min-w-0"
             href={getStepHref(getStepPath(retrospective.currentStep))}
-            onClick={() => { if (!isAssignment) setWeekStatus("writing"); }}
           >
             이어 쓰기 →
           </Button>

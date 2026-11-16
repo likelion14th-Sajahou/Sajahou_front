@@ -21,7 +21,7 @@ import { copyText } from "@/lib/clipboard";
 export default function CompleteContent() {
   const router = useRouter();
   const { authenticatedRequest, isDemo } = useAuth();
-  const { user, setWeekStatus } = useMockData();
+  const { user } = useMockData();
   const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent, getStepHref } = useRetrospectivePreview();
   const [card, setCard] = useState(null);
   const [notice, setNotice] = useState("");
@@ -60,7 +60,6 @@ export default function CompleteContent() {
     const { resetMockWeek } = await import("@/lib/mock/demoReset");
     resetMockWeek(window.localStorage, user.id);
     setAssignmentStatus("record");
-    setWeekStatus("idle");
     await refreshCurrent();
     router.push("/retrospective");
   }

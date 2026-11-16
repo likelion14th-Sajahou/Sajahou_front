@@ -43,12 +43,8 @@ function ProjectDetail({ project, initialIsAdding, onDeleted }) {
   // 기록의 '카드 보기'로 연 카드 팝업(A-10)이다. 링크로 새로 들어오면 닫히도록 연 시점의 bfcacheId도 기억한다.
   const [cardView, setCardView] = useState(null);
   const { toast, showToast, hideToast } = useToast();
-  const {
-    storyCards,
-    showFlashToast,
-    projectData,
-  } = useMockData();
-  const cards = storyCards.filter(({ projectId }) => projectId === project.id);
+  const { showFlashToast, projectData } = useMockData();
+  const cards = projectData.cards.filter(({ projectId }) => projectId === project.id);
   const viewingCard =
     cardView?.bfcacheId === bfcacheId
       ? projectRecords.find(({ id }) => id === cardView.recordId)

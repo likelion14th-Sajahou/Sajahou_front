@@ -1,54 +1,14 @@
 "use client";
 
 import { createContext, use, useState } from "react";
-import { FOOTPRINT_WEEKS } from "@/lib/mock/myRecord";
-import { MOCK_PROJECTS } from "@/lib/mock/projects";
-import { MOCK_STORY_CARDS } from "@/lib/mock/storyCards";
-import { MOCK_USER } from "@/lib/mock/user";
-import { MOCK_WEEK } from "@/lib/mock/week";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { useAuth } from "./AuthProvider";
 import useProjectData from "@/components/project/useProjectData";
 
 const MockDataContext = createContext(null);
 
-const CURRENT_WEEK_STICKER = { shape: "circle", color: "blue" };
-const PROJECT_RECAP_STICKER = { shape: "sun", color: "yellow", isProjectRecap: true };
-
-// 사자 발자국과 스티커 보드가 함께 쓰는 주차 목록이다.
-// 이번 주 칸은 회고 상태에 따라, 프로젝트 회고 칸은 프로젝트를 완료하면 바뀐다.
-// 완료한 뒤 지운 프로젝트의 스티커는 keptRecaps로 남긴다.
-function getFootprintWeeks(weekStatus, projects, keptRecaps) {
-  return FOOTPRINT_WEEKS.map((item) => {
-    const recap =
-      projects.find(({ recap, status }) => status === "done" && recap?.week === item.week)?.recap ??
-      keptRecaps.find(({ week }) => week === item.week);
-
-    if (recap) {
-      return {
-        ...item,
-        ...PROJECT_RECAP_STICKER,
-        status: "done",
-        title: recap.title,
-      };
-    }
-
-    if (item.week !== MOCK_WEEK.week) {
-      return item;
-    }
-
-    if (weekStatus === "done") {
-      return { ...item, status: "done", ...CURRENT_WEEK_STICKER };
-    }
-
-    return weekStatus === "paused" ? { ...item, status: "none", title: "휴회" } : item;
-  });
-}
-
-// 회고의 기존 시안 데이터는 유지하고, 프로젝트 카드는 API 응답만 사용한다.
-const INITIAL_STORY_CARDS = MOCK_STORY_CARDS.filter((card) => card.type !== "project");
-
-// 회고 시안 상태와 프로젝트 API 데이터를 기존 context에서 함께 제공한다.
+// 여러 화면이 함께 쓰는 로그인 사용자·프로젝트 데이터와, 화면을 옮겨 가서 띄울 토스트를 제공한다.
+// 목업 데이터는 가져오지 않는다. 목업 응답은 lib/auth.js가 mock 모드일 때만 불러오는 목업 API가 만든다.
 export default function MockDataProvider({ children }) {
   const { user, isDemo } = useAuth();
   return <MockDataState key={`${user?.id ?? "anonymous"}:${isDemo}`} authenticatedUser={user}>{children}</MockDataState>;
@@ -56,20 +16,11 @@ export default function MockDataProvider({ children }) {
 
 function MockDataState({ authenticatedUser, children }) {
   const projectData = useProjectData(authenticatedUser);
-  const user = authenticatedUser
-    ? { ...authenticatedUser, part: AUTH_PART_LABELS[authenticatedUser.part] }
-    : MOCK_USER;
+  // 화면에 보이는 파트 이름으로 바꿔 둔다. 로그인 전에는 없다(사용자를 쓰는 화면은 로그인 가드 안에 있다).
+  const user = authenticatedUser ? { ...authenticatedUser, part: AUTH_PART_LABELS[authenticatedUser.part] } : null;
   // 다른 화면으로 옮겨 가서 띄울 토스트다. 예: 프로젝트를 지우고 목록에서 안내(H-25).
   const [flashToast, setFlashToast] = useState(null);
-  const [storyCards, setStoryCards] = useState(INITIAL_STORY_CARDS);
-  const [weekStatus, setWeekStatus] = useState(MOCK_WEEK.status);
 
-  function updateStoryCard(cardId, changes) {
-    setStoryCards((current) => current.map((card) => card.id === cardId ? { ...card, ...changes } : card));
-  }
-  function deleteStoryCard(cardId) {
-    setStoryCards((current) => current.filter((card) => card.id !== cardId));
-  }
   function showFlashToast(message) {
     setFlashToast({ id: crypto.randomUUID(), message });
   }
@@ -81,15 +32,9 @@ function MockDataState({ authenticatedUser, children }) {
         projects: projectData.projects,
         addProject: projectData.create,
         projectData,
-        storyCards: [...storyCards.filter((card) => card.type !== "project"), ...projectData.cards],
-        updateStoryCard,
-        deleteStoryCard,
         flashToast,
         showFlashToast,
         hideFlashToast: () => setFlashToast(null),
-        footprintWeeks: getFootprintWeeks(weekStatus, MOCK_PROJECTS, []),
-        weekStatus,
-        setWeekStatus,
       }}
     >
       {children}

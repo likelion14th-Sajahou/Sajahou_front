@@ -41,7 +41,6 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
   const { getStepHref, refreshCurrent, isAssignment } = useRetrospectivePreview();
-  const { setWeekStatus } = useMockData();
   const [fields, setFields] = useState(() => Object.fromEntries(STORY_FIELDS.map(({ name }) => [name, initialCard[name] ?? ""])));
   const [fullMarkdown, setFullMarkdown] = useState(initialCard.fullMarkdown ?? "");
   const [tagSelection, setSelectedTags] = useState(() => initialCard.competencies);
@@ -120,8 +119,6 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
     try {
       await completeRetrospective(retrospectiveId, { request: authenticatedRequest });
       await refreshCurrent();
-      // 홈 화면은 아직 목업 상태를 보므로 세션 회고를 끝내면 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
-      if (!isAssignment) setWeekStatus("done");
       router.push(getStepHref("complete"));
     } catch (failure) {
       if (failure.code === "COMPETENCY_LIMIT") showToast(EMPTY_TAGS_MESSAGE);
