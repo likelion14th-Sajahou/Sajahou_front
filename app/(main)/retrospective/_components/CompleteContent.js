@@ -71,8 +71,8 @@ export default function CompleteContent() {
   return (
     <>
       {/* 제목·단계·카드 사이 간격은 앞 단계 화면들과 같다(프로토타입 11/13). */}
-      <RetrospectiveSteps currentStep={4} className="mt-[38px]" />
-      <RetroResultCard titleId="retrospective-complete-title" className="mt-10 max-w-[620px] gap-3 px-8 pt-12 pb-10">
+      <RetrospectiveSteps currentStep={4} />
+      <RetroResultCard titleId="retrospective-complete-title" className="max-w-[620px] gap-3 px-8 pt-12 pb-10">
         <Image src="/images/characters/cloud-done.png" alt="" width={150} height={113} className="done-pop mb-3" />
         <p className="text-body-sm leading-[21px] font-bold text-ink-subtle">{week.weekNumber}주차 {isAssignment ? "과제" : "세션"} 회고 완료</p>
         <h2 id="retrospective-complete-title" className="font-display text-[24px] leading-[39px] tracking-[-0.48px] text-balance break-keep text-ink-strong">사자록에 카드 1장을 저장했어요</h2>

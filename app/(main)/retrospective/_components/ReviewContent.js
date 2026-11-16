@@ -133,9 +133,9 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   return (
     <>
       {/* 왼쪽은 진한 '노션용 회고록' 카드, 오른쪽은 연회색 '스토리 카드 초안' 카드다(11/13 디자인, 568:496). */}
-      <fieldset disabled={isBusy} aria-busy={isBusy} className="mt-10 grid min-w-0 grid-cols-[minmax(0,568fr)_minmax(0,496fr)] items-start gap-6">
+      <fieldset disabled={isBusy} aria-busy={isBusy} className="grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,568fr)_minmax(0,496fr)]">
         <RetroDarkCard aria-labelledby="review-retrospective-title">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 id="review-retrospective-title" className="font-display text-title leading-8 tracking-[-0.4px] text-white">노션용 회고록</h2>
               <p id="review-retrospective-help" className="mt-1 text-label leading-5 text-locked">
@@ -155,7 +155,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
               name="retrospective"
               value={fullMarkdown}
               onChange={(event) => setFullMarkdown(event.target.value)}
-              className="block h-[900px] font-input leading-6 text-ink-strong!"
+              className="block h-[480px] font-input leading-6 text-ink-strong! lg:h-[900px]"
             />
           </div>
         </RetroDarkCard>
@@ -201,9 +201,9 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
           <div className="mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-2.5 border-t border-[#d9d7d1] pt-4">
             {/* 모든 질문에 답했으면 질문 화면이 질문 끝(고치기 목록)으로 열린다(R-17). */}
             <TextLink onClick={backToQuestions} disabled={isBusy}>← 질문으로</TextLink>
-            <div className="ml-auto flex gap-2">
+            <div className="ml-auto flex max-w-full flex-wrap justify-end gap-2">
               <Button variant="ink-outline" onClick={saveLater} disabled={isBusy} aria-busy={isBusy && !isCompleting}>{isBusy && !isCompleting ? "저장하는 중…" : "저장"}</Button>
-              <Button variant="cta-ink" onClick={complete} disabled={isBusy} aria-busy={isCompleting}>{isCompleting ? "저장하는 중…" : "저장하고 사자록에 추가"}</Button>
+              <Button variant="cta-ink" className="h-auto! min-h-12 max-w-full whitespace-normal! py-2" onClick={complete} disabled={isBusy} aria-busy={isCompleting}>{isCompleting ? "저장하는 중…" : "저장하고 사자록에 추가"}</Button>
             </div>
           </div>
           {/* 버튼 줄에 자리가 없어 바로 아래 오른쪽에 둔다. 저장 전에는 자리를 차지하지 않는다. */}
@@ -259,11 +259,11 @@ export default function ReviewContent() {
   return (
     <>
       {/* 제목·단계·카드 사이 간격은 앞 단계 화면들과 같다(프로토타입 11/13). */}
-      <RetrospectiveSteps currentStep={3} className="mt-[38px]" />
+      <RetrospectiveSteps currentStep={3} />
       {loaded ? (
         <ReviewForm key={`${loaded.card.cardId}:${user.part}`} retrospectiveId={retrospectiveId} initialCard={loaded.card} competencyItems={loaded.competencyItems} />
       ) : (
-        <Card as="section" size="md" className="mt-10 flex flex-wrap items-center gap-3">
+        <Card as="section" size="md" className="flex flex-wrap items-center gap-3">
           {error ? (
             <>
               <p role="alert" className="text-body-sm text-error">{error}</p>

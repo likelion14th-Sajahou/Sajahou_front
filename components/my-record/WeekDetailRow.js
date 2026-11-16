@@ -3,7 +3,7 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 import { weekDestination } from "@/lib/myRecordNavigation";
 
 const ROW_CLASSES =
-  "relative flex min-h-[78px] w-full flex-wrap items-center gap-x-3.5 gap-y-2 rounded-[20px] px-[22px] py-[18px]";
+  "relative flex min-h-[78px] w-full min-w-0 items-center gap-2 rounded-[20px] px-3 py-[18px] sm:gap-3.5 sm:px-[22px]";
 const ACTIVE_ROW_CLASSES = `${ROW_CLASSES} border-2 border-transparent bg-white`;
 const MUTED_ROW_CLASSES = `${ROW_CLASSES} border-[1.5px] border-transparent bg-[#fafaf8]`;
 
@@ -17,15 +17,15 @@ function getStateLabel({ status, cardCount, stickers }) {
 }
 
 function WeekName({ week }) {
-  return <span className="rounded-full bg-yellow-200 px-2.5 py-0.5 text-label leading-[20.8px] text-yellow-700">{week}주차</span>;
+  return <span className="shrink-0 whitespace-nowrap rounded-full bg-yellow-200 px-2.5 py-0.5 text-label leading-[20.8px] text-yellow-700">{week}주차</span>;
 }
 
 function WeekTitle({ title, completed = false }) {
-  return <span className={`text-[16px] ${completed ? "font-normal text-[#1f2433]" : "font-bold"}`}>{title}</span>;
+  return <span title={title} className={`min-w-0 flex-1 truncate text-[16px] sm:flex-initial ${completed ? "font-normal text-[#1f2433]" : "font-bold"}`}>{title}</span>;
 }
 
 function WeekState({ children, completed = false }) {
-  return <span className={`text-label leading-[19.5px] ${completed ? "text-[#5a606c]" : ""}`}>{children}</span>;
+  return <span title={children} className={`min-w-0 max-w-[40%] truncate text-caption leading-[19.5px] sm:max-w-none sm:shrink-0 sm:text-label ${completed ? "text-[#5a606c]" : ""}`}>{children}</span>;
 }
 
 export default function WeekDetailRow({ week, searchParams }) {
@@ -50,11 +50,15 @@ export default function WeekDetailRow({ week, searchParams }) {
       {!upcoming && <WeekTitle title={title} completed={completed} />}
       {stateLabel && <WeekState completed={completed}>{stateLabel}</WeekState>}
       {current ? (
-        <span className="ml-auto flex h-[38px] items-center rounded-full bg-shape-yellow px-[18px] text-body-sm">
-          회고 쓰기 →
+        <span className="ml-auto flex h-[38px] shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-shape-yellow px-3 text-body-sm sm:px-[18px]">
+          <span aria-hidden="true" className="sm:hidden">→</span>
+          <span className="sr-only sm:not-sr-only">회고 쓰기 →</span>
         </span>
       ) : hasCards ? (
-        <span className="ml-auto text-body-sm text-yellow-700">{cardLabel}</span>
+        <span className="ml-auto shrink-0 whitespace-nowrap text-body-sm text-yellow-700">
+          <span aria-hidden="true" className="sm:hidden">→</span>
+          <span className="sr-only sm:not-sr-only">{cardLabel}</span>
+        </span>
       ) : null}
     </Container>
   );

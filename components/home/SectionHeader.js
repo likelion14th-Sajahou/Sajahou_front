@@ -11,8 +11,8 @@ export default function SectionHeader({ title, href, action, chevronSize = 24, t
   ) : title;
 
   return (
-    <div className="flex w-full items-center justify-between gap-4">
-      <h2 className={`font-display leading-8 tracking-[-0.4px] text-ink ${titleSize === "lg" ? "text-[24px]" : "text-title"}`}>{heading}</h2>
+    <div className="flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-1">
+      <h2 className={`font-display leading-8 tracking-[-0.4px] text-ink ${titleSize === "lg" ? "text-title sm:text-[24px]" : "text-title"}`}>{heading}</h2>
       {action}
     </div>
   );

@@ -94,7 +94,7 @@ export default function AiQuestionsSession({ initialQuestions, attachments = [],
   const answeredBefore = questions.filter((item, itemIndex) => itemIndex < index && item.status !== "PENDING");
 
   return (
-    <div className="mt-10 grid grid-cols-[minmax(0,1fr)_320px] items-start gap-4">
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex min-w-0 flex-col gap-3">
         {isComplete ? (
           <AiQuestionsComplete questions={questions} onEdit={openQuestion} />
@@ -114,7 +114,7 @@ export default function AiQuestionsSession({ initialQuestions, attachments = [],
                   source={source && (
                     <span className="font-display leading-[26.6px] [overflow-wrap:anywhere]">
                       <span className="rounded bg-white/10 px-1.5 py-0.5 text-white">{source.label}</span>의{" "}
-                      <mark className="rounded bg-yellow-400 px-[3px] text-ink-950">“{source.quote}”</mark> 부분에서 물어봐요
+                      <mark className="box-decoration-clone rounded bg-yellow-400 px-[3px] py-0.5 leading-[18px] text-ink-950">“{source.quote}”</mark> 부분에서 물어봐요
                     </span>
                   )}
                   question={question.content}

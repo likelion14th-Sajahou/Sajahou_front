@@ -211,7 +211,7 @@ export default function MatchingForm({ jobPostingId = null }) {
 
   return (
     <>
-    <form className="matching-form relative mt-7 flex min-w-0 flex-col gap-4 rounded-[24px] bg-ink px-7 py-6" aria-labelledby="matching-form-title" onSubmit={submit} ref={formRef}>
+    <form className="matching-form relative mt-7 flex min-w-0 flex-col gap-4 rounded-[24px] bg-ink px-4 py-6 sm:px-7" aria-labelledby="matching-form-title" onSubmit={submit} ref={formRef}>
       <DrawnBorder />
       <h2 id="matching-form-title" className="text-[20px] leading-8 tracking-[-0.4px] text-white">지원할 곳 알려 주기</h2>
       <FormSection id="matching-place" title="지원할 곳">

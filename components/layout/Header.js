@@ -32,7 +32,7 @@ function NavLinks({ pathname }) {
         key={href}
         href={href}
         aria-current={isActive ? "page" : undefined}
-        className={`relative isolate whitespace-nowrap border-b-2 py-1.5 text-body-sm leading-[22.4px] font-bold ${
+        className={`relative isolate shrink-0 whitespace-nowrap border-b-2 py-1.5 text-caption leading-[22.4px] font-bold lg:text-body-sm ${
           isActive
             ? "border-transparent text-ink after:absolute after:-inset-x-[5px] after:bottom-1.5 after:-z-10 after:h-2.5 after:rounded-[5px] after:bg-yellow-400"
             : "border-transparent text-ink-subtle"
@@ -51,10 +51,25 @@ function CurrentNavLinks() {
 export default function Header() {
   const { user } = useMockData();
   const { isAuthenticated, restoreStatus, logout, isLoggingOut, isAccountBusy, logoutError } = useAuth();
-  // 이름(모바일은 '내 정보')을 누르면 내 정보 수정 팝업을 연다. 닫으면 누른 버튼으로 포커스를 돌려준다.
+  // 이름을 누르면 내 정보 수정 팝업을 연다. 닫으면 누른 버튼으로 포커스를 돌려준다.
   const [profileOpen, setProfileOpen] = useState(false);
+  const headerRef = useRef(null);
   const profileOpener = useRef(null);
   const { toast, showToast, hideToast } = useToast();
+
+  // 메뉴 스크롤바·사용자 이름·오류 안내로 높이가 달라져도 히어로는 남은 화면을 정확히 채운다.
+  useEffect(() => {
+    const header = headerRef.current;
+    const root = document.documentElement;
+    const updateHeight = () => root.style.setProperty("--header-height", `${header.getBoundingClientRect().height}px`);
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(header);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--header-height");
+    };
+  }, []);
 
   function openProfile(event) {
     profileOpener.current = event.currentTarget;
@@ -68,34 +83,36 @@ export default function Header() {
 
   // 화면 위에 고정되는 반투명 헤더(Figma 'Header'). 1024px 미만은 두 줄: 첫 줄에 로고와 사용자(로그아웃), 둘째 줄에 메뉴. 1024px 이상은 한 줄.
   // 홈 히어로가 이 높이를 빼서 첫 화면을 채우고, 스크롤 위치도 이 높이만큼 띄운다(globals.css의 --header-height).
-  // 줄 수나 높이를 바꾸면 --header-height도 함께 고친다.
+  // 최소 높이와 실측 높이를 분리해, 화면이 넓어질 때 헤더가 다시 한 줄 높이로 줄어들 수 있게 한다.
   return (
     <>
-    <header className="sticky top-0 z-40 min-h-[var(--header-height)] w-full border-b border-transparent bg-canvas/80 backdrop-blur-[8px]">
+    <header ref={headerRef} className="sticky top-0 z-40 min-h-[110px] w-full border-b border-transparent bg-canvas/80 backdrop-blur-[8px] lg:min-h-[75px]">
       <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-between gap-x-6 gap-y-2 p-4">
         <Link href="/" aria-label="사자록 홈" className="shrink-0">
-          <Image src="/images/brand/logo.png" alt="" width={117} height={42} priority />
+          <Image src="/images/brand/logo.png" alt="" width={117} height={42} className="h-auto w-[94px] lg:w-[117px]" priority />
         </Link>
-        <nav aria-label="주요 메뉴" className="order-last flex w-full flex-wrap items-center gap-x-4 gap-y-0.5 sm:gap-6 lg:order-none lg:ml-auto lg:w-auto">
+        <nav aria-label="주요 메뉴" className="order-last w-full min-w-0 overflow-x-auto px-1.5 lg:order-none lg:ml-auto lg:w-auto">
+          {/* 메뉴가 들어가면 가운데 정렬하고, 넘치면 첫 메뉴부터 끝 메뉴까지 스크롤할 수 있다. */}
+          <div className="flex w-max min-w-full items-center justify-center gap-3 sm:gap-6">
           {/* 동적 경로에서는 주소를 요청 시점에야 알 수 있어, 메뉴는 먼저 보여 주고 선택 표시만 나중에 채운다. */}
           <Suspense fallback={<NavLinks />}>
             <CurrentNavLinks />
           </Suspense>
+          </div>
         </nav>
         {/* 메뉴와 사용자 정보 사이 구분선 (한 줄일 때만) */}
         {isAuthenticated && <span aria-hidden="true" className="hidden h-4 w-px bg-locked lg:block" />}
-        {/* 모바일에서는 이름·파트 대신 내 정보 링크를 보여 준다. */}
+        {/* 모바일에서는 이름만 표시하고 파트는 숨긴다. */}
         <div className="flex items-center gap-2 sm:gap-4">
           {restoreStatus === "checking" && <p role="status" className="text-label text-ink-subtle">로그인 확인 중…</p>}
           {isAuthenticated && user && (
             <>
-              <div className="hidden min-w-0 items-center gap-1 text-body-sm leading-[20.8px] font-bold text-ink sm:flex">
+              <div className="flex min-w-0 items-center gap-1 text-caption leading-[20.8px] font-bold text-ink sm:text-body-sm">
                 <button type="button" aria-haspopup="dialog" aria-label={`${user.name} 님 내 정보 수정`} onClick={openProfile} className="max-w-[120px] cursor-pointer truncate rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink hover:underline">
                   {user.name}
                 </button>
-                <span className="whitespace-nowrap text-ink-500">{user.part}</span>
+                <span className="hidden whitespace-nowrap text-ink-500 sm:inline">{user.part}</span>
               </div>
-              <TextLink variant="underline" size="sm" aria-haspopup="dialog" onClick={openProfile} className="sm:hidden">내 정보</TextLink>
             </>
           )}
           {isAuthenticated && (

@@ -21,7 +21,7 @@ function InsufficientMaterial() {
   const review = useReviewDraftRequest();
 
   return (
-    <RetroDarkCard className="mt-10" aria-labelledby="insufficient-material-title">
+    <RetroDarkCard aria-labelledby="insufficient-material-title">
       <h2 id="insufficient-material-title" className="text-body leading-6 text-white">질문할 자료가 부족해요. 세션 자료나 메모를 조금만 더 올려 주세요.</h2>
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-locked pt-4">
         <Button variant="inverse-muted" href={getStepHref("materials")}>← 자료로</Button>
@@ -80,7 +80,7 @@ function Questions() {
 
   if (!loaded) {
     return (
-      <Card as="section" size="md" className="mt-10 flex flex-wrap items-center gap-3">
+      <Card as="section" size="md" className="flex flex-wrap items-center gap-3">
         {error ? (
           <>
             <p role="alert" className="text-body-sm text-error">{error}</p>
@@ -112,7 +112,7 @@ export default function AiQuestionsContent() {
   return (
     <>
       {/* 제목·단계·카드 사이 간격은 시작·자료 화면과 같다(프로토타입 11/13). */}
-      <RetrospectiveSteps currentStep={2} className="mt-[38px]" />
+      <RetrospectiveSteps currentStep={2} />
       <Questions />
     </>
   );

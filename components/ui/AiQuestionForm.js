@@ -101,7 +101,7 @@ export default function AiQuestionForm({
         onChange={(event) => changeAnswer(event.target.value)}
         className={styles.answer}
       />
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         {backLabel && (
           <>
             {/* 다른 단계로 가는 뒤로 가기는 링크(backHref), 같은 화면 안의 이동은 버튼(onBack)이다. */}

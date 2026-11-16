@@ -24,15 +24,24 @@
 @layer base {
   h1, h2, h3, h4, h5, h6, button, a, summary {
     font-family: var(--font-display);
+    font-synthesis-weight: none;
   }
 
   input, textarea, input::placeholder, textarea::placeholder {
     font-family: var(--font-input);
+    font-synthesis-weight: auto;
   }
 
   select, option {
     font-family: var(--font-display);
+    font-synthesis-weight: none;
   }
+}
+
+/* Basic만 있는 삼립호빵체는 합성 Bold를 막고, 다른 폰트의 기존 굵기 처리는 유지한다. */
+@layer utilities {
+  .font-display { font-synthesis-weight: none; }
+  .font-sans, .font-input, .font-noto { font-synthesis-weight: auto; }
 }
 
 /*
@@ -140,11 +149,11 @@
 }
 
 /*
- * 고정 헤더(components/layout/Header.js)의 높이. 1024px 미만은 두 줄, 이상은 한 줄이다.
- * 홈 히어로가 이 높이를 빼서 첫 화면을 채우고, 스크롤로 옮겨 가는 대상(결과 제목, 강조 카드 등)이 헤더에 가리지 않게 띄운다.
+ * 헤더 실측 전의 기본 높이. 마운트 후 Header의 ResizeObserver가 실제 높이로 갱신한다.
+ * 홈 히어로 높이와 스크롤 여백에 같은 값을 사용한다.
  */
 :root {
-  --header-height: 120px;
+  --header-height: 110px;
 }
 
 @media (min-width: 64rem) {
@@ -161,64 +170,134 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-display);
+  font-synthesis-weight: none;
   line-height: 1.6;
 }
 
-/* 히어로 장식 배치에만 화면별 좌표를 쓴다. */
+/* 모바일은 세로로 쌓고, 태블릿은 제목 아래 캐릭터·버튼을 좌우로 배치한다. */
 .home-hero {
-  min-height: 640px;
-  height: calc(100dvh - var(--header-height));
+  --home-hero-height: max(0px, calc(100dvh - var(--header-height)));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-items: center;
+  justify-items: center;
+  gap: clamp(8px, 2dvh, 20px);
+  height: var(--home-hero-height);
+  min-height: 0;
+  flex-shrink: 0;
+  padding: clamp(16px, 5dvh, 56px) 16px;
 }
 
 .home-hero-copy {
-  top: 14%;
-  left: 50%;
-  translate: -50% 0;
+  position: relative;
+  gap: clamp(4px, 1.8dvh, 16px);
+  padding-inline: 0;
+}
+
+.home-hero-copy p {
+  font-size: clamp(14px, min(5.48vw, calc(var(--home-hero-height) * 0.04)), 24px);
+}
+
+.home-hero-copy h1 {
+  font-size: clamp(28px, min(12.8vw, calc(var(--home-hero-height) * 0.085)), 56px);
 }
 
 .home-hero-character {
-  width: min(76vw, 360px);
-  left: -5%;
-  bottom: 7%;
+  position: relative;
+  width: 195px;
+  height: min(100%, 148px);
+  min-height: 0;
+  flex-shrink: 0;
 }
 
 .home-hero-cta {
-  top: 54%;
-  right: 3%;
+  position: relative;
+  margin-top: 0;
+  max-height: 100%;
+  flex-shrink: 0;
 }
 
-@media (min-width: 40rem) and (max-width: 63.999rem) {
-  .home-hero-character { left: 5%; }
-  .home-hero-cta { right: 13%; }
+@media (max-width: 47.999rem) {
+  .home-hero {
+    /* 긴 화면에서도 남는 높이를 캐릭터 행에 몰아주지 않는다. */
+    grid-template-rows: auto minmax(0, min(148px, calc(var(--home-hero-height) * 0.24))) auto;
+    align-content: center;
+    row-gap: clamp(12px, 3dvh, 32px);
+  }
+
+  .home-hero-cta {
+    width: clamp(80px, calc(var(--home-hero-height) * 0.2), 112px);
+    height: auto;
+    aspect-ratio: 112 / 109;
+  }
+}
+
+@media (max-width: 47.999rem) and (max-height: 420px) {
+  .home-hero-copy h1 { font-size: clamp(20px, calc(var(--home-hero-height) * 0.1), 28px); }
+  .home-hero-cta { width: 80px; }
 }
 
 @media (max-width: 63.999rem) {
-  .home-hero-stars > span:nth-child(1) { left: 83% !important; top: 8% !important; }
-  .home-hero-stars > span:nth-child(2) { left: 88% !important; top: 44% !important; }
-  .home-hero-stars > span:nth-child(3) { left: 8% !important; top: 6% !important; }
-  .home-hero-stars > span:nth-child(4) { left: 82% !important; top: 36% !important; }
-  .home-hero-stars > span:nth-child(5) { left: 3% !important; top: 32% !important; }
-  .home-hero-stars > span:nth-child(6) { left: 12% !important; top: 43% !important; }
-  .home-hero-stars > span:nth-child(7) { left: 20% !important; top: 55% !important; }
-  .home-hero-stars > span:nth-child(8) { left: 82% !important; top: 80% !important; }
-  .home-hero-stars > span:nth-child(9) { left: 55% !important; top: 89% !important; }
+  .home-hero-stars > span:nth-child(1) { left: 81% !important; top: 6% !important; width: 28px !important; height: 28px !important; }
+  .home-hero-stars > span:nth-child(2) { left: 77% !important; top: 79% !important; width: 24px !important; height: 24px !important; }
+  .home-hero-stars > span:nth-child(3) { left: 7% !important; top: 7% !important; width: 20px !important; height: 20px !important; }
+  .home-hero-stars > span:nth-child(4) { left: 9% !important; top: 56% !important; width: 30px !important; height: 30px !important; }
+  .home-hero-stars > span:nth-child(5) { left: 85% !important; top: 42% !important; width: 14px !important; height: 14px !important; }
+  .home-hero-stars > span:nth-child(n+6) { display: none; }
+}
+
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+  .home-hero {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* 문구와 캐릭터·버튼을 묶어 중앙에 놓고, 긴 화면의 여백은 위아래로 나눈다. */
+    grid-template-rows: auto minmax(0, min(243px, calc(var(--home-hero-height) * 0.32)));
+    align-content: center;
+    justify-items: center;
+    column-gap: 32px;
+    row-gap: clamp(24px, calc(var(--home-hero-height) * 0.07), 64px);
+    padding-inline: 48px;
+  }
+  .home-hero-copy { grid-column: 1 / -1; }
+  .home-hero-character {
+    width: min(100%, 320px);
+    height: min(100%, 243px);
+    justify-self: end;
+  }
+  .home-hero-cta { margin-top: 0; }
 }
 
 @media (min-width: 64rem) {
   .home-hero {
-    min-height: 520px;
+    display: block;
+    padding: 0;
   }
   .home-hero-copy {
+    position: absolute;
     top: 33.6114%;
+    left: 50%;
+    translate: -50% 0;
+    gap: 16px;
+    padding-inline: 24px;
   }
+  .home-hero-copy p { font-size: clamp(14px, calc(var(--home-hero-height) * 0.05), 24px); }
+  .home-hero-copy h1 { font-size: clamp(28px, calc(var(--home-hero-height) * 0.12), 56px); }
   .home-hero-character {
+    position: absolute;
     width: 35.8333%;
-    max-width: 600px;
+    height: auto;
+    max-width: min(600px, calc(var(--home-hero-height) * 0.72));
     left: 10.0694%;
     top: 41.5971%;
     bottom: auto;
   }
   .home-hero-cta {
+    position: absolute;
+    width: clamp(80px, calc(var(--home-hero-height) * 0.32), 172px);
+    height: auto;
+    aspect-ratio: 172 / 167;
+    max-height: none;
+    margin-top: 0;
     /* Figma 1440 × 839: 꽃 영역의 왼쪽 위 (922, 457). */
     top: 54.4696%;
     left: 64.0278%;

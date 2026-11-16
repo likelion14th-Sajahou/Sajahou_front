@@ -13,9 +13,9 @@ export default function PartField({ id, value, onChange, error }) {
     <fieldset className="min-w-0 pb-6" aria-labelledby={`${id}-title`} aria-describedby={error ? `${id}-error` : undefined} aria-invalid={error ? true : undefined}>
       <legend className="sr-only">파트</legend>
       <p id={`${id}-title`} className={LABEL_CLASS}>파트</p>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="flex flex-wrap gap-2">
         {PARTS.map((part) => (
-          <label key={part} className="cursor-pointer">
+          <label key={part} className="min-w-fit flex-1 cursor-pointer">
             <input type="radio" name="part" value={part} checked={value === part} onChange={onChange} className="peer sr-only" />
             <span className="font-display flex items-center justify-center rounded-[14px] border border-line bg-white px-2 py-2.5 text-center text-body-sm leading-5 whitespace-nowrap text-ink peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink">
               {AUTH_PART_LABELS[part]}
