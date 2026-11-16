@@ -1,5 +1,4 @@
 import Card from "@/components/ui/Card";
-import DrawnBorder from "@/components/ui/DrawnBorder";
 import CompetencyTags from "./CompetencyTags";
 import { StoryCardIcon, StoryCardTypeBadge } from "./StoryCardVisuals";
 
@@ -10,9 +9,8 @@ export default function StoryCard({ card, isHighlighted = false, onOpen }) {
     <Card
       as="article"
       size="sm"
-      className="relative flex h-full min-w-0 flex-col items-start gap-3 rounded-[24px]! font-display text-[#1f2433] tracking-[-0.15px]"
+      className={`relative flex h-full min-w-0 flex-col items-start gap-3 rounded-[24px]! border-2 font-display text-[#1f2433] tracking-[-0.15px] ${isHighlighted ? "border-shape-yellow" : "border-ink-300"}`}
     >
-      <DrawnBorder width={2} color={isHighlighted ? "var(--color-shape-yellow)" : "var(--color-ink-300)"} />
       <div className="flex w-full items-center gap-2">
         <span className="flex size-10 shrink-0 items-center justify-center"><StoryCardIcon card={card} /></span>
         <StoryCardTypeBadge type={type} />
