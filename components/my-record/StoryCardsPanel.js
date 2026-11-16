@@ -6,9 +6,9 @@ import Chip from "@/components/ui/Chip";
 import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
 import DrawnBorder from "@/components/ui/DrawnBorder";
-import TextField from "@/components/ui/TextField";
 import SelectField from "@/components/ui/SelectField";
 import StoryCardList from "./StoryCardList";
+import StoryCardSearch from "./StoryCardSearch";
 import RemoteStoryCard from "./RemoteStoryCard";
 import { getStoryCards } from "@/lib/myRecordApi";
 import { cardView } from "@/lib/projectViewModel";
@@ -93,15 +93,7 @@ export default function StoryCardsPanel({
             </option>
           ))}
         </SelectField>
-        <TextField
-          drawn
-          size="sm"
-          wrapperClassName="min-w-[120px] flex-1"
-          aria-label="카드 검색"
-          value={search}
-          onChange={(event) => onNavigate({ q: event.target.value, card: null }, true)}
-          placeholder="검색"
-        />
+        <StoryCardSearch search={search} onNavigate={onNavigate} />
       </div>
 
       {week !== undefined && (
