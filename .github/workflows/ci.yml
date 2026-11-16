@@ -1,0 +1,47 @@
+# 사자록 프론트엔드 CI
+# PR(develop·main 대상)과 develop 푸시마다 lint → build → 번들 크기 검사를 실행한다.
+# 번들 크기 검사(scripts/check-bundle-size.mjs): 브라우저 JS의 gzip 합계가 400KB를 넘으면 실패한다.
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+
+# 같은 브랜치에 새 커밋이 오면 이전 실행을 취소해 러너 시간을 아낀다.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint · Build · Bundle size
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - name: 코드 가져오기
+        uses: actions/checkout@v5
+
+      - name: Node.js 24 설치
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: 번들 크기 검사 (한도 400KB, gzip)
+        run: npm run check:bundle
