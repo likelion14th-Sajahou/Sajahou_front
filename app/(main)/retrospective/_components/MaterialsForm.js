@@ -8,6 +8,7 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 import Image from "next/image";
 import TextField from "@/components/ui/TextField";
 import LinkPasteField from "@/components/ui/LinkPasteField";
+import MarkedTitle from "@/components/ui/MarkedTitle";
 import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
 import MaterialsChangeNotice from "@/components/ui/MaterialsChangeNotice";
@@ -72,7 +73,8 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
     <section aria-labelledby={titleId} className="relative flex min-w-0 flex-col gap-3.5 rounded-[20px] bg-white px-5 py-[18px]">
       <DrawnBorder color="white" />
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h3 id={titleId} className="shrink-0 font-display text-[19px] leading-7 text-ink-strong">{title}</h3>
+        {/* 자소서 매칭 입력 카드와 같은 형광펜 제목이다. */}
+        <MarkedTitle id={titleId} size="lg" className="shrink-0">{title}</MarkedTitle>
         {controls}
       </div>
       {children}
