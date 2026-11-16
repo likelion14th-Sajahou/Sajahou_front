@@ -33,7 +33,7 @@ function smoothOffset(knots, position) {
 }
 
 // 너비 w·높이 h·모서리 r인 둥근 사각형의 가장자리를 따라 흔들리는 선(SVG path)을 만든다.
-export function drawnBorderPath(w, h, r, strokeWidth) {
+function drawnBorderPath(w, h, r, strokeWidth) {
   const radius = Math.max(0, Math.min(r, w / 2, h / 2));
   const straightW = w - 2 * radius;
   const straightH = h - 2 * radius;

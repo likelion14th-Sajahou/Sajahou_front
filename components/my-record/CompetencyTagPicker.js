@@ -5,7 +5,7 @@ import { selectedCompetencyNames } from "@/lib/competencySelection";
 
 const MAX_TAGS = 3;
 export const EMPTY_TAGS_MESSAGE = "역량 태그를 하나 이상 골라 주세요";
-export const TAG_LIMIT_MESSAGE = `역량 태그는 ${MAX_TAGS}개까지 고를 수 있어요`;
+const TAG_LIMIT_MESSAGE = `역량 태그는 ${MAX_TAGS}개까지 고를 수 있어요`;
 
 // 회고 검토(R-20), 기록 저장(H-14), 카드 수정(A-10)이 함께 쓰는 역량 태그 선택이다.
 // competencies는 역량 목록 조회(API 6) 응답이다(내 파트 8개 + 공통 7개). 칩에 마우스를 올리면 서버가 준 뜻(description)을 보여 준다.

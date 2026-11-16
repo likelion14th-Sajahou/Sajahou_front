@@ -24,7 +24,7 @@ function getFileKind(fileName) {
 }
 
 // 첨부 API 응답(7·8·13번)을 칩 하나로 바꾼다.
-export function toAttachmentItem(data) {
+function toAttachmentItem(data) {
   const name = data.name ?? data.url;
   return {
     id: String(data.attachmentId),
