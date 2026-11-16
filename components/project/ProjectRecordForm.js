@@ -10,7 +10,7 @@ import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import EmptyFieldsNotice from "./EmptyFieldsNotice";
 import RecordFieldsGrid from "./RecordFieldsGrid";
-import RecordFormTitle from "./RecordFormTitle";
+import CardTitle from "@/components/ui/CardTitle";
 import { REVIEW_TAG_PICKER_STYLE } from "./ProjectRecordReview";
 import { formatMonthDay } from "@/lib/formatDate";
 import { EMPTY_RECORD_MESSAGE, RECORD_FIELDS } from "./recordFields";
@@ -57,7 +57,7 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
       <DrawnBorder color="var(--color-ink-300)" />
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4">
-        <RecordFormTitle id="record-form-title" date={`${formatMonthDay(record.date)}(${record.weekday})`}>기록 수정</RecordFormTitle>
+        <CardTitle id="record-form-title" action={<p className="text-label text-ink-subtle">{`${formatMonthDay(record.date)}(${record.weekday})`}</p>}>기록 수정</CardTitle>
         <p className="text-label leading-5 text-ink-subtle">고칠 칸을 바꾸고 저장하세요.</p>
         <EmptyFieldsNotice fields={fields} />
         <RecordFieldsGrid

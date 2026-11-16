@@ -15,7 +15,7 @@ import Toast, { useToast } from "@/components/ui/Toast";
 import ProjectRecordQuestions from "./ProjectRecordQuestions";
 import ProjectRecordReview from "./ProjectRecordReview";
 import RecordAttachmentsField from "./RecordAttachmentsField";
-import RecordFormTitle from "./RecordFormTitle";
+import CardTitle from "@/components/ui/CardTitle";
 import { EMPTY_RECORD_MESSAGE } from "./recordFields";
 import ActionFooter from "@/components/ui/ActionFooter";
 import { createProjectRecord, updateProjectRecord, requestRecordQuestionsWithRetry, organizeProjectRecord } from "@/lib/projectApi";
@@ -194,7 +194,7 @@ export default function ProjectRecordAddForm({ projectId, onCancel, onSave }) {
     <Card as="section" size="md" className={`relative ${isDark ? "bg-ink-900! text-white" : ""}`} aria-labelledby="record-add-title">
       <DrawnBorder color={isDark ? undefined : "var(--color-ink-300)"} />
       <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4" aria-busy={busy}>
-        <RecordFormTitle id="record-add-title" date={todayLabel()} tone={isDark ? "dark" : "light"}>기록 추가</RecordFormTitle>
+        <CardTitle id="record-add-title" tone={isDark ? "dark" : "light"} action={<p className={`text-label ${isDark ? "text-locked" : "text-ink-subtle"}`}>{todayLabel()}</p>}>기록 추가</CardTitle>
         {step === "insufficient" && (
           <div className="flex flex-col gap-4">
             <p><Badge tone="brand">AI 질문</Badge></p>
