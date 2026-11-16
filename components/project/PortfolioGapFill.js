@@ -12,7 +12,6 @@ import useProjectAction from "./useProjectAction";
 import { saveQuestionAnswer } from "@/lib/projectApi";
 import AiPromptHeader from "@/components/ui/AiPromptHeader";
 import DrawnBorder from "@/components/ui/DrawnBorder";
-import Image from "next/image";
 
 export default function PortfolioGapFill({ state, onChange, onBackToRecords, onComplete }) {
   const { questions, inputs, index } = state;
@@ -66,7 +65,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
       </Card>
       <Card as="aside" size="md" aria-label="AI가 찾은 빈 곳" className="relative font-display text-ink-strong">
         <DrawnBorder color="var(--color-ink-300)" />
-        <div className="flex items-center justify-between border-b border-ink-strong pb-3"><h2 className="text-[18px] leading-[28.8px]">AI가 찾은 빈 곳</h2><Image src="/images/project/gap-marker.svg" width={14.08} height={13.12} alt="" /></div>
+        <div className="border-b border-ink-strong pb-3"><h2 className="text-[18px] leading-[28.8px]">AI가 찾은 빈 곳</h2></div>
         <ol className="flex flex-col gap-2 pt-4">
         {questions.map((q, i) => <li key={q.questionId} aria-current={i === index ? "step" : undefined} className={`flex flex-col items-start gap-1 rounded-xl px-3 py-2.5 ${i === index ? "bg-tint-orange" : "bg-canvas"}`}>
           <Badge tone={q.tag === "산출물 요청" ? "blue" : "red"} size="sm" className={q.tag === "산출물 요청" ? "" : "text-error"}>{q.tag}</Badge>
