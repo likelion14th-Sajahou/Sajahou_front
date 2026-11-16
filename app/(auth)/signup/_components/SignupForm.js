@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import FormSection from "@/components/profile/FormSection";
 import PartField from "@/components/profile/PartField";
 import Button from "@/components/ui/Button";
 import Checkbox from "@/components/ui/Checkbox";
+import MarkedSection from "@/components/ui/MarkedSection";
 import ProfileFields from "@/components/profile/ProfileFields";
 import TextLink from "@/components/ui/TextLink";
 import { useAuth } from "@/components/layout/AuthProvider";
@@ -121,14 +121,16 @@ export default function SignupForm() {
       {requestError && <p role="alert" className="pb-3 text-label text-error">{requestError}</p>}
       <fieldset disabled={submitting || signup?.submitted} className="min-w-0">
         <legend className="sr-only">회원가입 정보</legend>
-        <FormSection id="signup-info-title" title="기본 정보">
-          <ProfileFields values={values} onChange={handleChange} errors={errors} />
-        </FormSection>
-
-        <PartField id="signup-part" value={values.part} onChange={handleChange} error={errors.part} />
+        {/* 내 정보 수정 팝업처럼 계정·기본 정보·파트를 형광펜 제목 구역으로 나누고, 구역 사이는 선 없이 32px 띄운다. */}
+        <div className="flex flex-col gap-8">
+          <MarkedSection id="signup-info-title" title="기본 정보" as="h2">
+            <ProfileFields values={values} onChange={handleChange} errors={errors} />
+          </MarkedSection>
+          <PartField id="signup-part" value={values.part} onChange={handleChange} error={errors.part} />
+        </div>
 
         {/* 개인정보 동의(Figma 'Agreement Box') */}
-        <label className="flex cursor-pointer items-start gap-2 rounded-[14px] bg-canvas p-4">
+        <label className="mt-8 flex cursor-pointer items-start gap-2 rounded-[14px] bg-canvas p-4">
           <span className="flex shrink-0 pt-px">
             <Checkbox name="privacyAgreed" checked={values.privacyAgreed} onChange={handleChange} aria-invalid={errors.privacyAgreed ? true : undefined} aria-describedby={errors.privacyAgreed ? "privacyAgreed-error" : undefined} />
           </span>

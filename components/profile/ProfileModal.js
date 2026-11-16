@@ -8,6 +8,7 @@ import MarkedSection from "@/components/ui/MarkedSection";
 import TextLink from "@/components/ui/TextLink";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
 import { createProfileValues, toProfilePayload, validateProfile } from "@/lib/profile";
+import GoogleAccountInfo from "./GoogleAccountInfo";
 import ProfileFields from "./ProfileFields";
 import WithdrawAccountModal from "./WithdrawAccountModal";
 
@@ -129,11 +130,7 @@ function ProfileForm({ user, onClose, onSaved }) {
       <form ref={formRef} noValidate onSubmit={handleSubmit} aria-busy={isSavingProfile} className="flex flex-col gap-8">
         <fieldset disabled={isAccountBusy} className="flex min-w-0 flex-col gap-8">
           <legend className="sr-only">내 정보</legend>
-          <MarkedSection id="profile-account-title" title="계정">
-            <p className="flex min-h-12 items-center rounded-[14px] bg-canvas px-4 py-3 text-body leading-6 break-all text-ink-strong">
-              <span className="sr-only">Google 계정 </span>{user.email}
-            </p>
-          </MarkedSection>
+          <GoogleAccountInfo id="profile-account-title" email={user.email} />
           <MarkedSection id="profile-info-title" title="기본 정보">
             <ProfileFields values={values} onChange={handleChange} errors={errors} />
           </MarkedSection>

@@ -34,7 +34,8 @@ export default function SignupSession({ children }) {
   if (!signup) return null;
   return (
     <>
-      <GoogleAccountInfo email={signup.email} className="my-6 w-full" />
+      {/* 내 정보 수정 팝업처럼 구역 사이에 선 없이 32px 띄운다. */}
+      <GoogleAccountInfo id="signup-account-title" as="h2" email={signup.email} className="mt-6 mb-8 w-full" />
       <div key={signup.signupToken}>{children}</div>
     </>
   );
