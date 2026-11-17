@@ -17,7 +17,7 @@ export const metadata = {
     siteName: "사자록",
     locale: "ko_KR",
     type: "website",
-    images: [{ url: "/images/characters/cloud-shooting-star.png", width: 820, height: 615, alt: "사자록" }],
+    images: [{ url: "/images/og-image.png", width: 1731, height: 909, alt: "사자록" }],
   },
 };
 
