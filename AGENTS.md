@@ -37,7 +37,7 @@ AI는 작업 전 이 문서와 관련 코드를 확인하고, 프로젝트의 �
 
 | Category | Technology | Version |
 | --- | --- | --- |
-| Framework | Next.js (App Router) | 16.4.4 |
+| Framework | Next.js (App Router) | 16.4.6 |
 | UI Library | React | 19.3.0 |
 | Language | JavaScript (JSX) | - |
 | Styling | Tailwind CSS | 4.x |

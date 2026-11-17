@@ -18,7 +18,7 @@
 | 구분 | 기술 |
 | --- | --- |
 | 런타임 | Node.js 24.x |
-| 프레임워크 | Next.js 16.4.4 · App Router |
+| 프레임워크 | Next.js 16.4.6 · App Router |
 | UI | React 19.3.0 |
 | 언어 | JavaScript · JSX |
 | 스타일 | Tailwind CSS 4.x |
