@@ -15,6 +15,7 @@ export default function RecordFieldsGrid({ getFieldProps }) {
               multiline
               rows={1}
               labelClassName="text-caption leading-[19px] font-bold text-ink-500"
+              placeholder={field.placeholder}
               className={`font-input leading-6 text-ink-strong! ${className}`}
               {...props}
             />

@@ -42,6 +42,7 @@ export default function PortfolioReview({ project, initialMarkdown, blanks = [],
           <TextField
             multiline
             aria-label="포트폴리오"
+            placeholder="예) 캠퍼스 중고마켓의 첫 화면을 기획했어요. 사용자 의견을 반영해 상품 탐색 흐름을 개선했어요"
             value={markdown}
             onChange={(event) => setMarkdown(event.target.value)}
             className="font-input text-[14.5px]! leading-[25.375px] text-ink-strong!"
