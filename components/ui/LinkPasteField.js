@@ -11,7 +11,7 @@ export default function LinkPasteField({ value, onChange, onAdd, className = "",
       <Image src="/images/common/link-18.svg" alt="" width={18} height={18} className="shrink-0" />
       <input
         type="text"
-        className="h-full min-w-0 flex-1 bg-transparent font-input text-body-sm text-ink outline-none placeholder:text-ink-300"
+        className="h-full min-w-0 flex-1 bg-transparent font-input text-body-sm text-ink outline-none"
         value={value}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={(event) => {

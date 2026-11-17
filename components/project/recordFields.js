@@ -1,4 +1,4 @@
-// label은 기록 목록, formLabel은 입력 폼, placeholder는 기록 추가 폼에 쓴다(문구는 11/13 프로토타입).
+// label은 기록 목록, formLabel과 placeholder는 기록 추가·검토·수정 폼이 함께 쓴다.
 export const RECORD_FIELDS = [
   { key: "did", label: "한 일", formLabel: "이번에 한 일", placeholder: "예) 메인 화면 시안 2개를 만들어 공유했어요" },
   { key: "problem", label: "고민·해결", formLabel: "고민하거나 해결한 문제", placeholder: "예) 팀원마다 원하는 첫 화면이 달랐어요" },

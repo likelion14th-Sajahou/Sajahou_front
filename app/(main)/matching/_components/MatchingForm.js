@@ -221,7 +221,7 @@ export default function MatchingForm({ jobPostingId = null }) {
         </div>
       </FormSection>
       <FormSection id="matching-posting" title="채용 공고">
-        {field("jd", "주요 업무·자격 요건 (JD)", "공고 본문을 붙여 넣어요", 4)}
+        {field("jd", "주요 업무·자격 요건 (JD)", "예) 서비스 사용 흐름 개선 · 사용자 인터뷰 경험이 있는 분", 4)}
         <MatchingAttachments attachments={attachments} onLinkUnreadable={focusJd} />
       </FormSection>
       <FormSection id="matching-more" title="더 알려 주기" note={<Badge tone="plain" size="xs">선택</Badge>}>

@@ -12,6 +12,7 @@ import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/story-card/CompetencyTagPicker";
+import { DOCUMENT_PLACEHOLDERS, STORY_CARD_PLACEHOLDERS } from "@/components/story-card/storyCardTypes";
 import { getCompetencies, updateStoryCard } from "@/lib/myRecordApi";
 import { completeRetrospective, createReviewDraft, getRetrospective } from "@/lib/retrospectiveApi";
 import RetrospectiveSteps from "./RetrospectiveSteps";
@@ -24,16 +25,16 @@ import { selectedCompetencyNames } from "@/lib/competencySelection";
 import RetroDarkCard from "./RetroDarkCard";
 import { getAiErrorMessage, getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
-// API 19의 초안 값을 편집하고 API 23으로 저장하는 6개 필드다(R-20). 안내 문구는 11/13 디자인(프로토타입)을 따른다.
+// API 19의 초안 값을 편집하고 API 23으로 저장하는 6개 필드다(R-20). 입력 예시는 카드 수정과 공유한다.
 // blank: 칸이 비어 있을 때 그 칸 바로 아래에 띄우는 안내(⚑). 행동·결과·배운 점은 프로토타입 문구이고,
 // 제목·상황·이유는 같은 말투로 새로 썼다. 칸을 채우면 안내는 바로 사라진다.
 const STORY_FIELDS = [
   { name: "title", label: "제목", blank: "제목이 비어 있어요. 이 경험을 한 줄로 이름 붙여 주세요." },
   { name: "situation", label: "상황", blank: "상황은 기록에서 찾지 못해 비워 뒀어요. 어떤 상황이었는지 한 줄 남겨 주세요." },
-  { name: "action", label: "행동", placeholder: "근거를 더 추가할 수 있어요", blank: "행동이 기록에 부족해요. 근거를 더 추가할 수 있어요." },
-  { name: "reason", label: "이유", placeholder: "왜 그렇게 했는지 한 줄 남겨 주세요", blank: "이유는 기록에서 찾지 못해 비워 뒀어요. 왜 그렇게 했는지 한 줄 남겨 주세요." },
-  { name: "result", label: "결과", placeholder: "근거를 더 추가할 수 있어요 · 기록에 없는 수치는 넣지 않았어요", blank: "결과나 수치는 기록에서 찾지 못해 비워 뒀어요. 근거를 더 추가할 수 있어요." },
-  { name: "learned", label: "배운 점", placeholder: "다음에도 가져갈 한 가지를 남겨 주세요", blank: "느낀 점은 비워 뒀어요. 직접 한 줄 남겨 주세요." },
+  { name: "action", label: "행동", blank: "행동이 기록에 부족해요. 근거를 더 추가할 수 있어요." },
+  { name: "reason", label: "이유", blank: "이유는 기록에서 찾지 못해 비워 뒀어요. 왜 그렇게 했는지 한 줄 남겨 주세요." },
+  { name: "result", label: "결과", blank: "결과나 수치는 기록에서 찾지 못해 비워 뒀어요. 근거를 더 추가할 수 있어요." },
+  { name: "learned", label: "배운 점", blank: "느낀 점은 비워 뒀어요. 직접 한 줄 남겨 주세요." },
 ];
 
 // 칸 안 스크롤 없이 글 길이만큼 칸이 늘어난다(이슈 #108, TextField 공통 규칙).
@@ -155,6 +156,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
               aria-label="노션용 회고록"
               aria-describedby="review-retrospective-help"
               name="retrospective"
+              placeholder={DOCUMENT_PLACEHOLDERS[isAssignment ? "assignment" : "session"]}
               value={fullMarkdown}
               onChange={(event) => setFullMarkdown(event.target.value)}
               className="block font-sans! leading-6 text-ink-strong!"
@@ -167,7 +169,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
           <h2 id="review-story-title" className="font-display text-title leading-8 tracking-[-0.4px] text-ink-strong">스토리 카드 초안</h2>
           {/* 기록에서 찾지 못한 칸은 지어내지 않고 비워 둔다(R-20). */}
           <div className="flex flex-col gap-4">
-            {STORY_FIELDS.map(({ name, label, placeholder, blank }) => {
+            {STORY_FIELDS.map(({ name, label, blank }) => {
               // 비운 칸은 바로 안내가 생기고, 채우면 사라지도록 입력값으로 정한다.
               const isBlank = !fields[name].trim();
               const isTitle = name === "title";
@@ -182,7 +184,7 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
                     singleLine={isTitle}
                     rows={1}
                     value={fields[name]}
-                    placeholder={placeholder}
+                    placeholder={STORY_CARD_PLACEHOLDERS[name]}
                     onChange={(event) => {
                       const value = isTitle ? event.target.value.replace(/[\r\n]+/g, " ") : event.target.value;
                       setFields((previous) => ({ ...previous, [name]: value }));

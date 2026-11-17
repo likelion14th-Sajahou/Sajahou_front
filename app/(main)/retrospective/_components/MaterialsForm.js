@@ -194,7 +194,7 @@ export default function MaterialsForm({ initialMaterials }) {
           }>
             {hasPractice ? (
               <>
-                <MaterialTextArea id="practice" label="실습 내용" hint="무엇을 배웠는지 적어보세요" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} />
+                <MaterialTextArea id="practice" label="실습 내용" hint="무엇을 배웠는지 적어보세요" placeholder="예) 배운 내용을 적용해 로그인 화면을 만들었어요" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} />
                 {attachments("practiceFiles", "노션 ZIP·캡처 올리기")}
               </>
             ) : (
@@ -217,7 +217,7 @@ export default function MaterialsForm({ initialMaterials }) {
       )}>
         {assignmentStatus === "record" ? (
           <>
-            <MaterialTextArea id="assignment" label="과제 내용 · 코드나 에러" hint="붙여넣기" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} />
+            <MaterialTextArea id="assignment" label="과제 내용 · 코드나 에러" hint="붙여넣기" placeholder="예) 회원가입 폼을 만들었는데 빈칸을 제출해도 오류 안내가 나오지 않아요" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} />
             <div className="flex min-w-0 flex-col gap-2">
               <FieldLabel label="과제 노션이나 GitHub를 올려보세요" />
               {attachments("assignmentFiles", "과제 파일 올리기", {
@@ -241,6 +241,7 @@ export default function MaterialsForm({ initialMaterials }) {
                 id="codeReview"
                 label="받은 코드리뷰"
                 hint="짝이 남긴 코멘트 3개"
+                placeholder="예) 반복되는 입력창을 공통 컴포넌트로 분리하면 좋겠다는 리뷰를 받았어요"
                 value={materials.codeReview}
                 onChange={(event) => updateField("codeReview", event.target.value)}
               />
@@ -261,7 +262,7 @@ export default function MaterialsForm({ initialMaterials }) {
           <span className="text-label leading-[20.8px] font-bold text-white">
             고민 메모<span className="ml-0.5 text-caption font-normal text-white/50"> · 선택</span>
           </span>
-          <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서도 찾아봤는데 아직 헷갈림" className="block font-input leading-6 text-ink-strong! placeholder:text-ink-300!" />
+          <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서를 읽어도 상태를 어디서 관리해야 할지 헷갈려요" className="block font-input leading-6 text-ink-strong!" />
         </label>
       )}
       <MaterialsChangeNotice

@@ -17,8 +17,8 @@ export default function ProfileFields({ values, onChange, errors = {} }) {
 
   return (
     <div className="grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2">
-      <TextField label="이름" name="name" value={values.name} onChange={onChange} autoComplete="name" placeholder="김사자" error={errors.name} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
-      <TextField label="학번" name="studentNo" value={values.studentNo} onChange={onChange} inputMode="numeric" placeholder="20231234" error={errors.studentNo} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
+      <TextField label="이름" name="name" value={values.name} onChange={onChange} autoComplete="name" error={errors.name} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
+      <TextField label="학번" name="studentNo" value={values.studentNo} onChange={onChange} inputMode="numeric" error={errors.studentNo} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" />
       <SelectField label="학과" name="department" value={values.department} onChange={(event) => {
         focusOtherDepartment.current = event.target.value === "other";
         onChange(event);
@@ -34,7 +34,7 @@ export default function ProfileFields({ values, onChange, errors = {} }) {
       </SelectField>
       {values.department === "other" && (
         <div className="sm:col-span-2">
-          <TextField ref={otherDepartmentRef} label="학과 직접 입력" name="otherDepartment" value={values.otherDepartment} onChange={onChange} placeholder="학과 이름을 입력해 주세요" error={errors.department} />
+          <TextField ref={otherDepartmentRef} label="학과 직접 입력" name="otherDepartment" value={values.otherDepartment} onChange={onChange} error={errors.department} />
         </div>
       )}
     </div>

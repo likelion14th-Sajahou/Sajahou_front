@@ -58,7 +58,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
               <Button variant="soft" className="ml-auto h-[46px]!" disabled={attachmentBusy || (!hasSavedArtifact && !attachments.length) || attachments.some((a) => a.extractStatus === "PENDING")}
                 onClick={() => hasSavedArtifact ? next() : submit("ANSWERED")}>{hasSavedArtifact ? "기존 산출물로 다음 →" : "첨부하고 다음 →"}</Button></div>
           </div> : <AiQuestionForm tone="dark" category={<Badge tone="red" size="sm" className="text-error">{question.tag}</Badge>} source={question.quote || "고른 기록에서 빈 곳을 보완해 주세요"} question={question.content}
-            progress={`${index + 1} / ${questions.length}`} placeholder="확인할 수 있는 것만 적어 주세요"
+            progress={`${index + 1} / ${questions.length}`}
             answer={inputs[question.questionId] ?? question.answer ?? ""} onAnswerChange={(answer) => onChange({ ...state, inputs: { ...inputs, [question.questionId]: answer } })}
             backLabel={index === 0 ? "← 기록 고르기" : "← 이전 질문"} onBack={back} onAnswer={(answer) => submit("ANSWERED", answer)} onSkip={() => submit("SKIPPED")} />}
           {error && <p role="alert">{error}</p>}

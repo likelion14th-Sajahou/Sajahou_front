@@ -8,6 +8,7 @@ import Toast, { useToast } from "@/components/ui/Toast";
 import AiPromptHeader from "./AiPromptHeader";
 
 // 회고(R-16), 기록 추가(H-13), 포트폴리오 빈 곳(H-17)이 함께 쓰는 AI 질문 카드다.
+// 질문 내용이 동적으로 달라지므로 답변 입력란에는 placeholder를 넣지 않는다.
 // 버튼: [← 이전] | 건너뛰기 … 답하고 다음 →. AI는 질문만 하고 답은 사용자가 직접 쓴다(C-07).
 // - 답 보관: answer·onAnswerChange를 넘기면 쓰는 화면이 답을 들고 있고, 없으면 폼 안에서 들고 있다.
 //   폼 안에서 들 때는 질문이 바뀌면 입력을 비우도록 쓰는 곳에서 질문별 key를 준다.
@@ -49,7 +50,6 @@ export default function AiQuestionForm({
   questionId,
   size = "md",
   tone = "light",
-  placeholder,
   initialAnswer = "",
   answer: controlledAnswer,
   onAnswerChange,
@@ -96,7 +96,6 @@ export default function AiQuestionForm({
         labelClassName={styles.label}
         multiline
         name="answer"
-        placeholder={placeholder}
         value={answer}
         onChange={(event) => changeAnswer(event.target.value)}
         className={styles.answer}
