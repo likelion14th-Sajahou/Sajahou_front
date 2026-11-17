@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
@@ -9,6 +9,7 @@ import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { formatDeadline } from "@/lib/formatDate";
+import { startRetrospective } from "@/lib/retrospectiveApi";
 import { applyStartedRetrospective, loadCurrentRetrospective } from "@/lib/retrospectiveViewModel";
 
 const RetrospectiveDataContext = createContext(null);
@@ -34,6 +35,8 @@ export default function RetrospectiveProvider({ children }) {
   const [reloadKey, setReloadKey] = useState(0);
   // 시작 화면이 휴회 화면으로 바뀌어도 토스트가 남도록 여기에 둔다(C-02).
   const { toast, showToast, hideToast } = useToast();
+  // 회고 종류별로 진행 중인 '회고 시작'(API 12) 요청이다. 한 번의 클릭에서 저장과 질문 요청이 함께 불러도 한 번만 만든다.
+  const startRequests = useRef({});
 
   // 파트를 바꾸면 그 파트의 마감일로 다시 불러온다.
   useEffect(() => {
@@ -56,6 +59,25 @@ export default function RetrospectiveProvider({ children }) {
 
   function applyStarted(result) {
     setLoadState((previous) => ({ ...previous, current: applyStartedRetrospective(previous.current, result) }));
+  }
+
+  // 이슈 #117: '시작하기'는 화면만 열고, 처음 저장('임시 저장'·'AI 질문 받기')할 때 회고를 만든다.
+  // 이미 있으면 그 id를, 없으면 회고를 만들고 새 id를 돌려준다.
+  function ensureStarted(isAssignment) {
+    const key = isAssignment ? "assignment" : "session";
+    const id = current[key]?.id;
+    if (id) return Promise.resolve(id);
+    startRequests.current[key] ??= startRetrospective(
+      { weekId: current.week.weekId, type: isAssignment ? "ASSIGNMENT" : "SESSION" },
+      { request: authenticatedRequest },
+    ).then((result) => {
+      applyStarted(result);
+      return result.id;
+    }).catch((failure) => {
+      delete startRequests.current[key];
+      throw failure;
+    });
+    return startRequests.current[key];
   }
 
   // 임시 저장(API 14) 응답으로 단계·저장 시각을 바로 반영한다. 시작 화면의 '이어 쓰기'가 이 단계로 간다.
@@ -89,7 +111,7 @@ export default function RetrospectiveProvider({ children }) {
       assignment: formatDeadline(current.week.assignmentDeadline),
     },
     refreshCurrent,
-    applyStarted,
+    ensureStarted,
     applySaved,
     showToast,
   };
@@ -121,6 +143,8 @@ export function useRetrospective() {
     isAssignment,
     // 지금 보는 회고: 과제 회고 주소(?type=assignment)면 과제 회고, 아니면 세션 회고다.
     retrospective: isAssignment ? context.assignment : context.session,
+    // 지금 보는 회고를 처음 저장하기 직전에 부른다. 회고가 없으면 이때 만든다.
+    ensureStarted: () => context.ensureStarted(isAssignment),
     getStepHref,
     // 과제를 '나중에 쓸게요'로 골랐으면(화면에서 막 골랐거나 저장된 값) 세션·과제 전환 탭을 보여 준다(R-01).
     assignmentPending: context.assignmentStatus === "later" || context.session.assignmentMode === "LATER",
