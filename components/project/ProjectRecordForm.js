@@ -27,7 +27,7 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
   const [fields, setFields] = useState(() =>
     Object.fromEntries(RECORD_FIELDS.map(({ key }) => [key, record[key] ?? ""])),
   );
-  // 지금 파트 목록에 없는 태그(데모에서 파트를 바꿔 본 경우)는 빼고 시작한다. 카드 수정과 같은 규칙이다.
+  // 지금 파트 목록에 없는 태그는 빼고 시작한다. 카드 수정과 같은 규칙이다.
   const [tags, setTags] = useState(() => record.tags.filter((tag) => competencies.includes(tag)));
   const { toast, showToast, hideToast } = useToast();
   const { attachments } = record;

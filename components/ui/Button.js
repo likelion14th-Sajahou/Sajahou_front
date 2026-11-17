@@ -17,8 +17,6 @@ const VARIANT_CLASSES = {
   highlight: "border border-shape-yellow bg-shape-yellow text-ink",
   danger: "border border-ink bg-danger text-white",
   soft: "border-2 border-transparent bg-yellow-100 font-display text-ink",
-  // Figma 'Button' Type=Google. 색은 Google 로그인 버튼 안내(테두리 #747775, 글자 #1F1F1F)를 따른다.
-  google: "border border-[#747775] bg-white font-noto font-medium text-[#1f1f1f]",
   inverse: "border-2 border-white bg-transparent font-display text-white",
   ink: "border-2 border-transparent bg-ink-900 font-display text-white",
   "ink-outline": "border-2 border-ink bg-white font-display text-ink",

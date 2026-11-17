@@ -35,7 +35,7 @@ export default function AuthProvider({ children }) {
   }, []);
   const clearNotice = useCallback(() => setNotice(""), []);
   const clearSignupWelcome = useCallback(() => setSignupWelcome(null), []);
-  // 사용자 변경으로 하위 목 데이터가 초기화되어도 가입 완료 안내는 유지한다.
+  // 사용자 변경으로 하위 데이터가 초기화되어도 가입 완료 안내는 유지한다.
   const markSignupSubmitted = useCallback(() => {
     welcomePending.current = true;
     setSignup((current) => current ? { ...current, submitted: true } : null);
@@ -49,7 +49,7 @@ export default function AuthProvider({ children }) {
     request.then((result) => {
       if (!active || generation.current !== currentGeneration) return;
       const user = validateUser(result);
-      setSession({ user, isDemo: user.isDemo === true });
+      setSession({ user });
       setRestoreStatus("ready");
     }).catch((error) => {
       if (!active || generation.current !== currentGeneration) return;
@@ -118,7 +118,7 @@ export default function AuthProvider({ children }) {
     const currentGeneration = ++generation.current;
     const user = validateUser(await getCurrentUser({ signal }));
     if (generation.current !== currentGeneration || signal?.aborted) return false;
-    setSession({ user, isDemo: user.isDemo === true });
+    setSession({ user });
     if (welcomePending.current) {
       setSignupWelcome({ id: crypto.randomUUID(), message: `환영해요, ${user.name} 님! ${AUTH_PART_LABELS[user.part]} 파트로 시작해요` });
       welcomePending.current = false;
@@ -217,7 +217,7 @@ export default function AuthProvider({ children }) {
   }, [session, clearSession]);
 
   return (
-    <AuthContext value={{ user: session?.user ?? null, isAuthenticated: Boolean(session), isDemo: session?.isDemo === true, signup,
+    <AuthContext value={{ user: session?.user ?? null, isAuthenticated: Boolean(session), signup,
       notice, clearNotice, clearSignup, cancelSignup, markSignupSubmitted, acceptGoogleLogin, completeLogin,
       signupWelcome, clearSignupWelcome,
       authenticatedRequest, saveProfile, withdraw, isSavingProfile, isWithdrawing,

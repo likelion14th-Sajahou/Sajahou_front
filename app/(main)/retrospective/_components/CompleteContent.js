@@ -3,12 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useAppData } from "@/components/layout/AppDataProvider";
 import Button from "@/components/ui/Button";
 import Image from "next/image";
-import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
-import { getAuthMode } from "@/lib/authConfig";
 import { formatDeadline } from "@/lib/formatDate";
 import { getRetrospective } from "@/lib/retrospectiveApi";
 import RetroResultCard from "./RetroResultCard";
@@ -20,16 +17,14 @@ import { copyText } from "@/lib/clipboard";
 // 과제를 '나중에 쓸게요'로 고른 주에 아직 과제 회고가 남았으면 마감과 '과제 회고 쓰기'를 보여 준다.
 export default function CompleteContent() {
   const router = useRouter();
-  const { authenticatedRequest, isDemo } = useAuth();
-  const { user } = useAppData();
-  const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent, getStepHref } = useRetrospective();
+  const { authenticatedRequest } = useAuth();
+  const { week, assignment, retrospective, isAssignment, getStepHref } = useRetrospective();
   const [card, setCard] = useState(null);
   const [notice, setNotice] = useState("");
   const { toast, showToast, hideToast } = useToast();
   const retrospectiveId = retrospective?.id;
   const startHref = getStepHref();
   const isComplete = retrospective?.state === "COMPLETED";
-  const canRestartDemo = isDemo && getAuthMode() === "mock";
   // 세션 회고를 끝냈고 과제 회고가 아직 남았을 때만 보여 준다.
   const pendingAssignment = !isAssignment && assignment && assignment.state !== "COMPLETED" ? assignment : null;
 
@@ -52,16 +47,6 @@ export default function CompleteContent() {
   async function copyRetrospective() {
     const copied = await copyText(card.fullMarkdown);
     showToast(copied ? "회고록을 복사했어요. 노션에 붙여 넣어 주세요." : "복사하지 못했어요. 나의 사자록에서 회고록을 열어 직접 선택해서 복사해 주세요.");
-  }
-
-  // mock 데이터를 지우는 개발용 동작이다. mock 모드의 데모 세션에서만 제공한다.
-  async function restartDemo() {
-    if (!canRestartDemo) return;
-    const { resetMockWeek } = await import("@/lib/mock/demoReset");
-    resetMockWeek(window.localStorage, user.id);
-    setAssignmentStatus("record");
-    await refreshCurrent();
-    router.push("/retrospective");
   }
 
   if (!isComplete) return <p role="status" className="mt-6 text-body-sm text-ink-muted">회고 상태를 불러오는 중이에요.</p>;
@@ -89,7 +74,6 @@ export default function CompleteContent() {
             <Button variant="cta" href="/retrospective?type=assignment">과제 회고 쓰기 →</Button>
           </div>
         )}
-        {canRestartDemo && <TextLink className="mt-2" onClick={restartDemo}>데모 처음부터 다시 보기</TextLink>}
       </RetroResultCard>
       <p role="status" className={notice ? "mt-3 text-center text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
       <Toast toast={toast} onDismiss={hideToast} />

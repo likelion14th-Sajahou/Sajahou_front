@@ -5,7 +5,6 @@ import { useAuth } from "@/components/layout/AuthProvider";
 import Button from "@/components/ui/Button";
 import GoogleSignInButton from "@/components/ui/GoogleSignInButton";
 import Modal from "@/components/ui/Modal";
-import { getAuthMode, getGoogleAuthMode } from "@/lib/authConfig";
 
 // 부모에서 모달이 열릴 때만 마운트해 재인증 단계와 오류를 매번 초기화한다.
 export default function WithdrawAccountModal({ onClose }) {
@@ -16,8 +15,6 @@ export default function WithdrawAccountModal({ onClose }) {
   const controllerRef = useRef(null);
   const active = useRef(false);
   const titleRef = useRef(null);
-  const googleMode = getGoogleAuthMode();
-  const mockMode = getAuthMode() === "mock" && googleMode === "mock";
 
   useEffect(() => {
     active.current = true;
@@ -76,13 +73,7 @@ export default function WithdrawAccountModal({ onClose }) {
         <div className="mt-5 space-y-3">
           <p className="break-all text-body-sm text-ink-muted">{user?.email} 계정으로 인증하면 탈퇴가 진행돼요.</p>
           <p className="text-label text-ink-subtle">인증 창을 닫으면 탈퇴하지 않아요. 다시 인증하거나 취소할 수 있어요.</p>
-          {mockMode ? (
-            <Button variant="outline" className="w-full" disabled={isAccountBusy} onClick={() => handleCredential("mock-google-id-token")}>
-              Google 계정으로 본인 확인
-            </Button>
-          ) : googleMode === "google" ? (
-            <GoogleSignInButton disabled={isAccountBusy} onCredential={handleCredential} onError={handleGoogleError} />
-          ) : <p role="alert" className="text-body-sm text-error">Google 본인 확인을 사용할 수 없어요. 잠시 후 다시 이용해 주세요.</p>}
+          <GoogleSignInButton disabled={isAccountBusy} onCredential={handleCredential} onError={handleGoogleError} />
         </div>
       )}
       {error && <p role="alert" className="mt-4 text-body-sm text-error">{error}</p>}
