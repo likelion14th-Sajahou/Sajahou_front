@@ -73,7 +73,6 @@ export default function NewProjectForm({ onCreate, busy = false }) {
           <TextField
             name="name"
             aria-labelledby="new-project-name"
-            placeholder="예) 캠퍼스 중고마켓"
             required
             error={nameError}
             className="font-input"
