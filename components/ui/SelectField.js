@@ -8,7 +8,7 @@ export default function SelectField({ label, error, className = "", wrapperClass
     "aria-describedby": [rest["aria-describedby"], errorId].filter(Boolean).join(" "),
   } : {};
   const appearanceClasses = drawn
-    ? "cursor-pointer rounded-full bg-white text-body-sm text-[#1f2433]"
+    ? "cursor-pointer rounded-full bg-white text-body-sm text-ink-strong"
     : `rounded-[14px] bg-canvas text-body ${rest.value === "" ? "text-placeholder" : "text-ink"} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink`;
   const alignmentClasses = centered ? "text-transparent! [&_option]:text-ink" : "";
 
@@ -22,7 +22,7 @@ export default function SelectField({ label, error, className = "", wrapperClass
         {children}
       </select>
       {centered ? (
-        <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center px-7 text-body-sm text-[#1f2433]">
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center px-7 text-body-sm text-ink-strong">
           <span className="relative min-w-0 max-w-full">
             <span className="absolute top-1/2 right-full mr-1 h-2 w-3 -translate-y-1/2 bg-[url(/images/common/chevron-down.svg)] bg-contain bg-center bg-no-repeat" />
             <span className="block truncate">{displayValue}</span>

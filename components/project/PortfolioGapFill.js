@@ -8,15 +8,16 @@ import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import AiQuestionForm from "@/components/ui/AiQuestionForm";
 import RecordAttachmentsField from "./RecordAttachmentsField";
-import useProjectAction from "./useProjectAction";
+import useAsyncAction from "@/components/ui/useAsyncAction";
 import { saveQuestionAnswer } from "@/lib/projectApi";
 import AiPromptHeader from "@/components/ui/AiPromptHeader";
+import CardTitle from "@/components/ui/CardTitle";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 
 export default function PortfolioGapFill({ state, onChange, onBackToRecords, onComplete }) {
   const { questions, inputs, index } = state;
   const question = questions[index];
-  const { run, busy, error } = useProjectAction();
+  const { run, busy, error } = useAsyncAction();
   const { authenticatedRequest } = useAuth();
   const [attachmentBusy, setAttachmentBusy] = useState(false);
   if (!question) return <div><p>추가 질문이 없어요.</p><Button onClick={onBackToRecords}>← 기록 고르기</Button><Button onClick={onComplete}>포트폴리오 초안 만들기</Button></div>;
@@ -65,7 +66,7 @@ export default function PortfolioGapFill({ state, onChange, onBackToRecords, onC
       </Card>
       <Card as="aside" size="md" aria-label="AI가 찾은 빈 곳" className="relative font-display text-ink-strong">
         <DrawnBorder color="var(--color-ink-300)" />
-        <div className="border-b border-ink-strong pb-3"><h2 className="text-[18px] leading-[28.8px]">AI가 찾은 빈 곳</h2></div>
+        <CardTitle>AI가 찾은 빈 곳</CardTitle>
         <ol className="flex flex-col gap-2 pt-4">
         {questions.map((q, i) => <li key={q.questionId} aria-current={i === index ? "step" : undefined} className={`flex flex-col items-start gap-1 rounded-xl px-3 py-2.5 ${i === index ? "bg-tint-orange" : "bg-canvas"}`}>
           <Badge tone={q.tag === "산출물 요청" ? "blue" : "red"} size="sm" className={q.tag === "산출물 요청" ? "" : "text-error"}>{q.tag}</Badge>

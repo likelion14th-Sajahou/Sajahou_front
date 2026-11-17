@@ -3,20 +3,15 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useMockData } from "@/components/layout/MockDataProvider";
 import Button from "@/components/ui/Button";
 import { setRetrospectiveRest } from "@/lib/retrospectiveApi";
 import RetroResultCard from "./RetroResultCard";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
-
-// 홈 화면은 아직 목업 상태를 보므로 휴회 해제 뒤 상태를 맞춘다. 홈 API(4번)를 연결하면 뺀다.
-const HOME_WEEK_STATUS = { NOT_STARTED: "idle", IN_PROGRESS: "writing" };
 
 export default function PausedRetrospective() {
   const { authenticatedRequest } = useAuth();
-  const { setWeekStatus } = useMockData();
-  const { week, session, refreshCurrent } = useRetrospectivePreview();
+  const { week, session, refreshCurrent } = useRetrospective();
   const [isUndoing, setIsUndoing] = useState(false);
   const [error, setError] = useState("");
   const inFlight = useRef(false);
@@ -29,8 +24,7 @@ export default function PausedRetrospective() {
     setError("");
     try {
       await setRetrospectiveRest(session.id, false, { request: authenticatedRequest });
-      const { session: restored } = await refreshCurrent();
-      setWeekStatus(HOME_WEEK_STATUS[restored.state] ?? "idle");
+      await refreshCurrent();
     } catch (failure) {
       if (failure.status !== 401) setError(getRequestErrorMessage(failure, "휴회를 해제하지 못했어요. 잠시 후 다시 시도해 주세요."));
     } finally {

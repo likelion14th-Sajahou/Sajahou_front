@@ -5,10 +5,10 @@ import { useAuth } from "@/components/layout/AuthProvider";
 import PortfolioGapFill from "./PortfolioGapFill";
 import PortfolioRecordSelect from "./PortfolioRecordSelect";
 import PortfolioReview from "./PortfolioReview";
-import useProjectAction from "./useProjectAction";
+import useAsyncAction from "@/components/ui/useAsyncAction";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { getFinishQuestions, getPortfolioDraft } from "@/lib/projectApi";
+import { requestFinishQuestions, createPortfolioDraft } from "@/lib/projectApi";
 import { restoreFinishQuestions } from "@/lib/portfolioViewModel";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
 import { getAiErrorMessage } from "@/lib/requestErrorMessage";
@@ -19,12 +19,12 @@ export default function ProjectPortfolio({ project, records, onCancel, onSave })
   const [questions, setQuestions] = useState({ questions: [], inputs: {}, attachments: {}, index: 0 });
   const [draft, setDraft] = useState(null);
   // AI 실패(시간 초과·AI 오류 등)는 회고·자소서 매칭과 같은 안내로 보여 준다.
-  const { run, busy, error, clearError } = useProjectAction((failure) => getAiErrorMessage(failure, failure.message));
+  const { run, busy, error, clearError } = useAsyncAction((failure) => getAiErrorMessage(failure, failure.message));
   // 지금 기다리는 AI 작업: "questions"(마치기 질문, 32번) | "draft"(포트폴리오 초안, 33번)
   const [aiTask, setAiTask] = useState(null);
   const { authenticatedRequest } = useAuth();
   async function requestDraft(ids, signal) {
-    const result = await getPortfolioDraft(project.id, ids.map(Number), { signal, request: authenticatedRequest });
+    const result = await createPortfolioDraft(project.id, ids.map(Number), { signal, request: authenticatedRequest });
     signal.throwIfAborted();
     setDraft(result); setStep("review");
   }
@@ -32,7 +32,7 @@ export default function ProjectPortfolio({ project, records, onCancel, onSave })
   function startQuestions(ids) {
     setAiTask("questions");
     run(async (signal) => {
-      const result = await getFinishQuestions(project.id, ids.map(Number), { signal, request: authenticatedRequest });
+      const result = await requestFinishQuestions(project.id, ids.map(Number), { signal, request: authenticatedRequest });
       signal.throwIfAborted();
       setSelectedIds(ids);
       setQuestions((current) => restoreFinishQuestions(result.questions, current));

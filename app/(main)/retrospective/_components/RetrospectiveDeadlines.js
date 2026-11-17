@@ -1,10 +1,10 @@
 "use client";
 
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 
 // 시작 화면 오른쪽 '마감일' 박스다. 내 파트의 세션·과제 마감을 보여 준다(R-07).
 export default function RetrospectiveDeadlines() {
-  const { deadlineLabels } = useRetrospectivePreview();
+  const { deadlineLabels } = useRetrospective();
   const items = [
     { label: "세션 회고", dueLabel: deadlineLabels.session },
     { label: "과제 회고", dueLabel: deadlineLabels.assignment },

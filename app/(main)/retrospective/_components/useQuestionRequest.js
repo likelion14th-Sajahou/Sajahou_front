@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { requestQuestions } from "@/lib/retrospectiveApi";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 
 // 'AI 질문 받기'(R-14, API 17). 질문을 받으면 질문 단계로 넘어간다.
@@ -12,7 +12,7 @@ import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 export function useQuestionRequest() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { retrospective, getStepHref, refreshCurrent } = useRetrospectivePreview();
+  const { retrospective, getStepHref, refreshCurrent } = useRetrospective();
   const [isRequesting, setIsRequesting] = useState(false);
   // 자료가 바뀌었을 때 사라질 답 개수. null이면 확인 문구를 닫은 상태다.
   const [changedAnswerCount, setChangedAnswerCount] = useState(null);

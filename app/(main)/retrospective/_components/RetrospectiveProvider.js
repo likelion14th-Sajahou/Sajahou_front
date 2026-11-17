@@ -4,14 +4,14 @@ import { createContext, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { formatDeadline } from "@/lib/formatDate";
-import { applyStartedRetrospective, loadRetrospectivePreview } from "@/lib/retrospectiveViewModel";
+import { applyStartedRetrospective, loadCurrentRetrospective } from "@/lib/retrospectiveViewModel";
 
-const RetrospectivePreviewContext = createContext(null);
+const RetrospectiveDataContext = createContext(null);
 
 const STATE_LABELS = { NOT_STARTED: "시작 전", IN_PROGRESS: "작성 중", COMPLETED: "완료", RESTED: "휴회" };
 
@@ -26,8 +26,8 @@ export function getStepPath(currentStep) {
 
 // 제목·시작 화면·단계 화면이 함께 쓴다. 과제 선택도 제목 영역과 자료 폼에서 함께 사용한다.
 // 파트는 가입 때 고른 사용자 파트다. 파트에 따라 마감일이 다르다.
-export default function RetrospectivePreview({ children }) {
-  const { user } = useMockData();
+export default function RetrospectiveProvider({ children }) {
+  const { user } = useAppData();
   const { authenticatedRequest } = useAuth();
   const [assignmentStatus, setAssignmentStatus] = useState("record");
   const [{ current, error }, setLoadState] = useState({ current: null, error: "" });
@@ -38,7 +38,7 @@ export default function RetrospectivePreview({ children }) {
   // 파트를 바꾸면 그 파트의 마감일로 다시 불러온다.
   useEffect(() => {
     const controller = new AbortController();
-    loadRetrospectivePreview({ signal: controller.signal, request: authenticatedRequest })
+    loadCurrentRetrospective({ signal: controller.signal, request: authenticatedRequest })
       .then((result) => setLoadState({ current: result, error: "" }))
       .catch((failure) => {
         if (controller.signal.aborted || failure.name === "AbortError") return;
@@ -49,7 +49,7 @@ export default function RetrospectivePreview({ children }) {
 
   // 처음부터·휴회처럼 상태를 바꾼 뒤에 부른다.
   async function refreshCurrent() {
-    const result = await loadRetrospectivePreview({ request: authenticatedRequest });
+    const result = await loadCurrentRetrospective({ request: authenticatedRequest });
     setLoadState({ current: result, error: "" });
     return result;
   }
@@ -95,16 +95,16 @@ export default function RetrospectivePreview({ children }) {
   };
 
   return (
-    <RetrospectivePreviewContext value={value}>
+    <RetrospectiveDataContext value={value}>
       {error && <p role="alert" className="mb-4 text-body-sm text-error">{error}</p>}
       {children}
       <Toast toast={toast} onDismiss={hideToast} />
-    </RetrospectivePreviewContext>
+    </RetrospectiveDataContext>
   );
 }
 
-export function useRetrospectivePreview() {
-  const context = useContext(RetrospectivePreviewContext);
+export function useRetrospective() {
+  const context = useContext(RetrospectiveDataContext);
   const searchParams = useSearchParams();
   const isAssignment = searchParams.get("type") === "assignment";
 
@@ -128,7 +128,7 @@ export function useRetrospectivePreview() {
 }
 
 export function RetrospectiveHeading() {
-  const { week, session, assignment, part, assignmentPending, isAssignment } = useRetrospectivePreview();
+  const { week, session, assignment, part, assignmentPending, isAssignment } = useRetrospective();
   // 시작 화면(시작 전·작성 중·휴회)은 Figma대로 896px 가운데 정렬이다. 다른 단계 화면은 아직 디자인 전이라 본문 폭 그대로 둔다.
   const isStartScreen = !useSearchParams().get("step");
 

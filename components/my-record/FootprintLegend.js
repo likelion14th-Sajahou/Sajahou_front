@@ -1,4 +1,4 @@
-import FootprintSticker, { CurrentWeekSticker } from "./FootprintSticker";
+import FootprintSticker, { CurrentWeekSticker } from "@/components/story-card/FootprintSticker";
 
 const LEGEND_ITEMS = [
   { label: "회고 완료", icon: <FootprintSticker week={0} size={16} /> },

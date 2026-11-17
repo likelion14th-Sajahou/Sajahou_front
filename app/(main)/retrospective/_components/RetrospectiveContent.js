@@ -58,7 +58,7 @@ export default async function RetrospectiveContent({ searchParams }) {
           <div className="relative flex items-end gap-3">
             <Image src="/images/characters/cloud-small.png" alt="" width={56} height={47} className="shrink-0" />
             <div className="relative min-w-0 rounded-[22px] rounded-bl-[6px] bg-canvas px-4 py-3 text-left text-[16px] leading-[27.55px] tracking-[-0.19px] text-ink sm:px-6 sm:py-4">
-              <DrawnBorder color="#e4e2dd" />
+              <DrawnBorder color="var(--color-line)" />
               <p>{isAssignment ? "막혔던 그 순간이" : "지금은 조금 귀찮아도,"}</p>
               <p>{isAssignment ? "면접에서 제일 할 말 많은 이야기가 돼요." : "쌓이면 나만의 큰 자산이 돼요!"}</p>
             </div>

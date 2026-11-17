@@ -1,4 +1,4 @@
-import CompetencyTagPicker from "@/components/my-record/CompetencyTagPicker";
+import CompetencyTagPicker from "@/components/story-card/CompetencyTagPicker";
 import Button from "@/components/ui/Button";
 import TextLink from "@/components/ui/TextLink";
 import EmptyFieldsNotice from "./EmptyFieldsNotice";

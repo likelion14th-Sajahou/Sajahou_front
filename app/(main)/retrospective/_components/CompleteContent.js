@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import Button from "@/components/ui/Button";
 import Image from "next/image";
 import TextLink from "@/components/ui/TextLink";
@@ -13,7 +13,7 @@ import { formatDeadline } from "@/lib/formatDate";
 import { getRetrospective } from "@/lib/retrospectiveApi";
 import RetroResultCard from "./RetroResultCard";
 import RetrospectiveSteps from "./RetrospectiveSteps";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { copyText } from "@/lib/clipboard";
 
 // 5단계 완료(R-22, 06·06-a). 저장한 회고의 회고록을 복사하고, 공개된 카드를 나의 사자록에서 열 수 있다.
@@ -21,8 +21,8 @@ import { copyText } from "@/lib/clipboard";
 export default function CompleteContent() {
   const router = useRouter();
   const { authenticatedRequest, isDemo } = useAuth();
-  const { user, setWeekStatus } = useMockData();
-  const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent, getStepHref } = useRetrospectivePreview();
+  const { user } = useAppData();
+  const { week, assignment, retrospective, setAssignmentStatus, isAssignment, refreshCurrent, getStepHref } = useRetrospective();
   const [card, setCard] = useState(null);
   const [notice, setNotice] = useState("");
   const { toast, showToast, hideToast } = useToast();
@@ -60,7 +60,6 @@ export default function CompleteContent() {
     const { resetMockWeek } = await import("@/lib/mock/demoReset");
     resetMockWeek(window.localStorage, user.id);
     setAssignmentStatus("record");
-    setWeekStatus("idle");
     await refreshCurrent();
     router.push("/retrospective");
   }

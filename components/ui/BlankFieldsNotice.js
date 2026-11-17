@@ -4,7 +4,7 @@
 // tone: info(노랑, 기본) · bad(주황, 자료를 읽지 못함) · wait(회색, 기다리는 중). wait는 ⏳를 붙인다.
 const TONES = {
   info: "bg-tint-yellow text-tint-yellow-ink",
-  bad: "bg-[#fff0e8] text-[#b03a00]",
+  bad: "bg-[#fff0e8] text-warning",
   wait: "bg-[#eef0f3] text-[#4a5260]",
 };
 

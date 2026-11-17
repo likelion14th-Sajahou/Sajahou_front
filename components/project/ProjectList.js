@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import Button from "@/components/ui/Button";
 import DrawnBorder from "@/components/ui/DrawnBorder";
 import Badge from "@/components/ui/Badge";
@@ -38,7 +38,7 @@ function ProjectListCard({ project }) {
   const title = categoryLabel ?? name;
   const caption = categoryLabel ? name : subtitle;
   const sticker = projectBadgeImage(category) ?? `/images/stickers/${isActive ? "laurel" : "trophy"}.png`;
-  const { projectData: { loadProject } } = useMockData();
+  const { projectData: { loadProject } } = useAppData();
 
   // 목록 응답에는 기록 본문이 없어 기존 상세 API로 최근 기록을 보완한다.
   // 상세를 이미 불러온 프로젝트는 다시 요청하지 않는다.
@@ -87,7 +87,7 @@ function ProjectListCard({ project }) {
 // 프로젝트 목록(H-23, 15). 상단 메뉴 '프로젝트'로 들어온다.
 export default function ProjectList() {
   const { isAuthenticated } = useAuth();
-  const { projects, projectData, flashToast, hideFlashToast } = useMockData();
+  const { projects, projectData, flashToast, hideFlashToast } = useAppData();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (

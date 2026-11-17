@@ -1,9 +1,10 @@
+import ChoiceChip from "@/components/ui/ChoiceChip";
 import MarkedTitle from "@/components/ui/MarkedTitle";
 import { AUTH_PART_LABELS } from "@/lib/authConfig";
 
 const PARTS = ["PLAN_DESIGN", "FRONTEND", "BACKEND"];
 
-// 회원가입: 세 파트 중 하나를 고른다(S-04). 고른 칩만 진한 바탕 + 흰 글씨.
+// 회원가입: 세 파트 중 하나를 고른다(S-04). 고른 칩만 진한 바탕 + 흰 글씨(공용 ChoiceChip).
 // 내 정보 수정 팝업처럼 '파트'는 기본 정보와 따로 된 형광펜 제목 구역이다(MarkedSection과 같은 제목·간격).
 // 내 정보 수정 팝업은 파트를 바꿀 수 없어서 이 칸 대신 내 파트만 보여 준다(ProfileModal).
 export default function PartField({ id, value, onChange, error }) {
@@ -14,12 +15,10 @@ export default function PartField({ id, value, onChange, error }) {
       <div>
         <div className="flex flex-wrap gap-2">
           {PARTS.map((part) => (
-            <label key={part} className="min-w-fit flex-1 cursor-pointer">
-              <input type="radio" name="part" value={part} checked={value === part} onChange={onChange} className="peer sr-only" />
-              <span className="font-display flex items-center justify-center rounded-[14px] border border-line bg-white px-2 py-2.5 text-center text-body-sm leading-5 whitespace-nowrap text-ink peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink">
-                {AUTH_PART_LABELS[part]}
-              </span>
-            </label>
+            // 새 프로젝트의 종류·역할 칩과 같은 공용 칩이다. 칸이 좁아도 글자가 잘리지 않게 글자 폭보다 줄지 않는다.
+            <ChoiceChip key={part} name="part" value={part} checked={value === part} onChange={onChange} className="min-w-fit! flex-1">
+              {AUTH_PART_LABELS[part]}
+            </ChoiceChip>
           ))}
         </div>
         {error && <p id={`${id}-error`} className="mt-2 text-caption leading-5 text-error">{error}</p>}

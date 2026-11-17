@@ -1,6 +1,6 @@
 import Card from "@/components/ui/Card";
-import CompetencyTags from "./CompetencyTags";
-import { StoryCardIcon, StoryCardTypeBadge } from "./StoryCardVisuals";
+import CompetencyTags from "@/components/story-card/CompetencyTags";
+import { StoryCardIcon, StoryCardTypeBadge } from "@/components/story-card/StoryCardVisuals";
 
 export default function StoryCard({ card, isHighlighted = false, onOpen }) {
   const { type, whenLabel, title, tags } = card;
@@ -9,7 +9,7 @@ export default function StoryCard({ card, isHighlighted = false, onOpen }) {
     <Card
       as="article"
       size="sm"
-      className={`relative flex h-full min-w-0 flex-col items-start gap-3 rounded-[24px]! border-2 font-display text-[#1f2433] tracking-[-0.15px] ${isHighlighted ? "border-shape-yellow" : "border-ink-300"}`}
+      className={`relative flex h-full min-w-0 flex-col items-start gap-3 rounded-[24px]! border-2 font-display text-ink-strong tracking-[-0.15px] ${isHighlighted ? "border-shape-yellow" : "border-ink-300"}`}
     >
       <div className="flex w-full items-center gap-2">
         <span className="flex size-10 shrink-0 items-center justify-center"><StoryCardIcon card={card} /></span>

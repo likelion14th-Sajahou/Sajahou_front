@@ -13,7 +13,7 @@ import TextLink from "@/components/ui/TextLink";
 import MaterialAttachments from "./MaterialAttachments";
 import MaterialsChangeNotice from "@/components/ui/MaterialsChangeNotice";
 import RetroDarkCard from "./RetroDarkCard";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { useQuestionRequest } from "./useQuestionRequest";
 import useMaterialAttachments, { ATTACHMENT_FIELDS } from "./useMaterialAttachments";
@@ -83,7 +83,7 @@ function MaterialSection({ title, titleId, controls, inactive = false, children 
 }
 
 export default function MaterialsForm({ initialMaterials }) {
-  const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref, deadlineLabels, showToast } = useRetrospectivePreview();
+  const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref, deadlineLabels, showToast } = useRetrospective();
   const assignmentStatus = isAssignment ? "record" : sessionAssignmentStatus;
   // 입력 영역을 숨겨도(실습 없음, 과제 나중에) 작성한 내용은 유지한다.
   const [materials, setMaterials] = useState(initialMaterials);

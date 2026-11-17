@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import FormDialog from "@/components/ui/FormDialog";
 import NewProjectForm from "./NewProjectForm";
 
@@ -10,7 +10,7 @@ const TITLE_ID = "new-project-title";
 
 // 홈 프로젝트 타일과 프로젝트 목록이 함께 쓰는 '새 프로젝트' 팝업이다(H-10, H-23).
 export default function NewProjectModal({ open, onClose, onCreated }) {
-  const { addProject } = useMockData();
+  const { addProject } = useAppData();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const inFlight = useRef(false);

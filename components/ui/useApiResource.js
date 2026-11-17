@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 // 요청 키와 취소 신호로 늦은 응답·사용자 전환 후의 응답을 버린다.
-export default function useRecordResource(load, key, delayMs = 0) {
+export default function useApiResource(load, key, delayMs = 0) {
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState(null);
   useEffect(() => {

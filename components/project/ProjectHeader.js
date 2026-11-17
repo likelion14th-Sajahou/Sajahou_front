@@ -7,7 +7,7 @@ import { formatRoles } from "./projectRoles";
 
 const STATUS = {
   active: { label: "진행 중", className: "bg-yellow-400 text-ink-950" },
-  done: { label: "완료", className: "bg-[#e4e2dd] text-ink" },
+  done: { label: "완료", className: "bg-line text-ink" },
 };
 
 // 프로젝트 상세 머리(11/13 디자인): 프로젝트 스티커, 상태·역할 배지, 제목과 작은 글씨, 오른쪽 숫자 카드(노란 손그림 테두리).

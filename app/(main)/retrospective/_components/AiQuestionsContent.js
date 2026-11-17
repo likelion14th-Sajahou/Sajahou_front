@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -9,7 +8,9 @@ import { answerQuestion, getRetrospective, requestQuestions } from "@/lib/retros
 import RetrospectiveSteps from "./RetrospectiveSteps";
 import AiQuestionsSession from "./AiQuestionsSession";
 import RetroDarkCard from "./RetroDarkCard";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
+import StepLoadCard from "./StepLoadCard";
+import useStepData from "./useStepData";
 import { useReviewDraftRequest } from "./useReviewDraftRequest";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 import AiWaitingNotice from "@/components/ui/AiWaitingNotice";
@@ -17,7 +18,7 @@ import { answerDraftKey, readAnswerDrafts } from "@/lib/retrospectiveAnswerDraft
 
 // 자료가 부족해 질문을 만들지 못했을 때(R-15). 프로토타입처럼 질문 카드와 같은 진한 카드다.
 function InsufficientMaterial() {
-  const { getStepHref } = useRetrospectivePreview();
+  const { getStepHref } = useRetrospective();
   const review = useReviewDraftRequest();
 
   return (
@@ -37,61 +38,28 @@ function InsufficientMaterial() {
 
 // 3단계 AI 질문. 저장된 질문과 답을 불러온다(API 13). 아직 질문이 없으면 그때 질문을 받는다(API 17).
 // 과제 회고(R-23)는 과제 중심 질문이고, 마지막은 '이번 과제에서 다음에도 가져가고 싶은 것'이다(서버가 고른다).
+const toErrorMessage = (failure) => getRequestErrorMessage(failure, "질문을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");
+
 function Questions() {
-  const router = useRouter();
   const { authenticatedRequest, user } = useAuth();
-  const { retrospective, getStepHref } = useRetrospectivePreview();
-  const retrospectiveId = retrospective?.id;
-  const startHref = getStepHref();
-  const [loaded, setLoaded] = useState(null);
-  const [error, setError] = useState("");
-  const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    // 시작하지 않은 회고는 시작 화면에서 '시작하기'로 연다.
-    if (!retrospectiveId) {
-      router.replace(startHref);
-      return;
+  const userId = user?.id;
+  // 저장된 질문을 불러오고, 아직 없으면 그때 만든다(API 17). 이 브라우저에 임시 저장한 답도 함께 읽는다.
+  const load = useCallback(async (retrospectiveId, options) => {
+    const detail = await getRetrospective(retrospectiveId, options);
+    const result = detail.questions.length
+      ? { questions: detail.questions, attachments: detail.attachments, insufficient: false }
+      : await requestQuestions(retrospectiveId, "AUTO", options).then((created) => (
+        { questions: created.questions, attachments: detail.attachments, insufficient: created.insufficientMaterial }));
+    const draftKey = answerDraftKey(userId, retrospectiveId);
+    try {
+      return { ...result, draftKey, drafts: readAnswerDrafts(window.localStorage, draftKey, result.questions) };
+    } catch {
+      return { ...result, draftKey, drafts: {}, draftError: "이 브라우저에 임시 저장한 답변을 불러오지 못했어요." };
     }
-    const controller = new AbortController();
-    const options = { signal: controller.signal, request: authenticatedRequest };
-    getRetrospective(retrospectiveId, options)
-      .then(async (detail) => {
-        if (detail.questions.length) return { questions: detail.questions, attachments: detail.attachments, insufficient: false };
-        const result = await requestQuestions(retrospectiveId, "AUTO", options);
-        return { questions: result.questions, attachments: detail.attachments, insufficient: result.insufficientMaterial };
-      })
-      .then((result) => {
-        if (controller.signal.aborted) return;
-        const draftKey = answerDraftKey(user?.id, retrospectiveId);
-        try {
-          const drafts = readAnswerDrafts(window.localStorage, draftKey, result.questions);
-          setLoaded({ ...result, draftKey, drafts });
-        } catch {
-          setLoaded({ ...result, draftKey, drafts: {}, draftError: "이 브라우저에 임시 저장한 답변을 불러오지 못했어요." });
-        }
-      })
-      .catch((failure) => {
-        if (controller.signal.aborted || failure.name === "AbortError" || failure.status === 401) return;
-        setError(getRequestErrorMessage(failure, "질문을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."));
-      });
-    return () => controller.abort();
-  }, [retrospectiveId, startHref, authenticatedRequest, router, reloadKey, user?.id]);
+  }, [userId]);
+  const { data: loaded, error, retry } = useStepData(load, toErrorMessage);
 
-  if (!loaded) {
-    return (
-      <Card as="section" size="md" className="flex flex-wrap items-center gap-3">
-        {error ? (
-          <>
-            <p role="alert" className="text-body-sm text-error">{error}</p>
-            <Button size="sm" variant="secondary" onClick={() => { setError(""); setReloadKey((key) => key + 1); }}>다시 시도</Button>
-          </>
-        ) : (
-          <p role="status" className="text-body-sm text-ink-muted">질문을 불러오는 중이에요.</p>
-        )}
-      </Card>
-    );
-  }
+  if (!loaded) return <StepLoadCard error={error} onRetry={retry}>질문을 불러오는 중이에요.</StepLoadCard>;
 
   if (loaded.insufficient || !loaded.questions.length) return <InsufficientMaterial />;
 

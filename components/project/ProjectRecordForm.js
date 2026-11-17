@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useMockData } from "@/components/layout/MockDataProvider";
-import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
+import { useAppData } from "@/components/layout/AppDataProvider";
+import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/story-card/CompetencyTagPicker";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import DrawnBorder from "@/components/ui/DrawnBorder";
@@ -10,20 +10,20 @@ import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import EmptyFieldsNotice from "./EmptyFieldsNotice";
 import RecordFieldsGrid from "./RecordFieldsGrid";
-import RecordFormTitle from "./RecordFormTitle";
+import CardTitle from "@/components/ui/CardTitle";
 import { REVIEW_TAG_PICKER_STYLE } from "./ProjectRecordReview";
 import { formatMonthDay } from "@/lib/formatDate";
 import { EMPTY_RECORD_MESSAGE, RECORD_FIELDS } from "./recordFields";
 import SavedAttachments from "./SavedAttachments";
 import ActionFooter from "@/components/ui/ActionFooter";
-import useProjectAction from "./useProjectAction";
+import useAsyncAction from "@/components/ui/useAsyncAction";
 
 // 기록 수정(H-15, 12-b). 저장하면 카드도 함께 바뀐다(카드 제목은 유지).
 // 11/13 디자인: 기록 추가의 정리 결과와 같은 모양에 회색 손그림 테두리 상자.
 export default function ProjectRecordForm({ record, onCancel, onSave }) {
-  const { projectData } = useMockData();
+  const { projectData } = useAppData();
   const competencies = projectData.competencyItems.map((item) => item.name);
-  const { run, busy, error } = useProjectAction();
+  const { run, busy, error } = useAsyncAction();
   const [fields, setFields] = useState(() =>
     Object.fromEntries(RECORD_FIELDS.map(({ key }) => [key, record[key] ?? ""])),
   );
@@ -57,7 +57,7 @@ export default function ProjectRecordForm({ record, onCancel, onSave }) {
       <DrawnBorder color="var(--color-ink-300)" />
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <fieldset disabled={busy} className="flex min-w-0 flex-col gap-4">
-        <RecordFormTitle id="record-form-title" date={`${formatMonthDay(record.date)}(${record.weekday})`}>기록 수정</RecordFormTitle>
+        <CardTitle id="record-form-title" action={<p className="text-label text-ink-subtle">{`${formatMonthDay(record.date)}(${record.weekday})`}</p>}>기록 수정</CardTitle>
         <p className="text-label leading-5 text-ink-subtle">고칠 칸을 바꾸고 저장하세요.</p>
         <EmptyFieldsNotice fields={fields} />
         <RecordFieldsGrid

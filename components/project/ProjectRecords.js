@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import CompetencyTags from "@/components/my-record/CompetencyTags";
+import CompetencyTags from "@/components/story-card/CompetencyTags";
 import AttachmentChip from "@/components/ui/AttachmentChip";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -13,7 +13,7 @@ import DeleteConfirm from "./DeleteConfirm";
 import ProjectRecordAddForm from "./ProjectRecordAddForm";
 import ProjectRecordForm from "./ProjectRecordForm";
 import { RECORD_FIELDS, attachmentCategoryName } from "./recordFields";
-import useProjectAction from "./useProjectAction";
+import useAsyncAction from "@/components/ui/useAsyncAction";
 import TextField from "@/components/ui/TextField";
 import { formatMonthDay } from "@/lib/formatDate";
 import { recordBadgeImage } from "@/lib/stickerBadges";
@@ -49,7 +49,7 @@ function AddRecordPrompt({ status, onAdd }) {
 function RecordItem({ record, order, isLast, onViewCard, onEdit, onDelete, onResult }) {
   const { date, weekday, tags, organizedByAi, attachments } = record;
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-  const { run, busy, error } = useProjectAction();
+  const { run, busy, error } = useAsyncAction();
   const [result, setResult] = useState("");
 
   return (

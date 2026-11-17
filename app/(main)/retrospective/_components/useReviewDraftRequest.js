@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { createReviewDraft } from "@/lib/retrospectiveApi";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 
 
@@ -13,7 +13,7 @@ import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 export function useReviewDraftRequest() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { retrospective, getStepHref, refreshCurrent } = useRetrospectivePreview();
+  const { retrospective, getStepHref, refreshCurrent } = useRetrospective();
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
   const controllerRef = useRef(null);

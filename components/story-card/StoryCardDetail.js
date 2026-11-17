@@ -6,10 +6,10 @@ import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTags from "./CompetencyTags";
 import StoryCardEditForm from "./StoryCardEditForm";
-import { COPY_FAILED_MESSAGE, RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTypes";
+import { RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTypes";
 import { StoryCardIcon, StoryCardTypeBadge } from "./StoryCardVisuals";
-import { copyText } from "@/lib/clipboard";
-import useProjectAction from "@/components/project/useProjectAction";
+import { COPY_FAILED_MESSAGE, copyText } from "@/lib/clipboard";
+import useAsyncAction from "@/components/ui/useAsyncAction";
 import { withoutDocumentTitle } from "@/lib/storyCardDocument";
 
 const RECAP_TEXT = {
@@ -65,7 +65,7 @@ function SummaryDetails({ summary }) {
         <span aria-hidden="true" className="hidden w-[15px] text-body group-open:inline">▾</span>
         <span className="text-body">
           자소서에 쓰는 요약{" "}
-          <span className="font-display text-label text-[#5a606c]">상황 · 행동 · 이유 · 결과 · 배운 점</span>
+          <span className="font-display text-label text-ink-secondary">상황 · 행동 · 이유 · 결과 · 배운 점</span>
         </span>
       </summary>
       <dl className="pt-1">
@@ -92,7 +92,7 @@ function SummaryDetails({ summary }) {
 }
 
 export default function StoryCardDetail({ card, competencies, titleId, onClose, onDelete, onUpdate }) {
-  const { run, busy, error } = useProjectAction();
+  const { run, busy, error } = useAsyncAction();
   const { type, whenLabel, title, tags, document, summary } = card;
   const isProjectCard = type === "project";
   const documentBody = isProjectCard ? withoutDocumentTitle(document, title) : document;
@@ -113,7 +113,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
   }
 
   return (
-    <fieldset disabled={busy} className="flex min-w-0 flex-col items-start gap-3.5 font-display text-[#1f2433] tracking-[-0.15px]">
+    <fieldset disabled={busy} className="flex min-w-0 flex-col items-start gap-3.5 font-display text-ink-strong tracking-[-0.15px]">
       {error && <p role="alert">{error}</p>}
       <div className="flex w-full flex-wrap items-center gap-2.5">
         <span className="flex size-[52px] shrink-0 items-center justify-center"><StoryCardIcon card={card} size={50} /></span>
@@ -149,7 +149,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
           <section className="w-full rounded-[20px] bg-canvas px-5 py-[18px]">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-body font-normal">{documentText.title}</h3>
-              <Button size="sm" className="border-[#fef5d2]! bg-[#fef5d2]!" onClick={copyDocument}>노션에 복사</Button>
+              <Button size="sm" className="border-tint-cream! bg-tint-cream!" onClick={copyDocument}>노션에 복사</Button>
             </div>
             <div className="wrap-anywhere pt-2 font-sans">
               {documentBody
@@ -173,7 +173,7 @@ export default function StoryCardDetail({ card, competencies, titleId, onClose, 
               </p>
               <div className="flex items-center justify-between gap-3.5 pt-1">
                 {/* 삭제 버튼이 사라져도 포커스를 잃지 않고, 안내가 화면에 보이도록 취소로 옮긴다. */}
-                <TextLink variant="underline" className="text-[#4a5163]!" autoFocus onClick={() => setIsConfirmingDelete(false)}>
+                <TextLink variant="underline" className="text-ink-slate!" autoFocus onClick={() => setIsConfirmingDelete(false)}>
                   취소
                 </TextLink>
                 <Button variant="danger" className="h-[46px]! bg-error! px-6!" onClick={() => run((signal) => onDelete(signal))}>지우기</Button>

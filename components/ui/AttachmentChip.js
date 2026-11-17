@@ -12,7 +12,7 @@ const ATTACHMENT_BADGES = {
 
 const STATUS_TONES = {
   neutral: "bg-canvas text-ink-subtle",
-  warning: "bg-[#ffe0d1] text-[#b03a00]",
+  warning: "bg-[#ffe0d1] text-warning",
   success: "bg-tint-green text-tint-green-ink",
 };
 

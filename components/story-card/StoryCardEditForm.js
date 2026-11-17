@@ -78,7 +78,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         className="font-input text-label! font-bold leading-[20.8px]"
       />
       <div className="flex items-center justify-between gap-3.5 pt-1">
-        <TextLink variant="underline" className="text-[#4a5163]!" onClick={onCancel}>취소</TextLink>
+        <TextLink variant="underline" className="text-ink-slate!" onClick={onCancel}>취소</TextLink>
         <Button type="submit" variant="ink" className="h-[46px]! px-6!">저장</Button>
       </div>
       <Toast toast={toast} onDismiss={hideToast} />

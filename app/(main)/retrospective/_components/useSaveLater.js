@@ -4,14 +4,14 @@ import { useRef, useState } from "react";
 import { useAuth } from "@/components/layout/AuthProvider";
 import { formatTime } from "@/lib/formatDate";
 import { saveRetrospective } from "@/lib/retrospectiveApi";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 // 2~4단계의 '임시 저장'(R-03). 지금 단계와 보낸 자료를 저장하고, 저장 시각을 'HH:MM 저장됨'으로 보여 준다.
 // 지금 보는 회고(세션 또는 과제)를 저장한다.
 export function useSaveLater() {
   const { authenticatedRequest } = useAuth();
-  const { retrospective, applySaved } = useRetrospectivePreview();
+  const { retrospective, applySaved } = useRetrospective();
   const [isSaving, setIsSaving] = useState(false);
   const inFlight = useRef(false);
 

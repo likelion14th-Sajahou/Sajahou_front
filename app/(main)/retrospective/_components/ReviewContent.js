@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/layout/AuthProvider";
-import { useMockData } from "@/components/layout/MockDataProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
@@ -11,11 +11,13 @@ import DrawnBorder from "@/components/ui/DrawnBorder";
 import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
-import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/my-record/CompetencyTagPicker";
+import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/story-card/CompetencyTagPicker";
 import { getCompetencies, updateStoryCard } from "@/lib/myRecordApi";
 import { completeRetrospective, createReviewDraft, getRetrospective } from "@/lib/retrospectiveApi";
 import RetrospectiveSteps from "./RetrospectiveSteps";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
+import StepLoadCard from "./StepLoadCard";
+import useStepData from "./useStepData";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { copyText } from "@/lib/clipboard";
 import { selectedCompetencyNames } from "@/lib/competencySelection";
@@ -40,8 +42,7 @@ const STORY_FIELDS = [
 function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { getStepHref, refreshCurrent, isAssignment } = useRetrospectivePreview();
-  const { setWeekStatus } = useMockData();
+  const { getStepHref, refreshCurrent, isAssignment } = useRetrospective();
   const [fields, setFields] = useState(() => Object.fromEntries(STORY_FIELDS.map(({ name }) => [name, initialCard[name] ?? ""])));
   const [fullMarkdown, setFullMarkdown] = useState(initialCard.fullMarkdown ?? "");
   const [tagSelection, setSelectedTags] = useState(() => initialCard.competencies);
@@ -120,8 +121,6 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
     try {
       await completeRetrospective(retrospectiveId, { request: authenticatedRequest });
       await refreshCurrent();
-      // 홈 화면은 아직 목업 상태를 보므로 세션 회고를 끝내면 함께 바꾼다. 홈 API(4번)를 연결하면 뺀다.
-      if (!isAssignment) setWeekStatus("done");
       router.push(getStepHref("complete"));
     } catch (failure) {
       if (failure.code === "COMPETENCY_LIMIT") showToast(EMPTY_TAGS_MESSAGE);
@@ -225,64 +224,37 @@ function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
   );
 }
 
-// 4단계 검토. 저장된 초안 카드(API 13의 card)를 불러오고, 아직 없으면 그때 만든다(API 19).
-// 역량 태그는 고정 목록(API 6)에서 고르고, 저장할 때 id로 보낸다.
+const toErrorMessage = (failure) => getAiErrorMessage(failure, "초안을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");
+
+// 저장된 초안 카드(API 13의 card)를 불러오고, 아직 없으면 그때 만든다(API 19). 역량 태그는 고정 목록(API 6)에서 고른다.
+async function loadReview(retrospectiveId, options) {
+  const competencyItems = await getCompetencies(options);
+  let { card } = await getRetrospective(retrospectiveId, options);
+  if (!card) {
+    await createReviewDraft(retrospectiveId, options);
+    ({ card } = await getRetrospective(retrospectiveId, options));
+  }
+  if (!card) throw new Error("카드 초안을 찾을 수 없어요.");
+  return { card, competencyItems };
+}
+
+function ReviewStep() {
+  const { user } = useAppData();
+  const { data: loaded, error, retry, retrospectiveId } = useStepData(loadReview, toErrorMessage);
+
+  if (!loaded) return <StepLoadCard error={error} onRetry={retry}>회고록과 스토리 카드 초안을 불러오는 중이에요.</StepLoadCard>;
+  return <ReviewForm key={`${loaded.card.cardId}:${user.part}`} retrospectiveId={retrospectiveId} initialCard={loaded.card} competencyItems={loaded.competencyItems} />;
+}
+
+// 4단계 검토. 역량 태그는 고른 이름을 저장할 때 id로 보낸다.
+// 파트가 바뀌면(역량 목록이 파트마다 다르다) 검토 단계를 새로 불러온다.
 export default function ReviewContent() {
-  const router = useRouter();
-  const { authenticatedRequest } = useAuth();
-  const { user } = useMockData();
-  const { retrospective, getStepHref } = useRetrospectivePreview();
-  const retrospectiveId = retrospective?.id;
-  const startHref = getStepHref();
-  const [loaded, setLoaded] = useState(null);
-  const [error, setError] = useState("");
-  const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    if (!retrospectiveId) {
-      router.replace(startHref);
-      return;
-    }
-    const controller = new AbortController();
-    const options = { signal: controller.signal, request: authenticatedRequest };
-    async function load() {
-      const competencyItems = await getCompetencies(options);
-      let { card } = await getRetrospective(retrospectiveId, options);
-      if (!card) {
-        await createReviewDraft(retrospectiveId, options);
-        ({ card } = await getRetrospective(retrospectiveId, options));
-      }
-      if (!card) throw new Error("카드 초안을 찾을 수 없어요.");
-      return { card, competencyItems };
-    }
-    load()
-      .then((result) => { if (!controller.signal.aborted) setLoaded(result); })
-      .catch((failure) => {
-        if (controller.signal.aborted || failure.name === "AbortError" || failure.status === 401) return;
-        setError(getAiErrorMessage(failure, "초안을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."));
-      });
-    return () => controller.abort();
-    // 데모 파트를 바꾸면 그 파트의 역량 목록으로 다시 불러온다.
-  }, [retrospectiveId, startHref, authenticatedRequest, router, reloadKey, user.part]);
-
+  const { user } = useAppData();
   return (
     <>
       {/* 제목·단계·카드 사이 간격은 앞 단계 화면들과 같다(프로토타입 11/13). */}
       <RetrospectiveSteps currentStep={3} />
-      {loaded ? (
-        <ReviewForm key={`${loaded.card.cardId}:${user.part}`} retrospectiveId={retrospectiveId} initialCard={loaded.card} competencyItems={loaded.competencyItems} />
-      ) : (
-        <Card as="section" size="md" className="flex flex-wrap items-center gap-3">
-          {error ? (
-            <>
-              <p role="alert" className="text-body-sm text-error">{error}</p>
-              <Button size="sm" variant="secondary" onClick={() => { setError(""); setReloadKey((key) => key + 1); }}>다시 시도</Button>
-            </>
-          ) : (
-            <p role="status" className="text-body-sm text-ink-muted">회고록과 스토리 카드 초안을 불러오는 중이에요.</p>
-          )}
-        </Card>
-      )}
+      <ReviewStep key={user.part} />
     </>
   );
 }

@@ -9,7 +9,7 @@ import AnsweredQuestionList from "./AnsweredQuestionList";
 import QuestionProgressList from "./QuestionProgressList";
 import RetroDarkCard from "./RetroDarkCard";
 import RetroSideCard from "./RetroSideCard";
-import { useRetrospectivePreview } from "./RetrospectivePreview";
+import { useRetrospective } from "./RetrospectiveProvider";
 import { SavedTime, useSaveLater } from "./useSaveLater";
 import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 import { readAnswerDrafts, writeAnswerDrafts } from "@/lib/retrospectiveAnswerDrafts";
@@ -22,7 +22,7 @@ const isAllDone = (questions) => questions.length > 0 && questions.every(({ stat
 // saveAnswer(question, { status, answer })는 저장된 { status, answer }를 돌려준다. 실패하면 넘어가지 않는다.
 // 다시 들어오면 임시 저장한 답변을 먼저 열고, 없으면 처음으로 안 푼 질문부터 연다.
 export default function AiQuestionsSession({ initialQuestions, attachments = [], initialDrafts = {}, draftKey, draftError = "", saveAnswer }) {
-  const { getStepHref } = useRetrospectivePreview();
+  const { getStepHref } = useRetrospective();
   const [questions, setQuestions] = useState(initialQuestions);
   const [index, setIndex] = useState(() => {
     const draftIndex = initialQuestions.findIndex((item) => Object.hasOwn(initialDrafts, item.questionId));

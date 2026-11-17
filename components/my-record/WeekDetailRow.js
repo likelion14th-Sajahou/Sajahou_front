@@ -4,7 +4,7 @@ import { weekDestination } from "@/lib/myRecordNavigation";
 const ROW_CLASSES =
   "relative flex min-h-[78px] w-full min-w-0 items-center gap-2 rounded-[20px] px-3 py-[18px] sm:gap-3.5 sm:px-[22px]";
 const ACTIVE_ROW_CLASSES = `${ROW_CLASSES} border-2 border-ink bg-white`;
-const MUTED_ROW_CLASSES = `${ROW_CLASSES} border-[1.5px] border-line bg-[#fafaf8]`;
+const MUTED_ROW_CLASSES = `${ROW_CLASSES} border-[1.5px] border-line bg-surface-muted`;
 
 // 회고 상태 · 프로젝트 완료(stickers) · 카드 수를 한 줄로 잇는다. 발표 주에는 회고와 프로젝트 완료가 함께 있을 수 있다.
 // 이번 주는 '회고 쓰기' 버튼이 상태를 대신한다.
@@ -20,11 +20,11 @@ function WeekName({ week }) {
 }
 
 function WeekTitle({ title, completed = false }) {
-  return <span title={title} className={`min-w-0 flex-1 truncate text-[16px] sm:flex-initial ${completed ? "font-normal text-[#1f2433]" : "font-bold"}`}>{title}</span>;
+  return <span title={title} className={`min-w-0 flex-1 truncate text-[16px] sm:flex-initial ${completed ? "font-normal text-ink-strong" : "font-bold"}`}>{title}</span>;
 }
 
 function WeekState({ children, completed = false }) {
-  return <span title={children} className={`min-w-0 max-w-[40%] truncate text-caption leading-[19.5px] sm:max-w-none sm:shrink-0 sm:text-label ${completed ? "text-[#5a606c]" : ""}`}>{children}</span>;
+  return <span title={children} className={`min-w-0 max-w-[40%] truncate text-caption leading-[19.5px] sm:max-w-none sm:shrink-0 sm:text-label ${completed ? "text-ink-secondary" : ""}`}>{children}</span>;
 }
 
 export default function WeekDetailRow({ week, searchParams }) {
