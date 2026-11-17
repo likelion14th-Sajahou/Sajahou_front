@@ -12,10 +12,12 @@ import { getRequestErrorMessage } from "@/lib/requestErrorMessage";
 
 // 시작 전: '시작하기 →', 작성 중: '이어 쓰기 →' + '처음부터'(R-05).
 // 이어 쓰기는 마지막으로 저장한 단계(currentStep)로 간다(R-03). 과제 회고(R-23)도 같고, 휴회는 세션 회고에만 있다.
+// 이슈 #117: '시작하기'는 서버에 회고를 만들지 않고 자료 화면만 연다. 회고는 처음 저장할 때 만들어진다(ensureStarted).
+// 그래서 저장하지 않고 나가면 홈과 회고 화면 모두 '시작 전'으로 남는다.
 export default function StartActions({ isAssignment = false }) {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { week, session, retrospective, getStepHref, refreshCurrent, applyStarted, showToast } = useRetrospective();
+  const { week, session, retrospective, getStepHref, refreshCurrent, showToast } = useRetrospective();
   const [pending, setPending] = useState(null);
   const [error, setError] = useState("");
   const [isResetOpen, setIsResetOpen] = useState(false);
@@ -31,8 +33,7 @@ export default function StartActions({ isAssignment = false }) {
     setError("");
     try {
       const result = await request({ request: authenticatedRequest });
-      if (kind === "start") applyStarted(result);
-      else await refreshCurrent();
+      await refreshCurrent();
       setIsResetOpen(false);
       startNavigation(() => router.push(getStepHref(getStepPath(result.currentStep))));
     } catch (failure) {
@@ -44,7 +45,8 @@ export default function StartActions({ isAssignment = false }) {
   }
 
   function start() {
-    run("start", (options) => startRetrospective({ weekId: week.weekId, type: isAssignment ? "ASSIGNMENT" : "SESSION" }, options), "회고를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.");
+    setError("");
+    startNavigation(() => router.push(getStepHref("materials")));
   }
 
   // 휴회(R-06). 시작 전이면 휴회로 회고를 만들고(API 12), 시작한 뒤면 휴회로 표시한다(API 15).
@@ -77,7 +79,7 @@ export default function StartActions({ isAssignment = false }) {
   // 진한 시작 카드 안에 가운데 정렬로 놓인다(Figma '세션 회고 시작 카드'): 버튼 줄 아래에 휴회 링크.
   return (
     <div className="relative flex w-full flex-col items-center gap-4 pt-4">
-      {pending === "start" || isNavigating ? (
+      {isNavigating ? (
         <Button variant="soft" disabled aria-busy="true">시작하는 중…</Button>
       ) : isWriting ? (
         <div className="flex flex-wrap justify-center gap-3">
@@ -98,9 +100,7 @@ export default function StartActions({ isAssignment = false }) {
           </Button>
         </div>
       ) : (
-        <Button variant="soft" onClick={start} disabled={pending === "start"} aria-busy={pending === "start"}>
-          {pending === "start" ? "시작하는 중…" : "시작하기 →"}
-        </Button>
+        <Button variant="soft" onClick={start} disabled={pending !== null}>시작하기 →</Button>
       )}
       {!isAssignment && !isCompleted && (
         <TextLink variant="inverse" onClick={markRested} disabled={pending !== null || isNavigating} aria-busy={pending === "rest"}>

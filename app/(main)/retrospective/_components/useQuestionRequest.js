@@ -12,7 +12,7 @@ import { getAiErrorMessage } from "@/lib/requestErrorMessage";
 export function useQuestionRequest() {
   const router = useRouter();
   const { authenticatedRequest } = useAuth();
-  const { retrospective, getStepHref, refreshCurrent } = useRetrospective();
+  const { ensureStarted, getStepHref, refreshCurrent } = useRetrospective();
   const [isRequesting, setIsRequesting] = useState(false);
   // 자료가 바뀌었을 때 사라질 답 개수. null이면 확인 문구를 닫은 상태다.
   const [changedAnswerCount, setChangedAnswerCount] = useState(null);
@@ -27,7 +27,9 @@ export function useQuestionRequest() {
     controllerRef.current = controller;
     setIsRequesting(true);
     try {
-      await requestQuestions(retrospective.id, mode, { signal: controller.signal, request: authenticatedRequest });
+      // 자료를 먼저 저장하면서 회고가 만들어졌어도 이 함수는 그 전 화면 값을 보므로, id는 ensureStarted로 받는다.
+      const retrospectiveId = await ensureStarted();
+      await requestQuestions(retrospectiveId, mode, { signal: controller.signal, request: authenticatedRequest });
       setChangedAnswerCount(null);
       await refreshCurrent();
       router.push(getStepHref("questions"));
