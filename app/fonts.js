@@ -1,5 +1,4 @@
 import localFont from "next/font/local";
-import { Noto_Sans_KR } from "next/font/google";
 
 // 디자인 시스템 폰트(Figma 'Design' 섹션). 파일 출처와 라이선스는 app/fonts/LICENSE.md에 있다.
 // 폰트 파일은 받은 그대로 쓴다(NPS 폰트는 변형 금지).
@@ -29,15 +28,6 @@ export const pretendardFont = localFont({
   src: "./fonts/Pretendard-Regular.subset.woff2",
   variable: "--font-pretendard",
   weight: "400",
-  display: "swap",
-  preload: false,
-});
-
-// 모의 Google 로그인 버튼에만 쓰인다. 실제 로그인 버튼은 Google SDK의 폰트를 유지한다. 첫 화면에 꼭 필요하지 않아 미리 불러오지 않는다.
-export const notoSansKr = Noto_Sans_KR({
-  variable: "--font-noto-sans-kr",
-  weight: "500",
-  subsets: ["latin"],
   display: "swap",
   preload: false,
 });

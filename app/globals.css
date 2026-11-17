@@ -9,7 +9,6 @@
   --font-sans: var(--font-nps);
   --font-display: var(--font-samliphopang);
   --font-input: var(--font-pretendard);
-  --font-noto: var(--font-noto-sans-kr);
 }
 
 /* NPS 읽기 콘텐츠는 해당 영역에 font-sans를 명시한다. 입력·편집 영역은 Pretendard다. */
@@ -33,7 +32,7 @@
 /* Basic만 있는 삼립호빵체는 합성 Bold를 막고, 다른 폰트의 기존 굵기 처리는 유지한다. */
 @layer utilities {
   .font-display { font-synthesis-weight: none; }
-  .font-sans, .font-input, .font-noto { font-synthesis-weight: auto; }
+  .font-sans, .font-input { font-synthesis-weight: auto; }
 }
 
 /*
