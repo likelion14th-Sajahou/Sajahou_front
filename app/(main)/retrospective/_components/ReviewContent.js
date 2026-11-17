@@ -1,0 +1,265 @@
+"use client";
+
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/layout/AuthProvider";
+import { useAppData } from "@/components/layout/AppDataProvider";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import BlankFieldsNotice from "@/components/ui/BlankFieldsNotice";
+import DrawnBorder from "@/components/ui/DrawnBorder";
+import TextField from "@/components/ui/TextField";
+import TextLink from "@/components/ui/TextLink";
+import Toast, { useToast } from "@/components/ui/Toast";
+import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "@/components/story-card/CompetencyTagPicker";
+import { DOCUMENT_PLACEHOLDERS, STORY_CARD_PLACEHOLDERS } from "@/components/story-card/storyCardTypes";
+import { getCompetencies, updateStoryCard } from "@/lib/myRecordApi";
+import { completeRetrospective, createReviewDraft, getRetrospective } from "@/lib/retrospectiveApi";
+import RetrospectiveSteps from "./RetrospectiveSteps";
+import { useRetrospective } from "./RetrospectiveProvider";
+import StepLoadCard from "./StepLoadCard";
+import useStepData from "./useStepData";
+import { SavedTime, useSaveLater } from "./useSaveLater";
+import { copyText } from "@/lib/clipboard";
+import { selectedCompetencyNames } from "@/lib/competencySelection";
+import RetroDarkCard from "./RetroDarkCard";
+import { getAiErrorMessage, getRequestErrorMessage } from "@/lib/requestErrorMessage";
+
+// API 19의 초안 값을 편집하고 API 23으로 저장하는 6개 필드다(R-20). 입력 예시는 카드 수정과 공유한다.
+// blank: 칸이 비어 있을 때 그 칸 바로 아래에 띄우는 안내(⚑). 행동·결과·배운 점은 프로토타입 문구이고,
+// 제목·상황·이유는 같은 말투로 새로 썼다. 칸을 채우면 안내는 바로 사라진다.
+const STORY_FIELDS = [
+  { name: "title", label: "제목", blank: "제목이 비어 있어요. 이 경험을 한 줄로 이름 붙여 주세요." },
+  { name: "situation", label: "상황", blank: "상황은 기록에서 찾지 못해 비워 뒀어요. 어떤 상황이었는지 한 줄 남겨 주세요." },
+  { name: "action", label: "행동", blank: "행동이 기록에 부족해요. 근거를 더 추가할 수 있어요." },
+  { name: "reason", label: "이유", blank: "이유는 기록에서 찾지 못해 비워 뒀어요. 왜 그렇게 했는지 한 줄 남겨 주세요." },
+  { name: "result", label: "결과", blank: "결과나 수치는 기록에서 찾지 못해 비워 뒀어요. 근거를 더 추가할 수 있어요." },
+  { name: "learned", label: "배운 점", blank: "느낀 점은 비워 뒀어요. 직접 한 줄 남겨 주세요." },
+];
+
+// 칸 안 스크롤 없이 글 길이만큼 칸이 늘어난다(이슈 #108, TextField 공통 규칙).
+// 제목은 줄바꿈 없이 한 문장으로 저장하되, 길면 다음 줄로 감싸 보이도록 한 줄 높이에서 시작하는 여러 줄 칸(singleLine)을 쓰고 입력된 줄바꿈은 지운다.
+
+function ReviewForm({ retrospectiveId, initialCard, competencyItems }) {
+  const router = useRouter();
+  const { authenticatedRequest } = useAuth();
+  const { getStepHref, refreshCurrent, isAssignment } = useRetrospective();
+  const [fields, setFields] = useState(() => Object.fromEntries(STORY_FIELDS.map(({ name }) => [name, initialCard[name] ?? ""])));
+  const [fullMarkdown, setFullMarkdown] = useState(initialCard.fullMarkdown ?? "");
+  const [tagSelection, setSelectedTags] = useState(() => initialCard.competencies);
+  const selectedTags = selectedCompetencyNames(tagSelection, competencyItems);
+  const [notice, setNotice] = useState("");
+  const { save, isSaving, savedLabel } = useSaveLater();
+  const [isSavingCard, setIsSavingCard] = useState(false);
+  const savingCardRef = useRef(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const { toast, showToast, hideToast } = useToast();
+
+  const cardChanges = () => ({
+    ...fields,
+    fullMarkdown,
+    competencyIds: selectedTags.map((name) => competencyItems.find((item) => item.name === name)?.id).filter((id) => id !== undefined),
+  });
+
+  // 고친 회고록·카드와 고른 역량을 초안 카드에 저장한다(API 23). 실패하면 안내 문구를, 성공하면 ""를 돌려준다.
+  async function saveCard() {
+    if (savingCardRef.current) return null;
+    savingCardRef.current = true;
+    setIsSavingCard(true);
+    try {
+      await updateStoryCard(initialCard.cardId, cardChanges(), { request: authenticatedRequest });
+      return "";
+    } catch (failure) {
+      return failure.status === 401 ? null : getRequestErrorMessage(failure, "초안을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      savingCardRef.current = false;
+      setIsSavingCard(false);
+    }
+  }
+
+  // 미저장 태그도 서버 초안에 남겨, 답 수정 후 API 19가 다시 만들어도 유지한다.
+  async function backToQuestions() {
+    if (isBusy) return;
+    const message = await saveCard();
+    if (message !== "") {
+      if (message) setNotice(message);
+      return;
+    }
+    router.push(getStepHref("questions"));
+  }
+
+  // 임시 저장: 카드를 저장하고 지금 단계(4)와 저장 시각을 남긴다(API 14).
+  async function saveLater() {
+    if (initialCard.cardId) {
+      const message = await saveCard();
+      if (message !== "") {
+        if (message) setNotice(message);
+        return;
+      }
+    }
+    const message = await save({ currentStep: 4 });
+    if (message !== null) setNotice(message);
+  }
+
+  async function copyRetrospective() {
+    const copied = await copyText(fullMarkdown);
+    showToast(copied ? "회고록을 복사했어요. 노션에 붙여 넣어 주세요." : "복사하지 못했어요. 회고록의 내용을 직접 선택해서 복사해 주세요.");
+  }
+
+  // 저장하고 사자록에 추가(R-21): 고친 카드를 저장한 뒤 회고를 완료한다(API 23 → 20). 카드가 나의 사자록에 쌓이고 이번 주 스티커를 받는다.
+  // 역량 태그는 1~3개를 골라야 한다(R-20).
+  async function complete() {
+    if (!selectedTags.length) {
+      showToast(EMPTY_TAGS_MESSAGE);
+      return;
+    }
+    const message = await saveCard();
+    if (message !== "") {
+      if (message) setNotice(message);
+      return;
+    }
+    setIsCompleting(true);
+    try {
+      await completeRetrospective(retrospectiveId, { request: authenticatedRequest });
+      await refreshCurrent();
+      router.push(getStepHref("complete"));
+    } catch (failure) {
+      if (failure.code === "COMPETENCY_LIMIT") showToast(EMPTY_TAGS_MESSAGE);
+      else if (failure.status !== 401) setNotice(getRequestErrorMessage(failure, "저장하지 못했어요. 잠시 후 다시 시도해 주세요."));
+    } finally {
+      setIsCompleting(false);
+    }
+  }
+
+  const isBusy = isSaving || isSavingCard || isCompleting;
+
+  return (
+    <>
+      {/* 왼쪽은 진한 '노션용 회고록' 카드, 오른쪽은 연회색 '스토리 카드 초안' 카드다(11/13 디자인, 568:496). */}
+      <fieldset disabled={isBusy} aria-busy={isBusy} className="grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,568fr)_minmax(0,496fr)]">
+        <RetroDarkCard aria-labelledby="review-retrospective-title">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 id="review-retrospective-title" className="font-display text-title leading-8 tracking-[-0.4px] text-white">노션용 회고록</h2>
+              <p id="review-retrospective-help" className="mt-1 text-label leading-5 text-locked">
+                고칠 곳은 바로 고쳐요. 복사하면 노션에 그대로 붙여 넣을 수 있어요.
+              </p>
+            </div>
+            <Button variant="cta" className="shrink-0" onClick={copyRetrospective}>회고록 복사</Button>
+          </div>
+          {/* 회고록 본문은 편집 중에도 NPS를 쓴다. 공통 입력칸의 Pretendard보다 우선 적용한다.
+              다른 입력칸처럼 물결 테두리 없이 흰 상자만 둔다. */}
+          <div className="rounded-[20px] bg-white p-1">
+            <TextField
+              multiline
+              appearance="plain"
+              aria-label="노션용 회고록"
+              aria-describedby="review-retrospective-help"
+              name="retrospective"
+              placeholder={DOCUMENT_PLACEHOLDERS[isAssignment ? "assignment" : "session"]}
+              value={fullMarkdown}
+              onChange={(event) => setFullMarkdown(event.target.value)}
+              className="block font-sans! leading-6 text-ink-strong!"
+            />
+          </div>
+        </RetroDarkCard>
+
+        <section aria-labelledby="review-story-title" className="relative flex min-w-0 flex-col gap-3.5 rounded-[28px] bg-divider p-6">
+          <DrawnBorder />
+          <h2 id="review-story-title" className="font-display text-title leading-8 tracking-[-0.4px] text-ink-strong">스토리 카드 초안</h2>
+          {/* 기록에서 찾지 못한 칸은 지어내지 않고 비워 둔다(R-20). */}
+          <div className="flex flex-col gap-4">
+            {STORY_FIELDS.map(({ name, label, blank }) => {
+              // 비운 칸은 바로 안내가 생기고, 채우면 사라지도록 입력값으로 정한다.
+              const isBlank = !fields[name].trim();
+              const isTitle = name === "title";
+              return (
+                <div key={name} className="flex flex-col gap-2">
+                  <TextField
+                    label={label}
+                    labelClassName="text-label leading-5 text-ink-subtle"
+                    appearance="outlined"
+                    name={name}
+                    multiline
+                    singleLine={isTitle}
+                    rows={1}
+                    value={fields[name]}
+                    placeholder={STORY_CARD_PLACEHOLDERS[name]}
+                    onChange={(event) => {
+                      const value = isTitle ? event.target.value.replace(/[\r\n]+/g, " ") : event.target.value;
+                      setFields((previous) => ({ ...previous, [name]: value }));
+                    }}
+                    aria-describedby={isBlank ? `${name}-blank` : undefined}
+                    className="font-input leading-6 text-ink-strong!"
+                  />
+                  {isBlank && <BlankFieldsNotice id={`${name}-blank`}>{blank}</BlankFieldsNotice>}
+                </div>
+              );
+            })}
+            <CompetencyTagPicker
+              id="review-tags-label"
+              competencies={competencyItems}
+              selectedTags={selectedTags}
+              listClassName="gap-x-1.5 gap-y-2"
+              labelClassName="text-ink-subtle"
+              hintClassName="text-caption text-ink-faintest"
+              chipClassName="font-display border-ink-300! aria-pressed:border-ink!"
+              onChange={setSelectedTags}
+              onLimit={showToast}
+            />
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-2.5 border-t border-[#d9d7d1] pt-4">
+            {/* 모든 질문에 답했으면 질문 화면이 질문 끝(고치기 목록)으로 열린다(R-17). */}
+            <TextLink onClick={backToQuestions} disabled={isBusy}>← 질문으로</TextLink>
+            <div className="ml-auto flex max-w-full flex-wrap justify-end gap-2">
+              <Button variant="ink-outline" onClick={saveLater} disabled={isBusy} aria-busy={isBusy && !isCompleting}>{isBusy && !isCompleting ? "저장하는 중…" : "저장"}</Button>
+              <Button variant="cta-ink" className="h-auto! min-h-12 max-w-full whitespace-normal! py-2" onClick={complete} disabled={isBusy} aria-busy={isCompleting}>{isCompleting ? "저장하는 중…" : "저장하고 사자록에 추가"}</Button>
+            </div>
+          </div>
+          {/* 버튼 줄에 자리가 없어 바로 아래 오른쪽에 둔다. 저장 전에는 자리를 차지하지 않는다. */}
+          <SavedTime label={savedLabel} className="-mt-1.5 self-end empty:hidden" />
+        </section>
+      </fieldset>
+      <p role="status" className={notice ? "mt-3 text-body-sm text-ink-muted" : "sr-only"}>{notice}</p>
+      <Toast toast={toast} onDismiss={hideToast} />
+    </>
+  );
+}
+
+const toErrorMessage = (failure) => getAiErrorMessage(failure, "초안을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");
+
+// 저장된 초안 카드(API 13의 card)를 불러오고, 아직 없으면 그때 만든다(API 19). 역량 태그는 고정 목록(API 6)에서 고른다.
+async function loadReview(retrospectiveId, options) {
+  const detailRequest = getRetrospective(retrospectiveId, options);
+  // 두 조회를 함께 시작하되 역량 오류를 우선한다. 먼저 실패한 회고 요청의 미처리 거부도 방지한다.
+  detailRequest.catch(() => {});
+  const competencyItems = await getCompetencies(options);
+  let { card } = await detailRequest;
+  if (!card) {
+    await createReviewDraft(retrospectiveId, options);
+    ({ card } = await getRetrospective(retrospectiveId, options));
+  }
+  if (!card) throw new Error("카드 초안을 찾을 수 없어요.");
+  return { card, competencyItems };
+}
+
+function ReviewStep() {
+  const { user } = useAppData();
+  const { data: loaded, error, retry, retrospectiveId } = useStepData(loadReview, toErrorMessage);
+
+  if (!loaded) return <StepLoadCard error={error} onRetry={retry}>회고록과 스토리 카드 초안을 불러오는 중이에요.</StepLoadCard>;
+  return <ReviewForm key={`${loaded.card.cardId}:${user.part}`} retrospectiveId={retrospectiveId} initialCard={loaded.card} competencyItems={loaded.competencyItems} />;
+}
+
+// 4단계 검토. 역량 태그는 고른 이름을 저장할 때 id로 보낸다.
+// 파트가 바뀌면(역량 목록이 파트마다 다르다) 검토 단계를 새로 불러온다.
+export default function ReviewContent() {
+  const { user } = useAppData();
+  return (
+    <>
+      {/* 제목·단계·카드 사이 간격은 앞 단계 화면들과 같다(프로토타입 11/13). */}
+      <RetrospectiveSteps currentStep={3} />
+      <ReviewStep key={user.part} />
+    </>
+  );
+}

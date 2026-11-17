@@ -1,0 +1,298 @@
+"use client";
+
+import { useState } from "react";
+import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
+import Chip from "@/components/ui/Chip";
+import DrawnBorder from "@/components/ui/DrawnBorder";
+import Image from "next/image";
+import TextField from "@/components/ui/TextField";
+import LinkPasteField from "@/components/ui/LinkPasteField";
+import MarkedTitle from "@/components/ui/MarkedTitle";
+import TextLink from "@/components/ui/TextLink";
+import MaterialAttachments from "./MaterialAttachments";
+import MaterialsChangeNotice from "@/components/ui/MaterialsChangeNotice";
+import RetroDarkCard from "./RetroDarkCard";
+import { useRetrospective } from "./RetrospectiveProvider";
+import { SavedTime, useSaveLater } from "./useSaveLater";
+import { useQuestionRequest } from "./useQuestionRequest";
+import useMaterialAttachments, { ATTACHMENT_FIELDS } from "./useMaterialAttachments";
+import ActionFooter from "@/components/ui/ActionFooter";
+import { aiWaitingMessage } from "@/components/ui/AiWaitingNotice";
+import { normalizeGithubAttachmentUrl, GITHUB_ONLY_MESSAGE } from "@/lib/attachmentUrl";
+import { hasRetrospectiveMaterials, EMPTY_RETROSPECTIVE_MATERIALS_MESSAGE } from "@/lib/retrospectiveMaterials";
+
+const ASSIGNMENT_MODES = { record: "RECORD", later: "LATER", none: "NONE" };
+
+// 폼 값을 임시저장(API 14) 요청으로 바꾼다. API는 보낸 필드만 바꾸고, null이면 비운다.
+// - 비운 칸은 null로 보내 서버 값도 비운다.
+// - 이 화면에 없는 칸(과제 회고의 과제 방식, 프론트엔드가 아닌 파트의 코드리뷰)은 보내지 않아 서버 값을 그대로 둔다.
+// - 올린 첨부는 attachmentIds로 회고에 연결한다. 칩에서 뺀 첨부는 목록에서 빠져 연결이 풀린다.
+function toSaveRequest(materials, { currentStep, assignmentStatus, isAssignment, isFrontend, attachmentIds }) {
+  const text = (value) => value.trim() ? value : null;
+  return {
+    currentStep,
+    hasPractice: materials.hasPractice,
+    practiceContent: text(materials.practice),
+    ...(isAssignment ? {} : { assignmentMode: ASSIGNMENT_MODES[assignmentStatus] }),
+    assignmentContent: text(materials.assignment),
+    // 받은 코드리뷰는 프론트엔드 파트만 있다(R-11). 다른 파트는 보내지 않는다.
+    ...(isFrontend ? { codeReview: text(materials.codeReview) } : {}),
+    memo: text(materials.memo),
+    attachmentIds,
+  };
+}
+
+// 흐린 칸 이름 + 더 흐린 보조 설명('· 무엇을 배웠는지 적어보세요'). 서비스 문구라 본문 글꼴이다.
+function FieldLabel({ htmlFor, label, hint }) {
+  const Tag = htmlFor ? "label" : "p";
+  return (
+    <Tag htmlFor={htmlFor} className="text-label leading-5 text-ink-faint">
+      {label}
+      {hint && <span className="ml-0.5 text-caption text-ink-faintest"> · {hint}</span>}
+    </Tag>
+  );
+}
+
+// 사용자가 쓰는 칸이라 입력한 글은 Pretendard(font-input)다.
+function MaterialTextArea({ id, label, hint, className = "", ...props }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-2">
+      <FieldLabel htmlFor={id} label={label} hint={hint} />
+      <TextField multiline id={id} name={id} className={`font-input leading-6 text-ink-strong! ${className}`} {...props} />
+    </div>
+  );
+}
+
+const GENERATING_NOTICE = aiWaitingMessage("자료를 읽고 질문을 만들고 있어요");
+
+// 진한 자료 카드 안의 흰 섹션 카드. 접힌 상태(inactive: 실습 없음, 과제 나중에·없음)는 짧은 테두리 원본을 쓴다.
+// 11/13 디자인: 섹션 제목(19px) > 입력한 글(15px) > 칸 이름(13px, 흐림) 순으로 위계를 둔다.
+function MaterialSection({ title, titleId, controls, inactive = false, children }) {
+  return (
+    <section aria-labelledby={titleId} className="relative flex min-w-0 flex-col gap-3.5 rounded-[20px] bg-white px-5 py-[18px]">
+      <DrawnBorder color="white" />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        {/* 자소서 매칭 입력 카드와 같은 형광펜 제목이다. */}
+        <MarkedTitle id={titleId} size="lg" className="shrink-0">{title}</MarkedTitle>
+        {controls}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export default function MaterialsForm({ initialMaterials }) {
+  const { part, assignmentStatus: sessionAssignmentStatus, setAssignmentStatus, isAssignment, getStepHref, deadlineLabels, showToast } = useRetrospective();
+  const assignmentStatus = isAssignment ? "record" : sessionAssignmentStatus;
+  // 입력 영역을 숨겨도(실습 없음, 과제 나중에) 작성한 내용은 유지한다.
+  const [materials, setMaterials] = useState(initialMaterials);
+  const { hasPractice } = materials;
+  const [link, setLink] = useState("");
+  const [linkError, setLinkError] = useState("");
+  const [notice, setNotice] = useState("");
+  const { save, isSaving, savedLabel } = useSaveLater();
+  // 어느 버튼으로 저장 중인지. 누른 버튼에만 '저장하는 중…'을 보여 준다.
+  const [savingAction, setSavingAction] = useState(null);
+  const questions = useQuestionRequest();
+  const files = useMaterialAttachments({ materials, setMaterials });
+  // 파일을 올리는 동안 저장하면 막 올린 첨부가 빠질 수 있어 함께 막는다.
+  const isBusy = isSaving || questions.isRequesting || files.isUploading;
+
+  async function saveMaterials(action, currentStep) {
+    setSavingAction(action);
+    const message = await save(toSaveRequest(materials, {
+      currentStep, assignmentStatus, isAssignment, isFrontend: part === "프론트엔드", attachmentIds: files.attachmentIds,
+    }));
+    setSavingAction(null);
+    return message;
+  }
+
+  async function saveLater() {
+    const message = await saveMaterials("later", 2);
+    if (message !== null) setNotice(message);
+  }
+
+  // 질문을 받기 전에 지금 자료를 저장한다(R-14). '자료 고치기'로 돌아와도 쓴 내용이 남는다.
+  // 단계는 보내지 않는다. 질문을 받으면 서버가 AI 질문 단계(3)로 바꾸고, 실패하면 지금 단계로 남는다.
+  // 저장에 실패하면 질문을 받지 않아 쓴 내용을 잃지 않는다.
+  async function requestQuestions(mode = "AUTO") {
+    if (isBusy) return;
+    if (!hasRetrospectiveMaterials(materials, { isAssignment, isFrontend: part === "프론트엔드", assignmentStatus })) {
+      setNotice("");
+      questions.closeChangeNotice();
+      showToast(EMPTY_RETROSPECTIVE_MATERIALS_MESSAGE);
+      return;
+    }
+    const message = await saveMaterials("questions");
+    if (message !== "") {
+      if (message) setNotice(message);
+      return;
+    }
+    setNotice(GENERATING_NOTICE);
+    setNotice(await questions.request(mode));
+  }
+
+  function updateField(field, value) {
+    setMaterials((previous) => ({ ...previous, [field]: value }));
+  }
+
+  async function removeFile(field, id) {
+    setNotice(await files.remove(field, id));
+  }
+
+  async function selectFiles(field, selected) {
+    setNotice("파일을 올리고 있어요…");
+    setNotice(await files.upload(field, selected));
+  }
+
+  // 과제 링크는 GitHub만 받는다(프로젝트 기록 추가와 같은 규칙). 노션 등 다른 자료는 파일로 올린다.
+  async function addLink() {
+    const url = normalizeGithubAttachmentUrl(link);
+    if (!url) {
+      setLinkError(GITHUB_ONLY_MESSAGE);
+      return;
+    }
+    setLinkError("");
+    const message = await files.addLink(url);
+    if (!message) setLink("");
+    setNotice(message);
+  }
+
+  function attachments(field, uploadLabel, extra = {}) {
+    return (
+      <MaterialAttachments
+        files={materials[field]}
+        accept={ATTACHMENT_FIELDS[field].accept}
+        disabled={files.isUploading}
+        uploadLabel={uploadLabel}
+        onRemove={(id) => removeFile(field, id)}
+        onSelect={(files) => selectFiles(field, files)}
+        {...extra}
+      />
+    );
+  }
+
+  return (
+    // 자료 카드(Figma 'Section'): 진한 카드 안에 흰 섹션 카드가 쌓인다.
+    <RetroDarkCard aria-labelledby="materials-title">
+      <h2 id="materials-title" className="font-display text-title leading-8 tracking-[-0.4px] text-white">자료 올리기</h2>
+
+      {/* 과제 회고는 같은 5단계지만 자료 단계에는 과제 칸만 있다(R-23). */}
+      {!isAssignment && (
+        <>
+          <MaterialSection title="세션 자료" titleId="session-materials-title" controls={<Badge tone="plain" size="xs">PDF</Badge>}>
+            {attachments("sessionFiles", "세션 PDF 올리기")}
+          </MaterialSection>
+
+          <MaterialSection title="세션 중 실습이 있었나요?" titleId="practice-title" inactive={!hasPractice} controls={
+            <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="practice-title">
+              {["있었어요", "없었어요"].map((label, index) => (
+                <Chip key={label} size="sm" drawn selected={hasPractice === (index === 0)} onClick={() => updateField("hasPractice", index === 0)}>{label}</Chip>
+              ))}
+            </div>
+          }>
+            {hasPractice ? (
+              <>
+                <MaterialTextArea id="practice" label="실습 내용" hint="무엇을 배웠는지 적어보세요" placeholder="예) 배운 내용을 적용해 로그인 화면을 만들었어요" value={materials.practice} onChange={(event) => updateField("practice", event.target.value)} />
+                {attachments("practiceFiles", "노션 ZIP·캡처 올리기")}
+              </>
+            ) : (
+              <p className="text-label leading-5 break-keep text-ink-subtle">실습 질문은 건너뛰고 세션 내용만 물어볼게요.</p>
+            )}
+          </MaterialSection>
+        </>
+      )}
+
+      <MaterialSection title="이번 주 과제는요?" titleId="assignment-title" inactive={assignmentStatus !== "record"} controls={!isAssignment && (
+        <div className="ml-auto flex max-w-full flex-wrap gap-1.5" role="group" aria-labelledby="assignment-title">
+          {[
+            { value: "record", label: "과제 기록하기" },
+            { value: "later", label: "나중에 쓸게요" },
+            { value: "none", label: "과제 없음" },
+          ].map(({ value, label }) => (
+            <Chip key={value} size="sm" drawn selected={assignmentStatus === value} onClick={() => setAssignmentStatus(value)}>{label}</Chip>
+          ))}
+        </div>
+      )}>
+        {assignmentStatus === "record" ? (
+          <>
+            <MaterialTextArea id="assignment" label="과제 내용 · 코드나 에러" hint="붙여넣기" placeholder="예) 회원가입 폼을 만들었는데 빈칸을 제출해도 오류 안내가 나오지 않아요" value={materials.assignment} onChange={(event) => updateField("assignment", event.target.value)} />
+            <div className="flex min-w-0 flex-col gap-2">
+              <FieldLabel label="과제 노션이나 GitHub를 올려보세요" />
+              {attachments("assignmentFiles", "과제 파일 올리기", {
+                children: (
+                  <LinkPasteField
+                    name="assignmentLink"
+                    aria-label="과제 GitHub 링크"
+                    placeholder="GitHub 링크 붙여넣기"
+                    aria-invalid={Boolean(linkError)}
+                    aria-describedby={linkError ? "assignment-link-error" : undefined}
+                    value={link}
+                    onChange={(value) => { setLink(value); setLinkError(""); }}
+                    onAdd={addLink}
+                  />
+                ),
+              })}
+              {linkError && <p id="assignment-link-error" role="alert" className="text-label text-tint-red-ink">{linkError}</p>}
+            </div>
+            {part === "프론트엔드" && (
+              <MaterialTextArea
+                id="codeReview"
+                label="받은 코드리뷰"
+                hint="짝이 남긴 코멘트 3개"
+                placeholder="예) 반복되는 입력창을 공통 컴포넌트로 분리하면 좋겠다는 리뷰를 받았어요"
+                value={materials.codeReview}
+                onChange={(event) => updateField("codeReview", event.target.value)}
+              />
+            )}
+          </>
+        ) : (
+          <p className="text-label leading-5 break-keep text-ink-subtle">
+            {assignmentStatus === "later"
+              ? `과제는 ${deadlineLabels.assignment}까지 따로 써요. 세션 회고만 먼저 끝내요.`
+              : "이번 주 과제는 없어요."}
+          </p>
+        )}
+      </MaterialSection>
+
+      {!isAssignment && (
+        // 진한 카드 위라 칸 이름은 흰 글씨(보조 설명은 반투명)다. 입력칸은 다른 입력칸과 같은 기본 칸(물결 테두리 없음).
+        <label className="flex flex-col gap-1.5">
+          <span className="text-label leading-[20.8px] font-bold text-white">
+            고민 메모<span className="ml-0.5 text-caption font-normal text-white/50"> · 선택</span>
+          </span>
+          <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서를 읽어도 상태를 어디서 관리해야 할지 헷갈려요" className="block font-input leading-6 text-ink-strong!" />
+        </label>
+      )}
+      <MaterialsChangeNotice
+        open={questions.changedAnswerCount !== null}
+        answerCount={questions.changedAnswerCount ?? 0}
+        busy={isBusy}
+        onCancel={() => { questions.closeChangeNotice(); setNotice(""); }}
+        onContinue={() => requestQuestions("CONTINUE")}
+        onRegenerate={() => requestQuestions("REGENERATE")}
+      />
+      <ActionFooter className="flex-wrap justify-between gap-x-3.5 gap-y-2.5">
+        <TextLink variant="inverse-border" href={getStepHref()}>
+          <span className="inline-flex items-center gap-1">
+            <Image src="/images/common/arrow-left-12-white.svg" alt="" width={12} height={12} />
+            이전
+          </span>
+        </TextLink>
+        {/* 저장 시각이 버튼을 오른쪽으로 밀어 준다. 좁은 화면에서는 버튼이 다음 줄로 내려간다. */}
+        <SavedTime label={savedLabel} className="ml-auto text-ink-300!" />
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+          <Button variant="inverse-muted" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={saveLater} disabled={isBusy} aria-busy={savingAction === "later"}>{savingAction === "later" ? "저장하는 중…" : "임시 저장"}</Button>
+          <Button variant="cta" className="min-w-0 max-[389px]:px-2 max-[389px]:text-label" onClick={() => requestQuestions()} disabled={isBusy} aria-busy={savingAction === "questions" || questions.isRequesting}>{savingAction === "questions" ? "저장하는 중…" : questions.isRequesting ? "질문을 만드는 중…" : "AI 질문 받기 →"}</Button>
+        </div>
+      </ActionFooter>
+      <p role="status" className={notice ? "-mt-1 text-body-sm text-locked" : "sr-only"}>{notice}</p>
+      {files.pollingError && (
+        <p role="alert" className="-mt-1 text-body-sm text-tint-red">
+          {files.pollingError} <TextLink variant="inverse" size="sm" onClick={files.retryPolling}>상태 다시 확인</TextLink>
+        </p>
+      )}
+    </RetroDarkCard>
+  );
+}
