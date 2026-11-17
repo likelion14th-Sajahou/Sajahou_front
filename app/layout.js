@@ -5,7 +5,7 @@ import ScrollToTopOnNavigate from "@/components/layout/ScrollToTopOnNavigate";
 import { displayFont, npsFont, pretendardFont } from "./fonts";
 import "./globals.css";
 
-const DESCRIPTION = "멋쟁이사자처럼 활동에서 쌓은 경험을 회고하고, 스토리 카드로 모아 포트폴리오와 자기소개서 작성에 활용하는 서비스";
+const DESCRIPTION = "멋쟁이사자처럼 중앙대 아기사자의 한 해 활동을 기록하고, 자기소개서에 활용할 수 있는 경험으로 정리하는 서비스";
 
 // 링크 미리보기 이미지의 절대 주소는 Vercel 배포 주소로 자동으로 채워진다(metadataBase 생략).
 export const metadata = {
