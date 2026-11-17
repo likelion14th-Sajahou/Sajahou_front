@@ -6,7 +6,7 @@ import TextField from "@/components/ui/TextField";
 import TextLink from "@/components/ui/TextLink";
 import Toast, { useToast } from "@/components/ui/Toast";
 import CompetencyTagPicker, { EMPTY_TAGS_MESSAGE } from "./CompetencyTagPicker";
-import { RECORD_TEXT, SUMMARY_FIELDS } from "./storyCardTypes";
+import { DOCUMENT_PLACEHOLDERS, RECORD_TEXT, STORY_CARD_PLACEHOLDERS, SUMMARY_FIELDS } from "./storyCardTypes";
 import { selectedCompetencyNames } from "@/lib/competencySelection";
 import { withoutDocumentTitle } from "@/lib/storyCardDocument";
 
@@ -44,7 +44,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
   return (
     <form onSubmit={handleSubmit} className="story-card-edit-form flex flex-col gap-3.5">
       <p className="text-label text-yellow-700">카드 수정</p>
-      <TextField label="제목" name="title" defaultValue={card.title} className="h-[50px]!" required autoFocus />
+      <TextField label="제목" name="title" placeholder={STORY_CARD_PLACEHOLDERS.title} defaultValue={card.title} className="h-[50px]!" required autoFocus />
       <CompetencyTagPicker
         id="edit-tags-label"
         competencies={competencies}
@@ -58,6 +58,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
           key={key}
           label={label}
           name={key}
+          placeholder={STORY_CARD_PLACEHOLDERS[key]}
           multiline
           rows={2}
           className="text-body! leading-6"
@@ -74,6 +75,7 @@ export default function StoryCardEditForm({ card, competencies, onCancel, onSave
         }
         multiline
         name="document"
+        placeholder={DOCUMENT_PLACEHOLDERS[card.type]}
         defaultValue={card.type === "project" ? withoutDocumentTitle(card.document, card.title) : card.document}
         className="font-input text-label! font-bold leading-[20.8px]"
       />
