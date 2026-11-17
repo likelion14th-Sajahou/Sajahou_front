@@ -118,7 +118,6 @@ export default function AiQuestionsSession({ initialQuestions, attachments = [],
                     </span>
                   )}
                   question={question.content}
-                  placeholder="떠오르는 대로 짧게 써도 괜찮아요"
                   answer={answer}
                   onAnswerChange={(value) => { setDrafts((previous) => ({ ...previous, [question.questionId]: value })); setNotice(""); }}
                   // 첫 질문은 자료 단계로, 두 번째부터는 앞 질문으로 돌아간다(R-16).
