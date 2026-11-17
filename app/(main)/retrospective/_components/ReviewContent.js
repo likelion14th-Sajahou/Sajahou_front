@@ -228,8 +228,11 @@ const toErrorMessage = (failure) => getAiErrorMessage(failure, "초안을 불러
 
 // 저장된 초안 카드(API 13의 card)를 불러오고, 아직 없으면 그때 만든다(API 19). 역량 태그는 고정 목록(API 6)에서 고른다.
 async function loadReview(retrospectiveId, options) {
+  const detailRequest = getRetrospective(retrospectiveId, options);
+  // 두 조회를 함께 시작하되 역량 오류를 우선한다. 먼저 실패한 회고 요청의 미처리 거부도 방지한다.
+  detailRequest.catch(() => {});
   const competencyItems = await getCompetencies(options);
-  let { card } = await getRetrospective(retrospectiveId, options);
+  let { card } = await detailRequest;
   if (!card) {
     await createReviewDraft(retrospectiveId, options);
     ({ card } = await getRetrospective(retrospectiveId, options));
