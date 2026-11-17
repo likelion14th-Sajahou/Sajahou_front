@@ -23,6 +23,14 @@
     font-synthesis-weight: auto;
   }
 
+  /* 모든 입력란의 placeholder는 같은 기준을 쓴다. 크기와 줄 간격은 입력란을 따른다. */
+  input::placeholder, textarea::placeholder {
+    color: var(--color-placeholder);
+    font-weight: 400;
+    font-style: normal;
+    opacity: 1;
+  }
+
   select, option {
     font-family: var(--font-display);
     font-synthesis-weight: none;
@@ -353,8 +361,6 @@ body {
 .matching-form textarea[name="preferences"],
 .matching-form textarea[name="companyInfo"] { height: 98px; }
 .matching-form textarea[name^="question-"] { height: 74px; min-width: 0; }
-.matching-form input::placeholder,
-.matching-form textarea::placeholder { color: var(--color-ink-300); }
 
 /* 공용 폼의 기본 스타일은 유지하고 포트폴리오의 진한 카드 안에서만 조정한다. */
 .portfolio-question button { max-width: 100%; }

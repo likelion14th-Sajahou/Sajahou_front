@@ -262,7 +262,7 @@ export default function MaterialsForm({ initialMaterials }) {
           <span className="text-label leading-[20.8px] font-bold text-white">
             고민 메모<span className="ml-0.5 text-caption font-normal text-white/50"> · 선택</span>
           </span>
-          <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서를 읽어도 상태를 어디서 관리해야 할지 헷갈려요" className="block font-input leading-6 text-ink-strong! placeholder:text-ink-300!" />
+          <TextField multiline name="memo" value={materials.memo} onChange={(event) => updateField("memo", event.target.value)} placeholder="예) 공식 문서를 읽어도 상태를 어디서 관리해야 할지 헷갈려요" className="block font-input leading-6 text-ink-strong!" />
         </label>
       )}
       <MaterialsChangeNotice

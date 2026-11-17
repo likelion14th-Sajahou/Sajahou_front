@@ -62,9 +62,9 @@ export default function TextField({
   const errorId = error ? `${rest.id || rest.name}-error` : undefined;
   const look = appearanceClasses(appearance, size, error);
   // drawn: 손그림 테두리 틀(DrawnFieldFrame) 안에 들어가는 둥근 흰 칸. 기본(filled) 모양 위에 덮어쓴다.
-  const drawnClasses = drawn ? "rounded-full! border-transparent! bg-white! px-3.5! text-body-sm! text-ink-strong placeholder:text-ink-faint" : "";
+  const drawnClasses = drawn ? "rounded-full! border-transparent! bg-white! px-3.5! text-body-sm! text-ink-strong" : "";
   const fontClassName = rest.readOnly ? "font-sans" : "font-input";
-  const controlClasses = `w-full ${fontClassName} text-ink placeholder:font-input placeholder:text-placeholder ${look.control} ${drawnClasses} ${className}`;
+  const controlClasses = `w-full ${fontClassName} text-ink ${look.control} ${drawnClasses} ${className}`;
   const accessibilityProps = error ? {
     "aria-invalid": true,
     "aria-describedby": [rest["aria-describedby"], errorId].filter(Boolean).join(" "),
