@@ -66,7 +66,7 @@ export default function HomeHero({ userName, week, weekStatus }) {
         <span className="home-hero-cta-content relative flex size-full items-center justify-center">
           <Image src="/images/home/cta-flower.png" alt="" fill sizes="(min-width: 1024px) 172px, (min-width: 768px) 157px, 112px" className="object-contain" />
           <span className="absolute inset-0 flex items-center justify-center whitespace-nowrap font-display text-[14.208px] leading-[25.6px] tracking-[-0.15px] text-ink-strong">
-            {cta}<Image src="/images/home/cta-chevron-right.svg" alt="" width={16} height={16} className="shrink-0" />
+            {cta}<Image src="/images/home/cta-chevron-right.svg" alt="" width={16} height={16} className="shrink-0 -translate-y-[2px]" />
           </span>
         </span>
       </Link>
